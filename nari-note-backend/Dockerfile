@@ -1,37 +1,35 @@
-# syntax=docker/dockerfile:1
-# check=error=true
-
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t nari_note_backend .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name nari_note_backend nari_note_backend
-
-# For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
-
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 ARG RUBY_VERSION=3.3.7
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
-# Rails app lives here
-WORKDIR /rails
+WORKDIR /nari-note
 
-# Install base packages
+# sudo-apt clean と rm -rf /var/lib/apt/lists でインストール時のキャッシュをクリアする
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl default-mysql-client libjemalloc2 libvips && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    apt-get install -y --no-install-recommends \
+      curl \
+      default-mysql-client \
+      libjemalloc2 \
+      libvips && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists
 
-# Set production environment
-ENV RAILS_ENV="production" \
-    BUNDLE_DEPLOYMENT="1" \
-    BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+ENV RAILS_ENV="development" \
+    BUNDLE_PATH="/usr/local/bundle"
 
-# Throw-away build stage to reduce size of final image
+# 最終的なイメージサイズを削減するためにマルチステージビルドを行う
 FROM base AS build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential default-libmysqlclient-dev git libyaml-dev pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      default-libmysqlclient-dev \
+      git \
+      neovim \
+      libyaml-dev \
+      pkg-config && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -49,9 +47,6 @@ RUN bundle exec bootsnap precompile app/ lib/
 RUN chmod +x bin/* && \
     sed -i "s/\r$//g" bin/* && \
     sed -i 's/ruby\.exe$/ruby/' bin/*
-
-
-
 
 # Final stage for app image
 FROM base
