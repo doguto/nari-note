@@ -1,0 +1,31 @@
+﻿services:
+  db:
+    image: mysql:8.0.43
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: /bin/bash -c "rm -f tmp/pids/server.pid && bundle install && bin/dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/srv:cached
+      - bundle_ruby:/usr/local/bundle
+    depends_on:
+      - db
+    tty: true
+    stdin_open: true
+    environment:
+      DATABASE_USER: root
+      DB_HOST: db
+      DB_NAME: nari_note_backend_development
+
+volumes:
+  mysql:
+  bundle_ruby:
+
