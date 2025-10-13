@@ -111,6 +111,27 @@ Feature "記事の編集機能" do
     end
   end
 
+  Scenario "投稿済み記事の編集" do
+    Given "投稿済み記事の編集ページにアクセスするとき" do
+      When None do
+        Then "記事のタイトルが表示される"
+          .And "記事のタグが表示される"
+          .And "記事の本文が表示される"
+      end
+    end
+
+    Given "何かしらの編集を行ったとき" do
+      When "投稿ボタンを押すと、" do
+        Then "編集内容が反映された記事が公開される"
+          .And "公開した記事のページへと遷移する"
+      end
+
+      When None do
+        Then "下書き保存ボタンは表示されない"
+      end
+    end
+  end
+
   Scenario "サインインの要求" do
     Given "サインインしていないとき" do
       When "記事の編集を試みると、" do
