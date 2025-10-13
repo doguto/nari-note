@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,10 +15,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { currentUser, mockNotifications } from '@/lib/mockData';
+import { Search } from 'lucide-react';
 
 export const Header: React.FC = () => {
+  const router = useRouter();
   const [isLoggedIn] = useState(true); // モック：ログイン状態
+  const [searchQuery, setSearchQuery] = useState('');
   const unreadCount = mockNotifications.filter(n => !n.isRead).length;
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b-2 border-red-900 bg-white shadow-sm">
@@ -32,15 +43,26 @@ export const Header: React.FC = () => {
 
           {/* 検索バー */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <Input
-              type="search"
-              placeholder="記事を検索..."
-              className="w-full"
-            />
+            <form onSubmit={handleSearch} className="w-full">
+              <Input
+                type="search"
+                placeholder="記事を検索..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+            </form>
           </div>
 
           {/* ナビゲーション */}
           <nav className="flex items-center gap-4">
+            {/* モバイル検索ボタン */}
+            <Link href="/search" className="md:hidden">
+              <Button variant="ghost" size="icon">
+                <Search className="w-5 h-5" />
+              </Button>
+            </Link>
+
             {isLoggedIn ? (
               <>
                 <Link href="/articles/new">
