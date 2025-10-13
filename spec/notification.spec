@@ -30,6 +30,11 @@ Feature "通知機能" do
     end
   end
 
+  Scenario "その他の通知" do
+    # いいねされたときに通知が来るようにもしたいが、一旦保留
+    # コメント機能は無いので、コメント関連の通知は無し
+  end
+
   Scenario "通知の既読" do
     Given "未読の通知があるとき" do
       When "通知一覧を開くと、" do
