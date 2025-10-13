@@ -1,0 +1,6 @@
+@nari_note_backend_HostAddress = http://localhost:5005
+
+GET {{nari_note_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
