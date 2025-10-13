@@ -1,0 +1,33 @@
+name: Frontend Issue
+description: フロントエンド関連のissue
+title: "[FRONT] "
+labels: ["FrontEnd"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        フロントエンド関連のissueを作成します。
+  - type: textarea
+    id: description
+    attributes:
+      label: 説明
+      description: issueの詳細を記述してください
+      placeholder: issueの内容を記述してください
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: 受け入れ条件
+      description: このissueが完了したと判断する基準を記述してください
+      placeholder: 受け入れ条件を記述してください
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 追加情報
+      description: その他の関連情報やコンテキストがあれば記述してください
+      placeholder: 追加情報を記述してください
+    validations:
+      required: false
