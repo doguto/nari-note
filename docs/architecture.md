@@ -84,19 +84,19 @@ Data (DbContext, Repository実装)
 
 ```
 nari-note-backend/
-├── Controllers/              # Presentation層
+├── Controller/               # Presentation層
 │   ├── ArticlesController.cs
 │   ├── UsersController.cs
 │   └── TagsController.cs
 ├── Application/              # Business Logic層
-│   ├── Services/
+│   ├── Service/
 │   │   ├── GetArticleService.cs
 │   │   ├── CreateArticleService.cs
 │   │   ├── UpdateArticleService.cs
 │   │   ├── DeleteArticleService.cs
 │   │   ├── ToggleLikeService.cs
 │   │   └── GetUserProfileService.cs
-│   └── Repositories/         # Repository抽象化
+│   └── Repository/           # Repository抽象化
 │       ├── IArticleRepository.cs
 │       └── IUserRepository.cs
 ├── Domain/                   # Domain Entity
@@ -106,9 +106,8 @@ nari-note-backend/
 │   └── Like.cs
 └── Infrastructure/           # Data Access層
     ├── ApplicationDbContext.cs
-    └── Repositories/         # Repository実装
-        ├── ArticleRepository.cs
-        └── UserRepository.cs
+    ├── ArticleRepository.cs
+    └── UserRepository.cs
 ```
 
 ### Entity Framework Core との統合
