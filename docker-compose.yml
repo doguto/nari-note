@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16.10-alpine3.22
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  app:
+    build:
+      context: ./nari-note-backend
+      dockerfile: Dockerfile
+    command: dotnet watch run --urls http://0.0.0.0:5243
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://myuser:mypassword@db:5432/mydatabase
+    ports:
+      - "5243:5243"
+    volumes:
+      - ./nari-note-backend:/app:cached
+      - nuget:/root/.nuget/packages:cached
+    tty: true
+    stdin_open: true
+
+volumes:
+  postgres:
+  nuget:
