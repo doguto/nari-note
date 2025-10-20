@@ -5,6 +5,8 @@
 ```mermaid
 erDiagram
 
+User ||--o{ Session: "has many"
+
 User ||--o{ Article: "has many"
 Article ||--o{ ArticleTag: "has many"
 Tag ||--o{ ArticleTag: "1:n"
@@ -25,6 +27,14 @@ User {
     password_hash varchar(255)
     created_at datetime
     updated_at datetime
+}
+
+Session {
+    id integer PK
+    user_id integer FK
+    session_key varchar(255)
+    expires_at datetime
+    created_at datetime
 }
 
 Article {
@@ -77,6 +87,7 @@ Notification {
 
 ### ArticleTag
 - UNIQUE INDEX: `(article_id, tag_id)`
+- INDEX: `(user_id)`
 
 ### Like
 - UNIQUE INDEX: `(user_id, article_id)`
