@@ -1,3 +1,5 @@
+using NariNoteBackend.Src.Application.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
