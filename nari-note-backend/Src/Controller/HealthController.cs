@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace NariNoteBackend.Src.Controller;
+namespace NariNoteBackend.Controller;
 
 [ApiController]
 [Route("api/[controller]")]

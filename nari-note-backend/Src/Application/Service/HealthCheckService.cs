@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace NariNoteBackend.Src.Application.Service;
+namespace NariNoteBackend.Application.Service;
 
 public class HealthCheckService : IHealthCheck
 {

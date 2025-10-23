@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace nari_note_backend.Infrastructure;
+namespace NariNoteBackend.Infrastructure;
 
 public class NariNoteDbContext : DbContext
 {
