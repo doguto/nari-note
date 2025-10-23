@@ -1,12 +1,11 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace NariNoteBackend.Src.Application.Service
+namespace NariNoteBackend.Src.Application.Service;
+
+public class HealthCheckService : IHealthCheck
 {
-    public class HealthCheckService : IHealthCheck
+    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(HealthCheckResult.Healthy("The application is healthy."));
-        }
+        return Task.FromResult(HealthCheckResult.Healthy("The application is healthy."));
     }
 }
