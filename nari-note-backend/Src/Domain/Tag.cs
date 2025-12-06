@@ -14,5 +14,5 @@ public class Tag
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation Properties
-    public List<Article> Articles { get; set; } = new();
+    public List<ArticleTag> ArticleTags { get; set; } = new();
 }

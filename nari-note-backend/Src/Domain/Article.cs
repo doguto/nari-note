@@ -26,7 +26,7 @@ public class Article
 
     // Navigation Properties
     public required User Author { get; set; }
-    public List<Tag> Tags { get; set; } = new();
+    public List<ArticleTag> ArticleTags { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
 
     // Domain Logic
