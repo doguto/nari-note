@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace NariNoteBackend.Domain;
 
+[Index(nameof(Email), IsUnique = true)]
 public class User
 {
     [Key]
@@ -29,7 +31,7 @@ public class User
     public List<Article> Articles { get; set; } = new();
     public List<Session> Sessions { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
-    public List<Follow> Followings { get; set; } = new();
-    public List<Follow> Followers { get; set; } = new();
+    public List<Follow> Followings { get; set; } = new();  // 自分がフォローしているユーザーとの関係
+    public List<Follow> Followers { get; set; } = new();   // 自分をフォローしているユーザーとの関係
     public List<Notification> Notifications { get; set; } = new();
 }

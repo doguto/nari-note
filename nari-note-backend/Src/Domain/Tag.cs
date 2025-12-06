@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace NariNoteBackend.Domain;
 
+[Index(nameof(Name), IsUnique = true)]
 public class Tag
 {
     [Key]

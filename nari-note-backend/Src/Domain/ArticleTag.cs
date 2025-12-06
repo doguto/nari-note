@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace NariNoteBackend.Domain;
 
+[Index(nameof(ArticleId), nameof(TagId), IsUnique = true)]
 public class ArticleTag
 {
     [Key]
