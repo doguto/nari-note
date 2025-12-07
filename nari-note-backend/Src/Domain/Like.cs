@@ -18,7 +18,12 @@ public class Like
     [ForeignKey("Article")]
     public int ArticleId { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
+
+    public Like()
+    {
+        CreatedAt = DateTime.UtcNow;
+    }
 
     // Navigation Properties
     public required User User { get; set; }

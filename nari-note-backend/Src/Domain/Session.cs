@@ -18,8 +18,14 @@ public class Session
     [MaxLength(255)]
     public required string SessionKey { get; set; }
 
-    public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddHours(24);
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime ExpiresAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public Session()
+    {
+        ExpiresAt = DateTime.UtcNow.AddHours(24);
+        CreatedAt = DateTime.UtcNow;
+    }
 
     // Navigation Properties
     public required User User { get; set; }

@@ -18,7 +18,12 @@ public class ArticleTag
     [ForeignKey("Tag")]
     public int TagId { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
+
+    public ArticleTag()
+    {
+        CreatedAt = DateTime.UtcNow;
+    }
 
     // Navigation Properties
     public required Article Article { get; set; }

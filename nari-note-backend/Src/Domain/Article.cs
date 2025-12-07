@@ -17,12 +17,19 @@ public class Article
     public required string Title { get; set; }
 
     [Required]
+    [MaxLength(10000)]
     public required string Body { get; set; }
 
     public bool IsPublished { get; set; } = false;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+
+    public Article()
+    {
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
 
     // Navigation Properties
     public required User Author { get; set; }

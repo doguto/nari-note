@@ -13,7 +13,12 @@ public class Tag
     [MaxLength(50)]
     public required string Name { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
+
+    public Tag()
+    {
+        CreatedAt = DateTime.UtcNow;
+    }
 
     // Navigation Properties
     public List<ArticleTag> ArticleTags { get; set; } = new();

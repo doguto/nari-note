@@ -18,7 +18,12 @@ public class Follow
     [ForeignKey("Following")]
     public int FollowingId { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
+
+    public Follow()
+    {
+        CreatedAt = DateTime.UtcNow;
+    }
 
     // Navigation Properties
     public required User Follower { get; set; }  // フォローする側
