@@ -6,7 +6,7 @@ namespace NariNoteBackend.Application.Service;
 
 public class GetUserProfileService
 {
-    readonly IUserRepository userRepository;
+    private readonly IUserRepository userRepository;
     
     public GetUserProfileService(IUserRepository userRepository)
     {

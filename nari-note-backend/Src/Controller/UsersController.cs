@@ -9,7 +9,7 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    readonly GetUserProfileService getUserProfileService;
+    private readonly GetUserProfileService getUserProfileService;
     
     public UsersController(GetUserProfileService getUserProfileService)
     {
