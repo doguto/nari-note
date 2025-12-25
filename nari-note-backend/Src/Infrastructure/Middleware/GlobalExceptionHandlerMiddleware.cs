@@ -1,5 +1,5 @@
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
+using AppException = NariNoteBackend.Application.Exception.ApplicationException;
 
 namespace NariNoteBackend.Infrastructure.Middleware;
 
@@ -26,7 +26,7 @@ public class GlobalExceptionHandlerMiddleware
         {
             await this.next(context);
         }
-        catch (NariNoteBackend.Application.Exception.ApplicationException ex)
+        catch (AppException ex)
         {
             await this.HandleApplicationExceptionAsync(context, ex);
         }
@@ -41,7 +41,7 @@ public class GlobalExceptionHandlerMiddleware
     /// </summary>
     private async Task HandleApplicationExceptionAsync(
         HttpContext context,
-        NariNoteBackend.Application.Exception.ApplicationException exception)
+        AppException exception)
     {
         this.logger.LogWarning(
             exception,

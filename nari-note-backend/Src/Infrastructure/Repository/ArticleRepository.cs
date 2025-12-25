@@ -44,27 +44,18 @@ public class ArticleRepository : IArticleRepository
                 "Database error occurred while creating article",
                 ex);
         }
-        catch (System.Exception ex)
+        catch (DbUpdateConcurrencyException ex)
         {
-            throw new InfrastructureException(
-                "Unexpected error occurred while creating article",
+            throw new ConflictException(
+                "The article was modified by another user",
                 ex);
         }
     }
     
     public async Task<Article?> FindByIdAsync(int id)
     {
-        try
-        {
-            return await this.context.Articles
-                .Include(a => a.Author)
-                .FirstOrDefaultAsync(a => a.Id == id);
-        }
-        catch (System.Exception ex)
-        {
-            throw new InfrastructureException(
-                $"Error occurred while fetching article with ID {id}",
-                ex);
-        }
+        return await this.context.Articles
+            .Include(a => a.Author)
+            .FirstOrDefaultAsync(a => a.Id == id);
     }
 }
