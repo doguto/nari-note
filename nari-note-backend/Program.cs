@@ -18,6 +18,7 @@ builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 
 // Register services
 builder.Services.AddScoped<CreateArticleService>();
+builder.Services.AddScoped<DeleteArticleService>();
 
 var app = builder.Build();
 

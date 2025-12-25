@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Domain;
 
@@ -17,5 +18,20 @@ public class ArticleRepository : IArticleRepository
         this.context.Articles.Add(article);
         await this.context.SaveChangesAsync();
         return article;
+    }
+    
+    public async Task<Article?> FindByIdAsync(int id)
+    {
+        return await this.context.Articles.FindAsync(id);
+    }
+    
+    public async Task DeleteAsync(int id)
+    {
+        var article = await FindByIdAsync(id);
+        if (article != null)
+        {
+            this.context.Articles.Remove(article);
+            await this.context.SaveChangesAsync();
+        }
     }
 }

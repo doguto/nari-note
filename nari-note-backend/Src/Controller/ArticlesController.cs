@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Service;
 
 namespace NariNoteBackend.Controller;
@@ -10,10 +11,14 @@ namespace NariNoteBackend.Controller;
 public class ArticlesController : ControllerBase
 {
     private readonly CreateArticleService createArticleService;
+    private readonly DeleteArticleService deleteArticleService;
     
-    public ArticlesController(CreateArticleService createArticleService)
+    public ArticlesController(
+        CreateArticleService createArticleService,
+        DeleteArticleService deleteArticleService)
     {
         this.createArticleService = createArticleService;
+        this.deleteArticleService = deleteArticleService;
     }
     
     [HttpPost]
@@ -30,6 +35,25 @@ public class ArticlesController : ControllerBase
         
         var response = await this.createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteArticle(int id, [FromQuery] int userId)
+    {
+        try
+        {
+            var request = new DeleteArticleRequest { Id = id, UserId = userId };
+            await this.deleteArticleService.ExecuteAsync(request);
+            return NoContent();
+        }
+        catch (NotFoundException)
+        {
+            return NotFound(new DeleteArticleNotFoundResponse { ArticleId = id });
+        }
+        catch (ForbiddenException)
+        {
+            return StatusCode(403, new DeleteArticleForbiddenResponse { ArticleId = id });
+        }
     }
     
     // TODO: Implement GetArticle method (Issue #XX)
