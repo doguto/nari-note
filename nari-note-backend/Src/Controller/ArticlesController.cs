@@ -10,10 +10,14 @@ namespace NariNoteBackend.Controller;
 public class ArticlesController : ControllerBase
 {
     private readonly CreateArticleService createArticleService;
+    private readonly GetArticleService getArticleService;
     
-    public ArticlesController(CreateArticleService createArticleService)
+    public ArticlesController(
+        CreateArticleService createArticleService,
+        GetArticleService getArticleService)
     {
         this.createArticleService = createArticleService;
+        this.getArticleService = getArticleService;
     }
     
     [HttpPost]
@@ -28,15 +32,16 @@ public class ArticlesController : ControllerBase
             return BadRequest(new CreateArticleBadRequestResponse { Errors = errors });
         }
         
+        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var response = await this.createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
     
-    // TODO: Implement GetArticle method (Issue #XX)
-    // Placeholder for GetArticle action to satisfy CreatedAtAction
     [HttpGet("{id}")]
-    public ActionResult GetArticle(int id)
+    public async Task<ActionResult> GetArticle(int id)
     {
-        return NotFound();
+        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
+        var article = await this.getArticleService.ExecuteAsync(id);
+        return Ok(article);
     }
 }
