@@ -9,15 +9,15 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly GetUserProfileService _getUserProfileService;
+    readonly GetUserProfileService getUserProfileService;
     
     public UsersController(GetUserProfileService getUserProfileService)
     {
-        _getUserProfileService = getUserProfileService;
+        this.getUserProfileService = getUserProfileService;
     }
     
     [HttpGet("{id}")]
-    public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile(int id)
+    public async Task<ActionResult> GetUserProfile(int id)
     {
         if (id <= 0)
         {
@@ -25,13 +25,14 @@ public class UsersController : ControllerBase
         }
         
         var request = new GetUserProfileRequest { Id = id };
-        var response = await _getUserProfileService.ExecuteAsync(request);
+        var response = await this.getUserProfileService.ExecuteAsync(request);
         
-        if (response == null)
+        return response switch
         {
-            return NotFound(new GetUserProfileNotFoundResponse { UserId = id });
-        }
-        
-        return Ok(response);
+            GetUserProfileResponse profileResponse => Ok(profileResponse),
+            GetUserProfileNotFoundResponse notFoundResponse => NotFound(notFoundResponse),
+            GetUserProfileBadRequestResponse badRequestResponse => BadRequest(badRequestResponse),
+            _ => StatusCode(500, new { Message = "予期しないエラーが発生しました" })
+        };
     }
 }

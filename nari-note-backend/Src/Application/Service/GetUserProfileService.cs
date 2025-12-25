@@ -6,31 +6,33 @@ namespace NariNoteBackend.Application.Service;
 
 public class GetUserProfileService
 {
-    private readonly IUserRepository _userRepository;
+    readonly IUserRepository userRepository;
     
     public GetUserProfileService(IUserRepository userRepository)
     {
-        _userRepository = userRepository;
+        this.userRepository = userRepository;
     }
     
-    public async Task<GetUserProfileResponse?> ExecuteAsync(GetUserProfileRequest request)
+    public async Task<object> ExecuteAsync(GetUserProfileRequest request)
     {
         if (request == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            return new GetUserProfileBadRequestResponse();
         }
         
-        var user = await _userRepository.FindByIdAsync(request.Id);
-        if (user == null) return null;
+        var user = await this.userRepository.FindByIdAsync(request.Id);
+        if (user == null)
+        {
+            return new GetUserProfileNotFoundResponse();
+        }
         
         return new GetUserProfileResponse
         {
             Id = user.Id,
             Username = user.Name,  // Domain の Name を Username として返す
-            Email = user.Email,
             Bio = null,  // Domain に Bio フィールドがないため null
             CreatedAt = user.CreatedAt
-            // PasswordHash は含めない
+            // PasswordHash と Email は含めない
         };
     }
 }
