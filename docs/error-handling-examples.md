@@ -17,7 +17,7 @@
 - `Src/Application/Dto/Response/ErrorResponse.cs`
 
 ### 3. グローバル例外ハンドラー
-- `Src/Infrastructure/Middleware/GlobalExceptionHandlerMiddleware.cs`
+- `Src/Middleware/GlobalExceptionHandlerMiddleware.cs`
 
 ### 4. 実装例
 - `Src/Application/Service/GetArticleService.cs` - Serviceでの例外スロー例

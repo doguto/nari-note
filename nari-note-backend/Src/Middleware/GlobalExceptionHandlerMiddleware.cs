@@ -1,7 +1,7 @@
 using NariNoteBackend.Application.Dto.Response;
 using AppException = NariNoteBackend.Application.Exception.ApplicationException;
 
-namespace NariNoteBackend.Infrastructure.Middleware;
+namespace NariNoteBackend.Middleware;
 
 /// <summary>
 /// グローバル例外ハンドラーミドルウェア

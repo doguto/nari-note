@@ -2,8 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Infrastructure;
-using NariNoteBackend.Infrastructure.Middleware;
 using NariNoteBackend.Infrastructure.Repository;
+using NariNoteBackend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
