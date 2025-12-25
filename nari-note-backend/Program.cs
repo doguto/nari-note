@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Infrastructure;
+using NariNoteBackend.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,12 @@ builder.Services.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
 builder.Services.AddDbContext<NariNoteDbContext>(
     options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+// Register repositories
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+
+// Register services
+builder.Services.AddScoped<CreateArticleService>();
 
 var app = builder.Build();
 
