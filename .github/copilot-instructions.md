@@ -30,3 +30,15 @@ Refactor: データベース接続ロジックを整理
 Chore: 依存パッケージを最新版に更新
 Docs: READMEにセットアップ手順を追加
 ```
+
+## コーディング規約
+
+### C#
+
+#### 命名規則
+
+- **private変数**: アンダースコア（`_`）のプレフィックスを付けずに、キャメルケースで命名してください
+  - 良い例: `private readonly NariNoteDbContext context;`
+  - 悪い例: `private readonly NariNoteDbContext _context;`
+- private変数へのアクセスには `this.` を使用してください
+  - 例: `this.context.SaveChangesAsync();`
