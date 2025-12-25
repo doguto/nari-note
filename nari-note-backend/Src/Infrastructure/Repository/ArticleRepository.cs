@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Domain;
 
@@ -17,5 +18,14 @@ public class ArticleRepository : IArticleRepository
         this.context.Articles.Add(article);
         await this.context.SaveChangesAsync();
         return article;
+    }
+    
+    public async Task<List<Article>> FindByAuthorAsync(int authorId)
+    {
+        return await this.context.Articles
+            .Include(a => a.Author)
+            .Where(a => a.AuthorId == authorId)
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync();
     }
 }

@@ -10,10 +10,14 @@ namespace NariNoteBackend.Controller;
 public class ArticlesController : ControllerBase
 {
     private readonly CreateArticleService createArticleService;
+    private readonly GetArticlesByAuthorService getArticlesByAuthorService;
     
-    public ArticlesController(CreateArticleService createArticleService)
+    public ArticlesController(
+        CreateArticleService createArticleService,
+        GetArticlesByAuthorService getArticlesByAuthorService)
     {
         this.createArticleService = createArticleService;
+        this.getArticlesByAuthorService = getArticlesByAuthorService;
     }
     
     [HttpPost]
@@ -38,5 +42,13 @@ public class ArticlesController : ControllerBase
     public ActionResult GetArticle(int id)
     {
         return NotFound();
+    }
+    
+    [HttpGet("author/{authorId}")]
+    public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(int authorId)
+    {
+        var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
+        var response = await this.getArticlesByAuthorService.ExecuteAsync(request);
+        return Ok(response);
     }
 }
