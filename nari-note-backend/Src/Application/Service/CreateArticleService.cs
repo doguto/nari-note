@@ -24,7 +24,7 @@ public class CreateArticleService
             IsPublished = request.IsPublished,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            Author = null! // Will be loaded from database
+            Author = null! // EF Core handles navigation property via AuthorId
         };
         
         var created = await _articleRepository.CreateAsync(article);
@@ -35,7 +35,7 @@ public class CreateArticleService
             Title = created.Title,
             Body = created.Body,
             AuthorId = created.AuthorId,
-            Tags = request.Tags,
+            Tags = request.Tags, // Tags are returned as-is, not persisted yet
             IsPublished = created.IsPublished,
             CreatedAt = created.CreatedAt
         };
