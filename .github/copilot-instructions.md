@@ -40,5 +40,6 @@ Docs: READMEにセットアップ手順を追加
 - **private変数**: アンダースコア（`_`）のプレフィックスを付けずに、キャメルケースで命名してください
   - 良い例: `readonly NariNoteDbContext context;`
   - 悪い例: `readonly NariNoteDbContext _context;`
+  - ※例では`private`修飾子を省略しています
 - private変数へのアクセスには `this.` を使用してください
   - 例: `this.context.SaveChangesAsync();`
