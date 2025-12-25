@@ -43,3 +43,9 @@ Docs: READMEにセットアップ手順を追加
   - ※例では`private`修飾子を省略しています
 - private変数へのアクセスには `this.` を使用してください
   - 例: `this.context.SaveChangesAsync();`
+
+#### アクセス修飾子
+
+- **private修飾子の省略**: クラスのフィールドやメソッドにおいて、`private`修飾子は省略してください
+  - 良い例: `readonly NariNoteDbContext context;`
+  - 悪い例: `private readonly NariNoteDbContext _context;`
