@@ -1,5 +1,5 @@
 using NariNoteBackend.Application.Dto.Request;
-using NariNoteBackend.Application.Exception;
+using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Repository;
 
 namespace NariNoteBackend.Application.Service;
@@ -13,14 +13,20 @@ public class DeleteArticleService
         _articleRepository = articleRepository;
     }
     
-    public async Task ExecuteAsync(DeleteArticleRequest request)
+    public async Task<DeleteArticleResponse> ExecuteAsync(DeleteArticleRequest request)
     {
-        var article = await _articleRepository.FindByIdAsync(request.Id)
-            ?? throw new NotFoundException($"記事ID {request.Id} が見つかりません");
+        var article = await _articleRepository.FindByIdAsync(request.Id);
+        if (article == null)
+        {
+            return DeleteArticleResponse.NotFound(request.Id);
+        }
             
         if (article.AuthorId != request.UserId)
-            throw new ForbiddenException("この記事を削除する権限がありません");
+        {
+            return DeleteArticleResponse.Forbidden(request.Id);
+        }
             
         await _articleRepository.DeleteAsync(request.Id);
+        return DeleteArticleResponse.Success();
     }
 }
