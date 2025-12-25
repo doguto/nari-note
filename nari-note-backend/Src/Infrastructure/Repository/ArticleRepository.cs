@@ -5,17 +5,17 @@ namespace NariNoteBackend.Infrastructure.Repository;
 
 public class ArticleRepository : IArticleRepository
 {
-    private readonly NariNoteDbContext _context;
+    private readonly NariNoteDbContext context;
     
     public ArticleRepository(NariNoteDbContext context)
     {
-        _context = context;
+        this.context = context;
     }
     
     public async Task<Article> CreateAsync(Article article)
     {
-        _context.Articles.Add(article);
-        await _context.SaveChangesAsync();
+        context.Articles.Add(article);
+        await context.SaveChangesAsync();
         return article;
     }
 }

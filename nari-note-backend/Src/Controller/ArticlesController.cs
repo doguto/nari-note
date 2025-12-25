@@ -9,11 +9,11 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class ArticlesController : ControllerBase
 {
-    private readonly CreateArticleService _createArticleService;
+    private readonly CreateArticleService createArticleService;
     
     public ArticlesController(CreateArticleService createArticleService)
     {
-        _createArticleService = createArticleService;
+        this.createArticleService = createArticleService;
     }
     
     [HttpPost]
@@ -28,7 +28,7 @@ public class ArticlesController : ControllerBase
             return BadRequest(new CreateArticleBadRequestResponse { Errors = errors });
         }
         
-        var response = await _createArticleService.ExecuteAsync(request);
+        var response = await createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
     

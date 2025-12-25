@@ -7,11 +7,11 @@ namespace NariNoteBackend.Application.Service;
 
 public class CreateArticleService
 {
-    private readonly IArticleRepository _articleRepository;
+    private readonly IArticleRepository articleRepository;
     
     public CreateArticleService(IArticleRepository articleRepository)
     {
-        _articleRepository = articleRepository;
+        this.articleRepository = articleRepository;
     }
     
     public async Task<CreateArticleResponse> ExecuteAsync(CreateArticleRequest request)
@@ -27,16 +27,11 @@ public class CreateArticleService
             Author = null! // EF Core handles navigation property via AuthorId
         };
         
-        var created = await _articleRepository.CreateAsync(article);
+        var created = await articleRepository.CreateAsync(article);
         
         return new CreateArticleResponse
         {
             Id = created.Id,
-            Title = created.Title,
-            Body = created.Body,
-            AuthorId = created.AuthorId,
-            Tags = request.Tags, // Tags are returned as-is, not persisted yet
-            IsPublished = created.IsPublished,
             CreatedAt = created.CreatedAt
         };
     }
