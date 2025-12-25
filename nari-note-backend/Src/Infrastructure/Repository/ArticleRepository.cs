@@ -14,8 +14,8 @@ public class ArticleRepository : IArticleRepository
     
     public async Task<Article> CreateAsync(Article article)
     {
-        context.Articles.Add(article);
-        await context.SaveChangesAsync();
+        this.context.Articles.Add(article);
+        await this.context.SaveChangesAsync();
         return article;
     }
 }

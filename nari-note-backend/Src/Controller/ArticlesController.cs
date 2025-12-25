@@ -28,7 +28,7 @@ public class ArticlesController : ControllerBase
             return BadRequest(new CreateArticleBadRequestResponse { Errors = errors });
         }
         
-        var response = await createArticleService.ExecuteAsync(request);
+        var response = await this.createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
     
