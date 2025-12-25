@@ -40,21 +40,7 @@ public class ArticlesController : ControllerBase
     public async Task<ActionResult> DeleteArticle(int id, [FromQuery] int userId)
     {
         var request = new DeleteArticleRequest { Id = id, UserId = userId };
-        var response = await this.deleteArticleService.ExecuteAsync(request);
-        
-        if (!response.IsSuccess && response.Error != null)
-        {
-            switch (response.Error.Type)
-            {
-                case DeleteArticleErrorType.NotFound:
-                    return NotFound(new DeleteArticleNotFoundResponse { ArticleId = id });
-                case DeleteArticleErrorType.Forbidden:
-                    return StatusCode(403, new DeleteArticleForbiddenResponse { ArticleId = id });
-                default:
-                    return StatusCode(500);
-            }
-        }
-        
+        await deleteArticleService.ExecuteAsync(request);
         return NoContent();
     }
     
