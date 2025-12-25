@@ -50,6 +50,8 @@ public class ArticlesController : ControllerBase
                     return NotFound(new DeleteArticleNotFoundResponse { ArticleId = id });
                 case DeleteArticleErrorType.Forbidden:
                     return StatusCode(403, new DeleteArticleForbiddenResponse { ArticleId = id });
+                default:
+                    return StatusCode(500);
             }
         }
         
