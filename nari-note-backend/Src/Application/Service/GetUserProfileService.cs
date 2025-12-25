@@ -15,6 +15,11 @@ public class GetUserProfileService
     
     public async Task<GetUserProfileResponse?> ExecuteAsync(GetUserProfileRequest request)
     {
+        if (request == null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+        
         var user = await _userRepository.FindByIdAsync(request.Id);
         if (user == null) return null;
         

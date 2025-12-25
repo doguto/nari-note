@@ -17,8 +17,13 @@ public class UsersController : ControllerBase
     }
     
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetUserProfile(int id)
+    public async Task<ActionResult<GetUserProfileResponse>> GetUserProfile(int id)
     {
+        if (id <= 0)
+        {
+            return BadRequest(new { Message = "ユーザーIDは1以上の値を指定してください" });
+        }
+        
         var request = new GetUserProfileRequest { Id = id };
         var response = await _getUserProfileService.ExecuteAsync(request);
         
