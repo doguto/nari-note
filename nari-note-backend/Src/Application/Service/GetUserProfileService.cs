@@ -30,7 +30,7 @@ public class GetUserProfileService
         {
             Id = user.Id,
             Username = user.Name,  // Domain の Name を Username として返す
-            Bio = null,  // Domain に Bio フィールドがないため null
+            Bio = user.Bio,
             CreatedAt = user.CreatedAt
             // PasswordHash と Email は含めない
         };
