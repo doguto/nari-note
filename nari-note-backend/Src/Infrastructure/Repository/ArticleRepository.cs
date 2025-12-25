@@ -27,7 +27,7 @@ public class ArticleRepository : IArticleRepository
     
     public async Task DeleteAsync(int id)
     {
-        var article = await FindByIdAsync(id);
+        var article = await this.context.Articles.FindAsync(id);
         if (article != null)
         {
             this.context.Articles.Remove(article);
