@@ -46,6 +46,6 @@ Docs: READMEにセットアップ手順を追加
 
 #### アクセス修飾子
 
-- **private修飾子の省略**: クラスのフィールドやメソッドにおいて、`private`修飾子は省略してください
+- **private修飾子の省略**: クラスのフィールドにおいて、`private`修飾子は省略してください（C#ではデフォルトでprivateになります）
   - 良い例: `readonly NariNoteDbContext context;`
-  - 悪い例: `private readonly NariNoteDbContext _context;`
+  - 悪い例: `private readonly NariNoteDbContext context;`
