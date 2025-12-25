@@ -27,12 +27,11 @@ public class UsersController : ControllerBase
         var request = new GetUserProfileRequest { Id = id };
         var response = await this.getUserProfileService.ExecuteAsync(request);
         
-        return response switch
+        if (response == null)
         {
-            GetUserProfileResponse profileResponse => Ok(profileResponse),
-            GetUserProfileNotFoundResponse notFoundResponse => NotFound(notFoundResponse),
-            GetUserProfileBadRequestResponse badRequestResponse => BadRequest(badRequestResponse),
-            _ => StatusCode(500, new { Message = "予期しないエラーが発生しました" })
-        };
+            return NotFound(new GetUserProfileNotFoundResponse());
+        }
+        
+        return Ok(response);
     }
 }

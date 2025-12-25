@@ -13,17 +13,12 @@ public class GetUserProfileService
         this.userRepository = userRepository;
     }
     
-    public async Task<object> ExecuteAsync(GetUserProfileRequest request)
+    public async Task<GetUserProfileResponse?> ExecuteAsync(GetUserProfileRequest request)
     {
-        if (request == null)
-        {
-            return new GetUserProfileBadRequestResponse();
-        }
-        
         var user = await this.userRepository.FindByIdAsync(request.Id);
         if (user == null)
         {
-            return new GetUserProfileNotFoundResponse();
+            return null;
         }
         
         return new GetUserProfileResponse
