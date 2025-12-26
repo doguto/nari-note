@@ -10,15 +10,18 @@ namespace NariNoteBackend.Controller;
 public class ArticlesController : ControllerBase
 {
     readonly CreateArticleService createArticleService;
+    readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticleService getArticleService;
     readonly DeleteArticleService deleteArticleService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
+        GetArticlesByAuthorService getArticlesByAuthorService,
         GetArticleService getArticleService,
         DeleteArticleService deleteArticleService)
     {
         this.createArticleService = createArticleService;
+        this.getArticlesByAuthorService = getArticlesByAuthorService;
         this.getArticleService = getArticleService;
         this.deleteArticleService = deleteArticleService;
     }
@@ -46,6 +49,15 @@ public class ArticlesController : ControllerBase
         // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var article = await this.getArticleService.ExecuteAsync(id);
         return Ok(article);
+    }
+    
+    [HttpGet("author/{authorId}")]
+    public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(int authorId)
+    {
+        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
+        var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
+        var response = await this.getArticlesByAuthorService.ExecuteAsync(request);
+        return Ok(response);
     }
     
     [HttpDelete("{id}")]

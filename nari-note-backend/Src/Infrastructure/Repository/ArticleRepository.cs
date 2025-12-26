@@ -59,6 +59,15 @@ public class ArticleRepository : IArticleRepository
             .FirstOrDefaultAsync(a => a.Id == id);
     }
     
+    public async Task<List<Article>> FindByAuthorAsync(int authorId)
+    {
+        return await this.context.Articles
+            .Include(a => a.Author)
+            .Where(a => a.AuthorId == authorId)
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync();
+    }
+    
     public async Task DeleteAsync(int id)
     {
         try
