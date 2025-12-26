@@ -51,11 +51,7 @@ public class ArticlesController : ControllerBase
     [HttpGet("author/{authorId}")]
     public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(int authorId)
     {
-        if (authorId <= 0)
-        {
-            return BadRequest(new { message = "AuthorIdは1以上の値を指定してください" });
-        }
-        
+        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
         var response = await this.getArticlesByAuthorService.ExecuteAsync(request);
         return Ok(response);

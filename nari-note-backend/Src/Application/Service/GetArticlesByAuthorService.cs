@@ -24,7 +24,7 @@ public class GetArticlesByAuthorService
             Title = a.Title,
             Body = a.Body,
             AuthorId = a.AuthorId,
-            AuthorName = a.Author?.Name ?? "",
+            AuthorName = a.Author.Name,
             IsPublished = a.IsPublished,
             CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
@@ -33,7 +33,7 @@ public class GetArticlesByAuthorService
         return new GetArticlesByAuthorResponse
         {
             AuthorId = request.AuthorId,
-            AuthorName = articles.FirstOrDefault()?.Author?.Name ?? "",
+            AuthorName = articles.FirstOrDefault()?.Author.Name ?? "",
             Articles = articleDtos,
             TotalCount = articles.Count
         };
