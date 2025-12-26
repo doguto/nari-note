@@ -19,6 +19,7 @@ builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 
 // Register services
 builder.Services.AddScoped<CreateArticleService>();
+builder.Services.AddScoped<GetArticlesByAuthorService>();
 builder.Services.AddScoped<GetArticleService>();
 
 var app = builder.Build();
