@@ -5,9 +5,6 @@ using NariNoteBackend.Application.Repository;
 
 namespace NariNoteBackend.Application.Service;
 
-/// <summary>
-/// ユーザープロフィール取得サービス
-/// </summary>
 public class GetUserProfileService
 {
     private readonly IUserRepository userRepository;
@@ -17,12 +14,6 @@ public class GetUserProfileService
         this.userRepository = userRepository;
     }
     
-    /// <summary>
-    /// ユーザーIDでユーザープロフィールを取得する
-    /// </summary>
-    /// <param name="request">リクエスト</param>
-    /// <returns>ユーザープロフィールレスポンス</returns>
-    /// <exception cref="NotFoundException">ユーザーが見つからない場合</exception>
     public async Task<GetUserProfileResponse> ExecuteAsync(GetUserProfileRequest request)
     {
         var user = await this.userRepository.FindByIdAsync(request.Id);
