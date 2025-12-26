@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Application.Exception;
 
 namespace NariNoteBackend.Controller;
 
@@ -24,14 +25,15 @@ public class UsersController : ControllerBase
             return BadRequest(new { Message = "ユーザーIDは1以上の値を指定してください" });
         }
         
-        var request = new GetUserProfileRequest { Id = id };
-        var response = await this.getUserProfileService.ExecuteAsync(request);
-        
-        if (response == null)
+        try
+        {
+            var request = new GetUserProfileRequest { Id = id };
+            var response = await this.getUserProfileService.ExecuteAsync(request);
+            return Ok(response);
+        }
+        catch (NotFoundException)
         {
             return NotFound(new GetUserProfileNotFoundResponse());
         }
-        
-        return Ok(response);
     }
 }

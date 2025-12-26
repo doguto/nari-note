@@ -1,6 +1,7 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Repository;
+using NariNoteBackend.Application.Exception;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -13,12 +14,12 @@ public class GetUserProfileService
         this.userRepository = userRepository;
     }
     
-    public async Task<GetUserProfileResponse?> ExecuteAsync(GetUserProfileRequest request)
+    public async Task<GetUserProfileResponse> ExecuteAsync(GetUserProfileRequest request)
     {
         var user = await this.userRepository.FindByIdAsync(request.Id);
         if (user == null)
         {
-            return null;
+            throw new NotFoundException("ユーザーが見つかりません");
         }
         
         return new GetUserProfileResponse
