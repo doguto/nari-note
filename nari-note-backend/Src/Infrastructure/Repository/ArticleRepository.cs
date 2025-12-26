@@ -61,11 +61,26 @@ public class ArticleRepository : IArticleRepository
     
     public async Task DeleteAsync(int id)
     {
-        var article = await this.context.Articles.FindAsync(id);
-        if (article != null)
+        try
         {
-            this.context.Articles.Remove(article);
-            await this.context.SaveChangesAsync();
+            var article = await this.context.Articles.FindAsync(id);
+            if (article != null)
+            {
+                this.context.Articles.Remove(article);
+                await this.context.SaveChangesAsync();
+            }
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConflictException(
+                "The article was modified or deleted by another user",
+                ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new InfrastructureException(
+                $"Database error occurred while deleting article with ID {id}",
+                ex);
         }
     }
 }
