@@ -9,14 +9,17 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class ArticlesController : ControllerBase
 {
-    private readonly CreateArticleService createArticleService;
-    private readonly DeleteArticleService deleteArticleService;
+    readonly CreateArticleService createArticleService;
+    readonly GetArticleService getArticleService;
+    readonly DeleteArticleService deleteArticleService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
+        GetArticleService getArticleService,
         DeleteArticleService deleteArticleService)
     {
         this.createArticleService = createArticleService;
+        this.getArticleService = getArticleService;
         this.deleteArticleService = deleteArticleService;
     }
     
@@ -32,8 +35,17 @@ public class ArticlesController : ControllerBase
             return BadRequest(new CreateArticleBadRequestResponse { Errors = errors });
         }
         
+        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var response = await this.createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
+    }
+    
+    [HttpGet("{id}")]
+    public async Task<ActionResult> GetArticle(int id)
+    {
+        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
+        var article = await this.getArticleService.ExecuteAsync(id);
+        return Ok(article);
     }
     
     [HttpDelete("{id}")]
@@ -42,13 +54,5 @@ public class ArticlesController : ControllerBase
         var request = new DeleteArticleRequest { Id = id, UserId = userId };
         await deleteArticleService.ExecuteAsync(request);
         return NoContent();
-    }
-    
-    // TODO: Implement GetArticle method (Issue #XX)
-    // Placeholder for GetArticle action to satisfy CreatedAtAction
-    [HttpGet("{id}")]
-    public ActionResult GetArticle(int id)
-    {
-        return NotFound();
     }
 }
