@@ -16,6 +16,9 @@ public class User
     [MaxLength(255)]
     public string? ProfileImage { get; set; }
 
+    [MaxLength(500)]
+    public string? Bio { get; set; }
+
     [Required]
     [MaxLength(255)]
     public required string Email { get; set; }

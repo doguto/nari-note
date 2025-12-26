@@ -16,9 +16,11 @@ builder.Services.AddDbContext<NariNoteDbContext>(
 
 // Register repositories
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Register services
 builder.Services.AddScoped<CreateArticleService>();
+builder.Services.AddScoped<GetUserProfileService>();
 builder.Services.AddScoped<GetArticlesByAuthorService>();
 builder.Services.AddScoped<GetArticleService>();
 
