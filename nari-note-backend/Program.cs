@@ -3,6 +3,7 @@ using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Infrastructure;
 using NariNoteBackend.Infrastructure.Repository;
+using NariNoteBackend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 // Register services
 builder.Services.AddScoped<CreateArticleService>();
 builder.Services.AddScoped<GetArticlesByAuthorService>();
+builder.Services.AddScoped<GetArticleService>();
 
 var app = builder.Build();
 
@@ -26,6 +28,9 @@ var app = builder.Build();
 // {
 //     app.MapOpenApi();
 // }
+
+// グローバル例外ハンドラーを最初に登録（重要）
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 
