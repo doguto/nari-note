@@ -15,11 +15,7 @@ public class DeleteArticleService
     
     public async Task ExecuteAsync(DeleteArticleRequest request)
     {
-        var article = await articleRepository.FindByIdAsync(request.Id);
-        if (article == null)
-        {
-            throw new NotFoundException($"記事ID {request.Id} が見つかりません");
-        }
+        var article = await articleRepository.GetByIdAsync(request.Id);
             
         if (article.AuthorId != request.UserId)
         {

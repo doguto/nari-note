@@ -8,7 +8,7 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly GetUserProfileService getUserProfileService;
+    readonly GetUserProfileService getUserProfileService;
     
     public UsersController(GetUserProfileService getUserProfileService)
     {
@@ -20,7 +20,7 @@ public class UsersController : ControllerBase
     {
         // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var request = new GetUserProfileRequest { Id = id };
-        var response = await this.getUserProfileService.ExecuteAsync(request);
+        var response = await getUserProfileService.ExecuteAsync(request);
         return Ok(response);
     }
 }

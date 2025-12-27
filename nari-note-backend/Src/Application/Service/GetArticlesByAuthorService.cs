@@ -7,7 +7,7 @@ namespace NariNoteBackend.Application.Service;
 
 public class GetArticlesByAuthorService
 {
-    private readonly IArticleRepository articleRepository;
+    readonly IArticleRepository articleRepository;
     
     public GetArticlesByAuthorService(IArticleRepository articleRepository)
     {
@@ -16,7 +16,7 @@ public class GetArticlesByAuthorService
     
     public async Task<GetArticlesByAuthorResponse> ExecuteAsync(GetArticlesByAuthorRequest request)
     {
-        var articles = await this.articleRepository.FindByAuthorAsync(request.AuthorId);
+        var articles = await articleRepository.FindByAuthorAsync(request.AuthorId);
         
         var articleDtos = articles.Select(a => new ArticleDto
         {
