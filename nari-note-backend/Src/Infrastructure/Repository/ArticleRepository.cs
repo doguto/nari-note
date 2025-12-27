@@ -45,18 +45,36 @@ public class ArticleRepository : IArticleRepository
     
     public async Task<Article?> FindByIdAsync(int id)
     {
-        return await this.context.Articles
-            .Include(a => a.Author)
-            .FirstOrDefaultAsync(a => a.Id == id);
+        try
+        {
+            return await this.context.Articles
+                .Include(a => a.Author)
+                .FirstOrDefaultAsync(a => a.Id == id);
+        }
+        catch (System.Exception ex)
+        {
+            throw new InfrastructureException(
+                $"Error occurred while fetching article with ID {id}",
+                ex);
+        }
     }
     
     public async Task<List<Article>> FindByAuthorAsync(int authorId)
     {
-        return await this.context.Articles
-            .Include(a => a.Author)
-            .Where(a => a.AuthorId == authorId)
-            .OrderByDescending(a => a.CreatedAt)
-            .ToListAsync();
+        try
+        {
+            return await this.context.Articles
+                .Include(a => a.Author)
+                .Where(a => a.AuthorId == authorId)
+                .OrderByDescending(a => a.CreatedAt)
+                .ToListAsync();
+        }
+        catch (System.Exception ex)
+        {
+            throw new InfrastructureException(
+                $"Error occurred while fetching articles for author with ID {authorId}",
+                ex);
+        }
     }
     
     public async Task DeleteAsync(int id)

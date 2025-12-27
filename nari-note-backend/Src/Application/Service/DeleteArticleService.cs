@@ -15,7 +15,7 @@ public class DeleteArticleService
     
     public async Task ExecuteAsync(DeleteArticleRequest request)
     {
-        var article = await articleRepository.FindByIdAsync(request.Id);
+        var article = await this.articleRepository.FindByIdAsync(request.Id);
         if (article == null)
         {
             throw new NotFoundException($"記事ID {request.Id} が見つかりません");
@@ -26,6 +26,6 @@ public class DeleteArticleService
             throw new ForbiddenException("この記事を削除する権限がありません");
         }
             
-        await articleRepository.DeleteAsync(request.Id);
+        await this.articleRepository.DeleteAsync(request.Id);
     }
 }
