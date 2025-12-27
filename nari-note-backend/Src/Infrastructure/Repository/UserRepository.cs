@@ -21,7 +21,7 @@ public class UserRepository : IUserRepository
     
     public async Task<User> GetByIdAsync(int id)
     {
-        var user = await context.Users.FindAsync(id);
+        var user = await FindByIdAsync(id);
         
         if (user == null)
         {

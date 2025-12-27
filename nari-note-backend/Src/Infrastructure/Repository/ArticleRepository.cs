@@ -52,9 +52,7 @@ public class ArticleRepository : IArticleRepository
     
     public async Task<Article> GetByIdAsync(int id)
     {
-        var article = await context.Articles
-            .Include(a => a.Author)
-            .FirstOrDefaultAsync(a => a.Id == id);
+        var article = await FindByIdAsync(id);
         
         if (article == null)
         {
