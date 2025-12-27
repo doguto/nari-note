@@ -19,8 +19,8 @@ public class ArticleRepository : IArticleRepository
     {
         try
         {
-            this.context.Articles.Add(article);
-            await this.context.SaveChangesAsync();
+            context.Articles.Add(article);
+            await context.SaveChangesAsync();
             return article;
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
@@ -45,14 +45,14 @@ public class ArticleRepository : IArticleRepository
     
     public async Task<Article?> FindByIdAsync(int id)
     {
-        return await this.context.Articles
+        return await context.Articles
             .Include(a => a.Author)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
     
     public async Task<List<Article>> FindByAuthorAsync(int authorId)
     {
-        return await this.context.Articles
+        return await context.Articles
             .Include(a => a.Author)
             .Where(a => a.AuthorId == authorId)
             .OrderByDescending(a => a.CreatedAt)
@@ -63,11 +63,11 @@ public class ArticleRepository : IArticleRepository
     {
         try
         {
-            var article = await this.context.Articles.FindAsync(id);
+            var article = await context.Articles.FindAsync(id);
             if (article != null)
             {
-                this.context.Articles.Remove(article);
-                await this.context.SaveChangesAsync();
+                context.Articles.Remove(article);
+                await context.SaveChangesAsync();
             }
         }
         catch (DbUpdateConcurrencyException ex)

@@ -15,6 +15,6 @@ public class UserRepository : IUserRepository
     
     public async Task<User?> FindByIdAsync(int id)
     {
-        return await this.context.Users.FindAsync(id);
+        return await context.Users.FindAsync(id);
     }
 }
