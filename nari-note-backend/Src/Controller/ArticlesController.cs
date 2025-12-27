@@ -9,18 +9,21 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class ArticlesController : ControllerBase
 {
-    private readonly CreateArticleService createArticleService;
-    private readonly GetArticlesByAuthorService getArticlesByAuthorService;
-    private readonly GetArticleService getArticleService;
+    readonly CreateArticleService createArticleService;
+    readonly GetArticlesByAuthorService getArticlesByAuthorService;
+    readonly GetArticleService getArticleService;
+    readonly DeleteArticleService deleteArticleService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
         GetArticlesByAuthorService getArticlesByAuthorService,
-        GetArticleService getArticleService)
+        GetArticleService getArticleService,
+        DeleteArticleService deleteArticleService)
     {
         this.createArticleService = createArticleService;
         this.getArticlesByAuthorService = getArticlesByAuthorService;
         this.getArticleService = getArticleService;
+        this.deleteArticleService = deleteArticleService;
     }
     
     [HttpPost]
@@ -55,5 +58,13 @@ public class ArticlesController : ControllerBase
         var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
         var response = await this.getArticlesByAuthorService.ExecuteAsync(request);
         return Ok(response);
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteArticle(int id, [FromQuery] int userId)
+    {
+        var request = new DeleteArticleRequest { Id = id, UserId = userId };
+        await deleteArticleService.ExecuteAsync(request);
+        return NoContent();
     }
 }
