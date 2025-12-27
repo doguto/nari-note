@@ -50,6 +50,20 @@ public class ArticleRepository : IArticleRepository
             .FirstOrDefaultAsync(a => a.Id == id);
     }
     
+    public async Task<Article> GetByIdAsync(int id)
+    {
+        var article = await context.Articles
+            .Include(a => a.Author)
+            .FirstOrDefaultAsync(a => a.Id == id);
+        
+        if (article == null)
+        {
+            throw new NotFoundException($"Article with ID {id} not found");
+        }
+        
+        return article;
+    }
+    
     public async Task<List<Article>> FindByAuthorAsync(int authorId)
     {
         return await context.Articles

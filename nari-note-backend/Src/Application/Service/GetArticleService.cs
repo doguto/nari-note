@@ -15,13 +15,7 @@ public class GetArticleService
 
     public async Task<Article> ExecuteAsync(int id)
     {
-        var article = await articleRepository.FindByIdAsync(id);
-        
-        if (article == null)
-        {
-            throw new NotFoundException($"Article with ID {id} not found");
-        }
-        
+        var article = await articleRepository.GetByIdAsync(id);
         return article;
     }
 }

@@ -5,4 +5,5 @@ namespace NariNoteBackend.Application.Repository;
 public interface IUserRepository
 {
     Task<User?> FindByIdAsync(int id);
+    Task<User> GetByIdAsync(int id);
 }

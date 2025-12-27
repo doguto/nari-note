@@ -16,11 +16,7 @@ public class GetUserProfileService
     
     public async Task<GetUserProfileResponse> ExecuteAsync(GetUserProfileRequest request)
     {
-        var user = await userRepository.FindByIdAsync(request.Id);
-        if (user == null)
-        {
-            throw new NotFoundException($"User with ID {request.Id} not found");
-        }
+        var user = await userRepository.GetByIdAsync(request.Id);
         
         return new GetUserProfileResponse
         {
