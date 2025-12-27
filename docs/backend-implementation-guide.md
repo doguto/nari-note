@@ -45,27 +45,6 @@ public class ArticleService
 }
 ```
 
-#### private変数へのアクセス
-- **必ず `this.` を使用**
-
-```csharp
-// ✅ 正しい例
-public async Task<Article> ExecuteAsync(int id)
-{
-    var article = await this.articleRepository.GetByIdAsync(id);
-    this.logger.LogInformation("Article retrieved: {Id}", id);
-    return article;
-}
-
-// ❌ 間違った例
-public async Task<Article> ExecuteAsync(int id)
-{
-    var article = await articleRepository.GetByIdAsync(id);
-    logger.LogInformation("Article retrieved: {Id}", id);
-    return article;
-}
-```
-
 ### アクセス修飾子
 
 #### privateの省略
@@ -179,7 +158,7 @@ public class ArticlesController : ControllerBase
         }
         
         // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
-        var response = await this.createArticleService.ExecuteAsync(request);
+        var response = await createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
     
@@ -187,7 +166,7 @@ public class ArticlesController : ControllerBase
     public async Task<ActionResult<Article>> GetArticle(int id)
     {
         // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
-        var article = await this.getArticleService.ExecuteAsync(id);
+        var article = await getArticleService.ExecuteAsync(id);
         return Ok(article);
     }
     
@@ -195,7 +174,7 @@ public class ArticlesController : ControllerBase
     public async Task<ActionResult> DeleteArticle(int id, [FromQuery] int userId)
     {
         var request = new DeleteArticleRequest { Id = id, UserId = userId };
-        await this.deleteArticleService.ExecuteAsync(request);
+        await deleteArticleService.ExecuteAsync(request);
         return NoContent();
     }
 }
@@ -253,7 +232,7 @@ public class CreateArticleService
     public async Task<CreateArticleResponse> ExecuteAsync(CreateArticleRequest request)
     {
         // 1. ビジネスロジックの検証
-        var author = await this.userRepository.FindByIdAsync(request.AuthorId);
+        var author = await userRepository.FindByIdAsync(request.AuthorId);
         if (author == null)
         {
             throw new NotFoundException($"Author with ID {request.AuthorId} not found");
@@ -272,7 +251,7 @@ public class CreateArticleService
         };
         
         // 3. Repositoryの呼び出し
-        var created = await this.articleRepository.CreateAsync(article);
+        var created = await articleRepository.CreateAsync(article);
         
         // 4. レスポンスDTOの作成
         return new CreateArticleResponse
@@ -375,8 +354,8 @@ public class ArticleRepository : IArticleRepository
     {
         try
         {
-            this.context.Articles.Add(article);
-            await this.context.SaveChangesAsync();
+            context.Articles.Add(article);
+            await context.SaveChangesAsync();
             return article;
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
@@ -402,14 +381,14 @@ public class ArticleRepository : IArticleRepository
     
     public async Task<Article?> FindByIdAsync(int id)
     {
-        return await this.context.Articles
+        return await context.Articles
             .Include(a => a.Author)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
     
     public async Task<Article> GetByIdAsync(int id)
     {
-        var article = await this.FindByIdAsync(id);
+        var article = await FindByIdAsync(id);
         
         if (article == null)
         {
@@ -421,7 +400,7 @@ public class ArticleRepository : IArticleRepository
     
     public async Task<List<Article>> FindByAuthorAsync(int authorId)
     {
-        return await this.context.Articles
+        return await context.Articles
             .Include(a => a.Author)
             .Where(a => a.AuthorId == authorId)
             .OrderByDescending(a => a.CreatedAt)
@@ -432,11 +411,11 @@ public class ArticleRepository : IArticleRepository
     {
         try
         {
-            var article = await this.context.Articles.FindAsync(id);
+            var article = await context.Articles.FindAsync(id);
             if (article != null)
             {
-                this.context.Articles.Remove(article);
-                await this.context.SaveChangesAsync();
+                context.Articles.Remove(article);
+                await context.SaveChangesAsync();
             }
         }
         catch (DbUpdateConcurrencyException ex)

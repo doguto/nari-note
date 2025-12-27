@@ -27,7 +27,7 @@ public class CreateArticleService
             Author = null! // EF Core handles navigation property via AuthorId
         };
         
-        var created = await this.articleRepository.CreateAsync(article);
+        var created = await articleRepository.CreateAsync(article);
         
         return new CreateArticleResponse
         {
