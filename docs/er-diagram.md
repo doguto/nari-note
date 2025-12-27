@@ -23,6 +23,7 @@ User {
     id integer PK
     name varchar(50)
     profile_image varchar(255)
+    bio varchar(500)
     email varchar(255)
     password_hash varchar(255)
     created_at datetime
