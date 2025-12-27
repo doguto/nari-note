@@ -4,6 +4,17 @@
 
 ## アーキテクチャ関連
 
+### [api-reference.md](./api-reference.md)
+**APIエンドポイントの完全なリファレンス**
+
+**内容:**
+- 全エンドポイントの仕様
+- リクエスト/レスポンス例
+- エラーレスポンス形式
+- curl例
+
+**API仕様を確認する際は、このドキュメントを参照してください。**
+
 ### [architecture.md](./architecture.md)
 バックエンドの基本アーキテクチャ設計
 - レイヤー構成（Controller、Application、Domain、Infrastructure）
@@ -102,6 +113,9 @@
 ### データベース設計を確認する場合
 1. `er-diagram.md` でエンティティ関係を確認
 
+### API仕様を確認する場合
+1. `api-reference.md` で全エンドポイントの仕様を確認
+
 ### コーディング規約を確認する場合
 1. `backend-implementation-guide.md` のコーディング規約セクションを確認
 
@@ -111,10 +125,14 @@
 
 **特に重要なドキュメント:**
 - `backend-implementation-guide.md` - 実装パターンとコーディング規約の完全なガイド ⭐
+- `development-workflow.md` - 開発ワークフローと実践的タスクガイド ⭐
 - `error-handling-strategy.md` - エラーハンドリングの完全なガイド
+- `api-reference.md` - APIエンドポイントの完全なリファレンス
 - `architecture.md` - アーキテクチャの基本方針
 
 **実装の優先順位:**
-1. まず `backend-implementation-guide.md` で全体像を把握
-2. 次に `error-handling-strategy.md` でエラーハンドリングを理解
-3. 必要に応じて `architecture.md` で設計思想を確認
+1. まず `backend-implementation-guide.md` で全体像とコーディング規約を把握
+2. 次に `development-workflow.md` で具体的な開発手順を理解
+3. `error-handling-strategy.md` でエラーハンドリングを理解
+4. 必要に応じて `api-reference.md` で既存のAPI仕様を確認
+5. 必要に応じて `architecture.md` で設計思想を確認
