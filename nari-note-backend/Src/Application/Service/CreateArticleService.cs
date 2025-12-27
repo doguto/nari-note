@@ -7,7 +7,7 @@ namespace NariNoteBackend.Application.Service;
 
 public class CreateArticleService
 {
-    private readonly IArticleRepository articleRepository;
+    readonly IArticleRepository articleRepository;
     
     public CreateArticleService(IArticleRepository articleRepository)
     {
@@ -27,7 +27,7 @@ public class CreateArticleService
             Author = null! // EF Core handles navigation property via AuthorId
         };
         
-        var created = await this.articleRepository.CreateAsync(article);
+        var created = await articleRepository.CreateAsync(article);
         
         return new CreateArticleResponse
         {

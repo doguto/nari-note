@@ -39,7 +39,7 @@ public class ArticlesController : ControllerBase
         }
         
         // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
-        var response = await this.createArticleService.ExecuteAsync(request);
+        var response = await createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
     
@@ -47,7 +47,7 @@ public class ArticlesController : ControllerBase
     public async Task<ActionResult> GetArticle(int id)
     {
         // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
-        var article = await this.getArticleService.ExecuteAsync(id);
+        var article = await getArticleService.ExecuteAsync(id);
         return Ok(article);
     }
     
@@ -56,7 +56,7 @@ public class ArticlesController : ControllerBase
     {
         // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
-        var response = await this.getArticlesByAuthorService.ExecuteAsync(request);
+        var response = await getArticlesByAuthorService.ExecuteAsync(request);
         return Ok(response);
     }
     

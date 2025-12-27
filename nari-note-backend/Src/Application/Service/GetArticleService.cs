@@ -15,7 +15,7 @@ public class GetArticleService
 
     public async Task<Article> ExecuteAsync(int id)
     {
-        var article = await this.articleRepository.FindByIdAsync(id);
+        var article = await articleRepository.FindByIdAsync(id);
         
         if (article == null)
         {
