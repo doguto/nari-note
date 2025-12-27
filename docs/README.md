@@ -58,6 +58,21 @@
 
 **実際の開発作業を行う際は、このドキュメントを参照してください。**
 
+### [testing-guide.md](./testing-guide.md) ⭐ 重要
+**テスト実装の包括的ガイド**
+
+**内容:**
+- テスト戦略（テストピラミッド）
+- テスト環境のセットアップ
+- ユニットテストの実装パターン（Service、Repository）
+- 統合テストの実装パターン（Controller）
+- テストデータ管理（Fixtureパターン）
+- モックの使い方（Moq）
+- テスト実行とCI/CD
+- ベストプラクティス
+
+**テストコードを書く際は、このドキュメントを参照してください。**
+
 ### [er-diagram.md](./er-diagram.md)
 データベースのER図とエンティティ設計
 
@@ -102,13 +117,18 @@
 ### 新規機能を実装する場合
 1. `backend-implementation-guide.md` で実装パターンとコーディング規約を確認 ⭐
 2. `development-workflow.md` で具体的な開発手順を確認 ⭐
-3. `architecture.md` でアーキテクチャの全体像を確認
-4. `error-handling-strategy.md` でエラーハンドリング方針を確認
-5. `error-handling-examples.md` で具体的な実装例を参照
+3. `testing-guide.md` でテストの書き方を確認 ⭐
+4. `architecture.md` でアーキテクチャの全体像を確認
+5. `error-handling-strategy.md` でエラーハンドリング方針を確認
+6. `error-handling-examples.md` で具体的な実装例を参照
 
 ### エラーハンドリングを実装する場合
 1. `error-handling-strategy.md` で詳細な戦略を確認
 2. `error-handling-examples.md` でクイックリファレンスを参照
+
+### テストを実装する場合
+1. `testing-guide.md` でテスト戦略とパターンを確認
+2. 既存のテストコードを参考にする
 
 ### データベース設計を確認する場合
 1. `er-diagram.md` でエンティティ関係を確認
@@ -126,6 +146,7 @@
 **特に重要なドキュメント:**
 - `backend-implementation-guide.md` - 実装パターンとコーディング規約の完全なガイド ⭐
 - `development-workflow.md` - 開発ワークフローと実践的タスクガイド ⭐
+- `testing-guide.md` - テスト実装の包括的ガイド ⭐
 - `error-handling-strategy.md` - エラーハンドリングの完全なガイド
 - `api-reference.md` - APIエンドポイントの完全なリファレンス
 - `architecture.md` - アーキテクチャの基本方針
@@ -133,6 +154,7 @@
 **実装の優先順位:**
 1. まず `backend-implementation-guide.md` で全体像とコーディング規約を把握
 2. 次に `development-workflow.md` で具体的な開発手順を理解
-3. `error-handling-strategy.md` でエラーハンドリングを理解
-4. 必要に応じて `api-reference.md` で既存のAPI仕様を確認
-5. 必要に応じて `architecture.md` で設計思想を確認
+3. `testing-guide.md` でテストの書き方を理解（TDD推奨）
+4. `error-handling-strategy.md` でエラーハンドリングを理解
+5. 必要に応じて `api-reference.md` で既存のAPI仕様を確認
+6. 必要に応じて `architecture.md` で設計思想を確認
