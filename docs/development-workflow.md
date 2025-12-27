@@ -7,7 +7,7 @@
 1. [環境セットアップ](#環境セットアップ)
 2. [新規APIエンドポイントの追加](#新規apiエンドポイントの追加)
 3. [データベーススキーマの変更](#データベーススキーマの変更)
-4. [デバッグとトラブルシューティング](#デバッグとトラブルシューティング)
+4. [便利なコマンド](#便利なコマンド)
 
 ---
 
@@ -79,11 +79,6 @@ dotnet watch run
 
 #### ステップ1: Request/Response DTOの作成
 
-```bash
-# Request DTO作成
-vim nari-note-backend/Src/Application/Dto/Request/UpdateArticleRequest.cs
-```
-
 ```csharp
 using System.ComponentModel.DataAnnotations;
 
@@ -102,11 +97,6 @@ public class UpdateArticleRequest
 }
 ```
 
-```bash
-# Response DTO作成（必要に応じて）
-vim nari-note-backend/Src/Application/Dto/Response/UpdateArticleResponse.cs
-```
-
 ```csharp
 namespace NariNoteBackend.Application.Dto.Response;
 
@@ -118,10 +108,6 @@ public class UpdateArticleResponse
 ```
 
 #### ステップ2: Repository Interfaceにメソッド追加
-
-```bash
-vim nari-note-backend/Src/Application/Repository/IArticleRepository.cs
-```
 
 ```csharp
 public interface IArticleRepository
@@ -136,10 +122,6 @@ public interface IArticleRepository
 ```
 
 #### ステップ3: Repository実装
-
-```bash
-vim nari-note-backend/Src/Infrastructure/Repository/ArticleRepository.cs
-```
 
 ```csharp
 public async Task<Article> UpdateAsync(Article article)
@@ -165,10 +147,6 @@ public async Task<Article> UpdateAsync(Article article)
 ```
 
 #### ステップ4: Serviceの実装
-
-```bash
-vim nari-note-backend/Src/Application/Service/UpdateArticleService.cs
-```
 
 ```csharp
 using NariNoteBackend.Application.Repository;
@@ -221,10 +199,6 @@ public class UpdateArticleService
 
 #### ステップ5: Controllerにエンドポイント追加
 
-```bash
-vim nari-note-backend/Src/Controller/ArticlesController.cs
-```
-
 ```csharp
 [ApiController]
 [Route("api/[controller]")]
@@ -262,10 +236,6 @@ public class ArticlesController : ControllerBase
 
 #### ステップ6: DI登録
 
-```bash
-vim nari-note-backend/Program.cs
-```
-
 ```csharp
 // Register services
 builder.Services.AddScoped<UpdateArticleService>();
@@ -294,10 +264,6 @@ curl -X PUT http://localhost:5243/api/articles/1?userId=1 \
 ### 新しいエンティティの追加
 
 #### ステップ1: Domainエンティティの作成
-
-```bash
-vim nari-note-backend/Src/Domain/Comment.cs
-```
 
 ```csharp
 using System.ComponentModel.DataAnnotations;
@@ -338,10 +304,6 @@ public class Comment
 ```
 
 #### ステップ2: DbContextに追加
-
-```bash
-vim nari-note-backend/Src/Infrastructure/NariNoteDbContext.cs
-```
 
 ```csharp
 public class NariNoteDbContext : DbContext
@@ -401,11 +363,6 @@ dotnet ef migrations remove
 
 #### 例: Articleにview_countカラムを追加
 
-```bash
-# Entityを編集
-vim nari-note-backend/Src/Domain/Article.cs
-```
-
 ```csharp
 public class Article
 {
@@ -421,99 +378,6 @@ dotnet ef migrations add AddViewCountToArticle
 
 # 適用
 dotnet ef database update
-```
-
----
-
-## デバッグとトラブルシューティング
-
-### ログレベルの設定
-
-```bash
-vim nari-note-backend/appsettings.Development.json
-```
-
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning",
-      "Microsoft.EntityFrameworkCore": "Information"
-    }
-  }
-}
-```
-
-### EF Core SQLログの有効化
-
-```bash
-# 環境変数でログレベル変更
-export Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command=Information
-
-dotnet run
-```
-
-### データベース接続の確認
-
-```bash
-# PostgreSQL接続テスト
-psql -h localhost -U postgres -d nari_note
-
-# テーブル一覧
-\dt
-
-# テーブル構造確認
-\d articles
-```
-
-### マイグレーション状態の確認
-
-```bash
-# 適用済みマイグレーション一覧
-dotnet ef migrations list
-
-# データベースの現在の状態
-dotnet ef database update --verbose
-```
-
-### よくあるエラーと解決方法
-
-#### エラー: "A connection was successfully established with the server..."
-
-**原因:** データベースが起動していない
-
-**解決:**
-```bash
-# Docker Compose使用時
-docker-compose up -d postgres
-
-# ローカル環境
-brew services start postgresql@16  # macOS
-sudo systemctl start postgresql    # Linux
-```
-
-#### エラー: "The entity type 'Article' requires a primary key"
-
-**原因:** `[Key]`属性が欠落している
-
-**解決:**
-```csharp
-public class Article
-{
-    [Key]  // これを追加
-    public int Id { get; set; }
-}
-```
-
-#### エラー: "Build failed"
-
-**原因:** コンパイルエラー
-
-**解決:**
-```bash
-# 詳細なエラーメッセージを表示
-dotnet build --verbosity detailed
 ```
 
 ---

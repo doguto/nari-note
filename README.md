@@ -22,25 +22,6 @@ nari-noteは、技術記事の投稿・共有プラットフォームです。
 - **フレームワーク**: Next.js
 - **言語**: TypeScript
 
-## クイックスタート
-
-### Docker Composeを使用する場合（推奨）
-
-```bash
-# プロジェクトルートから
-docker-compose up
-```
-
-- バックエンド: `http://localhost:5243`
-- フロントエンド: `http://localhost:3000`
-- PostgreSQL: `localhost:5432`
-
-### ローカル環境で実行する場合
-
-詳細は各コンポーネントのREADMEを参照してください：
-- [nari-note-backend/README.md](./nari-note-backend/README.md)
-- [nari-note-frontend/README.md](./nari-note-frontend/README.md)
-
 ## ドキュメント
 
 プロジェクトの詳細なドキュメントは [docs](./docs) ディレクトリにあります。
@@ -48,10 +29,8 @@ docker-compose up
 ### バックエンド開発者向け
 - [バックエンド実装ガイド](./docs/backend-implementation-guide.md) ⭐
 - [開発ワークフロー](./docs/development-workflow.md) ⭐
-- [テスト実装ガイド](./docs/testing-guide.md) ⭐
 - [アーキテクチャ](./docs/architecture.md)
 - [エラーハンドリング戦略](./docs/error-handling-strategy.md)
-- [APIリファレンス](./docs/api-reference.md)
 - [ER図](./docs/er-diagram.md)
 
 ### すべてのドキュメント
@@ -65,11 +44,3 @@ docker-compose up
 - 記事へのいいね機能
 - ユーザーフォロー機能
 - 通知機能
-
-## 開発チーム
-
-個人開発プロジェクトです。
-
-## ライセンス
-
-このプロジェクトのライセンスは未定です。
