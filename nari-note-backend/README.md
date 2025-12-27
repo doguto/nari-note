@@ -56,14 +56,44 @@ dotnet watch run
 ```
 nari-note-backend/
 ├── Src/
-│   ├── Controller/        # APIエンドポイント（コントローラー）
-│   ├── Application/        # アプリケーション層（サービス、リポジトリインターフェース）
-│   ├── Domain/            # ドメイン層（エンティティ、ビジネスロジック）
-│   └── Infrastructure/    # インフラストラクチャ層（データベース、外部サービス）
-├── Program.cs             # アプリケーションのエントリーポイント
-├── appsettings.json       # アプリケーション設定
-├── Dockerfile             # Docker設定
-└── nari-note-backend.csproj # プロジェクトファイル
+│   ├── Controller/            # プレゼンテーション層（APIエンドポイント）
+│   │   ├── ArticlesController.cs
+│   │   ├── UsersController.cs
+│   │   └── HealthController.cs
+│   ├── Application/           # アプリケーション層
+│   │   ├── Service/          # ビジネスロジック（API一個につきService一個）
+│   │   │   ├── CreateArticleService.cs
+│   │   │   ├── GetArticleService.cs
+│   │   │   └── DeleteArticleService.cs
+│   │   ├── Repository/       # Repository抽象化（インターフェース）
+│   │   │   ├── IArticleRepository.cs
+│   │   │   └── IUserRepository.cs
+│   │   ├── Dto/              # Data Transfer Objects
+│   │   │   ├── Request/      # リクエストDTO
+│   │   │   └── Response/     # レスポンスDTO
+│   │   └── Exception/        # カスタム例外クラス
+│   │       ├── ApplicationException.cs（基底クラス）
+│   │       ├── NotFoundException.cs
+│   │       ├── ValidationException.cs
+│   │       ├── ConflictException.cs
+│   │       └── InfrastructureException.cs
+│   ├── Domain/                # ドメイン層
+│   │   ├── Article.cs        # エンティティ（EF Coreエンティティ + ドメインロジック）
+│   │   ├── User.cs
+│   │   ├── Tag.cs
+│   │   └── Like.cs
+│   ├── Infrastructure/        # インフラストラクチャ層
+│   │   ├── NariNoteDbContext.cs  # EF Core DbContext
+│   │   └── Repository/       # Repository実装
+│   │       ├── ArticleRepository.cs
+│   │       └── UserRepository.cs
+│   └── Middleware/            # カスタムミドルウェア
+│       └── GlobalExceptionHandlerMiddleware.cs
+├── Migrations/                # Entity Framework Coreマイグレーション
+├── Program.cs                 # アプリケーションのエントリーポイント
+├── appsettings.json          # アプリケーション設定
+├── Dockerfile                # Docker設定
+└── nari-note-backend.csproj  # プロジェクトファイル
 ```
 
 ## API エンドポイント
@@ -73,7 +103,55 @@ nari-note-backend/
 - `GET /health` - アプリケーションの健全性チェック
 - `GET /api/Health` - APIの健全性チェック
 
+### 記事（Articles）
+
+- `POST /api/articles` - 記事を作成
+- `GET /api/articles/{id}` - 記事を取得
+- `GET /api/articles/author/{authorId}` - 著者の記事一覧を取得
+- `DELETE /api/articles/{id}` - 記事を削除
+
+### ユーザー（Users）
+
+- `GET /api/users/{id}` - ユーザープロフィールを取得
+
 ## 開発
+
+### コーディング規約
+
+**詳細は [実装ガイド](/docs/backend-implementation-guide.md) を参照してください**
+
+主要な規約：
+- private変数: アンダースコア無し、キャメルケース、`this.`でアクセス
+- private修飾子: クラスフィールドでは省略
+- 日付時刻: 常に `DateTime.UtcNow` を使用
+
+### アーキテクチャ
+
+レイヤードアーキテクチャ + Repository パターン
+
+```
+Controller → Service → Repository Interface
+                            ↓
+                       Domain Entity
+                            ↑
+                  Repository Implementation
+```
+
+**詳細は以下のドキュメントを参照:**
+- [アーキテクチャ設計](/docs/architecture.md)
+- [実装ガイド](/docs/backend-implementation-guide.md)
+- [エラーハンドリング戦略](/docs/error-handling-strategy.md)
+
+### 新規機能の実装手順
+
+1. **Domain Entity の定義** - `Src/Domain/`
+2. **マイグレーション作成** - `dotnet ef migrations add`
+3. **Repository Interface** - `Src/Application/Repository/`
+4. **Repository 実装** - `Src/Infrastructure/Repository/`
+5. **Request/Response DTO** - `Src/Application/Dto/`
+6. **Service実装** - `Src/Application/Service/`（API一個につきService一個）
+7. **Controller実装** - `Src/Controller/`
+8. **DI登録** - `Program.cs`
 
 ### パッケージの追加
 
@@ -107,7 +185,38 @@ dotnet test
 
 | 変数名 | 説明 | デフォルト値 |
 |--------|------|------------|
-| DATABASE_URL | PostgreSQL接続URL | - |
+| `ConnectionStrings:DefaultConnection` | PostgreSQL接続文字列 | `Host=localhost;Port=5432;Database=nari_note;Username=postgres;Password=postgres` |
+
+### Docker Compose使用時
+`docker-compose.yml`で以下の環境変数が自動設定されます：
+- `DATABASE_URL`: PostgreSQLコンテナへの接続URL
+
+## 主要な技術詳細
+
+### エラーハンドリング
+
+- **グローバル例外ハンドラーミドルウェア**で統一的に処理
+- カスタム例外クラス（`NotFoundException`, `ValidationException`, `ConflictException` 等）
+- Controllerでtry-catchは不要
+- 統一されたエラーレスポンス形式
+
+**詳細:** [エラーハンドリング戦略](/docs/error-handling-strategy.md)
+
+### データベース設計
+
+- PostgreSQL 16 + Entity Framework Core 9.0
+- マイグレーションベースのスキーマ管理
+- リレーションシップ定義（Article-User, Article-Tag, Like, Follow等）
+
+**詳細:** [ER図](/docs/er-diagram.md)
+
+## 関連ドキュメント
+
+- [実装ガイド](/docs/backend-implementation-guide.md) - コーディング規約と実装パターン
+- [アーキテクチャ](/docs/architecture.md) - システムアーキテクチャの設計思想
+- [エラーハンドリング戦略](/docs/error-handling-strategy.md) - エラーハンドリングの包括的ガイド
+- [エラーハンドリング実装例](/docs/error-handling-examples.md) - 実装例とクイックリファレンス
+- [ER図](/docs/er-diagram.md) - データベース設計
 
 ## その他
 
