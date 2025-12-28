@@ -59,7 +59,7 @@ public class SignUpService
         {
             UserId = createdUser.Id,
             SessionKey = sessionKey,
-            ExpiresAt = DateTime.UtcNow.AddHours(24),
+            ExpiresAt = jwtTokenService.GetSessionExpiration(),
             CreatedAt = DateTime.UtcNow,
             User = createdUser
         };

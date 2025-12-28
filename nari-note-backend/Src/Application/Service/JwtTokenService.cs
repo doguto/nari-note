@@ -11,10 +11,20 @@ namespace NariNoteBackend.Application.Service;
 public class JwtTokenService
 {
     readonly IConfiguration configuration;
+    readonly int expirationHours;
     
     public JwtTokenService(IConfiguration configuration)
     {
         this.configuration = configuration;
+        this.expirationHours = int.Parse(configuration["Jwt:ExpirationInHours"] ?? "24");
+    }
+    
+    /// <summary>
+    /// セッションの有効期限を取得する
+    /// </summary>
+    public DateTime GetSessionExpiration()
+    {
+        return DateTime.UtcNow.AddHours(this.expirationHours);
     }
     
     /// <summary>
@@ -22,7 +32,12 @@ public class JwtTokenService
     /// </summary>
     public string GenerateToken(User user)
     {
-        var secret = configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
+        var secret = configuration["Jwt:Secret"];
+        if (string.IsNullOrEmpty(secret) || secret.Length < 32)
+        {
+            throw new InvalidOperationException("JWT Secret must be configured and at least 32 characters long");
+        }
+        
         var issuer = configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
         var audience = configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
         var expirationHours = int.Parse(configuration["Jwt:ExpirationInHours"] ?? "24");

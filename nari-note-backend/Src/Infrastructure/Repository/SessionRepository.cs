@@ -97,12 +97,9 @@ public class SessionRepository : ISessionRepository
     {
         try
         {
-            var sessions = await context.Sessions
+            await context.Sessions
                 .Where(s => s.UserId == userId)
-                .ToListAsync();
-            
-            context.Sessions.RemoveRange(sessions);
-            await context.SaveChangesAsync();
+                .ExecuteDeleteAsync();
         }
         catch (DbUpdateException ex)
         {
@@ -115,12 +112,9 @@ public class SessionRepository : ISessionRepository
     {
         try
         {
-            var expiredSessions = await context.Sessions
+            await context.Sessions
                 .Where(s => s.ExpiresAt <= DateTime.UtcNow)
-                .ToListAsync();
-            
-            context.Sessions.RemoveRange(expiredSessions);
-            await context.SaveChangesAsync();
+                .ExecuteDeleteAsync();
         }
         catch (DbUpdateException ex)
         {
