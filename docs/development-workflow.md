@@ -126,23 +126,10 @@ public interface IArticleRepository
 ```csharp
 public async Task<Article> UpdateAsync(Article article)
 {
-    try
-    {
-        article.UpdatedAt = DateTime.UtcNow;
-        this.context.Articles.Update(article);
-        await this.context.SaveChangesAsync();
-        return article;
-    }
-    catch (DbUpdateConcurrencyException ex)
-    {
-        throw new ConflictException(
-            "The article was modified by another user", ex);
-    }
-    catch (DbUpdateException ex)
-    {
-        throw new InfrastructureException(
-            $"Database error occurred while updating article", ex);
-    }
+    article.UpdatedAt = DateTime.UtcNow;
+    context.Articles.Update(article);
+    await context.SaveChangesAsync();
+    return article;
 }
 ```
 

@@ -33,9 +33,6 @@ nari-noteは、技術記事の投稿・共有プラットフォームです。
 - [エラーハンドリング戦略](./docs/error-handling-strategy.md)
 - [ER図](./docs/er-diagram.md)
 
-### すべてのドキュメント
-[docs/README.md](./docs/README.md) でドキュメント一覧と使い方を確認できます。
-
 ## 主な機能
 
 - ユーザー登録・ログイン

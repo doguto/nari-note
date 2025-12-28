@@ -232,11 +232,7 @@ public class CreateArticleService
     public async Task<CreateArticleResponse> ExecuteAsync(CreateArticleRequest request)
     {
         // 1. ビジネスロジックの検証
-        var author = await userRepository.FindByIdAsync(request.AuthorId);
-        if (author == null)
-        {
-            throw new NotFoundException($"Author with ID {request.AuthorId} not found");
-        }
+        var author = await userRepository.GetByIdAsync(request.AuthorId);
         
         // 2. ドメインオブジェクトの作成
         var article = new Article
@@ -589,85 +585,6 @@ public class CreateArticleResponse
 
 3. **EntityをそのままResponse DTOとして使用可能**
    - シンプルなGETの場合は変換不要
-
----
-
-## 開発ワークフロー
-
-### 1. 新規機能の追加
-
-#### ステップ1: Domainエンティティの定義
-```bash
-# 必要に応じてエンティティを追加・修正
-vim nari-note-backend/Src/Domain/Article.cs
-```
-
-#### ステップ2: マイグレーションの作成
-```bash
-cd nari-note-backend
-dotnet ef migrations add <マイグレーション名>
-dotnet ef database update
-```
-
-#### ステップ3: Repository Interfaceの定義
-```bash
-# Application/Repository に Interface を作成
-vim nari-note-backend/Src/Application/Repository/IArticleRepository.cs
-```
-
-#### ステップ4: Repository実装
-```bash
-# Infrastructure/Repository に実装を作成
-vim nari-note-backend/Src/Infrastructure/Repository/ArticleRepository.cs
-```
-
-#### ステップ5: Request/Response DTOの作成
-```bash
-# Application/Dto/Request, Response を作成
-vim nari-note-backend/Src/Application/Dto/Request/CreateArticleRequest.cs
-vim nari-note-backend/Src/Application/Dto/Response/CreateArticleResponse.cs
-```
-
-#### ステップ6: Serviceの実装
-```bash
-# Application/Service にServiceを作成
-vim nari-note-backend/Src/Application/Service/CreateArticleService.cs
-```
-
-#### ステップ7: Controllerの実装
-```bash
-# Controller にControllerを作成
-vim nari-note-backend/Src/Controller/ArticlesController.cs
-```
-
-#### ステップ8: Program.csにDI登録
-```csharp
-// Repository登録
-builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
-
-// Service登録
-builder.Services.AddScoped<CreateArticleService>();
-```
-
-### 2. ビルドとテスト
-
-```bash
-# ビルド
-dotnet build
-
-# 実行
-dotnet run
-
-# または、ホットリロード
-dotnet watch run
-```
-
-### 3. Docker環境での実行
-
-```bash
-# プロジェクトルートから
-docker-compose up
-```
 
 ---
 
