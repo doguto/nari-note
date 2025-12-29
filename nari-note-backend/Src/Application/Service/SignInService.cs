@@ -25,27 +25,21 @@ public class SignInService
     
     public async Task<AuthResponse> ExecuteAsync(SignInRequest request)
     {
-        // 1. ユーザー名またはメールアドレスでユーザーを検索
         var user = await userRepository.FindByUsernameOrEmailAsync(request.UsernameOrEmail);
         if (user == null)
         {
             throw new UnauthorizedException("ユーザー名またはパスワードが正しくありません");
         }
         
-        // 2. パスワードを検証
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordValid)
         {
             throw new UnauthorizedException("ユーザー名またはパスワードが正しくありません");
         }
         
-        // 3. セッションキーを生成
         var sessionKey = JwtHelper.GenerateSessionKey();
-        
-        // 4. JWTトークンを生成
         var token = jwtHelper.GenerateToken(user, sessionKey);
         
-        // 5. セッションを作成
         var session = new Session
         {
             UserId = user.Id,
@@ -57,11 +51,9 @@ public class SignInService
         
         await sessionRepository.CreateAsync(session);
         
-        // 6. レスポンスを返却
         return new AuthResponse
         {
-            UserId = user.Id,
-            ExpiresAt = session.ExpiresAt
+            UserId = user.Id
         };
     }
 }

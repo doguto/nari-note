@@ -3,6 +3,7 @@ using Npgsql;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Domain;
+using NariNoteBackend.Infrastructure.Constants;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -37,7 +38,8 @@ public class UserRepository : IUserRepository
         try
         {
             return await context.Users
-                .FirstOrDefaultAsync(u => u.Email == email);
+                .Where(u => u.Email == email)
+                .FirstOrDefaultAsync();
         }
         catch (System.Exception ex)
         {
@@ -51,7 +53,8 @@ public class UserRepository : IUserRepository
         try
         {
             return await context.Users
-                .FirstOrDefaultAsync(u => u.Name == usernameOrEmail || u.Email == usernameOrEmail);
+                .Where(u => u.Name == usernameOrEmail || u.Email == usernameOrEmail)
+                .FirstOrDefaultAsync();
         }
         catch (System.Exception ex)
         {
@@ -70,7 +73,7 @@ public class UserRepository : IUserRepository
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
         {
-            if (pgEx.SqlState == "23505") // Unique constraint violation
+            if (pgEx.SqlState == PostgresqlErrorCodes.UniqueViolation)
             {
                 throw new ConflictException("User with this email already exists", ex);
             }

@@ -26,17 +26,11 @@ public class JwtHelper
             configuration["Jwt:ExpirationInHours"] ?? "24");
     }
     
-    /// <summary>
-    /// トークンの有効期限（時間）を取得する
-    /// </summary>
     public int GetExpirationInHours()
     {
         return this.expirationInHours;
     }
     
-    /// <summary>
-    /// JWTトークンを生成する
-    /// </summary>
     public string GenerateToken(User user, string sessionKey)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.secret));
@@ -62,9 +56,6 @@ public class JwtHelper
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
     
-    /// <summary>
-    /// JWTトークンを検証し、Claimsを取得する
-    /// </summary>
     public ClaimsPrincipal? ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -88,19 +79,14 @@ public class JwtHelper
         }
         catch (SecurityTokenException)
         {
-            // JWTトークンが無効な場合
             return null;
         }
         catch (ArgumentException)
         {
-            // トークン形式が不正な場合
             return null;
         }
     }
     
-    /// <summary>
-    /// ランダムなセッションキーを生成する
-    /// </summary>
     public static string GenerateSessionKey()
     {
         var randomBytes = new byte[32];

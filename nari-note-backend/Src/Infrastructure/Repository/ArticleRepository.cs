@@ -3,6 +3,7 @@ using Npgsql;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Domain;
+using NariNoteBackend.Infrastructure.Constants;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -25,16 +26,14 @@ public class ArticleRepository : IArticleRepository
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
         {
-            // DB制約違反を適切な例外に変換
-            if (pgEx.SqlState == "23505") // Unique constraint violation
+            if (pgEx.SqlState == PostgresqlErrorCodes.UniqueViolation)
             {
                 throw new ConflictException("Article with this title already exists", ex);
             }
-            if (pgEx.SqlState == "23503") // Foreign key violation
+            if (pgEx.SqlState == PostgresqlErrorCodes.ForeignKeyViolation)
             {
                 throw new ValidationException("Invalid reference to related entity", null, ex);
             }
-            // その他のDB例外
             throw new InfrastructureException("Database error occurred while creating article", ex);
         }
         catch (DbUpdateConcurrencyException ex)

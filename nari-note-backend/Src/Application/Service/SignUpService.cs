@@ -25,17 +25,14 @@ public class SignUpService
     
     public async Task<AuthResponse> ExecuteAsync(SignUpRequest request)
     {
-        // 1. メールアドレスの重複チェック
         var existingUser = await userRepository.FindByEmailAsync(request.Email);
         if (existingUser != null)
         {
             throw new ConflictException("このメールアドレスは既に使用されています");
         }
         
-        // 2. パスワードをハッシュ化
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
         
-        // 3. ユーザーを作成
         var user = new User
         {
             Name = request.Name,
@@ -47,13 +44,9 @@ public class SignUpService
         
         var createdUser = await userRepository.CreateAsync(user);
         
-        // 4. セッションキーを生成
         var sessionKey = JwtHelper.GenerateSessionKey();
-        
-        // 5. JWTトークンを生成
         var token = jwtHelper.GenerateToken(createdUser, sessionKey);
         
-        // 6. セッションを作成
         var session = new Session
         {
             UserId = createdUser.Id,
@@ -65,11 +58,9 @@ public class SignUpService
         
         await sessionRepository.CreateAsync(session);
         
-        // 7. レスポンスを返却
         return new AuthResponse
         {
-            UserId = createdUser.Id,
-            ExpiresAt = session.ExpiresAt
+            UserId = createdUser.Id
         };
     }
 }

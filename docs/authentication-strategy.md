@@ -703,8 +703,7 @@ public class Session
 **Response (200 OK)**
 ```json
 {
-  "userId": 1,
-  "expiresAt": "2025-12-29T10:00:00Z"
+  "userId": 1
 }
 ```
 
@@ -749,8 +748,7 @@ public class Session
 **Response (200 OK)**
 ```json
 {
-  "userId": 1,
-  "expiresAt": "2025-12-29T10:00:00Z"
+  "userId": 1
 }
 ```
 
