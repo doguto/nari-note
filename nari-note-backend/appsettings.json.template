@@ -1,0 +1,15 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "Jwt": {
+    "Secret": "REPLACE_WITH_YOUR_SECRET_KEY_MINIMUM_32_CHARACTERS_OR_USE_ENVIRONMENT_VARIABLE",
+    "Issuer": "nari-note-api",
+    "Audience": "nari-note-client",
+    "ExpirationInHours": 24
+  }
+}

@@ -27,6 +27,14 @@ public class JwtHelper
     }
     
     /// <summary>
+    /// トークンの有効期限（時間）を取得する
+    /// </summary>
+    public int GetExpirationInHours()
+    {
+        return this.expirationInHours;
+    }
+    
+    /// <summary>
     /// JWTトークンを生成する
     /// </summary>
     public string GenerateToken(User user, string sessionKey)
@@ -78,8 +86,14 @@ public class JwtHelper
             
             return principal;
         }
-        catch
+        catch (SecurityTokenException)
         {
+            // JWTトークンが無効な場合
+            return null;
+        }
+        catch (ArgumentException)
+        {
+            // トークン形式が不正な場合
             return null;
         }
     }

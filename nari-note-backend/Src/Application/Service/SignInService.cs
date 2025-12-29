@@ -50,7 +50,7 @@ public class SignInService
         {
             UserId = user.Id,
             SessionKey = sessionKey,
-            ExpiresAt = DateTime.UtcNow.AddHours(24),
+            ExpiresAt = DateTime.UtcNow.AddHours(jwtHelper.GetExpirationInHours()),
             CreatedAt = DateTime.UtcNow,
             User = user
         };
