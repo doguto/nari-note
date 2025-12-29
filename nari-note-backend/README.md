@@ -108,7 +108,7 @@ nari-note-backend/
 - `POST /api/auth/signup` - ユーザー登録
 - `POST /api/auth/signin` - ログイン
 
-**詳細:** [認証API使用ガイド](/docs/authentication-api-guide.md)
+**詳細:** [認証戦略ドキュメント](/docs/authentication-strategy.md#apiエンドポイント)
 
 ### 記事（Articles）
 
@@ -227,8 +227,7 @@ dotnet test
 - [アーキテクチャ](/docs/architecture.md) - システムアーキテクチャの設計思想
 - [エラーハンドリング戦略](/docs/error-handling-strategy.md) - エラーハンドリングの包括的ガイド
 - [エラーハンドリング実装例](/docs/error-handling-examples.md) - 実装例とクイックリファレンス
-- [認証戦略](/docs/authentication-strategy.md) - 認証システムの設計と実装
-- [認証API使用ガイド](/docs/authentication-api-guide.md) - 認証APIの使用方法
+- [認証戦略](/docs/authentication-strategy.md) - 認証システムの設計と実装（API使用方法を含む）
 - [ER図](/docs/er-diagram.md) - データベース設計
 
 ## その他

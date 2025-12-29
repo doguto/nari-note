@@ -25,18 +25,18 @@ public class SignInService
     
     public async Task<AuthResponse> ExecuteAsync(SignInRequest request)
     {
-        // 1. メールアドレスでユーザーを検索
-        var user = await userRepository.FindByEmailAsync(request.Email);
+        // 1. ユーザー名またはメールアドレスでユーザーを検索
+        var user = await userRepository.FindByUsernameOrEmailAsync(request.UsernameOrEmail);
         if (user == null)
         {
-            throw new UnauthorizedException("メールアドレスまたはパスワードが正しくありません");
+            throw new UnauthorizedException("ユーザー名またはパスワードが正しくありません");
         }
         
         // 2. パスワードを検証
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordValid)
         {
-            throw new UnauthorizedException("メールアドレスまたはパスワードが正しくありません");
+            throw new UnauthorizedException("ユーザー名またはパスワードが正しくありません");
         }
         
         // 3. セッションキーを生成
@@ -60,10 +60,7 @@ public class SignInService
         // 6. レスポンスを返却
         return new AuthResponse
         {
-            Token = token,
             UserId = user.Id,
-            Email = user.Email,
-            Name = user.Name,
             ExpiresAt = session.ExpiresAt
         };
     }

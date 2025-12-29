@@ -68,10 +68,7 @@ public class SignUpService
         // 7. レスポンスを返却
         return new AuthResponse
         {
-            Token = token,
             UserId = createdUser.Id,
-            Email = createdUser.Email,
-            Name = createdUser.Name,
             ExpiresAt = session.ExpiresAt
         };
     }

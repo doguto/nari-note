@@ -46,6 +46,20 @@ public class UserRepository : IUserRepository
         }
     }
     
+    public async Task<User?> FindByUsernameOrEmailAsync(string usernameOrEmail)
+    {
+        try
+        {
+            return await context.Users
+                .FirstOrDefaultAsync(u => u.Name == usernameOrEmail || u.Email == usernameOrEmail);
+        }
+        catch (System.Exception ex)
+        {
+            throw new InfrastructureException(
+                $"Error occurred while fetching user with username or email {usernameOrEmail}", ex);
+        }
+    }
+    
     public async Task<User> CreateAsync(User user)
     {
         try

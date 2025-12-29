@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Controller;
 
@@ -21,36 +22,26 @@ public class AuthController : ControllerBase
     }
     
     [HttpPost("signup")]
+    [ValidateModelState]
     public async Task<ActionResult<AuthResponse>> SignUp([FromBody] SignUpRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
-            );
-            return BadRequest(new { errors });
-        }
-        
-        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var response = await signUpService.ExecuteAsync(request);
+        
+        // HttpOnly CookieにトークンをセットするロジックはSignUpServiceに委譲
+        // 将来的にCookie対応を追加する際はここで設定
+        
         return Ok(response);
     }
     
     [HttpPost("signin")]
+    [ValidateModelState]
     public async Task<ActionResult<AuthResponse>> SignIn([FromBody] SignInRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
-            );
-            return BadRequest(new { errors });
-        }
-        
-        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var response = await signInService.ExecuteAsync(request);
+        
+        // HttpOnly CookieにトークンをセットするロジックはSignInServiceに委譲
+        // 将来的にCookie対応を追加する際はここで設定
+        
         return Ok(response);
     }
 }
