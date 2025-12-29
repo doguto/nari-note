@@ -1,5 +1,6 @@
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Infrastructure.Helper;
+using NariNoteBackend.Infrastructure.Constants;
 
 namespace NariNoteBackend.Middleware;
 
@@ -31,7 +32,7 @@ public class AuthenticationMiddleware
         var authHeader = context.Request.Headers["Authorization"].ToString();
         if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
         {
-            context.Response.StatusCode = 401;
+            context.Response.StatusCode = HttpStatusCodes.Unauthorized;
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 
@@ -47,11 +48,10 @@ public class AuthenticationMiddleware
         
         var token = authHeader.Substring("Bearer ".Length).Trim();
         
-        // JWTトークンを検証
         var principal = jwtHelper.ValidateToken(token);
         if (principal == null)
         {
-            context.Response.StatusCode = 401;
+            context.Response.StatusCode = HttpStatusCodes.Unauthorized;
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 
@@ -65,11 +65,10 @@ public class AuthenticationMiddleware
             return;
         }
         
-        // セッションキーを取得
         var sessionKeyClaim = principal.FindFirst("sessionKey");
         if (sessionKeyClaim == null)
         {
-            context.Response.StatusCode = 401;
+            context.Response.StatusCode = HttpStatusCodes.Unauthorized;
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 
@@ -83,11 +82,10 @@ public class AuthenticationMiddleware
             return;
         }
         
-        // セッションが有効かチェック
         var session = await sessionRepository.FindBySessionKeyAsync(sessionKeyClaim.Value);
         if (session == null || session.ExpiresAt < DateTime.UtcNow)
         {
-            context.Response.StatusCode = 401;
+            context.Response.StatusCode = HttpStatusCodes.Unauthorized;
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 

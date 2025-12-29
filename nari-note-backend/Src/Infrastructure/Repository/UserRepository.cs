@@ -38,8 +38,7 @@ public class UserRepository : IUserRepository
         try
         {
             return await context.Users
-                .Where(u => u.Email == email)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
         catch (System.Exception ex)
         {
@@ -53,8 +52,7 @@ public class UserRepository : IUserRepository
         try
         {
             return await context.Users
-                .Where(u => u.Name == usernameOrEmail || u.Email == usernameOrEmail)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(u => u.Name == usernameOrEmail || u.Email == usernameOrEmail);
         }
         catch (System.Exception ex)
         {
