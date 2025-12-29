@@ -6,10 +6,11 @@
 
 1. [検討した認証方式](#検討した認証方式)
 2. [選定結果と理由](#選定結果と理由)
-3. [アーキテクチャ](#アーキテクチャ)
-4. [実装詳細](#実装詳細)
-5. [セキュリティ対策](#セキュリティ対策)
-6. [APIエンドポイント](#apiエンドポイント)
+3. [XSS（クロスサイトスクリプティング）対策](#xssクロスサイトスクリプティング対策)
+4. [アーキテクチャ](#アーキテクチャ)
+5. [実装詳細](#実装詳細)
+6. [セキュリティ対策](#セキュリティ対策)
+7. [APIエンドポイント](#apiエンドポイント)
 
 ---
 
@@ -55,8 +56,9 @@
 - ❌ トークンの即座の無効化が困難（有効期限まで有効）
 - ❌ トークンサイズが大きい
 - ❌ リフレッシュトークンの実装が必要
+- ⚠️ **XSS攻撃のリスク**（localStorageに保存する場合）
 
-**採用判断**: ✅ **採用**（ハイブリッド方式で欠点を補完）
+**採用判断**: ✅ **採用**（ハイブリッド方式とHttpOnly Cookieで欠点を補完）
 
 ### 3. OAuth 2.0 / OpenID Connect
 
@@ -118,9 +120,9 @@
 
 ## 選定結果と理由
 
-### 採用方式: **JWTベース認証 + セッション管理のハイブリッド方式**
+### 採用方式: **JWTベース認証 + セッション管理のハイブリッド方式 + HttpOnly Cookie**
 
-nari-noteでは、**JWT（JSON Web Token）**を主要な認証方式として採用し、セッション管理を組み合わせたハイブリッド方式を実装します。
+nari-noteでは、**JWT（JSON Web Token）**を主要な認証方式として採用し、セッション管理を組み合わせ、さらに**XSS対策としてHttpOnly Cookieを使用**したハイブリッド方式を実装します。
 
 #### 選定理由
 
@@ -140,9 +142,160 @@ nari-noteでは、**JWT（JSON Web Token）**を主要な認証方式として�
    - データベースにセッションレコードを保持することで、トークンの即座の無効化を実現
    - ログアウト機能やセキュリティインシデント時の全セッション削除が可能
 
-5. **将来の拡張性**
+5. **XSS攻撃への対策**
+   - **HttpOnly Cookie**を使用してJWTトークンを保存
+   - JavaScriptからトークンへのアクセスを防止
+   - CSRF対策も併用
+
+6. **将来の拡張性**
    - OAuth 2.0（Google認証等）との統合が容易
    - リフレッシュトークンの実装も可能
+
+---
+
+## XSS（クロスサイトスクリプティング）対策
+
+### 問題: JWTトークンのXSS脆弱性
+
+JWTトークンをブラウザで扱う際、以下のような保存方法にはXSS攻撃のリスクがあります：
+
+#### ❌ **脆弱な保存方法**
+
+1. **localStorage / sessionStorage**
+   ```javascript
+   // 危険な例
+   localStorage.setItem('token', jwtToken);
+   ```
+   - JavaScriptから自由にアクセス可能
+   - XSS攻撃によりトークンが盗まれる
+   - 攻撃者がトークンを取得してなりすまし可能
+
+2. **通常のCookie（HttpOnly なし）**
+   ```javascript
+   // 危険な例
+   document.cookie = `token=${jwtToken}`;
+   ```
+   - JavaScriptから読み取り可能
+   - XSS攻撃でトークンが漏洩
+
+### 解決策: HttpOnly Cookie + 追加のセキュリティ対策
+
+#### ✅ **推奨する実装方式**
+
+1. **HttpOnly Cookie の使用**
+   
+   サーバー側でJWTトークンをHttpOnly Cookieに設定：
+   
+   ```csharp
+   // C# (ASP.NET Core) での実装例
+   Response.Cookies.Append("authToken", jwtToken, new CookieOptions
+   {
+       HttpOnly = true,        // JavaScriptからアクセス不可
+       Secure = true,          // HTTPS のみ
+       SameSite = SameSiteMode.Strict,  // CSRF対策
+       MaxAge = TimeSpan.FromHours(24)
+   });
+   ```
+   
+   **メリット:**
+   - ✅ JavaScriptからトークンにアクセスできない
+   - ✅ XSS攻撃でトークンが盗まれない
+   - ✅ ブラウザが自動的にCookieを送信
+
+2. **SameSite属性によるCSRF対策**
+   
+   ```csharp
+   SameSite = SameSiteMode.Strict  // または Lax
+   ```
+   
+   - `Strict`: 同一サイトからのリクエストのみCookieを送信
+   - `Lax`: GET リクエストなど一部のクロスサイトリクエストを許可
+   - CSRF攻撃を防止
+
+3. **Secure属性の設定**
+   
+   ```csharp
+   Secure = true
+   ```
+   
+   - HTTPS通信のみでCookieを送信
+   - 中間者攻撃（MITM）を防止
+
+4. **短い有効期限 + リフレッシュトークン**
+   
+   - アクセストークン: 15分〜1時間程度の短い有効期限
+   - リフレッシュトークン: より長い有効期限（7日〜30日）
+   - トークンが漏洩した場合の影響を最小化
+
+### トークン保存方式の比較
+
+| 保存方式 | XSS脆弱性 | CSRF脆弱性 | モバイル対応 | 推奨度 |
+|---------|----------|-----------|------------|--------|
+| localStorage | ❌ 高リスク | ✅ 安全 | ✅ 容易 | ❌ 非推奨 |
+| sessionStorage | ❌ 高リスク | ✅ 安全 | ✅ 容易 | ❌ 非推奨 |
+| 通常のCookie | ❌ 高リスク | ❌ 高リスク | ⚠️ 複雑 | ❌ 非推奨 |
+| **HttpOnly Cookie** | ✅ **安全** | ⚠️ 要対策 | ⚠️ 複雑 | ✅ **推奨** |
+| HttpOnly + SameSite | ✅ **安全** | ✅ **安全** | ⚠️ 複雑 | ✅ **最推奨** |
+
+### その他のXSS対策
+
+1. **Content Security Policy (CSP)**
+   
+   HTTPヘッダーでスクリプトの実行を制限：
+   
+   ```csharp
+   app.Use(async (context, next) =>
+   {
+       context.Response.Headers.Add("Content-Security-Policy", 
+           "default-src 'self'; script-src 'self'");
+       await next();
+   });
+   ```
+
+2. **入力のサニタイゼーション**
+   
+   - ユーザー入力を常にエスケープ
+   - HTMLタグの無効化
+   - ASP.NET Core の Razor Pages は自動エスケープ機能あり
+
+3. **出力のエンコーディング**
+   
+   - HTML、JavaScript、URL等のコンテキストに応じた適切なエンコーディング
+   - `HtmlEncoder.Default.Encode()` などを使用
+
+4. **定期的なセキュリティ監査**
+   
+   - 依存ライブラリの脆弱性チェック
+   - OWASP Top 10 に基づくセキュリティレビュー
+
+### モバイルアプリケーションの場合
+
+モバイルアプリ（iOS, Android）では、ブラウザのCookieが使用できないため、以下の方式を採用：
+
+1. **Secure Storage の使用**
+   - iOS: Keychain
+   - Android: EncryptedSharedPreferences
+   - トークンを暗号化して保存
+
+2. **Certificate Pinning**
+   - HTTPS通信のセキュリティ強化
+   - 中間者攻撃を防止
+
+### 実装時の注意点
+
+1. **Webアプリケーション（ブラウザ）**
+   - ✅ HttpOnly Cookie + SameSite属性を使用
+   - ✅ HTTPS必須
+   - ✅ CSP ヘッダー設定
+
+2. **モバイルアプリケーション**
+   - ✅ Secure Storage に保存
+   - ✅ Certificate Pinning 実装
+   - ⚠️ HttpOnly Cookie は使用不可（代替手段を使用）
+
+3. **API間通信（サーバー間）**
+   - ✅ Authorization ヘッダーでトークン送信
+   - ✅ 相互TLS認証の検討
 
 ### パスワードハッシュ化アルゴリズムの検討
 
@@ -394,20 +547,39 @@ public class Session
 - ✅ **HMAC SHA256署名**: トークンの改ざんを防止
 - ✅ **有効期限設定**: デフォルト24時間で自動失効
 - ✅ **Secret鍵の環境変数管理**: `appsettings.json` で設定（本番環境では環境変数推奨）
+- ✅ **HttpOnly Cookie**: XSS攻撃からトークンを保護（詳細は[XSS対策](#xssクロスサイトスクリプティング対策)を参照）
 
-### 3. セッションセキュリティ
+### 3. XSS（クロスサイトスクリプティング）対策
+
+- ✅ **HttpOnly Cookie**: JavaScriptからトークンへのアクセスを防止
+- ✅ **Secure属性**: HTTPS通信のみでCookieを送信
+- ✅ **SameSite属性**: CSRF攻撃を防止（Strict または Lax）
+- ✅ **Content Security Policy (CSP)**: スクリプト実行を制限
+- ✅ **入力のサニタイゼーション**: ユーザー入力を常にエスケープ
+- ✅ **出力のエンコーディング**: コンテキストに応じた適切なエンコーディング
+
+詳細は[XSS対策](#xssクロスサイトスクリプティング対策)セクションを参照してください。
+
+### 4. CSRF（クロスサイトリクエストフォージェリ）対策
+
+- ✅ **SameSite Cookie属性**: クロスサイトからのCookie送信を制限
+- ✅ **CSRF トークン**: 重要な操作には追加のトークン検証（将来実装予定）
+- ✅ **Origin/Referer ヘッダー検証**: リクエスト元の検証
+
+### 5. セッションセキュリティ
 
 - ✅ **セッションキーのランダム生成**: 32バイトのランダムバイト列をBase64エンコード
 - ✅ **有効期限管理**: 期限切れセッションは自動削除可能（`DeleteExpiredSessionsAsync`）
 - ✅ **ユーザー単位での全セッション削除**: セキュリティインシデント時に対応可能
 
-### 4. API セキュリティ
+### 6. API セキュリティ
 
 - ✅ **入力バリデーション**: Data Annotationsによる厳格なバリデーション
 - ✅ **エラーメッセージの汎用化**: 認証エラー時は「メールアドレスまたはパスワードが正しくありません」と表示（アカウント列挙攻撃対策）
 - ✅ **HTTPS強制**: `UseHttpsRedirection()` で暗号化通信を強制
+- ✅ **Rate Limiting**: ブルートフォース攻撃対策（将来実装予定）
 
-### 5. データベースセキュリティ
+### 7. データベースセキュリティ
 
 - ✅ **Unique制約**: メールアドレスとセッションキーに一意性制約
 - ✅ **外部キー制約**: データ整合性の保証
