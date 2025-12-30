@@ -1,6 +1,6 @@
+using System.Net;
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Infrastructure.Helper;
-using NariNoteBackend.Infrastructure.Constants;
 
 namespace NariNoteBackend.Middleware;
 
@@ -32,7 +32,7 @@ public class AuthenticationMiddleware
         var authHeader = context.Request.Headers["Authorization"].ToString();
         if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
         {
-            context.Response.StatusCode = HttpStatusCodes.Unauthorized;
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 
@@ -51,7 +51,7 @@ public class AuthenticationMiddleware
         var principal = jwtHelper.ValidateToken(token);
         if (principal == null)
         {
-            context.Response.StatusCode = HttpStatusCodes.Unauthorized;
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 
@@ -68,7 +68,7 @@ public class AuthenticationMiddleware
         var sessionKeyClaim = principal.FindFirst("sessionKey");
         if (sessionKeyClaim == null)
         {
-            context.Response.StatusCode = HttpStatusCodes.Unauthorized;
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 
@@ -85,7 +85,7 @@ public class AuthenticationMiddleware
         var session = await sessionRepository.FindBySessionKeyAsync(sessionKeyClaim.Value);
         if (session == null || session.ExpiresAt < DateTime.UtcNow)
         {
-            context.Response.StatusCode = HttpStatusCodes.Unauthorized;
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 
