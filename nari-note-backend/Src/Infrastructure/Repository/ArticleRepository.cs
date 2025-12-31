@@ -45,6 +45,8 @@ public class ArticleRepository : IArticleRepository
     {
         return await context.Articles
             .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
     
