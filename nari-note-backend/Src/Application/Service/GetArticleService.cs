@@ -25,8 +25,8 @@ public class GetArticleService
             Body = article.Body,
             AuthorId = article.AuthorId,
             AuthorName = article.Author?.Name ?? "",
-            Tags = article.ArticleTags.Select(at => at.Tag.Name).ToList(),
-            LikeCount = article.Likes.Count,
+            Tags = article.ArticleTags.Select(at => at.Tag?.Name ?? string.Empty).Where(name => !string.IsNullOrEmpty(name)).ToList(),
+            LikeCount = article.Likes?.Count ?? 0,
             IsPublished = article.IsPublished,
             CreatedAt = article.CreatedAt,
             UpdatedAt = article.UpdatedAt
