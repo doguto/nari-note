@@ -3,7 +3,6 @@ using Npgsql;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Domain;
-using NariNoteBackend.Infrastructure.Constants;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -26,11 +25,11 @@ public class ArticleRepository : IArticleRepository
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
         {
-            if (pgEx.SqlState == PostgresqlErrorCodes.UniqueViolation)
+            if (pgEx.SqlState == PostgresErrorCodes.UniqueViolation)
             {
                 throw new ConflictException("Article with this title already exists", ex);
             }
-            if (pgEx.SqlState == PostgresqlErrorCodes.ForeignKeyViolation)
+            if (pgEx.SqlState == PostgresErrorCodes.ForeignKeyViolation)
             {
                 throw new ValidationException("Invalid reference to related entity", null, ex);
             }

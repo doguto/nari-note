@@ -3,7 +3,6 @@ using Npgsql;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Domain;
-using NariNoteBackend.Infrastructure.Constants;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -71,7 +70,7 @@ public class UserRepository : IUserRepository
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
         {
-            if (pgEx.SqlState == PostgresqlErrorCodes.UniqueViolation)
+            if (pgEx.SqlState == PostgresErrorCodes.UniqueViolation)
             {
                 throw new ConflictException("User with this email already exists", ex);
             }
