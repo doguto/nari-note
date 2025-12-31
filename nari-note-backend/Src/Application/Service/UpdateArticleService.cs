@@ -22,9 +22,14 @@ public class UpdateArticleService
         if (article.AuthorId != request.UserId)
             throw new ForbiddenException("この記事を更新する権限がありません");
         
-        if (request.Title != null) article.Title = request.Title;
-        if (request.Body != null) article.Body = request.Body;
-        if (request.IsPublished != null) article.IsPublished = request.IsPublished.Value;
+        // Only update non-null values
+        if (!string.IsNullOrEmpty(request.Title)) 
+            article.Title = request.Title;
+        if (!string.IsNullOrEmpty(request.Body)) 
+            article.Body = request.Body;
+        if (request.IsPublished != null) 
+            article.IsPublished = request.IsPublished.Value;
+        
         article.UpdatedAt = DateTime.UtcNow;
         
         await this.articleRepository.UpdateAsync(article);
