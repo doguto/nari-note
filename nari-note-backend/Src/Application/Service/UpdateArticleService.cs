@@ -29,6 +29,7 @@ public class UpdateArticleService
             article.Body = request.Body;
         if (request.IsPublished != null) 
             article.IsPublished = request.IsPublished.Value;
+        // TODO: Tags更新は将来の実装で対応予定
         
         article.UpdatedAt = DateTime.UtcNow;
         
