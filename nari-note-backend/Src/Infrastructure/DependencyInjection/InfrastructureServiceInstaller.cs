@@ -1,15 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Repository;
-using NariNoteBackend.Application.Service;
-using NariNoteBackend.Infrastructure;
 using NariNoteBackend.Infrastructure.Helper;
 using NariNoteBackend.Infrastructure.Repository;
 
-namespace NariNoteBackend;
+namespace NariNoteBackend.Infrastructure.DependencyInjection;
 
-public static class AppInstaller
+public static class InfrastructureServiceInstaller
 {
-    public static IServiceCollection AddAppServices(
+    public static void AddInfrastructureServices(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -25,17 +23,5 @@ public static class AppInstaller
 
         // Register helpers
         services.AddSingleton<JwtHelper>();
-
-        // Register services
-        services.AddScoped<CreateArticleService>();
-        services.AddScoped<DeleteArticleService>();
-        services.AddScoped<GetArticlesByAuthorService>();
-        services.AddScoped<GetArticleService>();
-        services.AddScoped<GetUserProfileService>();
-        services.AddScoped<SignUpService>();
-        services.AddScoped<SignInService>();
-        services.AddScoped<HealthCheckService>();
-
-        return services;
     }
 }
