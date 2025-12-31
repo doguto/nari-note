@@ -1,6 +1,5 @@
-using NariNoteBackend.Application.DependencyInjection;
+using NariNoteBackend;
 using NariNoteBackend.Application.Service;
-using NariNoteBackend.Infrastructure.DependencyInjection;
 using NariNoteBackend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,11 +8,8 @@ builder.Services.AddControllers();
 // builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
 
-// Register infrastructure services (DbContext, Repositories, Helpers)
-builder.Services.AddInfrastructureServices(builder.Configuration);
-
-// Register application services
-builder.Services.AddApplicationServices();
+// Register all application services
+builder.Services.AddAppServices(builder.Configuration);
 
 var app = builder.Build();
 
