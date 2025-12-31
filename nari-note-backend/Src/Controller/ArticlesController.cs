@@ -11,17 +11,20 @@ namespace NariNoteBackend.Controller;
 public class ArticlesController : ControllerBase
 {
     readonly CreateArticleService createArticleService;
+    readonly UpdateArticleService updateArticleService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticleService getArticleService;
     readonly DeleteArticleService deleteArticleService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
+        UpdateArticleService updateArticleService,
         GetArticlesByAuthorService getArticlesByAuthorService,
         GetArticleService getArticleService,
         DeleteArticleService deleteArticleService)
     {
         this.createArticleService = createArticleService;
+        this.updateArticleService = updateArticleService;
         this.getArticlesByAuthorService = getArticlesByAuthorService;
         this.getArticleService = getArticleService;
         this.deleteArticleService = deleteArticleService;
@@ -40,6 +43,16 @@ public class ArticlesController : ControllerBase
     {
         var article = await getArticleService.ExecuteAsync(id);
         return Ok(article);
+    }
+    
+    [HttpPut("{id}")]
+    [ValidateModelState]
+    public async Task<ActionResult> UpdateArticle(int id, [FromQuery] int userId, [FromBody] UpdateArticleRequest request)
+    {
+        request.Id = id;
+        request.UserId = userId;
+        var response = await updateArticleService.ExecuteAsync(request);
+        return Ok(response);
     }
     
     [HttpGet("author/{authorId}")]

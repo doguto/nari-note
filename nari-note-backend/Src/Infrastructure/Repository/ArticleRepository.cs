@@ -69,6 +69,28 @@ public class ArticleRepository : IArticleRepository
             .ToListAsync();
     }
     
+    public async Task<Article> UpdateAsync(Article article)
+    {
+        try
+        {
+            context.Articles.Update(article);
+            await context.SaveChangesAsync();
+            return article;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConflictException("The article was modified by another user", ex);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
+        {
+            if (pgEx.SqlState == PostgresErrorCodes.ForeignKeyViolation)
+            {
+                throw new ValidationException("Invalid reference to related entity", null, ex);
+            }
+            throw new InfrastructureException("Database error occurred while updating article", ex);
+        }
+    }
+    
     public async Task DeleteAsync(int id)
     {
         try

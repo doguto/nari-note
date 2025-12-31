@@ -8,5 +8,6 @@ public interface IArticleRepository
     Task<List<Article>> FindByAuthorAsync(int authorId);
     Task<Article?> FindByIdAsync(int id);
     Task<Article> GetByIdAsync(int id);
+    Task<Article> UpdateAsync(Article article);
     Task DeleteAsync(int id);
 }
