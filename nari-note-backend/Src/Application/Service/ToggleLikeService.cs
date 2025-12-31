@@ -36,8 +36,8 @@ public class ToggleLikeService
             { 
                 UserId = request.UserId, 
                 ArticleId = request.ArticleId,
-                User = null!,
-                Article = null!
+                User = null!, // EF Core handles navigation property via UserId
+                Article = null! // EF Core handles navigation property via ArticleId
             });
             isLiked = true;
         }
