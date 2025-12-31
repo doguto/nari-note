@@ -64,7 +64,22 @@ public class ArticleRepository : IArticleRepository
     {
         return await context.Articles
             .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(a => a.Likes)
             .Where(a => a.AuthorId == authorId)
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync();
+    }
+    
+    public async Task<List<Article>> FindByTagAsync(string tagName)
+    {
+        return await context.Articles
+            .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(a => a.Likes)
+            .Where(a => a.ArticleTags.Any(at => at.Tag.Name == tagName))
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
