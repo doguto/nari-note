@@ -12,17 +12,20 @@ public class ArticlesController : ControllerBase
 {
     readonly CreateArticleService createArticleService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
+    readonly GetArticlesByTagService getArticlesByTagService;
     readonly GetArticleService getArticleService;
     readonly DeleteArticleService deleteArticleService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
         GetArticlesByAuthorService getArticlesByAuthorService,
+        GetArticlesByTagService getArticlesByTagService,
         GetArticleService getArticleService,
         DeleteArticleService deleteArticleService)
     {
         this.createArticleService = createArticleService;
         this.getArticlesByAuthorService = getArticlesByAuthorService;
+        this.getArticlesByTagService = getArticlesByTagService;
         this.getArticleService = getArticleService;
         this.deleteArticleService = deleteArticleService;
     }
@@ -47,6 +50,19 @@ public class ArticlesController : ControllerBase
     {
         var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
         var response = await getArticlesByAuthorService.ExecuteAsync(request);
+        return Ok(response);
+    }
+    
+    [HttpGet("tag/{tagName}")]
+    public async Task<ActionResult<GetArticlesByTagResponse>> GetArticlesByTag(string tagName)
+    {
+        if (string.IsNullOrWhiteSpace(tagName))
+        {
+            return BadRequest(new { message = "Tag name cannot be empty" });
+        }
+        
+        var request = new GetArticlesByTagRequest { TagName = tagName };
+        var response = await getArticlesByTagService.ExecuteAsync(request);
         return Ok(response);
     }
     

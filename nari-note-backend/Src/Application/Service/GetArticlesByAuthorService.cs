@@ -25,6 +25,8 @@ public class GetArticlesByAuthorService
             Body = a.Body,
             AuthorId = a.AuthorId,
             AuthorName = a.Author.Name,
+            Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
+            LikeCount = a.Likes.Count,
             IsPublished = a.IsPublished,
             CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
