@@ -79,7 +79,7 @@ public class ArticleRepository : IArticleRepository
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
-            .Where(a => a.ArticleTags.Any(at => at.Tag.Name == tagName))
+            .Where(a => a.ArticleTags.Any(at => EF.Functions.ILike(at.Tag.Name, tagName)))
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
