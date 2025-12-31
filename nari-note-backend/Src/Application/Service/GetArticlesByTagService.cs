@@ -20,7 +20,6 @@ public class GetArticlesByTagService
         
         return new GetArticlesByTagResponse
         {
-            TagName = request.TagName,
             Articles = articles.Select(a => new ArticleDto 
             { 
                 Id = a.Id,
@@ -33,8 +32,7 @@ public class GetArticlesByTagService
                 IsPublished = a.IsPublished,
                 CreatedAt = a.CreatedAt,
                 UpdatedAt = a.UpdatedAt
-            }).ToList(),
-            TotalCount = articles.Count
+            }).ToList()
         };
     }
 }
