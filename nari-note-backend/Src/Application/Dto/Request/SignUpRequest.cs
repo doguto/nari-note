@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using NariNoteBackend.Application.Validation;
 
 namespace NariNoteBackend.Application.Dto.Request;
 
@@ -16,5 +17,6 @@ public class SignUpRequest
     [Required(ErrorMessage = "パスワードは必須です")]
     [MinLength(8, ErrorMessage = "パスワードは8文字以上で入力してください")]
     [MaxLength(255, ErrorMessage = "パスワードは255文字以内で入力してください")]
+    [StrongPassword]
     public required string Password { get; set; }
 }
