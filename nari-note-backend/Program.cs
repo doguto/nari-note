@@ -1,9 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using NariNoteBackend.Application.Repository;
+using NariNoteBackend.Application.DependencyInjection;
 using NariNoteBackend.Application.Service;
-using NariNoteBackend.Infrastructure;
-using NariNoteBackend.Infrastructure.Repository;
-using NariNoteBackend.Infrastructure.Helper;
+using NariNoteBackend.Infrastructure.DependencyInjection;
 using NariNoteBackend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,26 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
-builder.Services.AddDbContext<NariNoteDbContext>(
-    options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
 
-// Register repositories
-builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+// Register infrastructure services (DbContext, Repositories, Helpers)
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// Register helpers
-builder.Services.AddSingleton<JwtHelper>();
-
-// Register services
-builder.Services.AddScoped<CreateArticleService>();
-builder.Services.AddScoped<DeleteArticleService>();
-builder.Services.AddScoped<GetArticlesByAuthorService>();
-builder.Services.AddScoped<GetArticleService>();
-builder.Services.AddScoped<GetUserProfileService>();
-builder.Services.AddScoped<SignUpService>();
-builder.Services.AddScoped<SignInService>();
+// Register application services
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
