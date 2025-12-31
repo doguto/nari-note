@@ -5,11 +5,9 @@
       "Microsoft.AspNetCore": "Warning"
     }
   },
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=mydatabase;Username=myuser;Password=mypassword"
-  },
+  "AllowedHosts": "*",
   "Jwt": {
-    "Secret": "development-secret-key-for-testing-only-minimum-32-chars-required",
+    "Secret": "REPLACE_WITH_YOUR_SECRET_KEY_MINIMUM_32_CHARACTERS_OR_USE_ENVIRONMENT_VARIABLE",
     "Issuer": "nari-note-api",
     "Audience": "nari-note-client",
     "ExpirationInHours": 24

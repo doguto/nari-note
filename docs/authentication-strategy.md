@@ -695,20 +695,39 @@ public class Session
 }
 ```
 
+**バリデーション**:
+- `name`: 必須、最大50文字
+- `email`: 必須、有効なメールアドレス形式、最大255文字
+- `password`: 必須、最小8文字、最大255文字
+
 **Response (200 OK)**
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "userId": 1,
-  "email": "yamada@example.com",
-  "name": "山田太郎",
-  "expiresAt": "2025-12-29T10:00:00Z"
+  "userId": 1
 }
 ```
 
 **エラーレスポンス**
 - `400 Bad Request`: バリデーションエラー
+  ```json
+  {
+    "errors": {
+      "Email": ["有効なメールアドレスを入力してください"],
+      "Password": ["パスワードは8文字以上で入力してください"]
+    }
+  }
+  ```
 - `409 Conflict`: メールアドレス重複
+  ```json
+  {
+    "error": {
+      "code": "CONFLICT",
+      "message": "このメールアドレスは既に使用されています",
+      "timestamp": "2025-12-29T13:00:00Z",
+      "path": "/api/auth/signup"
+    }
+  }
+  ```
 
 ### POST /api/auth/signin
 
@@ -717,25 +736,96 @@ public class Session
 **Request Body**
 ```json
 {
-  "email": "yamada@example.com",
+  "usernameOrEmail": "yamada@example.com",
   "password": "securePassword123"
 }
 ```
 
+**バリデーション**:
+- `usernameOrEmail`: 必須、ユーザー名またはメールアドレス
+- `password`: 必須
+
 **Response (200 OK)**
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "userId": 1,
-  "email": "yamada@example.com",
-  "name": "山田太郎",
-  "expiresAt": "2025-12-29T10:00:00Z"
+  "userId": 1
 }
 ```
 
 **エラーレスポンス**
 - `400 Bad Request`: バリデーションエラー
-- `401 Unauthorized`: 認証失敗（メールアドレスまたはパスワード不正）
+  ```json
+  {
+    "errors": {
+      "UsernameOrEmail": ["ユーザー名またはメールアドレスは必須です"]
+    }
+  }
+  ```
+- `401 Unauthorized`: 認証失敗
+  ```json
+  {
+    "error": {
+      "code": "UNAUTHORIZED",
+      "message": "ユーザー名またはパスワードが正しくありません",
+      "timestamp": "2025-12-29T13:00:00Z",
+      "path": "/api/auth/signin"
+    }
+  }
+  ```
+
+### 認証が必要なAPIの使用方法
+
+SignUp/SignInで取得したトークンは、Cookieに`authToken`として自動的に保存されます。
+ブラウザは自動的にこのCookieを後続のリクエストに含めるため、クライアント側で特別な処理は不要です。
+
+**Cookieの設定**:
+- HttpOnly: true（JavaScriptからアクセス不可）
+- Secure: true（HTTPS通信のみ）
+- SameSite: Strict（CSRF対策）
+- MaxAge: 24時間（設定可能）
+
+**認証エラーレスポンス（401 Unauthorized）**:
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "認証が必要です",
+    "timestamp": "2025-12-29T13:00:00Z",
+    "path": "/api/articles/1"
+  }
+}
+```
+
+### テスト用コマンド例（curl）
+
+#### SignUp
+```bash
+curl -X POST http://localhost:5243/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  -d '{
+    "name": "山田太郎",
+    "email": "yamada@example.com",
+    "password": "securePassword123"
+  }'
+```
+
+#### SignIn
+```bash
+curl -X POST http://localhost:5243/api/auth/signin \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  -d '{
+    "usernameOrEmail": "yamada@example.com",
+    "password": "securePassword123"
+  }'
+```
+
+#### 認証が必要なAPIへのアクセス
+```bash
+curl -X GET http://localhost:5243/api/articles/1 \
+  -b cookies.txt
+```
 
 ---
 

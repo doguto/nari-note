@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Controller;
 
@@ -27,18 +28,9 @@ public class ArticlesController : ControllerBase
     }
     
     [HttpPost]
+    [ValidateModelState]
     public async Task<ActionResult> CreateArticle([FromBody] CreateArticleRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
-            );
-            return BadRequest(new CreateArticleBadRequestResponse { Errors = errors });
-        }
-        
-        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var response = await createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
@@ -46,7 +38,6 @@ public class ArticlesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult> GetArticle(int id)
     {
-        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var article = await getArticleService.ExecuteAsync(id);
         return Ok(article);
     }
@@ -54,7 +45,6 @@ public class ArticlesController : ControllerBase
     [HttpGet("author/{authorId}")]
     public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(int authorId)
     {
-        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
         var response = await getArticlesByAuthorService.ExecuteAsync(request);
         return Ok(response);
