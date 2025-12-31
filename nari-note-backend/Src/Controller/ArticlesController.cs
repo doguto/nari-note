@@ -14,17 +14,20 @@ public class ArticlesController : ControllerBase
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticleService getArticleService;
     readonly DeleteArticleService deleteArticleService;
+    readonly ToggleLikeService toggleLikeService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
         GetArticlesByAuthorService getArticlesByAuthorService,
         GetArticleService getArticleService,
-        DeleteArticleService deleteArticleService)
+        DeleteArticleService deleteArticleService,
+        ToggleLikeService toggleLikeService)
     {
         this.createArticleService = createArticleService;
         this.getArticlesByAuthorService = getArticlesByAuthorService;
         this.getArticleService = getArticleService;
         this.deleteArticleService = deleteArticleService;
+        this.toggleLikeService = toggleLikeService;
     }
     
     [HttpPost]
@@ -56,5 +59,14 @@ public class ArticlesController : ControllerBase
         var request = new DeleteArticleRequest { Id = id, UserId = userId };
         await deleteArticleService.ExecuteAsync(request);
         return NoContent();
+    }
+    
+    [HttpPost("{id}/like")]
+    [ValidateModelState]
+    public async Task<ActionResult> ToggleLike(int id, [FromBody] ToggleLikeRequest request)
+    {
+        request.ArticleId = id;
+        var response = await this.toggleLikeService.ExecuteAsync(request);
+        return Ok(response);
     }
 }
