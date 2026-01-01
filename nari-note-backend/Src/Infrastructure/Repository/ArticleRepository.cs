@@ -93,6 +93,56 @@ public class ArticleRepository : IArticleRepository
         }
     }
     
+    public async Task UpdateArticleTagsAsync(int articleId, List<string> tagNames)
+    {
+        try
+        {
+            // Remove existing ArticleTags
+            var existingArticleTags = await context.ArticleTags
+                .Where(at => at.ArticleId == articleId)
+                .ToListAsync();
+            context.ArticleTags.RemoveRange(existingArticleTags);
+            
+            // Add new tags
+            foreach (var tagName in tagNames)
+            {
+                // Get or create tag
+                var tag = await context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+                if (tag == null)
+                {
+                    tag = new Tag
+                    {
+                        Name = tagName,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    context.Tags.Add(tag);
+                    await context.SaveChangesAsync(); // Save to get the Tag ID
+                }
+                
+                // Create ArticleTag association
+                var articleTag = new ArticleTag
+                {
+                    ArticleId = articleId,
+                    TagId = tag.Id,
+                    CreatedAt = DateTime.UtcNow,
+                    Article = null!, // EF Core will handle this
+                    Tag = null! // EF Core will handle this
+                };
+                context.ArticleTags.Add(articleTag);
+            }
+            
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
+        {
+            if (pgEx.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                throw new ConflictException("Duplicate tag association", ex);
+            }
+            throw new InfrastructureException("Database error occurred while updating article tags", ex);
+        }
+    }
+    
     public async Task DeleteAsync(int id)
     {
         try

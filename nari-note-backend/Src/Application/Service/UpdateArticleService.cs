@@ -16,8 +16,7 @@ public class UpdateArticleService
     
     public async Task<UpdateArticleResponse> ExecuteAsync(UpdateArticleRequest request)
     {
-        var article = await this.articleRepository.FindByIdAsync(request.Id)
-            ?? throw new NotFoundException($"記事ID {request.Id} が見つかりません");
+        var article = await this.articleRepository.GetByIdAsync(request.Id);
             
         if (article.AuthorId != request.UserId)
             throw new ForbiddenException("この記事を更新する権限がありません");
@@ -29,20 +28,28 @@ public class UpdateArticleService
             article.Body = request.Body;
         if (request.IsPublished != null) 
             article.IsPublished = request.IsPublished.Value;
-        // TODO: Tags更新は将来の実装で対応予定
         
         article.UpdatedAt = DateTime.UtcNow;
         
         await this.articleRepository.UpdateAsync(article);
         
+        // Update tags if provided
+        if (request.Tags != null)
+        {
+            await this.articleRepository.UpdateArticleTagsAsync(article.Id, request.Tags);
+        }
+        
+        // Reload article to get updated tags
+        var updatedArticle = await this.articleRepository.GetByIdAsync(request.Id);
+        
         return new UpdateArticleResponse
         {
-            Id = article.Id,
-            Title = article.Title,
-            Body = article.Body,
-            Tags = article.ArticleTags.Select(at => at.Tag.Name).ToList(),
-            IsPublished = article.IsPublished,
-            UpdatedAt = article.UpdatedAt
+            Id = updatedArticle.Id,
+            Title = updatedArticle.Title,
+            Body = updatedArticle.Body,
+            Tags = updatedArticle.ArticleTags.Select(at => at.Tag.Name).ToList(),
+            IsPublished = updatedArticle.IsPublished,
+            UpdatedAt = updatedArticle.UpdatedAt
         };
     }
 }
