@@ -20,6 +20,7 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<IArticleRepository, ArticleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
+        services.AddScoped<ILikeRepository, LikeRepository>();
 
         // Register helpers
         services.AddSingleton<JwtHelper>();

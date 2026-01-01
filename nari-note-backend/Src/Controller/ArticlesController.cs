@@ -8,26 +8,29 @@ namespace NariNoteBackend.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ArticlesController : ControllerBase
+public class ArticlesController : ApplicationController
 {
     readonly CreateArticleService createArticleService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticlesByTagService getArticlesByTagService;
     readonly GetArticleService getArticleService;
     readonly DeleteArticleService deleteArticleService;
+    readonly ToggleLikeService toggleLikeService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
         GetArticlesByAuthorService getArticlesByAuthorService,
         GetArticlesByTagService getArticlesByTagService,
         GetArticleService getArticleService,
-        DeleteArticleService deleteArticleService)
+        DeleteArticleService deleteArticleService,
+        ToggleLikeService toggleLikeService)
     {
         this.createArticleService = createArticleService;
         this.getArticlesByAuthorService = getArticlesByAuthorService;
         this.getArticlesByTagService = getArticlesByTagService;
         this.getArticleService = getArticleService;
         this.deleteArticleService = deleteArticleService;
+        this.toggleLikeService = toggleLikeService;
     }
     
     [HttpPost]
@@ -73,5 +76,16 @@ public class ArticlesController : ControllerBase
         var request = new DeleteArticleRequest { Id = id, UserId = userId };
         await deleteArticleService.ExecuteAsync(request);
         return NoContent();
+    }
+    
+    [HttpPost("{id}/like")]
+    public async Task<ActionResult> ToggleLike(int id)
+    {
+        var request = new ToggleLikeRequest 
+        { 
+            ArticleId = id
+        };
+        var response = await this.toggleLikeService.ExecuteAsync(UserId, request);
+        return Ok(response);
     }
 }
