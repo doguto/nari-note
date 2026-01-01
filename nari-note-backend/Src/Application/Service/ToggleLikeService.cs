@@ -17,11 +17,11 @@ public class ToggleLikeService
         this.articleRepository = articleRepository;
     }
     
-    public async Task<ToggleLikeResponse> ExecuteAsync(ToggleLikeRequest request)
+    public async Task<ToggleLikeResponse> ExecuteAsync(int userId, ToggleLikeRequest request)
     {
         var article = await this.articleRepository.GetByIdAsync(request.ArticleId);
         
-        var existing = await this.likeRepository.FindByUserAndArticleAsync(request.UserId, request.ArticleId);
+        var existing = await this.likeRepository.FindByUserAndArticleAsync(userId, request.ArticleId);
         bool isLiked;
         
         if (existing != null)
@@ -33,7 +33,7 @@ public class ToggleLikeService
         {
             await this.likeRepository.CreateAsync(new Like 
             { 
-                UserId = request.UserId, 
+                UserId = userId, 
                 ArticleId = request.ArticleId,
                 User = null!,
                 Article = null!

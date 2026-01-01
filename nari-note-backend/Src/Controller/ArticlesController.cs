@@ -83,10 +83,9 @@ public class ArticlesController : BaseController
     {
         var request = new ToggleLikeRequest 
         { 
-            ArticleId = id,
-            UserId = AuthenticatedUserId
+            ArticleId = id
         };
-        var response = await this.toggleLikeService.ExecuteAsync(request);
+        var response = await this.toggleLikeService.ExecuteAsync(UserId, request);
         return Ok(response);
     }
 }
