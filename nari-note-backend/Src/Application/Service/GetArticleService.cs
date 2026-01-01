@@ -1,5 +1,6 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
 
 namespace NariNoteBackend.Application.Service;
@@ -13,10 +14,13 @@ public class GetArticleService
         this.articleRepository = articleRepository;
     }
 
-    public async Task<GetArticleResponse?> ExecuteAsync(GetArticleRequest request)
+    public async Task<GetArticleResponse> ExecuteAsync(GetArticleRequest request)
     {
         var article = await this.articleRepository.FindByIdAsync(request.Id);
-        if (article == null) return null;
+        if (article == null)
+        {
+            throw new NotFoundException($"Article with ID {request.Id} not found");
+        }
         
         return new GetArticleResponse
         {

@@ -40,12 +40,6 @@ public class ArticlesController : ControllerBase
     {
         var request = new GetArticleRequest { Id = id };
         var response = await this.getArticleService.ExecuteAsync(request);
-        
-        if (response == null)
-        {
-            return NotFound(new GetArticleNotFoundResponse { ArticleId = id });
-        }
-        
         return Ok(response);
     }
     
