@@ -23,7 +23,7 @@ public class Article : EntityBase
     public bool IsPublished { get; set; } = false;
 
     // Navigation Properties
-    public required User Author { get; set; }
+    public User Author { get; set; }
     public List<ArticleTag> ArticleTags { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
 

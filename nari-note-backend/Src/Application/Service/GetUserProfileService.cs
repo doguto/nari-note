@@ -17,7 +17,7 @@ public class GetUserProfileService
     public async Task<GetUserProfileResponse> ExecuteAsync(GetUserProfileRequest request)
     {
         var user = await userRepository.GetByIdAsync(request.Id);
-        
+
         return new GetUserProfileResponse
         {
             Id = user.Id,

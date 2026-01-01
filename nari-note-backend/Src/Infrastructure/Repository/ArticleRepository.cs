@@ -50,19 +50,15 @@ public class ArticleRepository : IArticleRepository
             .Include(a => a.Likes)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
-    
+
     public async Task<Article> GetByIdAsync(int id)
     {
         var article = await FindByIdAsync(id);
-        
-        if (article == null)
-        {
-            throw new NotFoundException($"Article with ID {id} not found");
-        }
-        
+        if (article == null) throw new NotFoundException($"記事{id}が存在しません");
+
         return article;
     }
-    
+
     public async Task<List<Article>> FindByAuthorAsync(int authorId)
     {
         return await context.Articles
@@ -86,7 +82,7 @@ public class ArticleRepository : IArticleRepository
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
-    
+
     public async Task<Article> UpdateAsync(Article article, List<string>? tagNames = null)
     {
         try
@@ -162,7 +158,7 @@ public class ArticleRepository : IArticleRepository
             throw new InfrastructureException("Database error occurred while updating article", ex);
         }
     }
-    
+
     public async Task DeleteAsync(int id)
     {
         try

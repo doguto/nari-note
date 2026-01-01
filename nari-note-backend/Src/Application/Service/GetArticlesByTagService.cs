@@ -16,8 +16,8 @@ public class GetArticlesByTagService
     
     public async Task<GetArticlesByTagResponse> ExecuteAsync(GetArticlesByTagRequest request)
     {
-        var articles = await this.articleRepository.FindByTagAsync(request.TagName);
-        
+        var articles = await articleRepository.FindByTagAsync(request.TagName);
+
         return new GetArticlesByTagResponse
         {
             Articles = articles.Select(a => new ArticleDto 

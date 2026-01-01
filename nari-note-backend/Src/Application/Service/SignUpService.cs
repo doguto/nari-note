@@ -26,33 +26,27 @@ public class SignUpService
     public async Task<AuthResponse> ExecuteAsync(SignUpRequest request)
     {
         var existingUser = await userRepository.FindByEmailAsync(request.Email);
-        if (existingUser != null)
-        {
-            throw new ConflictException("このメールアドレスは既に使用されています");
-        }
-        
+        if (existingUser != null) throw new ConflictException("このメールアドレスは既に使用されています");
+
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        
+
         var user = new User
         {
             Name = request.Name,
             Email = request.Email,
             PasswordHash = passwordHash,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
         };
-        
+
         var createdUser = await userRepository.CreateAsync(user);
-        
+
         var sessionKey = JwtHelper.GenerateSessionKey();
         var token = jwtHelper.GenerateToken(createdUser, sessionKey);
-        
+
         var session = new Session
         {
             UserId = createdUser.Id,
             SessionKey = sessionKey,
             ExpiresAt = DateTime.UtcNow.AddHours(jwtHelper.GetExpirationInHours()),
-            CreatedAt = DateTime.UtcNow,
             User = createdUser
         };
         
