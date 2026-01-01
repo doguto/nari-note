@@ -8,7 +8,7 @@ namespace NariNoteBackend.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ArticlesController : BaseController
+public class ArticlesController : ApplicationController
 {
     readonly CreateArticleService createArticleService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;

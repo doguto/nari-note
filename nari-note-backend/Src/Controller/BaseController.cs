@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NariNoteBackend.Controller;
 
-public abstract class BaseController : ControllerBase
+public abstract class ApplicationController : ControllerBase
 {
     protected int UserId => (int)HttpContext.Items["UserId"]!;
 }
