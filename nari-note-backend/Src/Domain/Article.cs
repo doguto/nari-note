@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NariNoteBackend.Domain;
 
-public class Article
+public class Article : EntityBase
 {
     [Key]
     public int Id { get; set; }
@@ -21,15 +21,6 @@ public class Article
     public required string Body { get; set; }
 
     public bool IsPublished { get; set; } = false;
-
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-
-    public Article()
-    {
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-    }
 
     // Navigation Properties
     public required User Author { get; set; }

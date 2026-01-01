@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace NariNoteBackend.Domain;
 
 [Index(nameof(Email), IsUnique = true)]
-public class User
+public class User : EntityBase
 {
     [Key]
     public int Id { get; set; }
@@ -26,15 +26,6 @@ public class User
     [Required]
     [MaxLength(255)]
     public required string PasswordHash { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-
-    public User()
-    {
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-    }
 
     // Navigation Properties
     public List<Article> Articles { get; set; } = new();

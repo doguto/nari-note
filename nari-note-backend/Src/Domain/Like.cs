@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace NariNoteBackend.Domain;
 
 [Index(nameof(UserId), nameof(ArticleId), IsUnique = true)]
-public class Like
+public class Like : EntityBase
 {
     [Key]
     public int Id { get; set; }
@@ -18,12 +18,6 @@ public class Like
     [ForeignKey("Article")]
     public int ArticleId { get; set; }
 
-    public DateTime CreatedAt { get; set; }
-
-    public Like()
-    {
-        CreatedAt = DateTime.UtcNow;
-    }
 
     // Navigation Properties
     public required User User { get; set; }

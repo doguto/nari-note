@@ -11,6 +11,7 @@ namespace NariNoteBackend.Controller;
 public class ArticlesController : ApplicationController
 {
     readonly CreateArticleService createArticleService;
+    readonly UpdateArticleService updateArticleService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticlesByTagService getArticlesByTagService;
     readonly GetArticleService getArticleService;
@@ -19,6 +20,7 @@ public class ArticlesController : ApplicationController
     
     public ArticlesController(
         CreateArticleService createArticleService,
+        UpdateArticleService updateArticleService,
         GetArticlesByAuthorService getArticlesByAuthorService,
         GetArticlesByTagService getArticlesByTagService,
         GetArticleService getArticleService,
@@ -26,6 +28,7 @@ public class ArticlesController : ApplicationController
         ToggleLikeService toggleLikeService)
     {
         this.createArticleService = createArticleService;
+        this.updateArticleService = updateArticleService;
         this.getArticlesByAuthorService = getArticlesByAuthorService;
         this.getArticlesByTagService = getArticlesByTagService;
         this.getArticleService = getArticleService;
@@ -46,6 +49,15 @@ public class ArticlesController : ApplicationController
     {
         var request = new GetArticleRequest { Id = id };
         var response = await this.getArticleService.ExecuteAsync(request);
+        return Ok(response);
+    }
+    
+    [HttpPut("{id}")]
+    [ValidateModelState]
+    public async Task<ActionResult> UpdateArticle(int id, [FromBody] UpdateArticleRequest request)
+    {
+        request.Id = id;
+        var response = await updateArticleService.ExecuteAsync(UserId, request);
         return Ok(response);
     }
     

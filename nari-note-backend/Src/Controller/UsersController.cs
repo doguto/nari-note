@@ -6,15 +6,15 @@ namespace NariNoteBackend.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController : ControllerBase
+public class UsersController : ApplicationController
 {
     readonly GetUserProfileService getUserProfileService;
-    
+
     public UsersController(GetUserProfileService getUserProfileService)
     {
         this.getUserProfileService = getUserProfileService;
     }
-    
+
     [HttpGet("{id}")]
     public async Task<ActionResult> GetUserProfile(int id)
     {

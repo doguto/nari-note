@@ -8,6 +8,7 @@ public static class ApplicationServiceInstaller
     {
         // Register services
         services.AddScoped<CreateArticleService>();
+        services.AddScoped<UpdateArticleService>();
         services.AddScoped<DeleteArticleService>();
         services.AddScoped<GetArticlesByAuthorService>();
         services.AddScoped<GetArticlesByTagService>();
