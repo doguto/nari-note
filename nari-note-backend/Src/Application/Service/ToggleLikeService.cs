@@ -19,8 +19,7 @@ public class ToggleLikeService
     
     public async Task<ToggleLikeResponse> ExecuteAsync(ToggleLikeRequest request)
     {
-        var article = await this.articleRepository.FindByIdAsync(request.ArticleId)
-            ?? throw new NotFoundException($"記事ID {request.ArticleId} が見つかりません");
+        var article = await this.articleRepository.GetByIdAsync(request.ArticleId);
         
         var existing = await this.likeRepository.FindByUserAndArticleAsync(request.UserId, request.ArticleId);
         bool isLiked;
@@ -36,8 +35,8 @@ public class ToggleLikeService
             { 
                 UserId = request.UserId, 
                 ArticleId = request.ArticleId,
-                User = null!, // EF Core handles navigation property via UserId
-                Article = null! // EF Core handles navigation property via ArticleId
+                User = null!,
+                Article = null!
             });
             isLiked = true;
         }
@@ -47,8 +46,6 @@ public class ToggleLikeService
         return new ToggleLikeResponse
         {
             IsLiked = isLiked,
-            ArticleId = request.ArticleId,
-            UserId = request.UserId,
             CurrentLikeCount = currentCount
         };
     }

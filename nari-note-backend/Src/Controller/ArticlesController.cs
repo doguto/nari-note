@@ -62,10 +62,19 @@ public class ArticlesController : ControllerBase
     }
     
     [HttpPost("{id}/like")]
-    [ValidateModelState]
-    public async Task<ActionResult> ToggleLike(int id, [FromBody] ToggleLikeRequest request)
+    public async Task<ActionResult> ToggleLike(int id)
     {
-        request.ArticleId = id;
+        var userId = (int?)HttpContext.Items["UserId"];
+        if (userId == null)
+        {
+            return Unauthorized(new { message = "認証が必要です" });
+        }
+        
+        var request = new ToggleLikeRequest 
+        { 
+            ArticleId = id,
+            UserId = userId.Value
+        };
         var response = await this.toggleLikeService.ExecuteAsync(request);
         return Ok(response);
     }
