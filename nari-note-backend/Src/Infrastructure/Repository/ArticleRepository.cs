@@ -134,8 +134,8 @@ public class ArticleRepository : IArticleRepository
                         ArticleId = article.Id,
                         TagId = tag.Id,
                         CreatedAt = DateTime.UtcNow,
-                        Article = null!, // EF Core will handle this
-                        Tag = null! // EF Core will handle this
+                        Article = article,
+                        Tag = tag
                     }).ToList();
                     
                     context.ArticleTags.AddRange(articleTags);
