@@ -1,103 +1,161 @@
-import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gradient-to-b from-[#f5f3e8] to-[#e8e4d0]">
+      {/* ヘッダー */}
+      <header className="bg-[#f5f3e8] border-b border-[#d4cdb3] shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-[#88b04b] rounded-lg flex items-center justify-center text-white font-bold">
+              な
+            </div>
+            <span className="text-xl font-bold text-[#2d3e1f]">なりノート</span>
+          </div>
+          
+          <nav className="hidden md:flex items-center gap-8">
+            <Link href="/" className="text-[#2d3e1f] hover:text-[#88b04b] font-medium border-b-2 border-[#88b04b] pb-1">
+              ホーム
+            </Link>
+            <Link href="/posts" className="text-[#555] hover:text-[#88b04b]">
+              記事発見
+            </Link>
+            <Link href="/submit" className="text-[#555] hover:text-[#88b04b]">
+              貢献する
+            </Link>
+          </nav>
+          
+          <div className="flex items-center gap-4">
+            <button className="px-4 py-2 text-[#2d3e1f] hover:text-[#88b04b]">
+              ログイン
+            </button>
+            <Link href="/debug" className="px-4 py-2 bg-[#88b04b] text-white rounded-lg hover:bg-[#769939] transition-colors">
+              API Debug
+            </Link>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </header>
+
+      {/* ヒーローセクション */}
+      <section className="max-w-7xl mx-auto px-4 py-16 text-center">
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#2d3e1f] mb-4" style={{ fontFamily: 'serif' }}>
+            持続の裁判、ソノビビュー、自我記。
+          </h1>
+          <p className="text-2xl md:text-3xl text-[#555] mb-8" style={{ fontFamily: 'serif' }}>
+            知識分全全を譲しよ。う
+          </p>
+        </div>
+        
+        <Link href="/debug" className="inline-block px-8 py-3 bg-[#88b04b] text-white rounded-lg hover:bg-[#769939] transition-colors font-medium text-lg">
+          新規記事を作成
+        </Link>
+      </section>
+
+      {/* メインコンテンツ */}
+      <section className="max-w-7xl mx-auto px-4 pb-16">
+        <div className="flex gap-8">
+          {/* 記事一覧 */}
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-[#2d3e1f] mb-6">新着記事</h2>
+            
+            <div className="space-y-4">
+              {/* 記事カード */}
+              {[
+                {
+                  title: "角坊わ具隊陣記",
+                  author: "【角弛別師全額】",
+                  stats: "101 2:3 -490",
+                  date: "202-1 1.105 11",
+                  image: "🎮"
+                },
+                {
+                  title: "第2細目読記・全一記工中一郭",
+                  author: "【情河調續記】",
+                  stats: "101 22.3 -430",
+                  date: "202-1 4.105 12",
+                  image: "🎮"
+                },
+                {
+                  title: "序始の僧担盖術",
+                  author: "【辯哪課墜坐小登含】",
+                  stats: "101 2:3 -490",
+                  date: "202-1 4.105 11",
+                  image: "🎮"
+                },
+                {
+                  title: "序皮章題担結柄金部",
+                  author: "【関発祖墜低】",
+                  stats: "101 22.3 -430",
+                  date: "202-1 4.105 11",
+                  image: "🎮"
+                }
+              ].map((article, index) => (
+                <div key={index} className="bg-[#2d3e1f] rounded-lg p-4 text-white hover:bg-[#3d4e2f] transition-colors cursor-pointer">
+                  <div className="flex gap-4">
+                    <div className="w-24 h-24 bg-[#1a2515] rounded flex items-center justify-center text-4xl">
+                      {article.image}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold mb-2">{article.title}</h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-300 mb-2">
+                        <span className="w-6 h-6 bg-gray-600 rounded-full"></span>
+                        <span>{article.author}</span>
+                      </div>
+                      <div className="flex gap-4 text-sm text-gray-400">
+                        <span>{article.stats}</span>
+                        <span>{article.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* サイドバー */}
+          <aside className="w-80 hidden lg:block">
+            <div className="bg-[#2d3e1f] rounded-lg p-4 text-white mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold">トレンド</h3>
+                <span className="text-2xl">🔥</span>
+              </div>
+              <div className="space-y-2">
+                <div className="text-sm hover:text-[#88b04b] cursor-pointer">トレンド</div>
+                <div className="text-sm hover:text-[#88b04b] cursor-pointer">#角槙操鍊記</div>
+                <div className="text-sm hover:text-[#88b04b] cursor-pointer">#厚井古物味したる。</div>
+                <div className="text-sm hover:text-[#88b04b] cursor-pointer">#定わ分録坐しよう</div>
+                <div className="text-sm hover:text-[#88b04b] cursor-pointer">#AI研究</div>
+              </div>
+            </div>
+
+            <div className="bg-[#f5f3e8] rounded-lg p-4 border border-[#d4cdb3]">
+              <h3 className="text-lg font-bold text-[#2d3e1f] mb-4">注目の議記</h3>
+              <div className="space-y-3">
+                {[
+                  { image: "👤", label: "#要 #将貫館", count: "471萬雨" },
+                  { image: "🎮", label: "紬任", count: "011 600丁" },
+                  { image: "🎮", label: "紬任", count: "18 5" }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="w-12 h-12 bg-[#e8e4d0] rounded flex items-center justify-center text-xl">
+                      {item.image}
+                    </div>
+                    <div className="flex-1 text-sm">
+                      <div className="text-[#555]">{item.label}</div>
+                      <div className="text-gray-400">{item.count}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 text-center text-sm text-gray-500">
+              © 2024刊伦 プライモンポトレブ
+            </div>
+          </aside>
+        </div>
+      </section>
     </div>
   );
 }
