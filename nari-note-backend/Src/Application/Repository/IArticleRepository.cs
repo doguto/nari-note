@@ -9,7 +9,6 @@ public interface IArticleRepository
     Task<List<Article>> FindByTagAsync(string tagName);
     Task<Article?> FindByIdAsync(int id);
     Task<Article> GetByIdAsync(int id);
-    Task<Article> UpdateAsync(Article article);
-    Task UpdateArticleTagsAsync(int articleId, List<string> tagNames);
+    Task<Article> UpdateAsync(Article article, List<string>? tagNames = null);
     Task DeleteAsync(int id);
 }

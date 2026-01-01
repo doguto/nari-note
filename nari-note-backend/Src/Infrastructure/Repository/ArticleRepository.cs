@@ -87,11 +87,61 @@ public class ArticleRepository : IArticleRepository
             .ToListAsync();
     }
     
-    public async Task<Article> UpdateAsync(Article article)
+    public async Task<Article> UpdateAsync(Article article, List<string>? tagNames = null)
     {
         try
         {
             context.Articles.Update(article);
+            
+            // Update tags if provided
+            if (tagNames != null)
+            {
+                // Remove existing ArticleTags
+                var existingArticleTags = await context.ArticleTags
+                    .Where(at => at.ArticleId == article.Id)
+                    .ToListAsync();
+                context.ArticleTags.RemoveRange(existingArticleTags);
+                
+                if (tagNames.Count > 0)
+                {
+                    // Get existing tags
+                    var existingTags = await context.Tags
+                        .Where(t => tagNames.Contains(t.Name))
+                        .ToListAsync();
+                    
+                    var existingTagNames = existingTags.Select(t => t.Name).ToHashSet();
+                    var newTagNames = tagNames.Where(tn => !existingTagNames.Contains(tn)).ToList();
+                    
+                    // Create new tags
+                    var newTags = newTagNames.Select(name => new Tag
+                    {
+                        Name = name,
+                        CreatedAt = DateTime.UtcNow
+                    }).ToList();
+                    
+                    if (newTags.Count > 0)
+                    {
+                        context.Tags.AddRange(newTags);
+                        await context.SaveChangesAsync(); // Save to get Tag IDs
+                    }
+                    
+                    // Combine all tags
+                    var allTags = existingTags.Concat(newTags).ToList();
+                    
+                    // Create ArticleTag associations
+                    var articleTags = allTags.Select(tag => new ArticleTag
+                    {
+                        ArticleId = article.Id,
+                        TagId = tag.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        Article = article,
+                        Tag = tag
+                    }).ToList();
+                    
+                    context.ArticleTags.AddRange(articleTags);
+                }
+            }
+            
             await context.SaveChangesAsync();
             return article;
         }
@@ -101,72 +151,15 @@ public class ArticleRepository : IArticleRepository
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
         {
+            if (pgEx.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                throw new ConflictException("Duplicate tag association", ex);
+            }
             if (pgEx.SqlState == PostgresErrorCodes.ForeignKeyViolation)
             {
                 throw new ValidationException("Invalid reference to related entity", null, ex);
             }
             throw new InfrastructureException("Database error occurred while updating article", ex);
-        }
-    }
-    
-    public async Task UpdateArticleTagsAsync(int articleId, List<string> tagNames)
-    {
-        try
-        {
-            // Remove existing ArticleTags
-            var existingArticleTags = await context.ArticleTags
-                .Where(at => at.ArticleId == articleId)
-                .ToListAsync();
-            context.ArticleTags.RemoveRange(existingArticleTags);
-            
-            if (tagNames.Count > 0)
-            {
-                // Get existing tags
-                var existingTags = await context.Tags
-                    .Where(t => tagNames.Contains(t.Name))
-                    .ToListAsync();
-                
-                var existingTagNames = existingTags.Select(t => t.Name).ToHashSet();
-                var newTagNames = tagNames.Where(tn => !existingTagNames.Contains(tn)).ToList();
-                
-                // Create new tags
-                var newTags = newTagNames.Select(name => new Tag
-                {
-                    Name = name,
-                    CreatedAt = DateTime.UtcNow
-                }).ToList();
-                
-                if (newTags.Count > 0)
-                {
-                    context.Tags.AddRange(newTags);
-                    await context.SaveChangesAsync(); // Save to get Tag IDs
-                }
-                
-                // Combine all tags
-                var allTags = existingTags.Concat(newTags).ToList();
-                
-                // Create ArticleTag associations
-                var articleTags = allTags.Select(tag => new ArticleTag
-                {
-                    ArticleId = articleId,
-                    TagId = tag.Id,
-                    CreatedAt = DateTime.UtcNow,
-                    Article = null!, // EF Core will handle this
-                    Tag = null! // EF Core will handle this
-                }).ToList();
-                
-                context.ArticleTags.AddRange(articleTags);
-            }
-            
-            await context.SaveChangesAsync();
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
-        {
-            if (pgEx.SqlState == PostgresErrorCodes.UniqueViolation)
-            {
-                throw new ConflictException("Duplicate tag association", ex);
-            }
-            throw new InfrastructureException("Database error occurred while updating article tags", ex);
         }
     }
     
