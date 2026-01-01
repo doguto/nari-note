@@ -3,7 +3,7 @@ using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Infrastructure.Helper;
 using NariNoteBackend.Infrastructure.Repository;
 
-namespace NariNoteBackend.Infrastructure.DependencyInjection;
+namespace NariNoteBackend.Infrastructure;
 
 public static class InfrastructureServiceInstaller
 {

@@ -1,6 +1,6 @@
 using NariNoteBackend.Application.Service;
 
-namespace NariNoteBackend.Application.DependencyInjection;
+namespace NariNoteBackend.Application;
 
 public static class ApplicationServiceInstaller
 {
@@ -10,6 +10,7 @@ public static class ApplicationServiceInstaller
         services.AddScoped<CreateArticleService>();
         services.AddScoped<DeleteArticleService>();
         services.AddScoped<GetArticlesByAuthorService>();
+        services.AddScoped<GetArticlesByTagService>();
         services.AddScoped<GetArticleService>();
         services.AddScoped<GetUserProfileService>();
         services.AddScoped<SignUpService>();
