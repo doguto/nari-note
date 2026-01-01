@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Exception;
@@ -8,17 +9,22 @@ namespace NariNoteBackend.Application.Service;
 public class UpdateArticleService
 {
     readonly IArticleRepository articleRepository;
+    readonly IHttpContextAccessor httpContextAccessor;
     
-    public UpdateArticleService(IArticleRepository articleRepository)
+    public UpdateArticleService(IArticleRepository articleRepository, IHttpContextAccessor httpContextAccessor)
     {
         this.articleRepository = articleRepository;
+        this.httpContextAccessor = httpContextAccessor;
     }
     
     public async Task<UpdateArticleResponse> ExecuteAsync(UpdateArticleRequest request)
     {
+        var userId = (int?)this.httpContextAccessor.HttpContext?.Items["UserId"] 
+            ?? throw new UnauthorizedException("認証が必要です");
+        
         var article = await this.articleRepository.GetByIdAsync(request.Id);
             
-        if (article.AuthorId != request.UserId)
+        if (article.AuthorId != userId)
             throw new ForbiddenException("この記事を更新する権限がありません");
         
         // Only update non-null values
@@ -31,27 +37,12 @@ public class UpdateArticleService
         
         article.UpdatedAt = DateTime.UtcNow;
         
-        await this.articleRepository.UpdateAsync(article);
-        
-        // Update tags if provided
-        List<string> updatedTags;
-        if (request.Tags != null)
-        {
-            await this.articleRepository.UpdateArticleTagsAsync(article.Id, request.Tags);
-            updatedTags = request.Tags;
-        }
-        else
-        {
-            updatedTags = article.ArticleTags.Select(at => at.Tag.Name).ToList();
-        }
+        // Update article and tags in a single operation
+        await this.articleRepository.UpdateAsync(article, request.Tags);
         
         return new UpdateArticleResponse
         {
             Id = article.Id,
-            Title = article.Title,
-            Body = article.Body,
-            Tags = updatedTags,
-            IsPublished = article.IsPublished,
             UpdatedAt = article.UpdatedAt
         };
     }

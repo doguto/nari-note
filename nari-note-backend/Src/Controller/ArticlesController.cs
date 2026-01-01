@@ -51,10 +51,9 @@ public class ArticlesController : ControllerBase
     
     [HttpPut("{id}")]
     [ValidateModelState]
-    public async Task<ActionResult> UpdateArticle(int id, [FromQuery] int userId, [FromBody] UpdateArticleRequest request)
+    public async Task<ActionResult> UpdateArticle(int id, [FromBody] UpdateArticleRequest request)
     {
         request.Id = id;
-        request.UserId = userId;
         var response = await updateArticleService.ExecuteAsync(request);
         return Ok(response);
     }

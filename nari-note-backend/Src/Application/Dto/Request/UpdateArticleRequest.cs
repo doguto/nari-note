@@ -5,7 +5,6 @@ namespace NariNoteBackend.Application.Dto.Request;
 public class UpdateArticleRequest
 {
     public int Id { get; set; }
-    public int UserId { get; set; } // 認証実装後は削除
     
     [MaxLength(50)]
     public string? Title { get; set; }
