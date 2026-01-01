@@ -41,8 +41,9 @@ public class ArticlesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult> GetArticle(int id)
     {
-        var article = await getArticleService.ExecuteAsync(id);
-        return Ok(article);
+        var request = new GetArticleRequest { Id = id };
+        var response = await this.getArticleService.ExecuteAsync(request);
+        return Ok(response);
     }
     
     [HttpGet("author/{authorId}")]
