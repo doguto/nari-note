@@ -1,6 +1,6 @@
 using NariNoteBackend.Application.Service;
 
-namespace NariNoteBackend.Application.DependencyInjection;
+namespace NariNoteBackend.Application;
 
 public static class ApplicationServiceInstaller
 {
