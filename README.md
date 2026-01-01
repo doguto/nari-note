@@ -33,6 +33,35 @@ nari-noteは、技術記事の投稿・共有プラットフォームです。
 - [エラーハンドリング戦略](./docs/error-handling-strategy.md)
 - [ER図](./docs/er-diagram.md)
 
+## 開発環境のセットアップ
+
+### Docker を使用した開発
+
+Docker Compose を使用して、データベース、バックエンド、フロントエンドを一括で起動できます。
+
+```bash
+# 全てのサービスを起動
+docker compose up
+
+# バックグラウンドで起動する場合
+docker compose up -d
+
+# ログを確認
+docker compose logs -f
+
+# サービスを停止
+docker compose down
+```
+
+#### アクセス先
+- **フロントエンド**: http://localhost:3000
+- **バックエンドAPI**: http://localhost:5243
+- **データベース**: localhost:5432
+
+#### 注意事項
+- 初回起動時は npm install に時間がかかるため、フロントエンドが利用可能になるまで2-3分程度お待ちください
+- node_modules はボリュームマウントでキャッシュされるため、2回目以降の起動は高速です
+
 ## 主な機能
 
 - ユーザー登録・ログイン
