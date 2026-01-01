@@ -17,7 +17,7 @@ public class GetArticlesByAuthorService
     public async Task<GetArticlesByAuthorResponse> ExecuteAsync(GetArticlesByAuthorRequest request)
     {
         var articles = await articleRepository.FindByAuthorAsync(request.AuthorId);
-        
+
         var articleDtos = articles.Select(a => new ArticleDto
         {
             Id = a.Id,
@@ -31,7 +31,7 @@ public class GetArticlesByAuthorService
             CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
         }).ToList();
-        
+
         return new GetArticlesByAuthorResponse
         {
             AuthorId = request.AuthorId,

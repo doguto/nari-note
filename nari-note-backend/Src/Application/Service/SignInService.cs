@@ -30,13 +30,13 @@ public class SignInService
         {
             throw new UnauthorizedException("ユーザー名またはパスワードが正しくありません");
         }
-        
+
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordValid)
         {
             throw new UnauthorizedException("ユーザー名またはパスワードが正しくありません");
         }
-        
+
         var sessionKey = JwtHelper.GenerateSessionKey();
         var token = jwtHelper.GenerateToken(user, sessionKey);
         

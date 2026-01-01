@@ -19,29 +19,27 @@ public class ToggleLikeService
     
     public async Task<ToggleLikeResponse> ExecuteAsync(int userId, ToggleLikeRequest request)
     {
-        var article = await this.articleRepository.GetByIdAsync(request.ArticleId);
-        
-        var existing = await this.likeRepository.FindByUserAndArticleAsync(userId, request.ArticleId);
+        var existing = await likeRepository.FindByUserAndArticleAsync(userId, request.ArticleId);
         bool isLiked;
-        
+
         if (existing != null)
         {
-            await this.likeRepository.DeleteAsync(existing.Id);
+            await likeRepository.DeleteAsync(existing.Id);
             isLiked = false;
         }
         else
         {
-            await this.likeRepository.CreateAsync(new Like 
-            { 
-                UserId = userId, 
-                ArticleId = request.ArticleId,
-                User = null!,
-                Article = null!
-            });
+            await likeRepository.CreateAsync(
+                new Like 
+                { 
+                    UserId = userId, 
+                    ArticleId = request.ArticleId,
+                }
+            );
             isLiked = true;
         }
-        
-        var currentCount = await this.likeRepository.CountByArticleAsync(request.ArticleId);
+
+        var currentCount = await likeRepository.CountByArticleAsync(request.ArticleId);
         
         return new ToggleLikeResponse
         {

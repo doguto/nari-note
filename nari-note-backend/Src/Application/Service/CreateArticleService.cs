@@ -21,10 +21,7 @@ public class CreateArticleService
             Title = request.Title,
             Body = request.Body,
             AuthorId = request.AuthorId,
-            IsPublished = request.IsPublished,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            Author = null! // EF Core handles navigation property via AuthorId
+            IsPublished = request.IsPublished
         };
         
         var created = await articleRepository.CreateAsync(article);
