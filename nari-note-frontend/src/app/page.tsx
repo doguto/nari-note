@@ -117,11 +117,11 @@ export default function Home() {
           <aside className="w-80 hidden lg:block">
             <div className="bg-[#2d3e1f] rounded-lg p-4 text-white mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold">トランド</h3>
+                <h3 className="text-lg font-bold">トレンド</h3>
                 <span className="text-2xl">🔥</span>
               </div>
               <div className="space-y-2">
-                <div className="text-sm hover:text-[#88b04b] cursor-pointer">テランド</div>
+                <div className="text-sm hover:text-[#88b04b] cursor-pointer">トレンド</div>
                 <div className="text-sm hover:text-[#88b04b] cursor-pointer">#角槙操鍊記</div>
                 <div className="text-sm hover:text-[#88b04b] cursor-pointer">#厚井古物味したる。</div>
                 <div className="text-sm hover:text-[#88b04b] cursor-pointer">#定わ分録坐しよう</div>
