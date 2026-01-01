@@ -8,7 +8,7 @@ namespace NariNoteBackend.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ArticlesController : ControllerBase
+public class ArticlesController : BaseController
 {
     readonly CreateArticleService createArticleService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
@@ -81,12 +81,10 @@ public class ArticlesController : ControllerBase
     [HttpPost("{id}/like")]
     public async Task<ActionResult> ToggleLike(int id)
     {
-        var userId = (int)HttpContext.Items["UserId"]!;
-        
         var request = new ToggleLikeRequest 
         { 
             ArticleId = id,
-            UserId = userId
+            UserId = AuthenticatedUserId
         };
         var response = await this.toggleLikeService.ExecuteAsync(request);
         return Ok(response);
