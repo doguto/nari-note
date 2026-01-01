@@ -34,22 +34,25 @@ public class UpdateArticleService
         await this.articleRepository.UpdateAsync(article);
         
         // Update tags if provided
+        List<string> updatedTags;
         if (request.Tags != null)
         {
             await this.articleRepository.UpdateArticleTagsAsync(article.Id, request.Tags);
+            updatedTags = request.Tags;
         }
-        
-        // Reload article to get updated tags
-        var updatedArticle = await this.articleRepository.GetByIdAsync(request.Id);
+        else
+        {
+            updatedTags = article.ArticleTags.Select(at => at.Tag.Name).ToList();
+        }
         
         return new UpdateArticleResponse
         {
-            Id = updatedArticle.Id,
-            Title = updatedArticle.Title,
-            Body = updatedArticle.Body,
-            Tags = updatedArticle.ArticleTags.Select(at => at.Tag.Name).ToList(),
-            IsPublished = updatedArticle.IsPublished,
-            UpdatedAt = updatedArticle.UpdatedAt
+            Id = article.Id,
+            Title = article.Title,
+            Body = article.Body,
+            Tags = updatedTags,
+            IsPublished = article.IsPublished,
+            UpdatedAt = article.UpdatedAt
         };
     }
 }

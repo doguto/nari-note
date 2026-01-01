@@ -103,32 +103,43 @@ public class ArticleRepository : IArticleRepository
                 .ToListAsync();
             context.ArticleTags.RemoveRange(existingArticleTags);
             
-            // Add new tags
-            foreach (var tagName in tagNames)
+            if (tagNames.Count > 0)
             {
-                // Get or create tag
-                var tag = await context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
-                if (tag == null)
+                // Get existing tags
+                var existingTags = await context.Tags
+                    .Where(t => tagNames.Contains(t.Name))
+                    .ToListAsync();
+                
+                var existingTagNames = existingTags.Select(t => t.Name).ToHashSet();
+                var newTagNames = tagNames.Where(tn => !existingTagNames.Contains(tn)).ToList();
+                
+                // Create new tags
+                var newTags = newTagNames.Select(name => new Tag
                 {
-                    tag = new Tag
-                    {
-                        Name = tagName,
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    context.Tags.Add(tag);
-                    await context.SaveChangesAsync(); // Save to get the Tag ID
+                    Name = name,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList();
+                
+                if (newTags.Count > 0)
+                {
+                    context.Tags.AddRange(newTags);
+                    await context.SaveChangesAsync(); // Save to get Tag IDs
                 }
                 
-                // Create ArticleTag association
-                var articleTag = new ArticleTag
+                // Combine all tags
+                var allTags = existingTags.Concat(newTags).ToList();
+                
+                // Create ArticleTag associations
+                var articleTags = allTags.Select(tag => new ArticleTag
                 {
                     ArticleId = articleId,
                     TagId = tag.Id,
                     CreatedAt = DateTime.UtcNow,
                     Article = null!, // EF Core will handle this
                     Tag = null! // EF Core will handle this
-                };
-                context.ArticleTags.Add(articleTag);
+                }).ToList();
+                
+                context.ArticleTags.AddRange(articleTags);
             }
             
             await context.SaveChangesAsync();
