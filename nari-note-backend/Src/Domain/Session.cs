@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace NariNoteBackend.Domain;
 
 [Index(nameof(SessionKey), IsUnique = true)]
-public class Session
+public class Session : EntityBase
 {
     [Key]
     public int Id { get; set; }
@@ -19,12 +19,10 @@ public class Session
     public required string SessionKey { get; set; }
 
     public DateTime ExpiresAt { get; set; }
-    public DateTime CreatedAt { get; set; }
 
     public Session()
     {
         ExpiresAt = DateTime.UtcNow.AddHours(24);
-        CreatedAt = DateTime.UtcNow;
     }
 
     // Navigation Properties

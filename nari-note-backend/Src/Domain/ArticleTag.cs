@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace NariNoteBackend.Domain;
 
 [Index(nameof(ArticleId), nameof(TagId), IsUnique = true)]
-public class ArticleTag
+public class ArticleTag : EntityBase
 {
     [Key]
     public int Id { get; set; }
@@ -17,13 +17,6 @@ public class ArticleTag
     [Required]
     [ForeignKey("Tag")]
     public int TagId { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-
-    public ArticleTag()
-    {
-        CreatedAt = DateTime.UtcNow;
-    }
 
     // Navigation Properties
     public required Article Article { get; set; }

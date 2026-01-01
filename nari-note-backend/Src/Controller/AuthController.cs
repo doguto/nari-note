@@ -8,7 +8,7 @@ namespace NariNoteBackend.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController : ApplicationController
 {
     readonly SignUpService signUpService;
     readonly SignInService signInService;

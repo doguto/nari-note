@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace NariNoteBackend.Domain;
 
 [Index(nameof(FollowerId), nameof(FollowingId), IsUnique = true)]
-public class Follow
+public class Follow : EntityBase
 {
     [Key]
     public int Id { get; set; }
@@ -17,13 +17,6 @@ public class Follow
     [Required]
     [ForeignKey("Following")]
     public int FollowingId { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-
-    public Follow()
-    {
-        CreatedAt = DateTime.UtcNow;
-    }
 
     // Navigation Properties
     public required User Follower { get; set; }  // フォローする側

@@ -14,13 +14,11 @@ public class UpdateArticleService
         this.articleRepository = articleRepository;
     }
     
-    public async Task<UpdateArticleResponse> ExecuteAsync(UpdateArticleRequest request)
+    public async Task<UpdateArticleResponse> ExecuteAsync(int userId, UpdateArticleRequest request)
     {
-        var article = await this.articleRepository.GetByIdAsync(request.Id);
-            
-        if (article.AuthorId != request.UserId)
-            throw new ForbiddenException("この記事を更新する権限がありません");
-        
+        var article = await articleRepository.GetByIdAsync(request.Id);
+        if (article.AuthorId != userId) throw new ForbiddenException("この記事を更新する権限がありません");
+
         // Only update non-null values
         if (!string.IsNullOrEmpty(request.Title)) 
             article.Title = request.Title;
@@ -28,16 +26,15 @@ public class UpdateArticleService
             article.Body = request.Body;
         if (request.IsPublished != null) 
             article.IsPublished = request.IsPublished.Value;
-        
+
         article.UpdatedAt = DateTime.UtcNow;
-        
-        await this.articleRepository.UpdateAsync(article);
-        
+        await articleRepository.UpdateAsync(article);
+
         // Update tags if provided
         List<string> updatedTags;
         if (request.Tags != null)
         {
-            await this.articleRepository.UpdateArticleTagsAsync(article.Id, request.Tags);
+            await articleRepository.UpdateArticleTagsAsync(article.Id, request.Tags);
             updatedTags = request.Tags;
         }
         else
