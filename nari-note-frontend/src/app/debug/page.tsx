@@ -56,6 +56,7 @@ export default function DebugPage() {
       const data = await res.json() as ApiResponse;
       
       if (!res.ok) {
+        console.error(`[API Error] ${method} ${url} - HTTP ${res.status}:`, data);
         setError(`HTTP ${res.status}: ${JSON.stringify(data)}`);
       } else {
         setResponse(data);
@@ -81,7 +82,7 @@ export default function DebugPage() {
   const handleSignUp = () => {
     makeRequest(`${apiEndpoint}/api/auth/signup`, 'POST', {
       email: signUpEmail,
-      username: signUpUsername,
+      name: signUpUsername,
       password: signUpPassword,
     });
   };
