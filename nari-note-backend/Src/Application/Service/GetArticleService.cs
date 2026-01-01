@@ -1,6 +1,7 @@
+using NariNoteBackend.Application.Dto.Request;
+using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
-using NariNoteBackend.Domain;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -13,9 +14,26 @@ public class GetArticleService
         this.articleRepository = articleRepository;
     }
 
-    public async Task<Article> ExecuteAsync(int id)
+    public async Task<GetArticleResponse> ExecuteAsync(GetArticleRequest request)
     {
-        var article = await articleRepository.GetByIdAsync(id);
-        return article;
+        var article = await this.articleRepository.FindByIdAsync(request.Id);
+        if (article == null)
+        {
+            throw new NotFoundException($"Article with ID {request.Id} not found");
+        }
+        
+        return new GetArticleResponse
+        {
+            Id = article.Id,
+            Title = article.Title,
+            Body = article.Body,
+            AuthorId = article.AuthorId,
+            AuthorName = article.Author?.Name ?? "",
+            Tags = article.ArticleTags.Select(at => at.Tag?.Name ?? string.Empty).Where(name => !string.IsNullOrEmpty(name)).ToList(),
+            LikeCount = article.LikeCount,
+            IsPublished = article.IsPublished,
+            CreatedAt = article.CreatedAt,
+            UpdatedAt = article.UpdatedAt
+        };
     }
 }

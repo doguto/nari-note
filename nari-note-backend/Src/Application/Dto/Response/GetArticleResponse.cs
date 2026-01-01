@@ -1,6 +1,6 @@
-namespace NariNoteBackend.Application.Dto;
+namespace NariNoteBackend.Application.Dto.Response;
 
-public class ArticleDto
+public class GetArticleResponse
 {
     public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
