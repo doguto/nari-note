@@ -322,13 +322,13 @@ public class CreateArticleService
         };
         
         // 2. Repositoryの呼び出し
-        var created = await articleRepository.CreateAsync(article);
+        var createdArticle = await articleRepository.CreateAsync(article);
         
         // 3. レスポンスDTOの作成
         return new CreateArticleResponse
         {
-            Id = created.Id,
-            CreatedAt = created.CreatedAt
+            Id = createdArticle.Id,
+            CreatedAt = createdArticle.CreatedAt
         };
     }
 }
@@ -860,7 +860,6 @@ public class CreateArticleResponse
 #### 4. コードレビュー
 - [ ] コーディング規約に従っているか確認
 - [ ] private変数の命名（アンダースコア無し）
-- [ ] `this.` を使用しているか
 - [ ] `DateTime.UtcNow` を使用しているか
 - [ ] try-catchを不要な箇所で使用していないか
 - [ ] レイヤー間の責務が守られているか

@@ -74,13 +74,15 @@ nari-note-backend/
    - エラーレスポンス形式
    - 実装例
 
-3. **[アーキテクチャ](/docs/architecture.md)**
-   - アーキテクチャの設計思想
-   - レイヤー構成と依存関係
-   - Entity Framework Coreとの統合
+3. **[アーキテクチャ概要](/docs/architecture-overview.md)**
+   - レイヤー構成と各層の責務
+   - ディレクトリ構成
+   - 重要な設計原則
+   - データフロー例
 
 ### 補足ドキュメント
 
+- **[アーキテクチャ（設計思想）](/docs/architecture.md)** - アーキテクチャ選定の経緯と設計思想
 - **[認証戦略](/docs/authentication-strategy.md)** - 認証機能実装時に参照
 - **[ER図](/docs/er-diagram.md)** - データベース設計時に参照
 
@@ -125,15 +127,13 @@ nari-note-backend/
 ### 新規DB実装（or 新規カラム追加）
 
 1. **Domain Entity の定義** - `Src/Domain/Entity/`（EntityBase継承）
-2. **マイグレーション作成** - `dotnet ef migrations add <名前>`
-3. **マイグレーション適用** - `dotnet ef database update`（または Docker再起動）
 
 ### 新規API実装
 
-1. **Repository Interface** - `Src/Application/Repository/`（IRepository継承）
-2. **Repository 実装** - `Src/Infrastructure/Repository/`
-3. **Request/Response DTO** - `Src/Application/Dto/`
-4. **Service実装** - `Src/Application/Service/`（ExecuteAsyncメソッド）
+1. **Request/Response DTO** - `Src/Application/Dto/`（API仕様に基づいて作成）
+2. **Service実装** - `Src/Application/Service/`（ExecuteAsyncメソッド）
+3. **Repository Interface** - `Src/Application/Repository/`（必要に応じて新規メソッドを追加）
+4. **Repository 実装** - `Src/Infrastructure/Repository/`（必要に応じて新規メソッドを実装）
 5. **Controller実装** - `Src/Controller/`
 6. **DI登録** - `Program.cs` または `*ServiceInstaller.cs`
 
