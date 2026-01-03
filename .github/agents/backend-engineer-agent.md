@@ -11,25 +11,138 @@ Nari-noteのバックエンドは以下の技術スタックで開発を行い�
 詳細はREADMEを参照してください。
 
 ### フレームワーク
-ASP.NET Core API
+ASP.NET Core 9.0 Web API
+
+### 言語
+C# (.NET 9.0)
 
 ### DB
-* PostgreSQL
+PostgreSQL 16
 
 ### ライブラリ
 **ORM**
-* Entity Framework Core
+* Entity Framework Core 9.0
 
 ## アーキテクチャ
-レイヤードアーキテクチャ
+レイヤードアーキテクチャ + Repository パターン
+
 ```
 nari-note-backend/
 ├── Src/
-│   ├── Controller/        # APIエンドポイント（コントローラー）
-│   ├── Application/       # アプリケーション層（サービス、リポジトリインターフェース）
-|   |   ├── Repository/    # インフラ層へのアクセス
-|   |   ├── Service/       # APIロジックの実装
-│   ├── Domain/            # ドメイン層（エンティティ、ビジネスロジック）
-│   └── Infrastructure/    # インフラストラクチャ層（データベース、外部サービス）
-├── Program.cs             # アプリケーションのエントリーポイント
+│   ├── Controller/            # プレゼンテーション層（APIエンドポイント）
+│   │   └── ApplicationController.cs  # 基底Controller
+│   ├── Application/           # アプリケーション層
+│   │   ├── Service/          # ビジネスロジック（API一個につきService一個）
+│   │   ├── Repository/       # Repository抽象化（インターフェース）
+│   │   │   └── IRepository.cs  # 共通Repository基底インターフェース
+│   │   ├── Dto/              # Data Transfer Objects
+│   │   │   ├── Request/      # リクエストDTO
+│   │   │   └── Response/     # レスポンスDTO
+│   │   ├── Exception/        # カスタム例外クラス
+│   │   └── Security/         # セキュリティ関連（JWT等）
+│   ├── Domain/                # ドメイン層
+│   │   └── Entity/           # エンティティ
+│   │       └── EntityBase.cs  # 共通Entity基底クラス
+│   ├── Infrastructure/        # インフラストラクチャ層
+│   │   ├── NariNoteDbContext.cs  # EF Core DbContext
+│   │   └── Repository/       # Repository実装
+│   ├── Middleware/            # カスタムミドルウェア
+│   │   ├── GlobalExceptionHandlerMiddleware.cs
+│   │   └── AuthenticationMiddleware.cs
+│   ├── Filter/                # アクションフィルタ
+│   │   └── ValidateModelStateAttribute.cs
+│   └── Extension/             # 拡張メソッド
+├── Migrations/                # Entity Framework Coreマイグレーション
+└── Program.cs                 # アプリケーションのエントリーポイント
 ```
+
+## 実装時の参照ドキュメント
+
+実装を行う際は、必ず以下のドキュメントを参照してください：
+
+### 必読ドキュメント
+
+1. **[バックエンド実装ガイド](/docs/backend-implementation-guide.md)**
+   - コーディング規約（命名規則、アクセス修飾子等）
+   - レイヤー別実装パターン（Controller、Service、Repository、Domain）
+   - DTO設計パターン
+   - 具体的なコード例
+
+2. **[エラーハンドリング戦略](/docs/error-handling-strategy.md)**
+   - GlobalExceptionHandlerMiddlewareの実装
+   - 例外とHTTPステータスコードのマッピング
+   - エラーレスポンス形式
+   - 実装例
+
+3. **[アーキテクチャ](/docs/architecture.md)**
+   - アーキテクチャの設計思想
+   - レイヤー構成と依存関係
+   - Entity Framework Coreとの統合
+
+### 補足ドキュメント
+
+- **[認証戦略](/docs/authentication-strategy.md)** - 認証機能実装時に参照
+- **[ER図](/docs/er-diagram.md)** - データベース設計時に参照
+
+## 重要な実装規約
+
+### 命名規則
+- private変数: アンダースコア無し、キャメルケース（例: `articleRepository`）
+- private変数へのアクセス: `this.` を使用（例: `this.articleRepository`）
+- private修飾子: クラスフィールドでは省略
+
+### 日付時刻
+- 常に `DateTime.UtcNow` を使用（`DateTime.Now` は使用しない）
+
+### Entity
+- すべてのエンティティは `EntityBase` を継承
+- `CreatedAt`, `UpdatedAt` は自動設定される
+- namespace: `NariNoteBackend.Domain.Entity`
+
+### Repository
+- すべてのRepositoryは `IRepository<T>` を継承
+- `FindByIdAsync`: 見つからない場合は `null`
+- `FindForceByIdAsync`: 見つからない場合は `KeyNotFoundException`
+
+### Service
+- API一個につきService一個の粒度
+- メソッド名は `ExecuteAsync`
+- try-catchは不要（例外はミドルウェアが処理）
+
+### Controller
+- 認証が必要な場合は `ApplicationController` を継承
+- バリデーションは `[ValidateModelState]` フィルタを使用
+- try-catchは不要（例外はミドルウェアが処理）
+
+### エラーハンドリング
+- 適切な例外をthrow（`KeyNotFoundException`, `UnauthorizedAccessException` 等）
+- try-catchは基本的に全レイヤーで不要
+- GlobalExceptionHandlerMiddlewareが自動的に適切なレスポンスに変換
+
+## 新規機能実装フロー
+
+1. **Domain Entity の定義** - `Src/Domain/Entity/`（EntityBase継承）
+2. **マイグレーション作成** - `dotnet ef migrations add <名前>`
+3. **Repository Interface** - `Src/Application/Repository/`（IRepository継承）
+4. **Repository 実装** - `Src/Infrastructure/Repository/`
+5. **Request/Response DTO** - `Src/Application/Dto/`
+6. **Service実装** - `Src/Application/Service/`（ExecuteAsyncメソッド）
+7. **Controller実装** - `Src/Controller/`
+8. **DI登録** - `Program.cs` または `*ServiceInstaller.cs`
+
+## 実装時の注意事項
+
+1. **必ずドキュメントを参照**
+   - 実装前に該当ドキュメントを確認
+   - コード例に従って実装
+
+2. **既存コードを参考にする**
+   - 同様の機能の実装を参照
+   - 命名規則やパターンを統一
+
+3. **一貫性を保つ**
+   - レイヤー間の責務を守る
+   - 既存のパターンに従う
+
+4. **ドキュメントの精度向上**
+   - 実装とドキュメントの不一致を発見した場合は報告

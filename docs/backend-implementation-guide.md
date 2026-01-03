@@ -114,6 +114,38 @@ Domain (Entity)
 Infrastructure (Repository実装)
 ```
 
+### ディレクトリ構成
+
+```
+nari-note-backend/
+├── Src/
+│   ├── Controller/            # プレゼンテーション層（APIエンドポイント）
+│   │   └── ApplicationController.cs  # 基底Controller
+│   ├── Application/           # アプリケーション層
+│   │   ├── Service/          # ビジネスロジック（API一個につきService一個）
+│   │   ├── Repository/       # Repository抽象化（インターフェース）
+│   │   │   └── IRepository.cs  # 共通Repository基底インターフェース
+│   │   ├── Dto/              # Data Transfer Objects
+│   │   │   ├── Request/      # リクエストDTO
+│   │   │   └── Response/     # レスポンスDTO
+│   │   ├── Exception/        # カスタム例外クラス
+│   │   └── Security/         # セキュリティ関連（JWT等）
+│   ├── Domain/                # ドメイン層
+│   │   └── Entity/           # エンティティ
+│   │       └── EntityBase.cs  # 共通Entity基底クラス
+│   ├── Infrastructure/        # インフラストラクチャ層
+│   │   ├── NariNoteDbContext.cs  # EF Core DbContext
+│   │   └── Repository/       # Repository実装
+│   ├── Middleware/            # カスタムミドルウェア
+│   │   ├── GlobalExceptionHandlerMiddleware.cs
+│   │   └── AuthenticationMiddleware.cs
+│   ├── Filter/                # アクションフィルタ
+│   │   └── ValidateModelStateAttribute.cs
+│   └── Extension/             # 拡張メソッド
+├── Migrations/                # Entity Framework Coreマイグレーション
+└── Program.cs                 # アプリケーションのエントリーポイント
+```
+
 ### Controller層
 
 #### 基本パターン
@@ -123,12 +155,13 @@ using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ArticlesController : ControllerBase
+public class ArticlesController : ApplicationController
 {
     readonly CreateArticleService createArticleService;
     readonly GetArticleService getArticleService;
@@ -145,29 +178,22 @@ public class ArticlesController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<ActionResult<CreateArticleResponse>> CreateArticle(
+    [ValidateModelState]
+    public async Task<ActionResult> CreateArticle(
         [FromBody] CreateArticleRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
-            );
-            return BadRequest(new { errors });
-        }
-        
         // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var response = await createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
     
     [HttpGet("{id}")]
-    public async Task<ActionResult<Article>> GetArticle(int id)
+    public async Task<ActionResult> GetArticle(int id)
     {
         // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
-        var article = await getArticleService.ExecuteAsync(id);
-        return Ok(article);
+        var request = new GetArticleRequest { Id = id };
+        var response = await getArticleService.ExecuteAsync(request);
+        return Ok(response);
     }
     
     [HttpDelete("{id}")]
@@ -180,10 +206,28 @@ public class ArticlesController : ControllerBase
 }
 ```
 
+#### ApplicationController基底クラス
+
+認証が必要なControllerは `ApplicationController` を継承します。
+
+```csharp
+using Microsoft.AspNetCore.Mvc;
+
+namespace NariNoteBackend.Controller;
+
+public abstract class ApplicationController : ControllerBase
+{
+    protected int UserId => (int)HttpContext.Items["UserId"]!;
+}
+```
+
+- **UserId**: AuthenticationMiddlewareで設定される認証済みユーザーのID
+- 認証が必要なエンドポイントで `this.UserId` を使用してアクセス可能
+
 #### Controllerの責務
 
 - **HTTPリクエスト/レスポンスの処理**
-- **入力バリデーション（ModelState）**
+- **入力バリデーション（ValidateModelStateAttribute使用）**
 - **適切なHTTPステータスコードの返却**
 - **Serviceの呼び出し**
 
@@ -199,7 +243,50 @@ public class ArticlesController : ControllerBase
    - Serviceに委譲する
 
 4. **ModelStateのバリデーション**
-   - リクエストDTOのバリデーション属性をチェック
+   - `[ValidateModelState]` フィルタを使用してバリデーション
+   - 手動でModelStateをチェックする必要はない
+
+5. **認証が必要な場合**
+   - `ApplicationController` を継承
+   - `UserId` プロパティで認証済みユーザーIDにアクセス
+
+#### ValidateModelStateAttribute フィルタ
+
+バリデーションエラーを自動的に処理するアクションフィルタ：
+
+```csharp
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+
+namespace NariNoteBackend.Filter;
+
+public class ValidateModelStateAttribute : ActionFilterAttribute
+{
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        if (!context.ModelState.IsValid)
+        {
+            var errors = context.ModelState.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
+            );
+            context.Result = new BadRequestObjectResult(new { errors });
+        }
+    }
+}
+```
+
+**使用方法：**
+```csharp
+[HttpPost]
+[ValidateModelState]  // このフィルタを付与
+public async Task<ActionResult> CreateArticle([FromBody] CreateArticleRequest request)
+{
+    // ModelStateは既にチェック済み
+    var response = await createArticleService.ExecuteAsync(request);
+    return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
+}
+```
 
 ---
 
@@ -211,50 +298,82 @@ public class ArticlesController : ControllerBase
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
-using NariNoteBackend.Domain;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Application.Service;
 
 public class CreateArticleService
 {
     readonly IArticleRepository articleRepository;
-    readonly IUserRepository userRepository;
     
-    public CreateArticleService(
-        IArticleRepository articleRepository,
-        IUserRepository userRepository)
+    public CreateArticleService(IArticleRepository articleRepository)
     {
         this.articleRepository = articleRepository;
-        this.userRepository = userRepository;
     }
     
     public async Task<CreateArticleResponse> ExecuteAsync(CreateArticleRequest request)
     {
-        // 1. ビジネスロジックの検証
-        var author = await userRepository.GetByIdAsync(request.AuthorId);
-        
-        // 2. ドメインオブジェクトの作成
+        // 1. ドメインオブジェクトの作成
         var article = new Article
         {
             Title = request.Title,
             Body = request.Body,
             AuthorId = request.AuthorId,
-            IsPublished = request.IsPublished,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            Author = null! // EF Core handles navigation property via AuthorId
+            IsPublished = request.IsPublished
+            // CreatedAt, UpdatedAt は EntityBase で自動設定
         };
         
-        // 3. Repositoryの呼び出し
+        // 2. Repositoryの呼び出し
         var created = await articleRepository.CreateAsync(article);
         
-        // 4. レスポンスDTOの作成
+        // 3. レスポンスDTOの作成
         return new CreateArticleResponse
         {
             Id = created.Id,
             CreatedAt = created.CreatedAt
         };
+    }
+}
+```
+
+#### 認証が必要なServiceの例
+
+```csharp
+using NariNoteBackend.Application.Repository;
+using NariNoteBackend.Application.Dto.Request;
+using NariNoteBackend.Application.Dto.Response;
+
+namespace NariNoteBackend.Application.Service;
+
+public class UpdateArticleService
+{
+    readonly IArticleRepository articleRepository;
+    
+    public UpdateArticleService(IArticleRepository articleRepository)
+    {
+        this.articleRepository = articleRepository;
+    }
+    
+    // UserIdを第一引数として受け取る
+    public async Task<UpdateArticleResponse> ExecuteAsync(int userId, UpdateArticleRequest request)
+    {
+        var article = await articleRepository.FindForceByIdAsync(request.Id);
+        
+        // 認可チェック
+        if (article.AuthorId != userId)
+        {
+            throw new UnauthorizedAccessException("この記事を編集する権限がありません");
+        }
+        
+        // 更新処理
+        if (request.Title != null) article.Title = request.Title;
+        if (request.Body != null) article.Body = request.Body;
+        if (request.IsPublished != null) article.IsPublished = request.IsPublished.Value;
+        article.UpdatedAt = DateTime.UtcNow;
+        
+        await articleRepository.UpdateWithTagAsync(article, request.Tags);
+        
+        return new UpdateArticleResponse { Id = article.Id };
     }
 }
 ```
@@ -265,6 +384,7 @@ public class CreateArticleService
 - **複数のRepositoryの協調**
 - **ドメインオブジェクトの操作**
 - **適切な例外のスロー**
+- **認可チェック（必要な場合）**
 
 #### Service実装のルール
 
@@ -275,9 +395,12 @@ public class CreateArticleService
 
 2. **メソッド名は `ExecuteAsync`**
    - 統一されたインターフェース
+   - 認証が必要な場合: `ExecuteAsync(int userId, TRequest request)`
+   - 認証が不要な場合: `ExecuteAsync(TRequest request)` または `ExecuteAsync(int id)`
 
 3. **Request/Response DTOを使用**
-   - 入力は `Request`, 出力は `Response` または `Entity`
+   - 入力は `Request` または プリミティブ型（id等）
+   - 出力は `Response` または `Entity`
 
 4. **try-catchは不要**
    - 必要に応じて適切な例外をthrow
@@ -286,43 +409,59 @@ public class CreateArticleService
 5. **インフラ関心事は書かない**
    - キャッシュ、トランザクション等はRepository層
 
+6. **EntityBase継承による自動フィールド設定**
+   - `CreatedAt`, `UpdatedAt` はEntityBaseで自動設定
+   - 明示的に設定する必要がある場合のみ上書き
+
 ---
 
 ### Repository層
 
-#### Interface定義
+#### 共通Repository基底インターフェース
+
+すべてのRepositoryは `IRepository<T>` を継承します：
 
 ```csharp
-using NariNoteBackend.Domain;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Application.Repository;
 
-public interface IArticleRepository
+public interface IRepository<T> where T : EntityBase
 {
-    /// <summary>
-    /// 記事を作成する
-    /// </summary>
-    Task<Article> CreateAsync(Article article);
-    
-    /// <summary>
-    /// IDで記事を検索（存在しない場合はnullを返す）
-    /// </summary>
-    Task<Article?> FindByIdAsync(int id);
-    
-    /// <summary>
-    /// IDで記事を取得（存在しない場合はNotFoundExceptionをthrow）
-    /// </summary>
-    Task<Article> GetByIdAsync(int id);
-    
+    Task<T> CreateAsync(T entity);
+    Task<T?> FindByIdAsync(int id);
+    Task<T> FindForceByIdAsync(int id);
+    Task<T> UpdateAsync(T entity);
+    Task DeleteAsync(int id);
+}
+```
+
+- **FindByIdAsync**: 見つからない場合は `null` を返す
+- **FindForceByIdAsync**: 見つからない場合は `KeyNotFoundException` をthrow
+
+#### 個別Repository Interface定義
+
+```csharp
+using NariNoteBackend.Domain.Entity;
+
+namespace NariNoteBackend.Application.Repository;
+
+public interface IArticleRepository : IRepository<Article>
+{
     /// <summary>
     /// 著者IDで記事一覧を取得
     /// </summary>
     Task<List<Article>> FindByAuthorAsync(int authorId);
     
     /// <summary>
-    /// 記事を削除する
+    /// タグ名で記事一覧を取得
     /// </summary>
-    Task DeleteAsync(int id);
+    Task<List<Article>> FindByTagAsync(string tagName);
+    
+    /// <summary>
+    /// 記事を更新し、タグも同時に更新する
+    /// </summary>
+    Task<Article> UpdateWithTagAsync(Article article, List<string>? tagNames = null);
 }
 ```
 
@@ -330,10 +469,8 @@ public interface IArticleRepository
 
 ```csharp
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using NariNoteBackend.Application.Repository;
-using NariNoteBackend.Application.Exception;
-using NariNoteBackend.Domain;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -348,81 +485,126 @@ public class ArticleRepository : IArticleRepository
     
     public async Task<Article> CreateAsync(Article article)
     {
-        try
-        {
-            context.Articles.Add(article);
-            await context.SaveChangesAsync();
-            return article;
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
-        {
-            // DB制約違反を適切な例外に変換
-            if (pgEx.SqlState == "23505") // Unique constraint violation
-            {
-                throw new ConflictException("Article with this title already exists", ex);
-            }
-            if (pgEx.SqlState == "23503") // Foreign key violation
-            {
-                throw new ValidationException("Invalid reference to related entity", null, ex);
-            }
-            // その他のDB例外
-            throw new InfrastructureException(
-                "Database error occurred while creating article", ex);
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            throw new ConflictException("The article was modified by another user", ex);
-        }
+        context.Articles.Add(article);
+        await context.SaveChangesAsync();
+        return article;
     }
     
     public async Task<Article?> FindByIdAsync(int id)
     {
         return await context.Articles
             .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(a => a.Likes)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
-    
-    public async Task<Article> GetByIdAsync(int id)
+
+    public async Task<Article> FindForceByIdAsync(int id)
     {
         var article = await FindByIdAsync(id);
-        
         if (article == null)
         {
-            throw new NotFoundException($"Article with ID {id} not found");
+            throw new KeyNotFoundException($"記事{id}が存在しません");
         }
-        
         return article;
     }
-    
+
+    public async Task<Article> UpdateAsync(Article entity)
+    {
+        context.Articles.Update(entity);
+        await context.SaveChangesAsync();
+        return entity;
+    }
+
     public async Task<List<Article>> FindByAuthorAsync(int authorId)
     {
         return await context.Articles
             .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(a => a.Likes)
             .Where(a => a.AuthorId == authorId)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
     
-    public async Task DeleteAsync(int id)
+    public async Task<List<Article>> FindByTagAsync(string tagName)
     {
-        try
+        return await context.Articles
+            .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(a => a.Likes)
+            .Where(a => a.ArticleTags.Any(at => EF.Functions.ILike(at.Tag.Name, tagName)))
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<Article> UpdateWithTagAsync(Article article, List<string>? tagNames = null)
+    {
+        context.Articles.Update(article);
+        
+        // Update tags if provided
+        if (tagNames != null)
         {
-            var article = await context.Articles.FindAsync(id);
-            if (article != null)
+            // Remove existing ArticleTags
+            var existingArticleTags = await context.ArticleTags
+                .Where(at => at.ArticleId == article.Id)
+                .ToListAsync();
+            context.ArticleTags.RemoveRange(existingArticleTags);
+            
+            if (tagNames.Count > 0)
             {
-                context.Articles.Remove(article);
-                await context.SaveChangesAsync();
+                // Get existing tags
+                var existingTags = await context.Tags
+                    .Where(t => tagNames.Contains(t.Name))
+                    .ToListAsync();
+                
+                var existingTagNames = existingTags.Select(t => t.Name).ToHashSet();
+                var newTagNames = tagNames.Where(tn => !existingTagNames.Contains(tn)).ToList();
+                
+                // Create new tags
+                var newTags = newTagNames.Select(name => new Tag
+                {
+                    Name = name,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList();
+                
+                if (newTags.Count > 0)
+                {
+                    context.Tags.AddRange(newTags);
+                    await context.SaveChangesAsync(); // Save to get Tag IDs
+                }
+                
+                // Combine all tags
+                var allTags = existingTags.Concat(newTags).ToList();
+                
+                // Create ArticleTag associations
+                var articleTags = allTags.Select(tag => new ArticleTag
+                {
+                    ArticleId = article.Id,
+                    TagId = tag.Id,
+                    CreatedAt = DateTime.UtcNow,
+                    Article = article,
+                    Tag = tag
+                }).ToList();
+                
+                context.ArticleTags.AddRange(articleTags);
             }
         }
-        catch (DbUpdateConcurrencyException ex)
+        
+        await context.SaveChangesAsync();
+        return article;
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var article = await context.Articles.FindAsync(id);
+        if (article != null)
         {
-            throw new ConflictException(
-                "The article was modified or deleted by another user", ex);
-        }
-        catch (DbUpdateException ex)
-        {
-            throw new InfrastructureException(
-                $"Database error occurred while deleting article with ID {id}", ex);
+            context.Articles.Remove(article);
+            await context.SaveChangesAsync();
         }
     }
 }
@@ -432,16 +614,16 @@ public class ArticleRepository : IArticleRepository
 
 - **データアクセス（CRUD操作）**
 - **EF Coreの操作**
-- **DB例外の変換**
+- **エンティティの取得時に必要なIncludeの指定**
 - **インフラ関心事（将来: キャッシュ、レプリカ振り分け等）**
 
 #### Repository実装のルール
 
 1. **メソッド命名規則**
    - `Find*Async`: 見つからない場合は `null` を返す
-   - `Get*Async`: 見つからない場合は `NotFoundException` をthrow
+   - `FindForce*Async`: 見つからない場合は `KeyNotFoundException` をthrow
    - `Create*Async`: 作成して返す
-   - `Update*Async`: 更新（返り値なし or Entity）
+   - `Update*Async`: 更新して返す
    - `Delete*Async`: 削除（返り値なし）
 
 2. **Include（Eager Loading）**
@@ -450,20 +632,39 @@ public class ArticleRepository : IArticleRepository
    .Include(a => a.Author)
    .Include(a => a.ArticleTags)
        .ThenInclude(at => at.Tag)
+   .Include(a => a.Likes)
    ```
 
-3. **DB例外の変換**
-   - `DbUpdateException` → 適切な `ApplicationException` に変換
-   - PostgreSQL エラーコードで判定
-     - `23505`: Unique制約違反 → `ConflictException`
-     - `23503`: 外部キー制約違反 → `ValidationException`
+3. **例外処理**
+   - 基本的に**try-catchは使用しない**
+   - DB制約違反等はEF Coreが投げる例外をそのまま伝播
+   - GlobalExceptionHandlerMiddlewareが適切なレスポンスに変換
+   - 特定の例外ハンドリングが必要な場合のみtry-catchを使用
 
-4. **try-catchの使用**
-   - Repositoryではtry-catchを使用してDB例外を変換
+4. **KeyNotFoundExceptionの使用**
+   - `FindForceByIdAsync` では、存在しない場合に `KeyNotFoundException` をthrow
+   - この例外はGlobalExceptionHandlerMiddlewareで404 Not Foundに変換される
 
 ---
 
 ### Domain層
+
+#### EntityBase基底クラス
+
+すべてのエンティティは `EntityBase` を継承します：
+
+```csharp
+namespace NariNoteBackend.Domain.Entity;
+
+public abstract class EntityBase
+{
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+}
+```
+
+- `CreatedAt`, `UpdatedAt` はデフォルトで自動設定される
+- 必要に応じて上書き可能
 
 #### Entityパターン
 
@@ -471,9 +672,9 @@ public class ArticleRepository : IArticleRepository
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace NariNoteBackend.Domain;
+namespace NariNoteBackend.Domain.Entity;
 
-public class Article
+public class Article : EntityBase
 {
     [Key]
     public int Id { get; set; }
@@ -492,17 +693,8 @@ public class Article
 
     public bool IsPublished { get; set; } = false;
 
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-
-    public Article()
-    {
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
     // Navigation Properties
-    public required User Author { get; set; }
+    public User Author { get; set; }
     public List<ArticleTag> ArticleTags { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
 
@@ -521,17 +713,26 @@ public class Article
 
 #### Entity実装のルール
 
-1. **Data Annotations使用**
+1. **EntityBase継承**
+   - すべてのエンティティは `EntityBase` を継承
+   - `CreatedAt`, `UpdatedAt` は自動的に設定される
+   - 明示的なコンストラクタで初期化する必要はない
+
+2. **Data Annotations使用**
    - `[Key]`, `[Required]`, `[MaxLength]`, `[ForeignKey]`
 
-2. **required修飾子**
+3. **required修飾子**
    - null許容でないプロパティには `required` を付与
 
-3. **ナビゲーションプロパティ**
-   - 関連エンティティは `required` または初期化
+4. **ナビゲーションプロパティ**
+   - 関連エンティティは初期化（`= new()`）または required
+   - EF Coreが外部キーから自動で設定するため、requiredは必須ではない
 
-4. **ドメインロジック**
+5. **ドメインロジック**
    - シンプルな計算プロパティやメソッドを実装可能
+
+6. **namespaceは `NariNoteBackend.Domain.Entity`**
+   - Entityは `Domain/Entity/` ディレクトリ配下に配置
 
 ---
 
