@@ -799,9 +799,96 @@ public class CreateArticleResponse
 - ✅ 保守性の高いコード
 - ✅ AIによる自動実装の精度向上
 
-新規機能を実装する際は：
-1. このガイドのパターンに従う
-2. `error-handling-strategy.md` でエラーハンドリングを確認
-3. 既存のコードを参考にする
+### 新規機能実装チェックリスト
+
+新規機能を実装する際は、以下のチェックリストを参考にしてください：
+
+#### 1. 設計フェーズ
+- [ ] 機能要件を確認
+- [ ] 必要なEntityを特定
+- [ ] API仕様を確認（エンドポイント、リクエスト/レスポンス形式）
+
+#### 2. 実装フェーズ
+
+**Entity作成:**
+- [ ] `Src/Domain/Entity/` にEntityクラスを作成
+- [ ] `EntityBase` を継承
+- [ ] Data Annotations（`[Key]`, `[Required]`, `[MaxLength]`, `[ForeignKey]`）を付与
+- [ ] ナビゲーションプロパティを定義
+- [ ] 必要に応じてドメインロジックを実装
+
+**マイグレーション:**
+- [ ] `dotnet ef migrations add <機能名>` でマイグレーション作成
+- [ ] マイグレーションファイルを確認
+- [ ] `dotnet ef database update` で適用（または Docker再起動）
+
+**Repository Interface:**
+- [ ] `Src/Application/Repository/` にインターフェースを作成
+- [ ] `IRepository<TEntity>` を継承
+- [ ] エンティティ固有のメソッドを定義（例: `FindByAuthorAsync`）
+
+**Repository実装:**
+- [ ] `Src/Infrastructure/Repository/` に実装クラスを作成
+- [ ] インターフェースを実装
+- [ ] 必要な `Include` を追加（Eager Loading）
+- [ ] `FindForceByIdAsync` では `KeyNotFoundException` をthrow
+- [ ] try-catchは基本的に使用しない
+
+**Request/Response DTO:**
+- [ ] `Src/Application/Dto/Request/` にRequestクラスを作成
+- [ ] バリデーション属性を付与（`[Required]`, `[MaxLength]`, `[Range]` 等）
+- [ ] エラーメッセージは日本語で記述
+- [ ] `Src/Application/Dto/Response/` にResponseクラスを作成（必要に応じて）
+
+**Service実装:**
+- [ ] `Src/Application/Service/` にServiceクラスを作成
+- [ ] API一個につきService一個の粒度
+- [ ] 必要なRepositoryをコンストラクタで注入
+- [ ] `ExecuteAsync` メソッドを実装
+  - [ ] 認証が必要な場合: `ExecuteAsync(int userId, TRequest request)`
+  - [ ] 認証が不要な場合: `ExecuteAsync(TRequest request)` または `ExecuteAsync(int id)`
+- [ ] ビジネスロジックを実装
+- [ ] 適切な例外をthrow（try-catchは不要）
+- [ ] EntityBaseによる自動フィールド設定を活用
+
+**Controller実装:**
+- [ ] `Src/Controller/` にControllerクラスを作成
+- [ ] 認証が必要な場合は `ApplicationController` を継承
+- [ ] 認証が不要な場合は `ControllerBase` を継承
+- [ ] `[ApiController]`, `[Route("api/[controller]")]` を付与
+- [ ] 必要なServiceをコンストラクタで注入
+- [ ] HTTPメソッド属性を付与（`[HttpGet]`, `[HttpPost]` 等）
+- [ ] バリデーションが必要な場合は `[ValidateModelState]` を付与
+- [ ] 適切なHTTPステータスコードを返す
+- [ ] try-catchは不要
+
+**DI登録:**
+- [ ] ServiceとRepositoryを `ApplicationServiceInstaller.cs` または `InfrastructureServiceInstaller.cs` に登録
+- [ ] 既存の登録パターンに従う
+
+#### 3. 検証フェーズ
+- [ ] コンパイルエラーがないことを確認（`dotnet build`）
+- [ ] 手動でAPIをテスト（`dotnet run` または Docker）
+- [ ] 正常系の動作確認
+- [ ] 異常系の動作確認（バリデーションエラー、404等）
+- [ ] エラーレスポンスの形式が正しいことを確認
+
+#### 4. コードレビュー
+- [ ] コーディング規約に従っているか確認
+- [ ] private変数の命名（アンダースコア無し）
+- [ ] `this.` を使用しているか
+- [ ] `DateTime.UtcNow` を使用しているか
+- [ ] try-catchを不要な箇所で使用していないか
+- [ ] レイヤー間の責務が守られているか
+- [ ] 既存のパターンと一貫性があるか
+
+### 参考ドキュメント
+
+実装時は以下のドキュメントを参照してください：
+
+1. **このガイド（backend-implementation-guide.md）** - 基本的な実装パターン
+2. **[エラーハンドリング戦略](/docs/error-handling-strategy.md)** - 例外処理の詳細
+3. **[アーキテクチャ](/docs/architecture.md)** - 設計思想とレイヤー構成
+4. **既存のコード** - 同様の機能を参考にする
 
 AI（GitHub Copilot等）は本ドキュメントを参照することで、適切な実装を自動生成できます。
