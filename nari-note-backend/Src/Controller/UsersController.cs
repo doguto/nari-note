@@ -18,7 +18,6 @@ public class UsersController : ApplicationController
     [HttpGet("{id}")]
     public async Task<ActionResult> GetUserProfile(int id)
     {
-        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var request = new GetUserProfileRequest { Id = id };
         var response = await getUserProfileService.ExecuteAsync(request);
         return Ok(response);

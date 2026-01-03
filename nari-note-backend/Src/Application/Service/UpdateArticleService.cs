@@ -1,6 +1,5 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Extension;
 
@@ -17,8 +16,8 @@ public class UpdateArticleService
 
     public async Task<UpdateArticleResponse> ExecuteAsync(int userId, UpdateArticleRequest request)
     {
-        var article = await articleRepository.GetByIdAsync(request.Id);
-        if (article.AuthorId != userId) throw new ForbiddenException("この記事を更新する権限がありません");
+        var article = await articleRepository.FindForceByIdAsync(request.Id);
+        if (article.AuthorId != userId) throw new UnauthorizedAccessException("この記事を更新する権限がありません");
 
         // nullでない値のみ更新
         if (!request.Title.IsNullOrEmpty())
@@ -39,7 +38,7 @@ public class UpdateArticleService
         article.UpdatedAt = DateTime.UtcNow;
 
         // タグと一緒に記事を更新（1回のDB操作に統合）
-        await articleRepository.UpdateAsync(article, request.Tags);
+        await articleRepository.UpdateWithTagAsync(article, request.Tags);
 
         return new UpdateArticleResponse
         {

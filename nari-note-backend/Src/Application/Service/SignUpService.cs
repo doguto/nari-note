@@ -1,7 +1,6 @@
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain;
 using NariNoteBackend.Infrastructure.Helper;
 
@@ -26,7 +25,7 @@ public class SignUpService
     public async Task<AuthResponse> ExecuteAsync(SignUpRequest request)
     {
         var existingUser = await userRepository.FindByEmailAsync(request.Email);
-        if (existingUser != null) throw new ConflictException("このメールアドレスは既に使用されています");
+        if (existingUser != null) throw new ArgumentException("このメールアドレスは既に使用されています");
 
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 

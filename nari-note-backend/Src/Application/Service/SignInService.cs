@@ -1,7 +1,6 @@
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain;
 using NariNoteBackend.Infrastructure.Helper;
 
@@ -26,20 +25,14 @@ public class SignInService
     public async Task<AuthResponse> ExecuteAsync(SignInRequest request)
     {
         var user = await userRepository.FindByUsernameOrEmailAsync(request.UsernameOrEmail);
-        if (user == null)
-        {
-            throw new UnauthorizedException("ユーザー名またはパスワードが正しくありません");
-        }
+        if (user == null) throw new ArgumentException("ユーザー名またはパスワードが正しくありません");
 
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
-        if (!isPasswordValid)
-        {
-            throw new UnauthorizedException("ユーザー名またはパスワードが正しくありません");
-        }
+        if (!isPasswordValid) throw new ArgumentException("ユーザー名またはパスワードが正しくありません");
 
         var sessionKey = JwtHelper.GenerateSessionKey();
         var token = jwtHelper.GenerateToken(user, sessionKey);
-        
+
         var session = new Session
         {
             UserId = user.Id,
