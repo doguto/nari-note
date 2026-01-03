@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Repository;
-using NariNoteBackend.Infrastructure.Helper;
+using NariNoteBackend.Application.Security;
 using NariNoteBackend.Infrastructure.Repository;
+using NariNoteBackend.Infrastructure.Security;
 
 namespace NariNoteBackend.Infrastructure;
 
@@ -21,8 +22,8 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
         services.AddScoped<ILikeRepository, LikeRepository>();
-
+        
         // Register helpers
-        services.AddSingleton<JwtHelper>();
+        services.AddScoped<IJwtHelper, JwtHelper>();
     }
 }

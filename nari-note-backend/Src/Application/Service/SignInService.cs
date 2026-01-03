@@ -1,8 +1,8 @@
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Application.Security;
 using NariNoteBackend.Domain;
-using NariNoteBackend.Infrastructure.Helper;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -10,12 +10,12 @@ public class SignInService
 {
     readonly IUserRepository userRepository;
     readonly ISessionRepository sessionRepository;
-    readonly JwtHelper jwtHelper;
+    readonly IJwtHelper jwtHelper;
     
     public SignInService(
         IUserRepository userRepository,
         ISessionRepository sessionRepository,
-        JwtHelper jwtHelper)
+        IJwtHelper jwtHelper)
     {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
@@ -30,7 +30,7 @@ public class SignInService
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordValid) throw new ArgumentException("ユーザー名またはパスワードが正しくありません");
 
-        var sessionKey = JwtHelper.GenerateSessionKey();
+        var sessionKey = jwtHelper.GenerateSessionKey();
         var token = jwtHelper.GenerateToken(user, sessionKey);
 
         var session = new Session

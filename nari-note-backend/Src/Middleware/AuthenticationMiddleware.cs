@@ -1,6 +1,6 @@
 using System.Net;
 using NariNoteBackend.Application.Repository;
-using NariNoteBackend.Infrastructure.Helper;
+using NariNoteBackend.Application.Security;
 
 namespace NariNoteBackend.Middleware;
 
@@ -15,7 +15,7 @@ public class AuthenticationMiddleware
     
     public async Task InvokeAsync(
         HttpContext context, 
-        JwtHelper jwtHelper, 
+        IJwtHelper jwtHelper, 
         ISessionRepository sessionRepository)
     {
         // 認証が不要なエンドポイントはスキップ
