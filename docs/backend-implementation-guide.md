@@ -182,7 +182,6 @@ public class ArticlesController : ApplicationController
     public async Task<ActionResult> CreateArticle(
         [FromBody] CreateArticleRequest request)
     {
-        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var response = await createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
@@ -190,7 +189,6 @@ public class ArticlesController : ApplicationController
     [HttpGet("{id}")]
     public async Task<ActionResult> GetArticle(int id)
     {
-        // 例外はグローバルミドルウェアがキャッチするので、try-catchは不要
         var request = new GetArticleRequest { Id = id };
         var response = await getArticleService.ExecuteAsync(request);
         return Ok(response);
@@ -222,7 +220,7 @@ public abstract class ApplicationController : ControllerBase
 ```
 
 - **UserId**: AuthenticationMiddlewareで設定される認証済みユーザーのID
-- 認証が必要なエンドポイントで `this.UserId` を使用してアクセス可能
+- 認証が必要なエンドポイントで `UserId` を使用してアクセス可能
 
 #### Controllerの責務
 
@@ -399,8 +397,8 @@ public class UpdateArticleService
    - 認証が不要な場合: `ExecuteAsync(TRequest request)` または `ExecuteAsync(int id)`
 
 3. **Request/Response DTOを使用**
-   - 入力は `Request` または プリミティブ型（id等）
-   - 出力は `Response` または `Entity`
+   - 入力は基本 `Request` 必要に応じてパラメータ（id等）を追加
+   - 出力は `Response`
 
 4. **try-catchは不要**
    - 必要に応じて適切な例外をthrow
@@ -448,19 +446,10 @@ namespace NariNoteBackend.Application.Repository;
 
 public interface IArticleRepository : IRepository<Article>
 {
-    /// <summary>
-    /// 著者IDで記事一覧を取得
-    /// </summary>
     Task<List<Article>> FindByAuthorAsync(int authorId);
     
-    /// <summary>
-    /// タグ名で記事一覧を取得
-    /// </summary>
     Task<List<Article>> FindByTagAsync(string tagName);
     
-    /// <summary>
-    /// 記事を更新し、タグも同時に更新する
-    /// </summary>
     Task<Article> UpdateWithTagAsync(Article article, List<string>? tagNames = null);
 }
 ```
@@ -816,11 +805,6 @@ public class CreateArticleResponse
 - [ ] Data Annotations（`[Key]`, `[Required]`, `[MaxLength]`, `[ForeignKey]`）を付与
 - [ ] ナビゲーションプロパティを定義
 - [ ] 必要に応じてドメインロジックを実装
-
-**マイグレーション:**
-- [ ] `dotnet ef migrations add <機能名>` でマイグレーション作成
-- [ ] マイグレーションファイルを確認
-- [ ] `dotnet ef database update` で適用（または Docker再起動）
 
 **Repository Interface:**
 - [ ] `Src/Application/Repository/` にインターフェースを作成

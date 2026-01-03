@@ -88,7 +88,7 @@ nari-note-backend/
 
 ### 命名規則
 - private変数: アンダースコア無し、キャメルケース（例: `articleRepository`）
-- private変数へのアクセス: `this.` を使用（例: `this.articleRepository`）
+- private変数へのアクセス: `this.` 特別必要な理由がない限りは不使用
 - private修飾子: クラスフィールドでは省略
 
 ### 日付時刻
@@ -116,19 +116,26 @@ nari-note-backend/
 
 ### エラーハンドリング
 - 適切な例外をthrow（`KeyNotFoundException`, `UnauthorizedAccessException` 等）
+- アプリケーション独自のカスタムエラーとして `NariNoteException` が存在（500エラーとして処理）
 - try-catchは基本的に全レイヤーで不要
 - GlobalExceptionHandlerMiddlewareが自動的に適切なレスポンスに変換
 
 ## 新規機能実装フロー
 
+### 新規DB実装（or 新規カラム追加）
+
 1. **Domain Entity の定義** - `Src/Domain/Entity/`（EntityBase継承）
 2. **マイグレーション作成** - `dotnet ef migrations add <名前>`
-3. **Repository Interface** - `Src/Application/Repository/`（IRepository継承）
-4. **Repository 実装** - `Src/Infrastructure/Repository/`
-5. **Request/Response DTO** - `Src/Application/Dto/`
-6. **Service実装** - `Src/Application/Service/`（ExecuteAsyncメソッド）
-7. **Controller実装** - `Src/Controller/`
-8. **DI登録** - `Program.cs` または `*ServiceInstaller.cs`
+3. **マイグレーション適用** - `dotnet ef database update`（または Docker再起動）
+
+### 新規API実装
+
+1. **Repository Interface** - `Src/Application/Repository/`（IRepository継承）
+2. **Repository 実装** - `Src/Infrastructure/Repository/`
+3. **Request/Response DTO** - `Src/Application/Dto/`
+4. **Service実装** - `Src/Application/Service/`（ExecuteAsyncメソッド）
+5. **Controller実装** - `Src/Controller/`
+6. **DI登録** - `Program.cs` または `*ServiceInstaller.cs`
 
 ## 実装時の注意事項
 

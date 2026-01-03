@@ -10,83 +10,6 @@ nari-note-backendでは、**GlobalExceptionHandlerMiddleware**を使用して全
 
 ## 例外とHTTPステータスコードのマッピング
 
-### GlobalExceptionHandlerMiddlewareの実装
-
-```csharp
-using System.ComponentModel.DataAnnotations;
-using System.Net;
-using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
-using NariNoteBackend.Extension;
-
-namespace NariNoteBackend.Middleware;
-
-public class GlobalExceptionHandlerMiddleware
-{
-    readonly RequestDelegate next;
-    readonly ILogger<GlobalExceptionHandlerMiddleware> logger;
-
-    public GlobalExceptionHandlerMiddleware(
-        RequestDelegate next,
-        ILogger<GlobalExceptionHandlerMiddleware> logger
-    )
-    {
-        this.next = next;
-        this.logger = logger;
-    }
-
-    public async Task InvokeAsync(HttpContext httpContext)
-    {
-        try
-        {
-            await next(httpContext);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, ex.Message);
-            var response = BuildErrorResponse(ex);
-            httpContext.Response.StatusCode = response.StatusCode;
-            httpContext.Response.ContentType = "application/json";
-
-            await httpContext.Response.WriteAsJsonAsync(response);
-        }
-    }
-
-    ErrorResponse BuildErrorResponse(Exception ex)
-    {
-        var statusCode = ex switch
-        {
-            // 400 Bad Request
-            ArgumentNullException or ArgumentOutOfRangeException or ArgumentException 
-                or ValidationException or InvalidOperationException
-                => HttpStatusCode.BadRequest,
-
-            // 401 Unauthorized
-            UnauthorizedAccessException => HttpStatusCode.Unauthorized,
-
-            // 404 Not Found
-            KeyNotFoundException => HttpStatusCode.NotFound,
-
-            // 408 Request Timeout
-            TimeoutException => HttpStatusCode.RequestTimeout,
-
-            // TODO: メンテナンス等によるサービスの停止中 503 ServiceUnavailable
-            
-            // 500 Internal Server Error
-            // NariNoteException はカスタムのエラーであるため可読性の為 500 であることを明記
-            NariNoteException => HttpStatusCode.InternalServerError,
-            _ => HttpStatusCode.InternalServerError,
-        };
-
-        return new ErrorResponse()
-        {
-            StatusCode = statusCode.AsInt(),
-            Message = ex.Message,
-        };
-    }
-}
-```
-
 ### エラーレスポンス形式
 
 ```csharp
@@ -142,15 +65,6 @@ if (request.AuthorId <= 0)
 
 **フロントエンドの挙動:**
 サインインページにリダイレクトする
-
-**例:**
-```csharp
-// 記事の編集権限チェック
-if (article.AuthorId != userId)
-{
-    throw new UnauthorizedAccessException("この記事を編集する権限がありません");
-}
-```
 
 ### 404 Not Found
 
@@ -217,56 +131,6 @@ public class NariNoteException : System.Exception
 
 **フロントエンドの挙動:**
 メンテナンス等のページにリダイレクトする
-
-## 実装例
-
-### Controller層
-
-```csharp
-[HttpPost]
-[ValidateModelState]
-public async Task<ActionResult> CreateArticle([FromBody] CreateArticleRequest request)
-{
-    // try-catchは不要
-    // 例外はGlobalExceptionHandlerMiddlewareが処理
-    var response = await createArticleService.ExecuteAsync(request);
-    return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
-}
-```
-
-### Service層
-
-```csharp
-public async Task<UpdateArticleResponse> ExecuteAsync(int userId, UpdateArticleRequest request)
-{
-    // try-catchは不要
-    // 適切な例外をthrowすればミドルウェアが処理
-    var article = await articleRepository.FindForceByIdAsync(request.Id);
-    
-    if (article.AuthorId != userId)
-    {
-        throw new UnauthorizedAccessException("この記事を編集する権限がありません");
-    }
-    
-    // 更新処理...
-}
-```
-
-### Repository層
-
-```csharp
-public async Task<Article> FindForceByIdAsync(int id)
-{
-    var article = await FindByIdAsync(id);
-    if (article == null)
-    {
-        // KeyNotFoundExceptionをthrow
-        // ミドルウェアが404 Not Foundに変換
-        throw new KeyNotFoundException($"記事{id}が存在しません");
-    }
-    return article;
-}
-```
 
 ## バリデーションエラーの処理
 
