@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using NariNoteBackend.Application.Security;
-using NariNoteBackend.Domain;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Infrastructure.Security;
 

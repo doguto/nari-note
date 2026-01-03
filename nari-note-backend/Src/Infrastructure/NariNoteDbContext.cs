@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NariNoteBackend.Domain;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Infrastructure;
 

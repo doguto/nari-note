@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using NariNoteBackend.Domain;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Application.Security;
 

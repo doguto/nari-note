@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Repository;
-using NariNoteBackend.Domain;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 

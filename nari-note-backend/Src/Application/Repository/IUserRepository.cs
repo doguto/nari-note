@@ -1,4 +1,4 @@
-using NariNoteBackend.Domain;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Application.Repository;
 
