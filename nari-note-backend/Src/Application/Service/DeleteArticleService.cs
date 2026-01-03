@@ -11,7 +11,7 @@ public class DeleteArticleService
     {
         this.articleRepository = articleRepository;
     }
-    
+
     public async Task ExecuteAsync(DeleteArticleRequest request)
     {
         var article = await articleRepository.FindForceByIdAsync(request.Id);

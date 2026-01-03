@@ -1,6 +1,7 @@
+using System.ComponentModel.DataAnnotations;
 using System.Net;
-using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Middleware;
@@ -38,56 +39,34 @@ public class GlobalExceptionHandlerMiddleware
 
     ErrorResponse BuildErrorResponse(Exception ex)
     {
-        return ex switch
+        var statusCode = ex switch
         {
+            // 400 Bad Request
+            ArgumentNullException or ArgumentOutOfRangeException or ArgumentException 
+                or ValidationException or InvalidOperationException
+                => HttpStatusCode.BadRequest,
 
-            ArgumentNullException or ArgumentOutOfRangeException or ArgumentException
-                => new ErrorResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest.AsInt(),
-                    Message = ex.Message,
-                },
-            KeyNotFoundException 
-                => new ErrorResponse()
-                {
-                    StatusCode = HttpStatusCode.NotFound.AsInt(),
-                    Message = ex.Message,
-                },
-            UnauthorizedAccessException
-                => new ErrorResponse()
-                {
-                    StatusCode = HttpStatusCode.Unauthorized.AsInt(),
-                    Message = ex.Message,
-                },
-            InvalidOperationException
-                => new ErrorResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest.AsInt(),
-                    Message = ex.Message,
-                },
-            DbUpdateConcurrencyException
-                => new ErrorResponse()
-                {
-                    StatusCode = HttpStatusCode.Conflict.AsInt(),
-                    Message = ex.Message,
-                },
-            DbUpdateException
-                => new ErrorResponse()
-                {
-                    StatusCode = HttpStatusCode.InternalServerError.AsInt(),
-                    Message = ex.Message,
-                },
-            TimeoutException
-                => new ErrorResponse()
-                {
-                    StatusCode = HttpStatusCode.RequestTimeout.AsInt(),
-                    Message = ex.Message,
-                },
-            _ => new ErrorResponse()
-            {
-                StatusCode = HttpStatusCode.InternalServerError.AsInt(),
-                Message = ex.Message,
-            }
+            // 401 Unauthorized
+            UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+
+            // 404 Not Found
+            KeyNotFoundException => HttpStatusCode.NotFound,
+
+            // 408 Request Timeout
+            TimeoutException => HttpStatusCode.RequestTimeout,
+
+            // TODO: メンテナンス等によるサービスの停止中 503 ServiceUnavailable
+            
+            // 500 Internal Server Error
+            // NariNoteException はカスタムのエラーであるため可読性の為 500 であることを明記
+            NariNoteException => HttpStatusCode.InternalServerError,
+            _ => HttpStatusCode.InternalServerError,
+        };
+
+        return new ErrorResponse()
+        {
+            StatusCode = statusCode.AsInt(),
+            Message = ex.Message,
         };
     }
 }
