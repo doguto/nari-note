@@ -1,11 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
-namespace NariNoteBackend.Domain;
+namespace NariNoteBackend.Domain.Entity;
 
-[Index(nameof(UserId), nameof(ArticleId), IsUnique = true)]
-public class Like : EntityBase
+public class Notification : EntityBase
 {
     [Key]
     public int Id { get; set; }
@@ -18,8 +16,9 @@ public class Like : EntityBase
     [ForeignKey("Article")]
     public int ArticleId { get; set; }
 
+    public bool IsRead { get; set; } = false;
 
     // Navigation Properties
-    public User User { get; set; }
-    public Article Article { get; set; }
+    public required User User { get; set; }
+    public required Article Article { get; set; }
 }

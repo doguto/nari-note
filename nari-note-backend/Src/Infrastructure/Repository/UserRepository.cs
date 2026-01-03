@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
-using NariNoteBackend.Domain;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -19,67 +17,47 @@ public class UserRepository : IUserRepository
     {
         return await context.Users.FindAsync(id);
     }
-    
-    public async Task<User> GetByIdAsync(int id)
+
+    public async Task<User> FindForceByIdAsync(int id)
     {
         var user = await FindByIdAsync(id);
-        
-        if (user == null)
-        {
-            throw new NotFoundException($"User with ID {id} not found");
-        }
-        
+        if (user == null) throw new KeyNotFoundException($"User with ID {id} not found");
+
         return user;
     }
-    
-    public async Task<User?> FindByEmailAsync(string email)
+
+    public async Task<User> UpdateAsync(User entity)
     {
-        try
+        context.Users.Update(entity);
+        await context.SaveChangesAsync();
+        return entity;
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var user = await context.Users.FindAsync(id);
+        if (user != null)
         {
-            return await context.Users
-                .FirstOrDefaultAsync(u => u.Email == email);
-        }
-        catch (System.Exception ex)
-        {
-            throw new InfrastructureException(
-                $"Error occurred while fetching user with email {email}", ex);
+            context.Users.Remove(user);
+            await context.SaveChangesAsync();
         }
     }
-    
+
+    public async Task<User?> FindByEmailAsync(string email)
+    {
+        return await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+    }
+
     public async Task<User?> FindByUsernameOrEmailAsync(string usernameOrEmail)
     {
-        try
-        {
-            return await context.Users
-                .FirstOrDefaultAsync(u => u.Name == usernameOrEmail || u.Email == usernameOrEmail);
-        }
-        catch (System.Exception ex)
-        {
-            throw new InfrastructureException(
-                $"Error occurred while fetching user with username or email {usernameOrEmail}", ex);
-        }
+        return await context.Users
+            .FirstOrDefaultAsync(u => u.Name == usernameOrEmail || u.Email == usernameOrEmail);
     }
     
     public async Task<User> CreateAsync(User user)
     {
-        try
-        {
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
-            return user;
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
-        {
-            if (pgEx.SqlState == PostgresErrorCodes.UniqueViolation)
-            {
-                throw new ConflictException("User with this email already exists", ex);
-            }
-            throw new InfrastructureException(
-                "Database error occurred while creating user", ex);
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            throw new ConflictException("The user was modified by another user", ex);
-        }
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+        return user;
     }
 }

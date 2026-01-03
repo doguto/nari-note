@@ -1,6 +1,5 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
 
 namespace NariNoteBackend.Application.Service;
@@ -16,7 +15,7 @@ public class GetUserProfileService
     
     public async Task<GetUserProfileResponse> ExecuteAsync(GetUserProfileRequest request)
     {
-        var user = await userRepository.GetByIdAsync(request.Id);
+        var user = await userRepository.FindForceByIdAsync(request.Id);
 
         return new GetUserProfileResponse
         {
@@ -24,7 +23,6 @@ public class GetUserProfileService
             Username = user.Name,  // Domain の Name を Username として返す
             Bio = user.Bio,
             CreatedAt = user.CreatedAt
-            // PasswordHash と Email は含めない
         };
     }
 }

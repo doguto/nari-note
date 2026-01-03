@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace NariNoteBackend.Domain;
+namespace NariNoteBackend.Domain.Entity;
 
 public class Article : EntityBase
 {

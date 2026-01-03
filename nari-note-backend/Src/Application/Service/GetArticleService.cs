@@ -1,6 +1,5 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
 
 namespace NariNoteBackend.Application.Service;
@@ -16,7 +15,7 @@ public class GetArticleService
 
     public async Task<GetArticleResponse> ExecuteAsync(GetArticleRequest request)
     {
-        var article = await articleRepository.GetByIdAsync(request.Id);
+        var article = await articleRepository.FindForceByIdAsync(request.Id);
 
         return new GetArticleResponse
         {

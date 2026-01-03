@@ -1,96 +1,72 @@
+using System.ComponentModel.DataAnnotations;
+using System.Net;
 using NariNoteBackend.Application.Dto.Response;
-using AppException = NariNoteBackend.Application.Exception.ApplicationException;
+using NariNoteBackend.Application.Exception;
+using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Middleware;
 
-/// <summary>
-/// グローバル例外ハンドラーミドルウェア
-/// すべての例外を一括でキャッチし、統一されたエラーレスポンスを返却
-/// </summary>
 public class GlobalExceptionHandlerMiddleware
 {
-    private readonly RequestDelegate next;
-    private readonly ILogger<GlobalExceptionHandlerMiddleware> logger;
+    readonly RequestDelegate next;
+    readonly ILogger<GlobalExceptionHandlerMiddleware> logger;
 
     public GlobalExceptionHandlerMiddleware(
         RequestDelegate next,
-        ILogger<GlobalExceptionHandlerMiddleware> logger)
+        ILogger<GlobalExceptionHandlerMiddleware> logger
+    )
     {
         this.next = next;
         this.logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext httpContext)
     {
         try
         {
-            await this.next(context);
+            await next(httpContext);
         }
-        catch (AppException ex)
+        catch (Exception ex)
         {
-            await this.HandleApplicationExceptionAsync(context, ex);
-        }
-        catch (System.Exception ex)
-        {
-            await this.HandleUnexpectedExceptionAsync(context, ex);
+            logger.LogError(ex, ex.Message);
+            var response = BuildErrorResponse(ex);
+            httpContext.Response.StatusCode = response.StatusCode;
+            httpContext.Response.ContentType = "application/json";
+
+            await httpContext.Response.WriteAsJsonAsync(response);
         }
     }
 
-    /// <summary>
-    /// アプリケーション例外を処理
-    /// </summary>
-    private async Task HandleApplicationExceptionAsync(
-        HttpContext context,
-        AppException exception)
+    ErrorResponse BuildErrorResponse(Exception ex)
     {
-        this.logger.LogWarning(
-            exception,
-            "Application exception occurred: {ErrorCode} - {Message}",
-            exception.ErrorCode,
-            exception.Message);
-
-        var response = new ErrorResponse
+        var statusCode = ex switch
         {
-            Error = new ErrorDetail
-            {
-                Code = exception.ErrorCode,
-                Message = exception.Message,
-                Timestamp = DateTime.UtcNow,
-                Path = context.Request.Path,
-                AdditionalData = exception.AdditionalData
-            }
+            // 400 Bad Request
+            ArgumentNullException or ArgumentOutOfRangeException or ArgumentException 
+                or ValidationException or InvalidOperationException
+                => HttpStatusCode.BadRequest,
+
+            // 401 Unauthorized
+            UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+
+            // 404 Not Found
+            KeyNotFoundException => HttpStatusCode.NotFound,
+
+            // 408 Request Timeout
+            TimeoutException => HttpStatusCode.RequestTimeout,
+
+            // TODO: メンテナンス等によるサービスの停止中 503 ServiceUnavailable
+            
+            // 500 Internal Server Error
+            // NariNoteException はカスタムのエラーであるため可読性の為 500 であることを明記
+            NariNoteException => HttpStatusCode.InternalServerError,
+            _ => HttpStatusCode.InternalServerError,
         };
 
-        context.Response.StatusCode = exception.StatusCode;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(response);
-    }
-
-    /// <summary>
-    /// 予期しない例外を処理
-    /// </summary>
-    private async Task HandleUnexpectedExceptionAsync(
-        HttpContext context,
-        System.Exception exception)
-    {
-        this.logger.LogError(
-            exception,
-            "Unexpected exception occurred: {Message}",
-            exception.Message);
-
-        var response = new ErrorResponse
+        return new ErrorResponse()
         {
-            Error = new ErrorDetail
-            {
-                Code = "INTERNAL_SERVER_ERROR",
-                Message = "An unexpected error occurred",
-                Timestamp = DateTime.UtcNow,
-                Path = context.Request.Path
-            }
+            StatusCode = statusCode.AsInt(),
+            Message = ex.Message,
         };
-
-        context.Response.StatusCode = 500;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(response);
     }
 }

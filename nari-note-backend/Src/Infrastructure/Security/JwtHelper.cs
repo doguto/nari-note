@@ -3,11 +3,12 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using NariNoteBackend.Domain;
+using NariNoteBackend.Application.Security;
+using NariNoteBackend.Domain.Entity;
 
-namespace NariNoteBackend.Infrastructure.Helper;
+namespace NariNoteBackend.Infrastructure.Security;
 
-public class JwtHelper
+public class JwtHelper : IJwtHelper
 {
     readonly string secret;
     readonly string issuer;
@@ -16,21 +17,21 @@ public class JwtHelper
     
     public JwtHelper(IConfiguration configuration)
     {
-        this.secret = configuration["Jwt:Secret"] 
+        secret = configuration["Jwt:Secret"] 
             ?? throw new InvalidOperationException("JWT Secret is not configured");
-        this.issuer = configuration["Jwt:Issuer"] 
+        issuer = configuration["Jwt:Issuer"] 
             ?? throw new InvalidOperationException("JWT Issuer is not configured");
-        this.audience = configuration["Jwt:Audience"] 
+        audience = configuration["Jwt:Audience"] 
             ?? throw new InvalidOperationException("JWT Audience is not configured");
-        this.expirationInHours = int.Parse(
+        expirationInHours = int.Parse(
             configuration["Jwt:ExpirationInHours"] ?? "24");
     }
     
     public int GetExpirationInHours()
     {
-        return this.expirationInHours;
+        return expirationInHours;
     }
-    
+
     public string GenerateToken(User user, string sessionKey)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.secret));
@@ -46,8 +47,8 @@ public class JwtHelper
         };
         
         var token = new JwtSecurityToken(
-            issuer: this.issuer,
-            audience: this.audience,
+            issuer: issuer,
+            audience: audience,
             claims: claims,
             expires: DateTime.UtcNow.AddHours(this.expirationInHours),
             signingCredentials: credentials
@@ -59,7 +60,7 @@ public class JwtHelper
     public ClaimsPrincipal? ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(this.secret);
+        var key = Encoding.UTF8.GetBytes(secret);
         
         try
         {
@@ -68,9 +69,9 @@ public class JwtHelper
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = true,
-                ValidIssuer = this.issuer,
+                ValidIssuer = issuer,
                 ValidateAudience = true,
-                ValidAudience = this.audience,
+                ValidAudience = audience,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             }, out SecurityToken validatedToken);
@@ -86,8 +87,8 @@ public class JwtHelper
             return null;
         }
     }
-    
-    public static string GenerateSessionKey()
+
+    public string GenerateSessionKey()
     {
         var randomBytes = new byte[32];
         using (var rng = RandomNumberGenerator.Create())

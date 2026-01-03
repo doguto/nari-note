@@ -1,24 +1,24 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
-namespace NariNoteBackend.Domain;
+namespace NariNoteBackend.Domain.Entity;
 
-public class Notification : EntityBase
+[Index(nameof(ArticleId), nameof(TagId), IsUnique = true)]
+public class ArticleTag : EntityBase
 {
     [Key]
     public int Id { get; set; }
 
     [Required]
-    [ForeignKey("User")]
-    public int UserId { get; set; }
-
-    [Required]
     [ForeignKey("Article")]
     public int ArticleId { get; set; }
 
-    public bool IsRead { get; set; } = false;
+    [Required]
+    [ForeignKey("Tag")]
+    public int TagId { get; set; }
 
     // Navigation Properties
-    public required User User { get; set; }
     public required Article Article { get; set; }
+    public required Tag Tag { get; set; }
 }

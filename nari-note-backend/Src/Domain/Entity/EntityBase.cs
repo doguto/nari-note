@@ -1,4 +1,4 @@
-﻿namespace NariNoteBackend.Domain;
+﻿namespace NariNoteBackend.Domain.Entity;
 
 public abstract class EntityBase
 {

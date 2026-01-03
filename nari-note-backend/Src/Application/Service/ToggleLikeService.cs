@@ -1,20 +1,17 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Repository;
-using NariNoteBackend.Domain;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Application.Service;
 
 public class ToggleLikeService
 {
     readonly ILikeRepository likeRepository;
-    readonly IArticleRepository articleRepository;
     
-    public ToggleLikeService(ILikeRepository likeRepository, IArticleRepository articleRepository)
+    public ToggleLikeService(ILikeRepository likeRepository)
     {
         this.likeRepository = likeRepository;
-        this.articleRepository = articleRepository;
     }
     
     public async Task<ToggleLikeResponse> ExecuteAsync(int userId, ToggleLikeRequest request)

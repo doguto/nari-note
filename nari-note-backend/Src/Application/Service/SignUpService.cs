@@ -1,9 +1,8 @@
 using NariNoteBackend.Application.Repository;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
-using NariNoteBackend.Domain;
-using NariNoteBackend.Infrastructure.Helper;
+using NariNoteBackend.Application.Security;
+using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -11,22 +10,22 @@ public class SignUpService
 {
     readonly IUserRepository userRepository;
     readonly ISessionRepository sessionRepository;
-    readonly JwtHelper jwtHelper;
-    
+    readonly IJwtHelper jwtHelper;
+
     public SignUpService(
         IUserRepository userRepository,
         ISessionRepository sessionRepository,
-        JwtHelper jwtHelper)
+        IJwtHelper jwtHelper)
     {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
         this.jwtHelper = jwtHelper;
     }
-    
+
     public async Task<AuthResponse> ExecuteAsync(SignUpRequest request)
     {
         var existingUser = await userRepository.FindByEmailAsync(request.Email);
-        if (existingUser != null) throw new ConflictException("このメールアドレスは既に使用されています");
+        if (existingUser != null) throw new ArgumentException("このメールアドレスは既に使用されています");
 
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
@@ -39,7 +38,7 @@ public class SignUpService
 
         var createdUser = await userRepository.CreateAsync(user);
 
-        var sessionKey = JwtHelper.GenerateSessionKey();
+        var sessionKey = jwtHelper.GenerateSessionKey();
         var token = jwtHelper.GenerateToken(createdUser, sessionKey);
 
         var session = new Session
