@@ -10,7 +10,7 @@ interface ApiResponse {
 }
 
 export default function DebugPage() {
-  const [apiEndpoint, setApiEndpoint] = useState('http://localhost:5243');
+  const [apiEndpoint, setApiEndpoint] = useState('');
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +56,7 @@ export default function DebugPage() {
       const options: RequestInit = {
         method,
         headers,
+        credentials: 'include',
       };
       
       if (body) {
@@ -107,7 +108,7 @@ export default function DebugPage() {
 
   const handleSignIn = () => {
     makeRequest(`${apiEndpoint}/api/auth/signin`, 'POST', {
-      email: signInEmail,
+      usernameOrEmail: signInEmail,
       password: signInPassword,
     });
   };

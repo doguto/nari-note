@@ -22,7 +22,7 @@ namespace NariNoteBackend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Article", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -59,7 +59,7 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("Articles");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.ArticleTag", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.ArticleTag", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -89,7 +89,41 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("ArticleTags");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Follow", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Follow", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -119,7 +153,7 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("Follows");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Like", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Like", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -149,7 +183,7 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("Likes");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Notification", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Notification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -181,7 +215,7 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Session", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Session", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -216,7 +250,7 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("Sessions");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Tag", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Tag", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -243,7 +277,7 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.User", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -288,9 +322,9 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Article", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
                 {
-                    b.HasOne("NariNoteBackend.Domain.User", "Author")
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "Author")
                         .WithMany("Articles")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -299,15 +333,15 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.ArticleTag", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.ArticleTag", b =>
                 {
-                    b.HasOne("NariNoteBackend.Domain.Article", "Article")
+                    b.HasOne("NariNoteBackend.Domain.Entity.Article", "Article")
                         .WithMany("ArticleTags")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NariNoteBackend.Domain.Tag", "Tag")
+                    b.HasOne("NariNoteBackend.Domain.Entity.Tag", "Tag")
                         .WithMany("ArticleTags")
                         .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -318,15 +352,34 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("Tag");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Follow", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Comment", b =>
                 {
-                    b.HasOne("NariNoteBackend.Domain.User", "Follower")
+                    b.HasOne("NariNoteBackend.Domain.Entity.Article", "Article")
+                        .WithMany("Comments")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Follow", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "Follower")
                         .WithMany("Followings")
                         .HasForeignKey("FollowerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("NariNoteBackend.Domain.User", "Following")
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "Following")
                         .WithMany("Followers")
                         .HasForeignKey("FollowingId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -337,15 +390,15 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("Following");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Like", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Like", b =>
                 {
-                    b.HasOne("NariNoteBackend.Domain.Article", "Article")
+                    b.HasOne("NariNoteBackend.Domain.Entity.Article", "Article")
                         .WithMany("Likes")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NariNoteBackend.Domain.User", "User")
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
                         .WithMany("Likes")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -356,15 +409,15 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Notification", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Notification", b =>
                 {
-                    b.HasOne("NariNoteBackend.Domain.Article", "Article")
+                    b.HasOne("NariNoteBackend.Domain.Entity.Article", "Article")
                         .WithMany()
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NariNoteBackend.Domain.User", "User")
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
                         .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -375,9 +428,9 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Session", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Session", b =>
                 {
-                    b.HasOne("NariNoteBackend.Domain.User", "User")
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
                         .WithMany("Sessions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -386,21 +439,25 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Article", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
                 {
                     b.Navigation("ArticleTags");
+
+                    b.Navigation("Comments");
 
                     b.Navigation("Likes");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Tag", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Tag", b =>
                 {
                     b.Navigation("ArticleTags");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.User", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.User", b =>
                 {
                     b.Navigation("Articles");
+
+                    b.Navigation("Comments");
 
                     b.Navigation("Followers");
 

@@ -12,15 +12,18 @@ public class SignUpService
     readonly IUserRepository userRepository;
     readonly ISessionRepository sessionRepository;
     readonly IJwtHelper jwtHelper;
+    readonly ICookieOptionsHelper cookieOptionsHelper;
 
     public SignUpService(
         IUserRepository userRepository,
         ISessionRepository sessionRepository,
-        IJwtHelper jwtHelper)
+        IJwtHelper jwtHelper,
+        ICookieOptionsHelper cookieOptionsHelper)
     {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
         this.jwtHelper = jwtHelper;
+        this.cookieOptionsHelper = cookieOptionsHelper;
     }
 
     public async Task<AuthResponse> ExecuteAsync(SignUpRequest request, HttpResponse response)
@@ -54,13 +57,9 @@ public class SignUpService
         await sessionRepository.CreateAsync(session);
         
         // HttpOnly Cookieにトークンを設定
-        response.Cookies.Append("authToken", token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            MaxAge = TimeSpan.FromHours(jwtHelper.GetExpirationInHours())
-        });
+        var cookieOptions = cookieOptionsHelper.CreateAuthCookieOptions(
+            TimeSpan.FromHours(jwtHelper.GetExpirationInHours()));
+        response.Cookies.Append("authToken", token, cookieOptions);
         
         return new AuthResponse
         {
