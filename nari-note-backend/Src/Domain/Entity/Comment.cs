@@ -17,6 +17,7 @@ public class Comment : EntityBase
     public int ArticleId { get; set; }
 
     [Required]
+    [MaxLength(1000)]
     public required string Message { get; set; }
 
     // Navigation Properties
