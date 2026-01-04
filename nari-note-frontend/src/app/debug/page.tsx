@@ -84,7 +84,7 @@ export default function DebugPage() {
         }
         
         // ユーザープロフィール取得成功時にIDを保存
-        if (data.id && method === 'GET' && url.includes('/users/')) {
+        if (data.id && method === 'GET' && url.match(/\/users\/\d+$/)) {
           setUserId(data.id.toString());
         }
       }
@@ -116,7 +116,7 @@ export default function DebugPage() {
     const tags = articleTags.split(',').map(tag => tag.trim()).filter(tag => tag);
     makeRequest(`${apiEndpoint}/api/articles`, 'POST', {
       title: articleTitle,
-      content: articleContent,
+      body: articleContent,
       tags: tags,
     });
   };
@@ -195,6 +195,13 @@ export default function DebugPage() {
     if (userName) body.name = userName;
     if (userBio) body.bio = userBio;
     if (userProfileImage) body.profileImage = userProfileImage;
+    
+    if (Object.keys(body).length === 0) {
+      const errorMsg = '少なくとも1つのフィールドを入力してください';
+      setError(errorMsg);
+      alert(`❌ ${errorMsg}`);
+      return;
+    }
     
     makeRequest(`${apiEndpoint}/api/users`, 'PUT', body);
   };
