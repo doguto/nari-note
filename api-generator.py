@@ -1,18 +1,4 @@
 #!/usr/bin/env python3
-"""
-API Generator Script
-
-このスクリプトは、バックエンドのC#コード（Controllers, Request, Response）から
-フロントエンド用のTypeScript API関数とTanStack Queryフックを生成します。
-
-使用方法:
-    python api-generator.py
-
-生成されるファイル:
-    - nari-note-frontend/src/lib/api/types.ts
-    - nari-note-frontend/src/lib/api/endpoints.ts
-    - nari-note-frontend/src/lib/api/hooks.ts
-"""
 
 import os
 import re
@@ -301,24 +287,38 @@ def main():
     # 出力ディレクトリを作成
     FRONTEND_API_DIR.mkdir(parents=True, exist_ok=True)
     
+    # 既存ファイルの確認
+    types_file = FRONTEND_API_DIR / "types.ts"
+    endpoints_file = FRONTEND_API_DIR / "endpoints.ts"
+    hooks_file = FRONTEND_API_DIR / "hooks.ts"
+    
+    existing_files = [f for f in [types_file, endpoints_file, hooks_file] if f.exists()]
+    
+    if existing_files:
+        print("\n⚠️  警告: 以下のファイルが既に存在します:")
+        for f in existing_files:
+            print(f"   - {f}")
+        print("\n生成を続行すると、これらのファイルが上書きされます。")
+        response = input("続行しますか？ (y/N): ").strip().lower()
+        if response not in ['y', 'yes']:
+            print("生成を中止しました。")
+            return
+    
     # types.tsを生成
     print("\n✏️  Generating types.ts...")
     types_content = generate_types_file(classes)
-    types_file = FRONTEND_API_DIR / "types.ts"
     types_file.write_text(types_content, encoding='utf-8')
     print(f"  ✓ {types_file}")
     
     # endpoints.tsを生成
     print("\n✏️  Generating endpoints.ts...")
     endpoints_content = generate_endpoints_file(all_endpoints)
-    endpoints_file = FRONTEND_API_DIR / "endpoints.ts"
     endpoints_file.write_text(endpoints_content, encoding='utf-8')
     print(f"  ✓ {endpoints_file}")
     
     # hooks.tsを生成（骨組みのみ）
     print("\n✏️  Generating hooks.ts template...")
     hooks_content = generate_hooks_file(all_endpoints)
-    hooks_file = FRONTEND_API_DIR / "hooks.ts"
     hooks_file.write_text(hooks_content, encoding='utf-8')
     print(f"  ✓ {hooks_file}")
     
