@@ -143,10 +143,10 @@ export function useSignIn(options?: UseMutationOptions<AuthResponse, Error, Sign
 }
 
 // Health Hooks
-export function useGetHealth(params: void, options?: Omit<UseQueryOptions<GetHealthResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetHealth(options?: Omit<UseQueryOptions<GetHealthResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetHealthResponse>({
-    queryKey: [...queryKeys.health.getHealth, params],
-    queryFn: () => healthApi.getHealth(params),
+    queryKey: queryKeys.health.getHealth,
+    queryFn: () => healthApi.getHealth(),
     ...options,
   });
 }
