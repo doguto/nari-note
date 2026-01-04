@@ -1,5 +1,5 @@
 using System.Net;
-using NariNoteBackend.Application.Repository;
+using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Application.Security;
 
 namespace NariNoteBackend.Middleware;

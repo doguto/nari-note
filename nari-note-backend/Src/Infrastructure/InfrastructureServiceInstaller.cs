@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using NariNoteBackend.Application.Repository;
+using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Application.Security;
 using NariNoteBackend.Infrastructure.Repository;
 using NariNoteBackend.Infrastructure.Security;

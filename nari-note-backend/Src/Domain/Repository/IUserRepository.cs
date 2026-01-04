@@ -1,6 +1,6 @@
 using NariNoteBackend.Domain.Entity;
 
-namespace NariNoteBackend.Application.Repository;
+namespace NariNoteBackend.Domain.Repository;
 
 public interface IUserRepository : IRepository<User>
 {

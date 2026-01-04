@@ -1,6 +1,6 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Repository;
+using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
 
 namespace NariNoteBackend.Application.Service;

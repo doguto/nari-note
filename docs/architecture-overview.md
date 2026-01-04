@@ -19,8 +19,6 @@ Infrastructure (Repository実装)
 
 ## ディレクトリ構成
 
-> **注意**: 現在 Repository Interface は `Application/Repository/` に配置されていますが、将来的に `Domain/Repository/` に移動する予定です。新規実装時は `Domain/Repository/` に配置してください。
-
 ```
 nari-note-backend/
 ├── Src/
@@ -40,7 +38,7 @@ nari-note-backend/
 │   │   │   └── NariNoteException.cs
 │   │   └── Security/         # セキュリティ関連（JWT等）
 │   ├── Domain/                # ドメイン層
-│   │   ├── Repository/       # Repository抽象化（インターフェース）※新規実装はここに配置
+│   │   ├── Repository/       # Repository抽象化（インターフェース）
 │   │   │   ├── IRepository.cs  # 共通基底インターフェース
 │   │   │   ├── IArticleRepository.cs
 │   │   │   └── IUserRepository.cs
