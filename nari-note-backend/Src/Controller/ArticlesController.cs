@@ -40,6 +40,7 @@ public class ArticlesController : ApplicationController
     [ValidateModelState]
     public async Task<ActionResult> CreateArticle([FromBody] CreateArticleRequest request)
     {
+        request.AuthorId = UserId;
         var response = await createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
