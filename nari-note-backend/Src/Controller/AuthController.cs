@@ -25,10 +25,7 @@ public class AuthController : ApplicationController
     [ValidateModelState]
     public async Task<ActionResult<AuthResponse>> SignUp([FromBody] SignUpRequest request)
     {
-        var response = await signUpService.ExecuteAsync(request);
-        
-        // HttpOnly CookieにトークンをセットするロジックはSignUpServiceに委譲
-        // 将来的にCookie対応を追加する際はここで設定
+        var response = await signUpService.ExecuteAsync(request, Response);
         
         return Ok(response);
     }
@@ -37,10 +34,7 @@ public class AuthController : ApplicationController
     [ValidateModelState]
     public async Task<ActionResult<AuthResponse>> SignIn([FromBody] SignInRequest request)
     {
-        var response = await signInService.ExecuteAsync(request);
-        
-        // HttpOnly CookieにトークンをセットするロジックはSignInServiceに委譲
-        // 将来的にCookie対応を追加する際はここで設定
+        var response = await signInService.ExecuteAsync(request, Response);
         
         return Ok(response);
     }

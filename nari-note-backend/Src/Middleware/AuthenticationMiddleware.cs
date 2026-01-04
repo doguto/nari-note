@@ -1,6 +1,7 @@
 using System.Net;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Application.Security;
+using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Middleware;
 
@@ -28,9 +29,21 @@ public class AuthenticationMiddleware
             return;
         }
         
-        // Authorizationヘッダーからトークンを取得
-        var authHeader = context.Request.Headers["Authorization"].ToString();
-        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+        // Cookieからトークンを取得（優先）
+        var token = context.Request.Cookies["authToken"];
+        
+        // Cookieにトークンがない場合、Authorizationヘッダーから取得
+        if (token.IsNullOrEmpty())
+        {
+            var authHeader = context.Request.Headers["Authorization"].ToString();
+            if (!authHeader.IsNullOrEmpty() && authHeader.StartsWith("Bearer "))
+            {
+                token = authHeader.Substring("Bearer ".Length).Trim();
+            }
+        }
+        
+        // トークンが見つからない場合
+        if (token.IsNullOrEmpty())
         {
             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             await context.Response.WriteAsJsonAsync(new 
@@ -46,9 +59,7 @@ public class AuthenticationMiddleware
             return;
         }
         
-        var token = authHeader.Substring("Bearer ".Length).Trim();
-        
-        var principal = jwtHelper.ValidateToken(token);
+        var principal = jwtHelper.ValidateToken(token!);
         if (principal == null)
         {
             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
