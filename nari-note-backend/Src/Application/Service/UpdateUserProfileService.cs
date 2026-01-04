@@ -39,10 +39,6 @@ public class UpdateUserProfileService
 
         await userRepository.UpdateAsync(user);
 
-        return new UpdateUserProfileResponse
-        {
-            Id = user.Id,
-            UpdatedAt = user.UpdatedAt
-        };
+        return new UpdateUserProfileResponse();
     }
 }
