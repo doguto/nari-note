@@ -9,7 +9,7 @@ services:
       - postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-  app:
+  api:
     build:
       context: ./nari-note-backend
       dockerfile: Dockerfile
@@ -25,13 +25,13 @@ services:
       - nuget:/root/.nuget/packages:cached
     tty: true
     stdin_open: true
-  frontend:
+  web:
     build:
       context: ./nari-note-frontend
       dockerfile: Dockerfile
     command: sh -c "npm install && npm run dev"
     depends_on:
-      - app
+      - api
     environment:
       - NODE_ENV=development
     ports:
