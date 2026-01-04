@@ -1,6 +1,6 @@
-﻿using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.Entity;
 
-namespace NariNoteBackend.Application.Repository;
+namespace NariNoteBackend.Domain.Repository;
 
 public interface IRepository<T> where T : EntityBase
 {

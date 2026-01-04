@@ -1,5 +1,5 @@
 using NariNoteBackend.Application.Dto.Request;
-using NariNoteBackend.Application.Repository;
+using NariNoteBackend.Domain.Repository;
 
 namespace NariNoteBackend.Application.Service;
 
