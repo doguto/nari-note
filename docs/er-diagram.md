@@ -39,13 +39,14 @@ Session {
     session_key varchar(255)
     expires_at datetime
     created_at datetime
+    updated_at datetime
 }
 
 Article {
     id integer PK
     author_id integer FK
     title varchar(50)
-    body text
+    body varchar(10000)
     is_published boolean
     created_at datetime
     updated_at datetime
@@ -55,6 +56,7 @@ Tag {
     id integer PK
     name varchar(50)
     created_at datetime
+    updated_at datetime
 }
 
 ArticleTag {
@@ -62,6 +64,7 @@ ArticleTag {
     article_id integer FK
     tag_id integer FK
     created_at datetime
+    updated_at datetime
 }
 
 Like {
@@ -69,6 +72,7 @@ Like {
     user_id integer FK
     article_id integer FK
     created_at datetime
+    updated_at datetime
 }
 
 Comment {
@@ -82,9 +86,10 @@ Comment {
 
 Follow {
     id integer PK
+    follower_id integer FK
     following_id integer FK
-    followed_id integer FK
     created_at datetime
+    updated_at datetime
 }
 
 Notification {
@@ -93,17 +98,23 @@ Notification {
     article_id integer FK
     is_read boolean
     created_at datetime
+    updated_at datetime
 }
 ```
 
 ## インデックス・制約
 
+### User
+- UNIQUE INDEX: `email`
+
+### Tag
+- UNIQUE INDEX: `name`
+
 ### ArticleTag
 - UNIQUE INDEX: `(article_id, tag_id)`
-- INDEX: `(user_id)`
 
 ### Like
 - UNIQUE INDEX: `(user_id, article_id)`
 
 ### Follow
-- UNIQUE INDEX: `(following_id, followed_id)`
+- UNIQUE INDEX: `(follower_id, following_id)`
