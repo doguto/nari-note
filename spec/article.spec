@@ -1,8 +1,4 @@
 Feature "記事の基本機能" do
-  # 注: 記事の基本機能は部分的に実装済みです。
-  # - 記事取得API (GetArticle): 実装済み
-  # - いいね機能API (ToggleLike): 実装済み
-  # - 棋譜再生機能: 未実装
   Scenario "記事の表示" do
     Given None do
       When None do

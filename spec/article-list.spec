@@ -1,9 +1,4 @@
 Feature "記事一覧機能" do
-  # 注: 記事一覧機能は部分的に実装済みです。
-  # - 著者別記事一覧 (GetArticlesByAuthor): 実装済み
-  # - タグ別記事一覧 (GetArticlesByTag): 実装済み
-  # - 下書き一覧機能: 未実装
-  # - 記事削除機能: API実装済み、UI未実装の可能性
   Scenario "記事一覧ページの表示" do
     Given "ログイン状態のとき" do
       When "記事一覧ページにアクセスすると、" do

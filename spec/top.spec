@@ -1,5 +1,4 @@
 Feature "トップページ" do
-  # 注: トップタイムライン機能は未実装です。記事一覧の取得APIが未実装です。
   Scenario "トップタイムラインの基本表示" do
     Given None do
       When None do
