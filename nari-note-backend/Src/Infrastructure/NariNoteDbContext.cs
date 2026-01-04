@@ -13,6 +13,7 @@ public class NariNoteDbContext : DbContext
     public DbSet<Tag> Tags { get; set; }
     public DbSet<ArticleTag> ArticleTags { get; set; }
     public DbSet<Like> Likes { get; set; }
+    public DbSet<Comment> Comments { get; set; }
     public DbSet<Follow> Follows { get; set; }
     public DbSet<Notification> Notifications { get; set; }
 
@@ -33,6 +34,12 @@ public class NariNoteDbContext : DbContext
             .HasForeignKey(l => l.ArticleId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<Article>()
+            .HasMany(a => a.Comments)
+            .WithOne(c => c.Article)
+            .HasForeignKey(c => c.ArticleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // User関係の設定
         modelBuilder.Entity<User>()
             .HasMany(u => u.Sessions)
@@ -44,6 +51,12 @@ public class NariNoteDbContext : DbContext
             .HasMany(u => u.Likes)
             .WithOne(l => l.User)
             .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Comments)
+            .WithOne(c => c.User)
+            .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<User>()

@@ -26,6 +26,7 @@ public class Article : EntityBase
     public User Author { get; set; }
     public List<ArticleTag> ArticleTags { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
+    public List<Comment> Comments { get; set; } = new();
 
     // Domain Logic
     public bool IsLikedBy(int userId) => Likes.Any(l => l.UserId == userId);
