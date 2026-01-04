@@ -69,7 +69,7 @@ export const useCreateArticle = (options?: UseMutationOptions<CreateArticleRespo
   });
 };
 
-export const useArticle = (id: number, options?: UseQueryOptions<GetArticleResponse, Error>) => {
+export const useArticle = (id: number, options?: Omit<UseQueryOptions<GetArticleResponse, Error>, 'queryKey' | 'queryFn'>) => {
   return useQuery({
     queryKey: queryKeys.articles.byId(id),
     queryFn: () => articlesApi.getById(id),
@@ -101,7 +101,7 @@ export const useDeleteArticle = (options?: UseMutationOptions<void, Error, { id:
   });
 };
 
-export const useArticlesByAuthor = (authorId: number, options?: UseQueryOptions<GetArticlesByAuthorResponse, Error>) => {
+export const useArticlesByAuthor = (authorId: number, options?: Omit<UseQueryOptions<GetArticlesByAuthorResponse, Error>, 'queryKey' | 'queryFn'>) => {
   return useQuery({
     queryKey: queryKeys.articles.byAuthor(authorId),
     queryFn: () => articlesApi.getByAuthor(authorId),
@@ -110,7 +110,7 @@ export const useArticlesByAuthor = (authorId: number, options?: UseQueryOptions<
   });
 };
 
-export const useArticlesByTag = (tagName: string, options?: UseQueryOptions<GetArticlesByTagResponse, Error>) => {
+export const useArticlesByTag = (tagName: string, options?: Omit<UseQueryOptions<GetArticlesByTagResponse, Error>, 'queryKey' | 'queryFn'>) => {
   return useQuery({
     queryKey: queryKeys.articles.byTag(tagName),
     queryFn: () => articlesApi.getByTag(tagName),
@@ -131,7 +131,7 @@ export const useToggleLike = (options?: UseMutationOptions<ToggleLikeResponse, E
 };
 
 // User Hooks
-export const useUserProfile = (userId: number, options?: UseQueryOptions<GetUserProfileResponse, Error>) => {
+export const useUserProfile = (userId: number, options?: Omit<UseQueryOptions<GetUserProfileResponse, Error>, 'queryKey' | 'queryFn'>) => {
   return useQuery({
     queryKey: queryKeys.users.profile(userId),
     queryFn: () => usersApi.getProfile(userId),
@@ -152,7 +152,7 @@ export const useUpdateUserProfile = (options?: UseMutationOptions<UpdateUserProf
 };
 
 // Health Check Hook
-export const useHealthCheck = (options?: UseQueryOptions<{ status: string }, Error>) => {
+export const useHealthCheck = (options?: Omit<UseQueryOptions<{ status: string }, Error>, 'queryKey' | 'queryFn'>) => {
   return useQuery({
     queryKey: queryKeys.health,
     queryFn: healthApi.check,
