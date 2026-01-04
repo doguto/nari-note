@@ -31,6 +31,7 @@ public class User : EntityBase
     public List<Article> Articles { get; set; } = new();
     public List<Session> Sessions { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
+    public List<Comment> Comments { get; set; } = new();
     public List<Follow> Followings { get; set; } = new();  // 自分がフォローしているユーザーとの関係
     public List<Follow> Followers { get; set; } = new();   // 自分をフォローしているユーザーとの関係
     public List<Notification> Notifications { get; set; } = new();
