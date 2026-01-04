@@ -191,11 +191,12 @@ export default function DebugPage() {
   };
 
   const handleUpdateUserProfile = () => {
-    makeRequest(`${apiEndpoint}/api/users`, 'PUT', {
-      name: userName || undefined,
-      bio: userBio || undefined,
-      profileImage: userProfileImage || undefined,
-    });
+    const body: Record<string, string> = {};
+    if (userName) body.name = userName;
+    if (userBio) body.bio = userBio;
+    if (userProfileImage) body.profileImage = userProfileImage;
+    
+    makeRequest(`${apiEndpoint}/api/users`, 'PUT', body);
   };
 
   const handleGetArticlesByAuthor = () => {
