@@ -14,34 +14,21 @@ python3 api-generator.py
 
 スクリプトを実行すると、以下のファイルが生成されます：
 
-- `nari-note-frontend/src/lib/api/types.generated.ts` - TypeScript型定義
-- `nari-note-frontend/src/lib/api/endpoints.generated.ts` - API関数
-- `nari-note-frontend/src/lib/api/hooks.generated.ts` - TanStack Queryフックのテンプレート
+- `nari-note-frontend/src/lib/api/types.ts` - TypeScript型定義
+- `nari-note-frontend/src/lib/api/endpoints.ts` - API関数
+- `nari-note-frontend/src/lib/api/hooks.ts` - TanStack Queryフックのテンプレート
+
+**注意**: 生成されたファイルは直接gitにコミットされます。必要に応じて手動で調整してください。
 
 ### 3. 生成されたファイルの確認と調整
 
-生成されたファイルは `.generated.ts` という拡張子で作成されます。これらのファイルを確認し、必要に応じて手動で調整してください。
+生成されたファイルを確認し、必要に応じて手動で調整してください。
 
 **調整が必要な項目：**
 - プロパティのオプショナル（`?`）の判定
 - 複雑な型（ネストされたオブジェクト、Union型など）
 - APIエンドポイントのパラメータ（パスパラメータ、クエリパラメータ）
 - TanStack Queryフックの実装
-
-### 4. 既存ファイルへの統合
-
-生成されたファイルを確認後、以下のように既存のファイルに統合します：
-
-```bash
-# 型定義を既存ファイルにコピー
-cp nari-note-frontend/src/lib/api/types.generated.ts nari-note-frontend/src/lib/api/types.ts
-
-# エンドポイントを既存ファイルにコピー
-cp nari-note-frontend/src/lib/api/endpoints.generated.ts nari-note-frontend/src/lib/api/endpoints.ts
-
-# フックは手動で実装が必要
-# hooks.generated.ts を参考に hooks.ts を作成
-```
 
 ## 設計思想
 
@@ -58,7 +45,7 @@ cp nari-note-frontend/src/lib/api/endpoints.generated.ts nari-note-frontend/src/
 
 1. **初回生成**: `api-generator.py`を実行して骨組みを生成
 2. **レビュー**: 生成されたファイルを確認し、不足している情報を手動で補完
-3. **統合**: 確認後のファイルを既存のコードベースに統合
+3. **コミット**: 調整したファイルをgitにコミット
 4. **更新時**: バックエンドに変更があった場合、再度ジェネレーターを実行して差分を確認
 
 ## 実装の詳細
@@ -90,7 +77,7 @@ cp nari-note-frontend/src/lib/api/endpoints.generated.ts nari-note-frontend/src/
 
 ### 型が正しく生成されない
 
-→ 生成された `.generated.ts` ファイルを確認し、手動で調整してください。特に：
+→ 生成された `.ts` ファイルを確認し、手動で調整してください。特に：
 - プロパティの型
 - オプショナル（`?`）の有無
 - 配列型

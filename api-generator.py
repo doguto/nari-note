@@ -304,27 +304,27 @@ def main():
     # types.tsを生成
     print("\n✏️  Generating types.ts...")
     types_content = generate_types_file(classes)
-    types_file = FRONTEND_API_DIR / "types.generated.ts"
+    types_file = FRONTEND_API_DIR / "types.ts"
     types_file.write_text(types_content, encoding='utf-8')
     print(f"  ✓ {types_file}")
     
     # endpoints.tsを生成
     print("\n✏️  Generating endpoints.ts...")
     endpoints_content = generate_endpoints_file(all_endpoints)
-    endpoints_file = FRONTEND_API_DIR / "endpoints.generated.ts"
+    endpoints_file = FRONTEND_API_DIR / "endpoints.ts"
     endpoints_file.write_text(endpoints_content, encoding='utf-8')
     print(f"  ✓ {endpoints_file}")
     
     # hooks.tsを生成（骨組みのみ）
     print("\n✏️  Generating hooks.ts template...")
     hooks_content = generate_hooks_file(all_endpoints)
-    hooks_file = FRONTEND_API_DIR / "hooks.generated.ts"
+    hooks_file = FRONTEND_API_DIR / "hooks.ts"
     hooks_file.write_text(hooks_content, encoding='utf-8')
     print(f"  ✓ {hooks_file}")
     
     print("\n✅ API generation completed!")
-    print("\n📝 Note: Generated files have .generated.ts extension.")
-    print("   Review and customize them, then integrate into your codebase.")
+    print("\n📝 Note: Generated files are committed to git.")
+    print("   Review and customize them as needed for your project.")
     print(f"\n📊 Summary:")
     print(f"   - {len(classes)} types generated")
     print(f"   - {len(all_endpoints)} endpoints found")
