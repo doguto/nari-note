@@ -57,11 +57,21 @@ def csharp_type_to_typescript(csharp_type: str) -> str:
         'Guid': 'string',
     }
     
+    # Dictionary<TKey, TValue> を Record<K, V> に変換
+    dict_match = re.match(r'Dictionary<(.+),\s*(.+)>', csharp_type)
+    if dict_match:
+        key_type = dict_match.group(1).strip()
+        value_type = dict_match.group(2).strip()
+        # 再帰的に内部の型も変換
+        ts_key = csharp_type_to_typescript(key_type)
+        ts_value = csharp_type_to_typescript(value_type)
+        return f"Record<{ts_key}, {ts_value}>"
+    
     # List<T> を T[] に変換
     list_match = re.match(r'List<(.+)>', csharp_type)
     if list_match:
         inner_type = list_match.group(1)
-        return f"{type_mapping.get(inner_type, inner_type)}[]"
+        return f"{csharp_type_to_typescript(inner_type)}[]"
     
     return type_mapping.get(csharp_type, csharp_type)
 
