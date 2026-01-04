@@ -119,20 +119,24 @@ def parse_controller(file_path: Path) -> List[EndpointInfo]:
     
     endpoints = []
     
-    # エンドポイントを抽出（簡易版）
-    # [HttpGet], [HttpPost]などのアトリビュートとメソッドを見つける
-    method_pattern = r'\[Http(Get|Post|Put|Delete)(?:\("([^"]+)"\))?\]\s+(?:\[ValidateModelState\]\s+)?public\s+async\s+Task<ActionResult(?:<(\w+)>)?>\s+(\w+)'
+    # エンドポイントを抽出（改良版）
+    # [HttpGet], [HttpPost]などのアトリビュートとメソッド、パラメータを見つける
+    method_pattern = r'\[Http(Get|Post|Put|Delete)(?:\("([^"]+)"\))?\]\s+(?:\[ValidateModelState\]\s+)?public\s+async\s+Task<ActionResult(?:<(\w+)>)?>\s+(\w+)\s*\(([^)]*)\)'
     
     for match in re.finditer(method_pattern, content):
         http_method = match.group(1).upper()
         route = match.group(2) or ""
         response_type = match.group(3)
         function_name = match.group(4)
+        parameters = match.group(5)
         
-        # リクエスト型を推測（簡易版）
+        # パラメータからリクエスト型を抽出
         request_type = None
-        if 'Request' in function_name:
-            request_type = f"{function_name}Request"
+        if parameters:
+            # [FromBody] XxxRequest のパターンを探す
+            from_body_match = re.search(r'\[FromBody\]\s+(\w+Request)\s+\w+', parameters)
+            if from_body_match:
+                request_type = from_body_match.group(1)
         
         # ルートパスを構築
         path = f"/api/{controller_name}"
@@ -206,7 +210,7 @@ def generate_endpoints_file(endpoints: List[EndpointInfo]) -> str:
             func_name = ep.function_name[0].lower() + ep.function_name[1:]
             
             if ep.method == "GET":
-                # TODO: パラメータを適切に処理
+                # GETリクエストはパラメータなし（パスパラメータは別途処理が必要）
                 lines.append(f"  {func_name}: async (): Promise<{ep.response_type or 'void'}> => {{")
                 lines.append(f"    const response = await apiClient.get<{ep.response_type or 'void'}>('{ep.path}');")
                 lines.append("    return response.data;")
@@ -217,7 +221,16 @@ def generate_endpoints_file(endpoints: List[EndpointInfo]) -> str:
                 lines.append(f"    const response = await apiClient.post<{ep.response_type or 'void'}>('{ep.path}'{', data' if req_param else ''});")
                 lines.append("    return response.data;")
                 lines.append("  },")
-            # PUT, DELETEも同様に処理
+            elif ep.method == "PUT":
+                req_param = f"data: {ep.request_type}" if ep.request_type else ""
+                lines.append(f"  {func_name}: async ({req_param}): Promise<{ep.response_type or 'void'}> => {{")
+                lines.append(f"    const response = await apiClient.put<{ep.response_type or 'void'}>('{ep.path}'{', data' if req_param else ''});")
+                lines.append("    return response.data;")
+                lines.append("  },")
+            elif ep.method == "DELETE":
+                lines.append(f"  {func_name}: async (): Promise<{ep.response_type or 'void'}> => {{")
+                lines.append(f"    await apiClient.delete('{ep.path}');")
+                lines.append("  },")
         
         lines.append("};")
         lines.append("")
