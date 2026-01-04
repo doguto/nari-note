@@ -1,4 +1,5 @@
 Feature "プロフィールページ" do
+  # 注: フォロー機能はデータモデルのみ実装済みで、API・UIは未実装です
   Scenario "プロフィールページの基本表示" do
     Given None do
       When None do

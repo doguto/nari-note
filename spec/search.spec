@@ -1,4 +1,5 @@
 Feature "検索機能" do
+  # 注: 検索機能は未実装です
   Scenario "記事の検索" do
     Given None do
       When "検索ボックスにキーワードを入力して検索すると、" do

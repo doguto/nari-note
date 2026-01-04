@@ -5,7 +5,7 @@ namespace NariNoteBackend.Application.Dto.Request;
 public class CreateArticleRequest
 {
     [Required(ErrorMessage = "タイトルは必須です")]
-    [MaxLength(200, ErrorMessage = "タイトルは200文字以内で入力してください")]
+    [MaxLength(50, ErrorMessage = "タイトルは50文字以内で入力してください")]
     public string Title { get; set; } = string.Empty;
     
     [Required(ErrorMessage = "本文は必須です")]

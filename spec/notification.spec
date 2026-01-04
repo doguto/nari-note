@@ -1,4 +1,5 @@
 Feature "通知機能" do
+  # 注: 通知機能はデータモデルのみ実装済みで、API・UIは未実装です
   Scenario "通知一覧の表示" do
     Given "ログイン状態のとき" do
       When "通知アイコンをクリックすると、" do
