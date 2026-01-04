@@ -12,6 +12,7 @@ FRONTEND_API_DIR = Path("nari-note-frontend/src/lib/api")
 CONTROLLER_DIR = BACKEND_ROOT / "Controller"
 REQUEST_DIR = BACKEND_ROOT / "Application/Dto/Request"
 RESPONSE_DIR = BACKEND_ROOT / "Application/Dto/Response"
+DTO_DIR = BACKEND_ROOT / "Application/Dto"
 
 
 @dataclass
@@ -85,9 +86,10 @@ def parse_csharp_class(file_path: Path) -> Optional[CSharpClass]:
     
     # プロパティを抽出
     properties = []
-    property_pattern = r'public\s+(\w+(?:<\w+>)?)\s+(\w+)\s*{\s*get;\s*set;\s*}(?:\s*=\s*[^;]+)?;'
+    # 改良版: int, DateTime, List<T>などをサポート
+    property_pattern = r'public\s+([\w<>,\s]+?)\s+(\w+)\s*\{\s*get;\s*set;\s*\}'
     for match in re.finditer(property_pattern, content):
-        prop_type = match.group(1)
+        prop_type = match.group(1).strip()
         prop_name = match.group(2)
         
         is_list = 'List<' in prop_type
@@ -271,11 +273,11 @@ def main():
         print(f"❌ Backend directory not found: {BACKEND_ROOT}")
         return
     
-    # Request/Responseクラスをパース
-    print("\n📖 Parsing Request/Response classes...")
+    # Request/Response/DTOクラスをパース
+    print("\n📖 Parsing Request/Response/DTO classes...")
     classes: List[CSharpClass] = []
     
-    for dir_path in [REQUEST_DIR, RESPONSE_DIR]:
+    for dir_path in [REQUEST_DIR, RESPONSE_DIR, DTO_DIR]:
         if not dir_path.exists():
             print(f"⚠️  Directory not found: {dir_path}")
             continue
