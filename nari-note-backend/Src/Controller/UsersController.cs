@@ -32,7 +32,7 @@ public class UsersController : ApplicationController
     [ValidateModelState]
     public async Task<ActionResult> UpdateUserProfile([FromBody] UpdateUserProfileRequest request)
     {
-        await updateUserProfileService.ExecuteAsync(UserId, request);
-        return NoContent();
+        var response = await updateUserProfileService.ExecuteAsync(UserId, request);
+        return Ok(response);
     }
 }

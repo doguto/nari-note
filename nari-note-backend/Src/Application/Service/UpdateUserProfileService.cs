@@ -1,4 +1,5 @@
 using NariNoteBackend.Application.Dto.Request;
+using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Extension;
 
@@ -13,7 +14,7 @@ public class UpdateUserProfileService
         this.userRepository = userRepository;
     }
 
-    public async Task ExecuteAsync(int userId, UpdateUserProfileRequest request)
+    public async Task<UpdateUserProfileResponse> ExecuteAsync(int userId, UpdateUserProfileRequest request)
     {
         var user = await userRepository.FindForceByIdAsync(userId);
 
@@ -37,5 +38,11 @@ public class UpdateUserProfileService
         user.UpdatedAt = DateTime.UtcNow;
 
         await userRepository.UpdateAsync(user);
+
+        return new UpdateUserProfileResponse
+        {
+            Id = user.Id,
+            UpdatedAt = user.UpdatedAt
+        };
     }
 }
