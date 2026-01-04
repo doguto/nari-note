@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Controller;
 
@@ -9,10 +10,14 @@ namespace NariNoteBackend.Controller;
 public class UsersController : ApplicationController
 {
     readonly GetUserProfileService getUserProfileService;
+    readonly UpdateUserProfileService updateUserProfileService;
 
-    public UsersController(GetUserProfileService getUserProfileService)
+    public UsersController(
+        GetUserProfileService getUserProfileService,
+        UpdateUserProfileService updateUserProfileService)
     {
         this.getUserProfileService = getUserProfileService;
+        this.updateUserProfileService = updateUserProfileService;
     }
 
     [HttpGet("{id}")]
@@ -20,6 +25,14 @@ public class UsersController : ApplicationController
     {
         var request = new GetUserProfileRequest { Id = id };
         var response = await getUserProfileService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpPut]
+    [ValidateModelState]
+    public async Task<ActionResult> UpdateUserProfile([FromBody] UpdateUserProfileRequest request)
+    {
+        var response = await updateUserProfileService.ExecuteAsync(UserId, request);
         return Ok(response);
     }
 }
