@@ -18,14 +18,8 @@ import {
 } from '@/lib/api';
 import { AxiosError } from 'axios';
 
-interface ApiResponse {
-  token?: string;
-  id?: number;
-  [key: string]: unknown;
-}
-
 export default function DebugPage() {
-  const [response, setResponse] = useState<ApiResponse | null>(null);
+  const [response, setResponse] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -35,7 +29,6 @@ export default function DebugPage() {
   const [signUpPassword, setSignUpPassword] = useState('Password123!');
   const [signInEmail, setSignInEmail] = useState('test@example.com');
   const [signInPassword, setSignInPassword] = useState('Password123!');
-  const [authToken, setAuthToken] = useState<string>('');
   
   // Article
   const [articleTitle, setArticleTitle] = useState('テスト記事タイトル');
@@ -63,7 +56,7 @@ export default function DebugPage() {
     
     try {
       const data = await apiCall();
-      setResponse(data as ApiResponse);
+      setResponse(data as Record<string, unknown>);
       
       if (successCallback) {
         successCallback(data);
@@ -288,27 +281,13 @@ export default function DebugPage() {
           </button>
         </div>
 
-        {/* 認証トークン表示 */}
-        {authToken && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-bold mb-4">認証トークン（※現在は使用されていません）</h2>
-            <p className="text-sm text-gray-600 mb-3">
-              認証トークンはlocalStorageで自動管理されます
-            </p>
-            <div className="bg-gray-100 p-3 rounded font-mono text-sm break-all">
-              {authToken}
-            </div>
-            <button
-              onClick={() => {
-                setAuthToken('');
-                localStorage.removeItem('authToken');
-              }}
-              className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              トークンをクリア
-            </button>
-          </div>
-        )}
+        {/* 認証情報 */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-bold mb-4">認証について</h2>
+          <p className="text-sm text-gray-600">
+            認証はCookieベースで自動管理されます。サインアップ/サインイン後は自動的に認証されます。
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* サインアップ */}
