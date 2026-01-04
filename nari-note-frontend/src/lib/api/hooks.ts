@@ -33,39 +33,47 @@ export const queryKeys = {
 };
 
 // Auth Hooks
-export const useSignUp = (options?: UseMutationOptions<AuthResponse, Error, SignUpRequest>) => {
+export const useSignUp = (options?: Omit<UseMutationOptions<AuthResponse, Error, SignUpRequest>, 'mutationFn'>) => {
+  const userOnSuccess = options?.onSuccess;
   return useMutation({
+    ...options,
     mutationFn: authApi.signUp,
-    onSuccess: (data) => {
+    onSuccess: (...args) => {
+      const [data] = args;
       if (typeof window !== 'undefined') {
         localStorage.setItem('authToken', data.token);
       }
+      userOnSuccess?.(...args);
     },
-    ...options,
   });
 };
 
-export const useSignIn = (options?: UseMutationOptions<AuthResponse, Error, SignInRequest>) => {
+export const useSignIn = (options?: Omit<UseMutationOptions<AuthResponse, Error, SignInRequest>, 'mutationFn'>) => {
+  const userOnSuccess = options?.onSuccess;
   return useMutation({
+    ...options,
     mutationFn: authApi.signIn,
-    onSuccess: (data) => {
+    onSuccess: (...args) => {
+      const [data] = args;
       if (typeof window !== 'undefined') {
         localStorage.setItem('authToken', data.token);
       }
+      userOnSuccess?.(...args);
     },
-    ...options,
   });
 };
 
 // Article Hooks
-export const useCreateArticle = (options?: UseMutationOptions<CreateArticleResponse, Error, CreateArticleRequest>) => {
+export const useCreateArticle = (options?: Omit<UseMutationOptions<CreateArticleResponse, Error, CreateArticleRequest>, 'mutationFn'>) => {
   const queryClient = useQueryClient();
+  const userOnSuccess = options?.onSuccess;
   return useMutation({
-    mutationFn: articlesApi.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.articles.all });
-    },
     ...options,
+    mutationFn: articlesApi.create,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.articles.all });
+      userOnSuccess?.(...args);
+    },
   });
 };
 
@@ -78,26 +86,31 @@ export const useArticle = (id: number, options?: Omit<UseQueryOptions<GetArticle
   });
 };
 
-export const useUpdateArticle = (options?: UseMutationOptions<UpdateArticleResponse, Error, { id: number; data: UpdateArticleRequest }>) => {
+export const useUpdateArticle = (options?: Omit<UseMutationOptions<UpdateArticleResponse, Error, { id: number; data: UpdateArticleRequest }>, 'mutationFn'>) => {
   const queryClient = useQueryClient();
+  const userOnSuccess = options?.onSuccess;
   return useMutation({
+    ...options,
     mutationFn: ({ id, data }) => articlesApi.update(id, data),
-    onSuccess: (_, variables) => {
+    onSuccess: (...args) => {
+      const [, variables] = args;
       queryClient.invalidateQueries({ queryKey: queryKeys.articles.byId(variables.id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.articles.all });
+      userOnSuccess?.(...args);
     },
-    ...options,
   });
 };
 
-export const useDeleteArticle = (options?: UseMutationOptions<void, Error, { id: number; userId: number }>) => {
+export const useDeleteArticle = (options?: Omit<UseMutationOptions<void, Error, { id: number; userId: number }>, 'mutationFn'>) => {
   const queryClient = useQueryClient();
+  const userOnSuccess = options?.onSuccess;
   return useMutation({
-    mutationFn: ({ id, userId }) => articlesApi.delete(id, userId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.articles.all });
-    },
     ...options,
+    mutationFn: ({ id, userId }) => articlesApi.delete(id, userId),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.articles.all });
+      userOnSuccess?.(...args);
+    },
   });
 };
 
@@ -119,14 +132,17 @@ export const useArticlesByTag = (tagName: string, options?: Omit<UseQueryOptions
   });
 };
 
-export const useToggleLike = (options?: UseMutationOptions<ToggleLikeResponse, Error, number>) => {
+export const useToggleLike = (options?: Omit<UseMutationOptions<ToggleLikeResponse, Error, number>, 'mutationFn'>) => {
   const queryClient = useQueryClient();
+  const userOnSuccess = options?.onSuccess;
   return useMutation({
-    mutationFn: articlesApi.toggleLike,
-    onSuccess: (_, articleId) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.articles.byId(articleId) });
-    },
     ...options,
+    mutationFn: articlesApi.toggleLike,
+    onSuccess: (...args) => {
+      const [, articleId] = args;
+      queryClient.invalidateQueries({ queryKey: queryKeys.articles.byId(articleId) });
+      userOnSuccess?.(...args);
+    },
   });
 };
 
@@ -140,14 +156,17 @@ export const useUserProfile = (userId: number, options?: Omit<UseQueryOptions<Ge
   });
 };
 
-export const useUpdateUserProfile = (options?: UseMutationOptions<UpdateUserProfileResponse, Error, UpdateUserProfileRequest>) => {
+export const useUpdateUserProfile = (options?: Omit<UseMutationOptions<UpdateUserProfileResponse, Error, UpdateUserProfileRequest>, 'mutationFn'>) => {
   const queryClient = useQueryClient();
+  const userOnSuccess = options?.onSuccess;
   return useMutation({
-    mutationFn: usersApi.updateProfile,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.profile(data.id) });
-    },
     ...options,
+    mutationFn: usersApi.updateProfile,
+    onSuccess: (...args) => {
+      const [data] = args;
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.profile(data.id) });
+      userOnSuccess?.(...args);
+    },
   });
 };
 

@@ -47,6 +47,8 @@ export const articlesApi = {
   },
 
   delete: async (id: number, userId: number): Promise<void> => {
+    // Note: バックエンドAPI仕様により、userIdはクエリパラメータとして送信
+    // 将来的には認証トークンから自動的にuserIdを取得する実装に変更予定
     await apiClient.delete(`/api/articles/${id}?userId=${userId}`);
   },
 
