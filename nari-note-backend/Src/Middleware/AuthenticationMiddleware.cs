@@ -28,9 +28,21 @@ public class AuthenticationMiddleware
             return;
         }
         
-        // Authorizationヘッダーからトークンを取得
-        var authHeader = context.Request.Headers["Authorization"].ToString();
-        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+        // Cookieからトークンを取得（優先）
+        var token = context.Request.Cookies["authToken"];
+        
+        // Cookieにトークンがない場合、Authorizationヘッダーから取得
+        if (string.IsNullOrEmpty(token))
+        {
+            var authHeader = context.Request.Headers["Authorization"].ToString();
+            if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+            {
+                token = authHeader.Substring("Bearer ".Length).Trim();
+            }
+        }
+        
+        // トークンが見つからない場合
+        if (string.IsNullOrEmpty(token))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             await context.Response.WriteAsJsonAsync(new 
@@ -45,8 +57,6 @@ public class AuthenticationMiddleware
             });
             return;
         }
-        
-        var token = authHeader.Substring("Bearer ".Length).Trim();
         
         var principal = jwtHelper.ValidateToken(token);
         if (principal == null)

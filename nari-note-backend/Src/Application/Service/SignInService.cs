@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
@@ -22,7 +23,7 @@ public class SignInService
         this.jwtHelper = jwtHelper;
     }
     
-    public async Task<AuthResponse> ExecuteAsync(SignInRequest request)
+    public async Task<AuthResponse> ExecuteAsync(SignInRequest request, HttpResponse response)
     {
         var user = await userRepository.FindByUsernameOrEmailAsync(request.UsernameOrEmail);
         if (user == null) throw new ArgumentException("ユーザー名またはパスワードが正しくありません");
@@ -43,6 +44,15 @@ public class SignInService
         };
         
         await sessionRepository.CreateAsync(session);
+        
+        // HttpOnly Cookieにトークンを設定
+        response.Cookies.Append("authToken", token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            MaxAge = TimeSpan.FromHours(jwtHelper.GetExpirationInHours())
+        });
         
         return new AuthResponse
         {
