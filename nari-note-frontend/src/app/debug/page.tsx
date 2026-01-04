@@ -28,6 +28,16 @@ export default function DebugPage() {
   const [articleContent, setArticleContent] = useState('これはテスト記事の内容です。');
   const [articleTags, setArticleTags] = useState('test,debug');
   const [articleId, setArticleId] = useState('');
+  
+  // User Profile
+  const [userId, setUserId] = useState('');
+  const [userName, setUserName] = useState('');
+  const [userBio, setUserBio] = useState('');
+  const [userProfileImage, setUserProfileImage] = useState('');
+  
+  // Search
+  const [authorId, setAuthorId] = useState('');
+  const [tagName, setTagName] = useState('');
 
   const makeRequest = async (url: string, method: string, body?: Record<string, unknown>) => {
     setLoading(true);
@@ -57,7 +67,9 @@ export default function DebugPage() {
       
       if (!res.ok) {
         console.error(`[API Error] ${method} ${url} - HTTP ${res.status}:`, data);
-        setError(`HTTP ${res.status}: ${JSON.stringify(data)}`);
+        const errorMsg = `HTTP ${res.status}: ${JSON.stringify(data)}`;
+        setError(errorMsg);
+        alert(`❌ エラーが発生しました\n\n${errorMsg}`);
       } else {
         setResponse(data);
         
@@ -70,10 +82,16 @@ export default function DebugPage() {
         if (data.id && method === 'POST' && url.includes('/articles')) {
           setArticleId(data.id.toString());
         }
+        
+        // ユーザープロフィール取得成功時にIDを保存
+        if (data.id && method === 'GET' && url.match(/\/users\/\d+$/)) {
+          setUserId(data.id.toString());
+        }
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
+      alert(`❌ エラーが発生しました\n\n${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -98,14 +116,16 @@ export default function DebugPage() {
     const tags = articleTags.split(',').map(tag => tag.trim()).filter(tag => tag);
     makeRequest(`${apiEndpoint}/api/articles`, 'POST', {
       title: articleTitle,
-      content: articleContent,
+      body: articleContent,
       tags: tags,
     });
   };
 
   const handleGetArticle = () => {
     if (!articleId) {
-      setError('記事IDを入力してください');
+      const errorMsg = '記事IDを入力してください';
+      setError(errorMsg);
+      alert(`❌ ${errorMsg}`);
       return;
     }
     makeRequest(`${apiEndpoint}/api/articles/${articleId}`, 'GET');
@@ -117,6 +137,93 @@ export default function DebugPage() {
 
   const handleHealthCheck = () => {
     makeRequest(`${apiEndpoint}/api/health`, 'GET');
+  };
+
+  const handleUpdateArticle = () => {
+    if (!articleId) {
+      const errorMsg = '記事IDを入力してください';
+      setError(errorMsg);
+      alert(`❌ ${errorMsg}`);
+      return;
+    }
+    const tags = articleTags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    makeRequest(`${apiEndpoint}/api/articles/${articleId}`, 'PUT', {
+      title: articleTitle,
+      body: articleContent,
+      tags: tags,
+    });
+  };
+
+  const handleDeleteArticle = () => {
+    if (!articleId) {
+      const errorMsg = '記事IDを入力してください';
+      setError(errorMsg);
+      alert(`❌ ${errorMsg}`);
+      return;
+    }
+    if (!userId) {
+      const errorMsg = 'ユーザーIDを入力してください';
+      setError(errorMsg);
+      alert(`❌ ${errorMsg}`);
+      return;
+    }
+    makeRequest(`${apiEndpoint}/api/articles/${articleId}?userId=${userId}`, 'DELETE');
+  };
+
+  const handleToggleLike = () => {
+    if (!articleId) {
+      const errorMsg = '記事IDを入力してください';
+      setError(errorMsg);
+      alert(`❌ ${errorMsg}`);
+      return;
+    }
+    makeRequest(`${apiEndpoint}/api/articles/${articleId}/like`, 'POST');
+  };
+
+  const handleGetUserProfile = () => {
+    if (!userId) {
+      const errorMsg = 'ユーザーIDを入力してください';
+      setError(errorMsg);
+      alert(`❌ ${errorMsg}`);
+      return;
+    }
+    makeRequest(`${apiEndpoint}/api/users/${userId}`, 'GET');
+  };
+
+  const handleUpdateUserProfile = () => {
+    const body: Record<string, string> = {};
+    if (userName) body.name = userName;
+    if (userBio) body.bio = userBio;
+    if (userProfileImage) body.profileImage = userProfileImage;
+    
+    if (Object.keys(body).length === 0) {
+      const errorMsg = '少なくとも1つのフィールドを入力してください';
+      setError(errorMsg);
+      alert(`❌ ${errorMsg}`);
+      return;
+    }
+    
+    makeRequest(`${apiEndpoint}/api/users`, 'PUT', body);
+  };
+
+  const handleGetArticlesByAuthor = () => {
+    if (!authorId) {
+      const errorMsg = '著者IDを入力してください';
+      setError(errorMsg);
+      alert(`❌ ${errorMsg}`);
+      return;
+    }
+    makeRequest(`${apiEndpoint}/api/articles/author/${authorId}`, 'GET');
+  };
+
+  const handleGetArticlesByTag = () => {
+    if (!tagName) {
+      const errorMsg = 'タグ名を入力してください';
+      setError(errorMsg);
+      alert(`❌ ${errorMsg}`);
+      return;
+    }
+    makeRequest(`${apiEndpoint}/api/articles/tag/${tagName}`, 'GET');
   };
 
   return (
@@ -292,6 +399,207 @@ export default function DebugPage() {
                 disabled={loading}
               >
                 記事一覧を取得
+              </button>
+            </div>
+          </div>
+
+          {/* 記事更新 */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold mb-4">記事更新</h2>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={articleId}
+                onChange={(e) => setArticleId(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="記事ID"
+              />
+              <input
+                type="text"
+                value={articleTitle}
+                onChange={(e) => setArticleTitle(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="タイトル"
+              />
+              <textarea
+                value={articleContent}
+                onChange={(e) => setArticleContent(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="本文"
+                rows={4}
+              />
+              <input
+                type="text"
+                value={articleTags}
+                onChange={(e) => setArticleTags(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="タグ (カンマ区切り)"
+              />
+              <button
+                onClick={handleUpdateArticle}
+                className="w-full px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                disabled={loading || !authToken}
+              >
+                記事を更新
+              </button>
+              {!authToken && (
+                <p className="text-sm text-red-500">※ 認証が必要です</p>
+              )}
+            </div>
+          </div>
+
+          {/* 記事削除 */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold mb-4">記事削除</h2>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={articleId}
+                onChange={(e) => setArticleId(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="記事ID"
+              />
+              <input
+                type="text"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="ユーザーID"
+              />
+              <button
+                onClick={handleDeleteArticle}
+                className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                disabled={loading || !authToken}
+              >
+                記事を削除
+              </button>
+              {!authToken && (
+                <p className="text-sm text-red-500">※ 認証が必要です</p>
+              )}
+            </div>
+          </div>
+
+          {/* いいね切り替え */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold mb-4">いいね切り替え</h2>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={articleId}
+                onChange={(e) => setArticleId(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="記事ID"
+              />
+              <button
+                onClick={handleToggleLike}
+                className="w-full px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600"
+                disabled={loading || !authToken}
+              >
+                いいねを切り替え
+              </button>
+              {!authToken && (
+                <p className="text-sm text-red-500">※ 認証が必要です</p>
+              )}
+            </div>
+          </div>
+
+          {/* ユーザープロフィール取得 */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold mb-4">ユーザープロフィール取得</h2>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="ユーザーID"
+              />
+              <button
+                onClick={handleGetUserProfile}
+                className="w-full px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
+                disabled={loading}
+              >
+                プロフィールを取得
+              </button>
+            </div>
+          </div>
+
+          {/* ユーザープロフィール更新 */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold mb-4">ユーザープロフィール更新</h2>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="ユーザー名"
+              />
+              <textarea
+                value={userBio}
+                onChange={(e) => setUserBio(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="自己紹介"
+                rows={3}
+              />
+              <input
+                type="text"
+                value={userProfileImage}
+                onChange={(e) => setUserProfileImage(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="プロフィール画像URL"
+              />
+              <button
+                onClick={handleUpdateUserProfile}
+                className="w-full px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
+                disabled={loading || !authToken}
+              >
+                プロフィールを更新
+              </button>
+              {!authToken && (
+                <p className="text-sm text-red-500">※ 認証が必要です</p>
+              )}
+            </div>
+          </div>
+
+          {/* 著者別記事取得 */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold mb-4">著者別記事取得</h2>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={authorId}
+                onChange={(e) => setAuthorId(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="著者ID"
+              />
+              <button
+                onClick={handleGetArticlesByAuthor}
+                className="w-full px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600"
+                disabled={loading}
+              >
+                著者の記事を取得
+              </button>
+            </div>
+          </div>
+
+          {/* タグ別記事取得 */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold mb-4">タグ別記事取得</h2>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={tagName}
+                onChange={(e) => setTagName(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+                placeholder="タグ名"
+              />
+              <button
+                onClick={handleGetArticlesByTag}
+                className="w-full px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600"
+                disabled={loading}
+              >
+                タグの記事を取得
               </button>
             </div>
           </div>
