@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using NariNoteBackend.Application.Service;
 
 namespace NariNoteBackend.Controller;
 
@@ -6,9 +7,17 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class HealthController : ControllerBase
 {
-    [HttpGet]
-    public IActionResult GetHealth()
+    GetHealthService getHealthService;
+
+    public HealthController(GetHealthService getHealthService)
     {
-        return Ok(new { status = "Healthy" });
+        this.getHealthService = getHealthService;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult> GetHealth()
+    {
+        var response = await getHealthService.ExecuteAsync();
+        return Ok(response);
     }
 }
