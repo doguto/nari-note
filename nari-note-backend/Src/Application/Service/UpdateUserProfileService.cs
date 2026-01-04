@@ -19,6 +19,7 @@ public class UpdateUserProfileService
         var user = await userRepository.FindForceByIdAsync(userId);
 
         // nullでない値のみ更新
+        // ProfileImageとBioは空文字列も許可（クリア操作として扱う）
         if (!request.Name.IsNullOrEmpty())
         {
             user.Name = request.Name;
