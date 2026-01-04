@@ -34,6 +34,7 @@ services:
       - api
     environment:
       - NODE_ENV=development
+      - API_URL=http://api:5243
     ports:
       - "3000:3000"
     volumes:
