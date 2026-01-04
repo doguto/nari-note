@@ -26,5 +26,6 @@ public static class InfrastructureServiceInstaller
         
         // Register helpers
         services.AddScoped<IJwtHelper, JwtHelper>();
+        services.AddScoped<ICookieOptionsHelper, CookieOptionsHelper>();
     }
 }
