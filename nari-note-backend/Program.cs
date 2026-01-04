@@ -22,7 +22,7 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
-// builder.Services.AddOpenApi();
+builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -30,10 +30,10 @@ builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
-// if (app.Environment.IsDevelopment())
-// {
-//     app.MapOpenApi();
-// }
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
 
 // CORSミドルウェアを最初に登録（preflightリクエスト対応のため）
 app.UseCors();
