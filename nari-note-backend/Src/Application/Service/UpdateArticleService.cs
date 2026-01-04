@@ -22,12 +22,12 @@ public class UpdateArticleService
         // nullでない値のみ更新
         if (!request.Title.IsNullOrEmpty())
         {
-            article.Title = request.Title;
+            article.Title = request.Title!;
         }
 
         if (!request.Body.IsNullOrEmpty())
         {
-            article.Body = request.Body;
+            article.Body = request.Body!;
         }
 
         if (request.IsPublished.HasValue)
