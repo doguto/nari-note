@@ -288,7 +288,7 @@ def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpC
                         # {id} の場合、articleId や id などのプロパティを探す
                         if camel_param == 'id':
                             # コントローラー名に基づいた候補を探す
-                            candidates = [f'{controller}Id', 'articleId', 'userId', 'id']
+                            candidates = [f'{ep.controller_name}Id', 'articleId', 'userId', 'id']
                             for candidate in candidates:
                                 if candidate in prop_names:
                                     camel_param = candidate
@@ -331,11 +331,12 @@ def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpC
                     lines.append("  },")
                 else:
                     # POST, PUTの場合
-                    # [FromBody]パラメータがある、またはパスパラメータがない場合はボディとして渡す
-                    if ep.has_body_param or not path_params:
+                    # [FromBody]パラメータがある場合、またはパスパラメータがない通常のPOST/PUTの場合はボディとして渡す
+                    # パスパラメータのみでFromBodyがない場合（例: ToggleLike）はボディを渡さない
+                    send_body = ep.has_body_param or (not path_params and request_type != "void")
+                    if send_body:
                         lines.append(f"    const response = await apiClient.{http_method}<{response_type}>({url_expression}, data);")
                     else:
-                        # パスパラメータのみの場合はボディを渡さない
                         lines.append(f"    const response = await apiClient.{http_method}<{response_type}>({url_expression});")
                     lines.append("    return response.data;")
                     lines.append("  },")
