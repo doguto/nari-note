@@ -2,15 +2,172 @@
 // Do not edit manually
 
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type UseQueryOptions } from '@tanstack/react-query';
-import { authApi, articlesApi, usersApi, healthApi } from './endpoints';
+import { articlesApi, authApi, healthApi, usersApi } from './endpoints';
 import type {
-  // Import necessary types
+  AuthResponse,
+  CreateArticleRequest,
+  CreateArticleResponse,
+  DeleteArticleRequest,
+  GetArticleRequest,
+  GetArticleResponse,
+  GetArticlesByAuthorRequest,
+  GetArticlesByAuthorResponse,
+  GetArticlesByTagRequest,
+  GetArticlesByTagResponse,
+  GetHealthResponse,
+  GetUserProfileRequest,
+  GetUserProfileResponse,
+  SignInRequest,
+  SignUpRequest,
+  ToggleLikeRequest,
+  ToggleLikeResponse,
+  UpdateArticleRequest,
+  UpdateArticleResponse,
+  UpdateUserProfileRequest,
+  UpdateUserProfileResponse,
 } from './types';
 
 // Query Keys
 export const queryKeys = {
-  // Define query keys
+  articles: {
+    getArticle: ['articles', 'getArticle'] as const,
+    getArticlesByAuthor: ['articles', 'getArticlesByAuthor'] as const,
+    getArticlesByTag: ['articles', 'getArticlesByTag'] as const,
+  },
+  auth: {
+  },
+  health: {
+    getHealth: ['health', 'getHealth'] as const,
+  },
+  users: {
+    getUserProfile: ['users', 'getUserProfile'] as const,
+  },
 };
 
-// TODO: Implement hooks based on endpoints
-// This is a template - customize based on your needs
+// Articles Hooks
+export function useCreateArticle(options?: UseMutationOptions<CreateArticleResponse, Error, CreateArticleRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<CreateArticleResponse, Error, CreateArticleRequest>({
+    mutationFn: (data) => articlesApi.createArticle(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useGetArticle(params: GetArticleRequest, options?: Omit<UseQueryOptions<GetArticleResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticleResponse>({
+    queryKey: [...queryKeys.articles.getArticle, params],
+    queryFn: () => articlesApi.getArticle(params),
+    ...options,
+  });
+}
+
+export function useUpdateArticle(options?: UseMutationOptions<UpdateArticleResponse, Error, UpdateArticleRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UpdateArticleResponse, Error, UpdateArticleRequest>({
+    mutationFn: (data) => articlesApi.updateArticle(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useGetArticlesByAuthor(params: GetArticlesByAuthorRequest, options?: Omit<UseQueryOptions<GetArticlesByAuthorResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticlesByAuthorResponse>({
+    queryKey: [...queryKeys.articles.getArticlesByAuthor, params],
+    queryFn: () => articlesApi.getArticlesByAuthor(params),
+    ...options,
+  });
+}
+
+export function useGetArticlesByTag(params: GetArticlesByTagRequest, options?: Omit<UseQueryOptions<GetArticlesByTagResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticlesByTagResponse>({
+    queryKey: [...queryKeys.articles.getArticlesByTag, params],
+    queryFn: () => articlesApi.getArticlesByTag(params),
+    ...options,
+  });
+}
+
+export function useDeleteArticle(options?: UseMutationOptions<void, Error, DeleteArticleRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeleteArticleRequest>({
+    mutationFn: (data) => articlesApi.deleteArticle(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useToggleLike(options?: UseMutationOptions<ToggleLikeResponse, Error, ToggleLikeRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<ToggleLikeResponse, Error, ToggleLikeRequest>({
+    mutationFn: (data) => articlesApi.toggleLike(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+// Auth Hooks
+export function useSignUp(options?: UseMutationOptions<AuthResponse, Error, SignUpRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<AuthResponse, Error, SignUpRequest>({
+    mutationFn: (data) => authApi.signUp(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useSignIn(options?: UseMutationOptions<AuthResponse, Error, SignInRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<AuthResponse, Error, SignInRequest>({
+    mutationFn: (data) => authApi.signIn(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+// Health Hooks
+export function useGetHealth(params: void, options?: Omit<UseQueryOptions<GetHealthResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetHealthResponse>({
+    queryKey: [...queryKeys.health.getHealth, params],
+    queryFn: () => healthApi.getHealth(params),
+    ...options,
+  });
+}
+
+// Users Hooks
+export function useGetUserProfile(params: GetUserProfileRequest, options?: Omit<UseQueryOptions<GetUserProfileResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetUserProfileResponse>({
+    queryKey: [...queryKeys.users.getUserProfile, params],
+    queryFn: () => usersApi.getUserProfile(params),
+    ...options,
+  });
+}
+
+export function useUpdateUserProfile(options?: UseMutationOptions<UpdateUserProfileResponse, Error, UpdateUserProfileRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UpdateUserProfileResponse, Error, UpdateUserProfileRequest>({
+    mutationFn: (data) => usersApi.updateUserProfile(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}

@@ -33,7 +33,6 @@ export interface CreateArticleResponse {
 
 export interface DeleteArticleRequest {
   id?: number;
-  userId?: number;
 }
 
 export interface ErrorResponse {
@@ -90,6 +89,7 @@ export interface GetUserProfileRequest {
 export interface GetUserProfileResponse {
   id?: number;
   username?: string;
+  bio?: string;
   createdAt?: string;
 }
 
@@ -118,6 +118,10 @@ export interface ToggleLikeResponse {
 
 export interface UpdateArticleRequest {
   id?: number;
+  title?: string;
+  body?: string;
+  tags?: string[];
+  isPublished?: boolean;
 }
 
 export interface UpdateArticleResponse {
@@ -126,6 +130,9 @@ export interface UpdateArticleResponse {
 }
 
 export interface UpdateUserProfileRequest {
+  name?: string;
+  profileImage?: string;
+  bio?: string;
 }
 
 export interface UpdateUserProfileResponse {

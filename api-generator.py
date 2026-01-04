@@ -121,30 +121,36 @@ def parse_csharp_class(file_path: Path) -> Optional[CSharpClass]:
     return CSharpClass(name=class_name, properties=properties, namespace=namespace)
 
 
-def parse_controller(file_path: Path) -> List[EndpointInfo]:
-    """コントローラーファイルをパースしてエンドポイント情報を抽出"""
+def parse_controller(file_path: Path, all_request_types: set, all_response_types: set) -> List[EndpointInfo]:
+    """コントローラーファイルをパースしてエンドポイント情報を抽出
+    
+    Args:
+        file_path: コントローラーファイルのパス
+        all_request_types: 利用可能なRequest型の集合
+        all_response_types: 利用可能なResponse型の集合
+    """
     try:
         content = file_path.read_text(encoding='utf-8')
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
         return []
-    
+
     # コントローラー名を抽出
     controller_match = re.search(r'public class (\w+)Controller', content)
     if not controller_match:
         return []
     controller_name = controller_match.group(1).lower()
-    
+
     endpoints = []
     
     # エンドポイントを抽出（改良版）
     # [HttpGet], [HttpPost]などのアトリビュートとメソッド、パラメータを見つける
     method_pattern = r'\[Http(Get|Post|Put|Delete)(?:\("([^"]+)"\))?\]\s+(?:\[ValidateModelState\]\s+)?public\s+async\s+Task<ActionResult(?:<(\w+)>)?>\s+(\w+)\s*\(([^)]*)\)'
-    
+
     for match in re.finditer(method_pattern, content):
         http_method = match.group(1).upper()
         route = match.group(2) or ""
-        response_type = match.group(3)
+        explicit_response_type = match.group(3)
         function_name = match.group(4)
         parameters = match.group(5)
         
@@ -155,6 +161,22 @@ def parse_controller(file_path: Path) -> List[EndpointInfo]:
             from_body_match = re.search(r'\[FromBody\]\s+(\w+Request)\s+\w+', parameters)
             if from_body_match:
                 request_type = from_body_match.group(1)
+        
+        # メソッド名からRequest/Response型を推測
+        inferred_request = f"{function_name}Request"
+        inferred_response = f"{function_name}Response"
+        
+        # リクエスト型: 明示的に指定されていない場合、推測した型が存在すれば使用
+        if not request_type and inferred_request in all_request_types:
+            request_type = inferred_request
+        
+        # レスポンス型: 明示的に指定されている場合はそれを使用、なければ推測
+        if explicit_response_type:
+            response_type = explicit_response_type
+        elif inferred_response in all_response_types:
+            response_type = inferred_response
+        else:
+            response_type = None
         
         # ルートパスを構築
         path = f"/api/{controller_name}"
@@ -227,30 +249,29 @@ def generate_endpoints_file(endpoints: List[EndpointInfo]) -> str:
         
         for ep in eps:
             func_name = ep.function_name[0].lower() + ep.function_name[1:]
+            request_type = ep.request_type or "void"
+            response_type = ep.response_type or "void"
             
-            if ep.method == "GET":
-                # GETリクエストはパラメータなし（パスパラメータは別途処理が必要）
-                lines.append(f"  {func_name}: async (): Promise<{ep.response_type or 'void'}> => {{")
-                lines.append(f"    const response = await apiClient.get<{ep.response_type or 'void'}>('{ep.path}');")
-                lines.append("    return response.data;")
-                lines.append("  },")
-            elif ep.method == "POST":
-                req_param = f"data: {ep.request_type}" if ep.request_type else ""
-                lines.append(f"  {func_name}: async ({req_param}): Promise<{ep.response_type or 'void'}> => {{")
-                lines.append(f"    const response = await apiClient.post<{ep.response_type or 'void'}>('{ep.path}'{', data' if req_param else ''});")
-                lines.append("    return response.data;")
-                lines.append("  },")
-            elif ep.method == "PUT":
-                req_param = f"data: {ep.request_type}" if ep.request_type else ""
-                lines.append(f"  {func_name}: async ({req_param}): Promise<{ep.response_type or 'void'}> => {{")
-                lines.append(f"    const response = await apiClient.put<{ep.response_type or 'void'}>('{ep.path}'{', data' if req_param else ''});")
-                lines.append("    return response.data;")
-                lines.append("  },")
-            elif ep.method == "DELETE":
-                lines.append(f"  {func_name}: async (): Promise<{ep.response_type or 'void'}> => {{")
+            # HTTPメソッドに応じたクライアントメソッドを選択
+            http_method = ep.method.lower()
+            
+            if ep.method == "DELETE":
+                lines.append(f"  {func_name}: async (data: {request_type}): Promise<{response_type}> => {{")
                 lines.append(f"    await apiClient.delete('{ep.path}');")
                 lines.append("  },")
-        
+            elif ep.method == "GET":
+                # GETはparamsとして渡す
+                lines.append(f"  {func_name}: async (data: {request_type}): Promise<{response_type}> => {{")
+                lines.append(f"    const response = await apiClient.get<{response_type}>('{ep.path}', {{ params: data }});")
+                lines.append("    return response.data;")
+                lines.append("  },")
+            else:
+                # POST, PUTはボディとして渡す
+                lines.append(f"  {func_name}: async (data: {request_type}): Promise<{response_type}> => {{")
+                lines.append(f"    const response = await apiClient.{http_method}<{response_type}>('{ep.path}', data);")
+                lines.append("    return response.data;")
+                lines.append("  },")
+
         lines.append("};")
         lines.append("")
     
@@ -315,10 +336,11 @@ def generate_hooks_file(endpoints: List[EndpointInfo]) -> str:
             if ep.method == "GET":
                 # Query hook
                 return_type = ep.response_type or "void"
-                lines.append(f"export function {hook_name}(options?: Omit<UseQueryOptions<{return_type}>, 'queryKey' | 'queryFn'>) {{")
+                request_type = ep.request_type or "void"
+                lines.append(f"export function {hook_name}(params: {request_type}, options?: Omit<UseQueryOptions<{return_type}>, 'queryKey' | 'queryFn'>) {{")
                 lines.append(f"  return useQuery<{return_type}>({{")
-                lines.append(f"    queryKey: queryKeys.{controller}.{func_name},")
-                lines.append(f"    queryFn: () => {controller}Api.{func_name}(),")
+                lines.append(f"    queryKey: [...queryKeys.{controller}.{func_name}, params],")
+                lines.append(f"    queryFn: () => {controller}Api.{func_name}(params),")
                 lines.append("    ...options,")
                 lines.append("  });")
                 lines.append("}")
@@ -357,6 +379,8 @@ def main():
     # Request/Response/DTOクラスをパース
     print("\n📖 Parsing Request/Response/DTO classes...")
     classes: List[CSharpClass] = []
+    all_request_types: set = set()
+    all_response_types: set = set()
     
     for dir_path in [REQUEST_DIR, RESPONSE_DIR, DTO_DIR]:
         if not dir_path.exists():
@@ -368,6 +392,13 @@ def main():
             if cls:
                 classes.append(cls)
                 print(f"  ✓ {cls.name}")
+                # Request/Response型を収集
+                if cls.name.endswith("Request"):
+                    all_request_types.add(cls.name)
+                elif cls.name.endswith("Response"):
+                    all_response_types.add(cls.name)
+    
+    print(f"\n📊 Found {len(all_request_types)} Request types, {len(all_response_types)} Response types")
     
     # コントローラーをパース
     print("\n📖 Parsing Controllers...")
@@ -375,7 +406,7 @@ def main():
     
     if CONTROLLER_DIR.exists():
         for file_path in CONTROLLER_DIR.glob("*Controller.cs"):
-            endpoints = parse_controller(file_path)
+            endpoints = parse_controller(file_path, all_request_types, all_response_types)
             all_endpoints.extend(endpoints)
             if endpoints:
                 print(f"  ✓ {file_path.name}: {len(endpoints)} endpoints")
