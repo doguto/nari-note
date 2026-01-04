@@ -12,10 +12,10 @@ public class DeleteArticleService
         this.articleRepository = articleRepository;
     }
 
-    public async Task ExecuteAsync(DeleteArticleRequest request)
+    public async Task ExecuteAsync(int userId, DeleteArticleRequest request)
     {
         var article = await articleRepository.FindForceByIdAsync(request.Id);
-        if (article.AuthorId != request.UserId) throw new UnauthorizedAccessException("この記事を削除する権限がありません");
+        if (article.AuthorId != userId) throw new UnauthorizedAccessException("この記事を削除する権限がありません");
             
         await articleRepository.DeleteAsync(request.Id);
     }

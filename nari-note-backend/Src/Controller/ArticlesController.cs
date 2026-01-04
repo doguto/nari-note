@@ -60,7 +60,7 @@ public class ArticlesController : ApplicationController
         var response = await updateArticleService.ExecuteAsync(UserId, request);
         return Ok(response);
     }
-    
+
     [HttpGet("author/{authorId}")]
     public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(int authorId)
     {
@@ -68,28 +68,25 @@ public class ArticlesController : ApplicationController
         var response = await getArticlesByAuthorService.ExecuteAsync(request);
         return Ok(response);
     }
-    
+
     [HttpGet("tag/{tagName}")]
     public async Task<ActionResult<GetArticlesByTagResponse>> GetArticlesByTag(string tagName)
     {
-        if (string.IsNullOrWhiteSpace(tagName))
-        {
-            return BadRequest(new { message = "Tag name cannot be empty" });
-        }
-        
+        if (string.IsNullOrWhiteSpace(tagName)) return BadRequest(new { message = "Tag name cannot be empty" });
+
         var request = new GetArticlesByTagRequest { TagName = tagName };
         var response = await getArticlesByTagService.ExecuteAsync(request);
         return Ok(response);
     }
-    
+
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteArticle(int id, [FromQuery] int userId)
+    public async Task<ActionResult> DeleteArticle(int id)
     {
-        var request = new DeleteArticleRequest { Id = id, UserId = userId };
-        await deleteArticleService.ExecuteAsync(request);
+        var request = new DeleteArticleRequest { Id = id };
+        await deleteArticleService.ExecuteAsync(UserId, request);
         return NoContent();
     }
-    
+
     [HttpPost("{id}/like")]
     public async Task<ActionResult> ToggleLike(int id)
     {
