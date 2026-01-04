@@ -86,8 +86,8 @@ def parse_csharp_class(file_path: Path) -> Optional[CSharpClass]:
     
     # プロパティを抽出
     properties = []
-    # 改良版: int, DateTime, List<T>などをサポート
-    property_pattern = r'public\s+([\w<>,\s]+?)\s+(\w+)\s*\{\s*get;\s*set;\s*\}'
+    # 改良版: int, DateTime, List<T>などをサポート、requiredキーワードを無視
+    property_pattern = r'public\s+(?:required\s+)?([\w<>,\s]+?)\s+(\w+)\s*\{\s*get;\s*set;\s*\}'
     for match in re.finditer(property_pattern, content):
         prop_type = match.group(1).strip()
         prop_name = match.group(2)
