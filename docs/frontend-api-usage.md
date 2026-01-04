@@ -7,6 +7,16 @@
 フロントエンドでは、TanStack Query（React Query）とAxiosを使用してAPIとの通信を行います。
 すべてのAPI関数は型安全で、自動的にキャッシュとリフェッチを管理します。
 
+## API関数の生成
+
+バックエンドのコードからAPI関数を生成するには、`api-generator.py`スクリプトを使用します。
+
+```bash
+python3 api-generator.py
+```
+
+詳細は[API-GENERATOR-README.md](../API-GENERATOR-README.md)を参照してください。
+
 ## セットアップ
 
 プロジェクトにはすでにQueryProviderが設定されているため、追加のセットアップは不要です。
