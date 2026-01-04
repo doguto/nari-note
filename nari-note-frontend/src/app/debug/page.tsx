@@ -15,6 +15,7 @@ import {
   type UpdateArticleResponse,
   type ToggleLikeResponse,
   type GetUserProfileResponse,
+  type UpdateUserProfileRequest,
 } from '@/lib/api';
 import { AxiosError } from 'axios';
 
@@ -214,7 +215,7 @@ export default function DebugPage() {
   };
 
   const handleUpdateUserProfile = () => {
-    const body: { name?: string; bio?: string; profileImage?: string } = {};
+    const body: UpdateUserProfileRequest = {};
     if (userName) body.name = userName;
     if (userBio) body.bio = userBio;
     if (userProfileImage) body.profileImage = userProfileImage;
