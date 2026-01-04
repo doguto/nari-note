@@ -10,7 +10,7 @@ Controller (プレゼンテーション層)
     ↓
 Application (Service層)
     ↓
-Application (Repository Interface)
+Domain (Repository Interface)
     ↓
 Domain (Entity)
     ↑
@@ -18,6 +18,8 @@ Infrastructure (Repository実装)
 ```
 
 ## ディレクトリ構成
+
+> **注意**: 現在 Repository Interface は `Application/Repository/` に配置されていますが、将来的に `Domain/Repository/` に移動する予定です。新規実装時は `Domain/Repository/` に配置してください。
 
 ```
 nari-note-backend/
@@ -31,10 +33,6 @@ nari-note-backend/
 │   │   │   ├── CreateArticleService.cs
 │   │   │   ├── GetArticleService.cs
 │   │   │   └── UpdateArticleService.cs
-│   │   ├── Repository/       # Repository抽象化（インターフェース）
-│   │   │   ├── IRepository.cs  # 共通基底インターフェース
-│   │   │   ├── IArticleRepository.cs
-│   │   │   └── IUserRepository.cs
 │   │   ├── Dto/              # Data Transfer Objects
 │   │   │   ├── Request/      # リクエストDTO
 │   │   │   └── Response/     # レスポンスDTO
@@ -42,6 +40,10 @@ nari-note-backend/
 │   │   │   └── NariNoteException.cs
 │   │   └── Security/         # セキュリティ関連（JWT等）
 │   ├── Domain/                # ドメイン層
+│   │   ├── Repository/       # Repository抽象化（インターフェース）※新規実装はここに配置
+│   │   │   ├── IRepository.cs  # 共通基底インターフェース
+│   │   │   ├── IArticleRepository.cs
+│   │   │   └── IUserRepository.cs
 │   │   └── Entity/           # エンティティ
 │   │       ├── EntityBase.cs  # 共通基底クラス
 │   │       ├── Article.cs
@@ -96,7 +98,7 @@ nari-note-backend/
    - 各Serviceが単一責任を持つ
 
 2. **依存性逆転（Repository層のみ）**
-   - ApplicationがRepository Interfaceを定義
+   - DomainがRepository Interfaceを定義
    - InfrastructureがRepository Interfaceを実装
    - Serviceはインフラの詳細を知らない
 

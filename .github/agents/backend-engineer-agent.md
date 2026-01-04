@@ -132,7 +132,7 @@ nari-note-backend/
 
 1. **Request/Response DTO** - `Src/Application/Dto/`（API仕様に基づいて作成）
 2. **Service実装** - `Src/Application/Service/`（ExecuteAsyncメソッド）
-3. **Repository Interface** - `Src/Application/Repository/`（必要に応じて新規メソッドを追加）
+3. **Repository Interface** - `Src/Domain/Repository/`（必要に応じて新規メソッドを追加）
 4. **Repository 実装** - `Src/Infrastructure/Repository/`（必要に応じて新規メソッドを実装）
 5. **Controller実装** - `Src/Controller/`
 6. **DI登録** - `Program.cs` または `*ServiceInstaller.cs`

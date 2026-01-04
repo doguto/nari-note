@@ -107,7 +107,7 @@ Controller (プレゼンテーション層)
     ↓
 Application (Service層)
     ↓
-Application (Repository Interface)
+Domain (Repository Interface)
     ↓
 Domain (Entity)
     ↑
@@ -116,6 +116,8 @@ Infrastructure (Repository実装)
 
 ### ディレクトリ構成
 
+> **注意**: 現在 Repository Interface は `Application/Repository/` に配置されていますが、将来的に `Domain/Repository/` に移動する予定です。新規実装時は `Domain/Repository/` に配置してください。
+
 ```
 nari-note-backend/
 ├── Src/
@@ -123,14 +125,14 @@ nari-note-backend/
 │   │   └── ApplicationController.cs  # 基底Controller
 │   ├── Application/           # アプリケーション層
 │   │   ├── Service/          # ビジネスロジック（API一個につきService一個）
-│   │   ├── Repository/       # Repository抽象化（インターフェース）
-│   │   │   └── IRepository.cs  # 共通Repository基底インターフェース
 │   │   ├── Dto/              # Data Transfer Objects
 │   │   │   ├── Request/      # リクエストDTO
 │   │   │   └── Response/     # レスポンスDTO
 │   │   ├── Exception/        # カスタム例外クラス
 │   │   └── Security/         # セキュリティ関連（JWT等）
 │   ├── Domain/                # ドメイン層
+│   │   ├── Repository/       # Repository抽象化（インターフェース）※新規実装はここに配置
+│   │   │   └── IRepository.cs  # 共通Repository基底インターフェース
 │   │   └── Entity/           # エンティティ
 │   │       └── EntityBase.cs  # 共通Entity基底クラス
 │   ├── Infrastructure/        # インフラストラクチャ層
@@ -807,7 +809,7 @@ public class CreateArticleResponse
 - [ ] 必要に応じてドメインロジックを実装
 
 **Repository Interface:**
-- [ ] `Src/Application/Repository/` にインターフェースを作成
+- [ ] `Src/Domain/Repository/` にインターフェースを作成
 - [ ] `IRepository<TEntity>` を継承
 - [ ] エンティティ固有のメソッドを定義（例: `FindByAuthorAsync`）
 
