@@ -2,16 +2,25 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-
-interface ApiResponse {
-  token?: string;
-  id?: number;
-  [key: string]: unknown;
-}
+import { 
+  authApi, 
+  articlesApi, 
+  usersApi, 
+  healthApi,
+  type AuthResponse,
+  type CreateArticleResponse,
+  type GetArticleResponse,
+  type GetArticlesByAuthorResponse,
+  type GetArticlesByTagResponse,
+  type UpdateArticleResponse,
+  type ToggleLikeResponse,
+  type GetUserProfileResponse,
+  type UpdateUserProfileRequest,
+} from '@/lib/api';
+import { AxiosError } from 'axios';
 
 export default function DebugPage() {
-  const [apiEndpoint, setApiEndpoint] = useState('');
-  const [response, setResponse] = useState<ApiResponse | null>(null);
+  const [response, setResponse] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -21,7 +30,6 @@ export default function DebugPage() {
   const [signUpPassword, setSignUpPassword] = useState('Password123!');
   const [signInEmail, setSignInEmail] = useState('test@example.com');
   const [signInPassword, setSignInPassword] = useState('Password123!');
-  const [authToken, setAuthToken] = useState<string>('');
   
   // Article
   const [articleTitle, setArticleTitle] = useState('テスト記事タイトル');
@@ -39,87 +47,78 @@ export default function DebugPage() {
   const [authorId, setAuthorId] = useState('');
   const [tagName, setTagName] = useState('');
 
-  const makeRequest = async (url: string, method: string, body?: Record<string, unknown>) => {
+  const handleApiCall = async <T,>(
+    apiCall: () => Promise<T>,
+    successCallback?: (data: T) => void
+  ) => {
     setLoading(true);
     setError(null);
     setResponse(null);
     
     try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
+      const data = await apiCall();
+      setResponse(data as Record<string, unknown>);
       
-      if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
-      }
-      
-      const options: RequestInit = {
-        method,
-        headers,
-        credentials: 'include',
-      };
-      
-      if (body) {
-        options.body = JSON.stringify(body);
-      }
-      
-      const res = await fetch(url, options);
-      const data = await res.json() as ApiResponse;
-      
-      if (!res.ok) {
-        console.error(`[API Error] ${method} ${url} - HTTP ${res.status}:`, data);
-        const errorMsg = `HTTP ${res.status}: ${JSON.stringify(data)}`;
-        setError(errorMsg);
-        alert(`❌ エラーが発生しました\n\n${errorMsg}`);
-      } else {
-        setResponse(data);
-        
-        // 認証成功時にトークンを保存
-        if (data.token) {
-          setAuthToken(data.token);
-        }
-        
-        // 記事作成成功時にIDを保存
-        if (data.id && method === 'POST' && url.includes('/articles')) {
-          setArticleId(data.id.toString());
-        }
-        
-        // ユーザープロフィール取得成功時にIDを保存
-        if (data.id && method === 'GET' && url.match(/\/users\/\d+$/)) {
-          setUserId(data.id.toString());
-        }
+      if (successCallback) {
+        successCallback(data);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(errorMessage);
-      alert(`❌ エラーが発生しました\n\n${errorMessage}`);
+      const axiosError = err as AxiosError<{ message?: string }>;
+      const errorMessage = axiosError.response?.data?.message || axiosError.message || 'Unknown error occurred';
+      const statusCode = axiosError.response?.status;
+      const fullError = `HTTP ${statusCode}: ${errorMessage}`;
+      
+      console.error('[API Error]:', fullError, axiosError.response?.data);
+      setError(fullError);
+      alert(`❌ エラーが発生しました\n\n${fullError}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSignUp = () => {
-    makeRequest(`${apiEndpoint}/api/auth/signup`, 'POST', {
-      email: signUpEmail,
-      name: signUpUsername,
-      password: signUpPassword,
-    });
+    handleApiCall(
+      () => authApi.signUp({
+        email: signUpEmail,
+        name: signUpUsername,
+        password: signUpPassword,
+      }),
+      (data: AuthResponse) => {
+        if (data.userId) {
+          setUserId(data.userId.toString());
+        }
+      }
+    );
   };
 
   const handleSignIn = () => {
-    makeRequest(`${apiEndpoint}/api/auth/signin`, 'POST', {
-      usernameOrEmail: signInEmail,
-      password: signInPassword,
-    });
+    handleApiCall(
+      () => authApi.signIn({
+        usernameOrEmail: signInEmail,
+        password: signInPassword,
+      }),
+      (data: AuthResponse) => {
+        if (data.userId) {
+          setUserId(data.userId.toString());
+        }
+      }
+    );
   };
 
   const handleCreateArticle = () => {
     const tags = articleTags.split(',').map(tag => tag.trim()).filter(tag => tag);
-    makeRequest(`${apiEndpoint}/api/articles`, 'POST', {
-      title: articleTitle,
-      body: articleContent,
-      tags: tags,
-    });
+    handleApiCall(
+      () => articlesApi.createArticle({
+        title: articleTitle,
+        body: articleContent,
+        tags: tags,
+      }),
+      (data: CreateArticleResponse) => {
+        if (data.id) {
+          setArticleId(data.id.toString());
+        }
+      }
+    );
   };
 
   const handleGetArticle = () => {
@@ -129,15 +128,25 @@ export default function DebugPage() {
       alert(`❌ ${errorMsg}`);
       return;
     }
-    makeRequest(`${apiEndpoint}/api/articles/${articleId}`, 'GET');
+    handleApiCall(
+      () => articlesApi.getArticle({ id: parseInt(articleId) }),
+      (data: GetArticleResponse) => {
+        if (data.id) {
+          setArticleId(data.id.toString());
+        }
+        if (data.authorId) {
+          setUserId(data.authorId.toString());
+        }
+      }
+    );
   };
 
   const handleGetArticles = () => {
-    makeRequest(`${apiEndpoint}/api/articles`, 'GET');
+    alert('❌ GET /api/articles エンドポイントはバックエンドに実装されていません。\n代わりに「著者別記事取得」または「タグ別記事取得」を使用してください。');
   };
 
   const handleHealthCheck = () => {
-    makeRequest(`${apiEndpoint}/api/health`, 'GET');
+    handleApiCall(() => healthApi.getHealth());
   };
 
   const handleUpdateArticle = () => {
@@ -148,11 +157,19 @@ export default function DebugPage() {
       return;
     }
     const tags = articleTags.split(',').map(tag => tag.trim()).filter(tag => tag);
-    makeRequest(`${apiEndpoint}/api/articles/${articleId}`, 'PUT', {
-      title: articleTitle,
-      body: articleContent,
-      tags: tags,
-    });
+    handleApiCall(
+      () => articlesApi.updateArticle({
+        id: parseInt(articleId),
+        title: articleTitle,
+        body: articleContent,
+        tags: tags,
+      }),
+      (data: UpdateArticleResponse) => {
+        if (data.id) {
+          setArticleId(data.id.toString());
+        }
+      }
+    );
   };
 
   const handleDeleteArticle = () => {
@@ -162,13 +179,7 @@ export default function DebugPage() {
       alert(`❌ ${errorMsg}`);
       return;
     }
-    if (!userId) {
-      const errorMsg = 'ユーザーIDを入力してください';
-      setError(errorMsg);
-      alert(`❌ ${errorMsg}`);
-      return;
-    }
-    makeRequest(`${apiEndpoint}/api/articles/${articleId}?userId=${userId}`, 'DELETE');
+    handleApiCall(() => articlesApi.deleteArticle({ id: parseInt(articleId) }));
   };
 
   const handleToggleLike = () => {
@@ -178,7 +189,12 @@ export default function DebugPage() {
       alert(`❌ ${errorMsg}`);
       return;
     }
-    makeRequest(`${apiEndpoint}/api/articles/${articleId}/like`, 'POST');
+    handleApiCall(
+      () => articlesApi.toggleLike({ articleId: parseInt(articleId) }),
+      (data: ToggleLikeResponse) => {
+        console.log('Like toggled:', data);
+      }
+    );
   };
 
   const handleGetUserProfile = () => {
@@ -188,11 +204,18 @@ export default function DebugPage() {
       alert(`❌ ${errorMsg}`);
       return;
     }
-    makeRequest(`${apiEndpoint}/api/users/${userId}`, 'GET');
+    handleApiCall(
+      () => usersApi.getUserProfile({ id: parseInt(userId) }),
+      (data: GetUserProfileResponse) => {
+        if (data.id) {
+          setUserId(data.id.toString());
+        }
+      }
+    );
   };
 
   const handleUpdateUserProfile = () => {
-    const body: Record<string, string> = {};
+    const body: UpdateUserProfileRequest = {};
     if (userName) body.name = userName;
     if (userBio) body.bio = userBio;
     if (userProfileImage) body.profileImage = userProfileImage;
@@ -204,7 +227,7 @@ export default function DebugPage() {
       return;
     }
     
-    makeRequest(`${apiEndpoint}/api/users`, 'PUT', body);
+    handleApiCall(() => usersApi.updateUserProfile(body));
   };
 
   const handleGetArticlesByAuthor = () => {
@@ -214,7 +237,12 @@ export default function DebugPage() {
       alert(`❌ ${errorMsg}`);
       return;
     }
-    makeRequest(`${apiEndpoint}/api/articles/author/${authorId}`, 'GET');
+    handleApiCall(
+      () => articlesApi.getArticlesByAuthor({ authorId: parseInt(authorId) }),
+      (data: GetArticlesByAuthorResponse) => {
+        console.log('Articles by author:', data);
+      }
+    );
   };
 
   const handleGetArticlesByTag = () => {
@@ -224,7 +252,12 @@ export default function DebugPage() {
       alert(`❌ ${errorMsg}`);
       return;
     }
-    makeRequest(`${apiEndpoint}/api/articles/tag/${tagName}`, 'GET');
+    handleApiCall(
+      () => articlesApi.getArticlesByTag({ tagName }),
+      (data: GetArticlesByTagResponse) => {
+        console.log('Articles by tag:', data);
+      }
+    );
   };
 
   return (
@@ -237,42 +270,25 @@ export default function DebugPage() {
           </Link>
         </div>
 
-        {/* API Endpoint設定 */}
+        {/* Health Check */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">API エンドポイント</h2>
-          <div className="flex gap-4">
-            <input
-              type="text"
-              value={apiEndpoint}
-              onChange={(e) => setApiEndpoint(e.target.value)}
-              className="flex-1 px-4 py-2 border rounded"
-              placeholder="http://localhost:5243"
-            />
-            <button
-              onClick={handleHealthCheck}
-              className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-              disabled={loading}
-            >
-              Health Check
-            </button>
-          </div>
+          <h2 className="text-xl font-bold mb-4">Health Check</h2>
+          <button
+            onClick={handleHealthCheck}
+            className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            disabled={loading}
+          >
+            Health Check
+          </button>
         </div>
 
-        {/* 認証トークン表示 */}
-        {authToken && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-bold mb-4">認証トークン</h2>
-            <div className="bg-gray-100 p-3 rounded font-mono text-sm break-all">
-              {authToken}
-            </div>
-            <button
-              onClick={() => setAuthToken('')}
-              className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              トークンをクリア
-            </button>
-          </div>
-        )}
+        {/* 認証情報 */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-bold mb-4">認証について</h2>
+          <p className="text-sm text-gray-600">
+            認証はCookieベースで自動管理されます。サインアップ/サインイン後は自動的に認証されます。
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* サインアップ */}
@@ -366,13 +382,11 @@ export default function DebugPage() {
               <button
                 onClick={handleCreateArticle}
                 className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                disabled={loading || !authToken}
+                disabled={loading}
               >
                 記事を作成
               </button>
-              {!authToken && (
-                <p className="text-sm text-red-500">※ 認証が必要です</p>
-              )}
+              <p className="text-sm text-gray-500">※ 認証が必要です（自動でトークンが使用されます）</p>
             </div>
           </div>
 
@@ -439,13 +453,11 @@ export default function DebugPage() {
               <button
                 onClick={handleUpdateArticle}
                 className="w-full px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                disabled={loading || !authToken}
+                disabled={loading}
               >
                 記事を更新
               </button>
-              {!authToken && (
-                <p className="text-sm text-red-500">※ 認証が必要です</p>
-              )}
+              <p className="text-sm text-gray-500">※ 認証が必要です（自動でトークンが使用されます）</p>
             </div>
           </div>
 
@@ -460,23 +472,14 @@ export default function DebugPage() {
                 className="w-full px-4 py-2 border rounded"
                 placeholder="記事ID"
               />
-              <input
-                type="text"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                className="w-full px-4 py-2 border rounded"
-                placeholder="ユーザーID"
-              />
               <button
                 onClick={handleDeleteArticle}
                 className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                disabled={loading || !authToken}
+                disabled={loading}
               >
                 記事を削除
               </button>
-              {!authToken && (
-                <p className="text-sm text-red-500">※ 認証が必要です</p>
-              )}
+              <p className="text-sm text-gray-500">※ 認証が必要です（自動でトークンが使用されます）</p>
             </div>
           </div>
 
@@ -494,13 +497,11 @@ export default function DebugPage() {
               <button
                 onClick={handleToggleLike}
                 className="w-full px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600"
-                disabled={loading || !authToken}
+                disabled={loading}
               >
                 いいねを切り替え
               </button>
-              {!authToken && (
-                <p className="text-sm text-red-500">※ 認証が必要です</p>
-              )}
+              <p className="text-sm text-gray-500">※ 認証が必要です（自動でトークンが使用されます）</p>
             </div>
           </div>
 
@@ -553,13 +554,11 @@ export default function DebugPage() {
               <button
                 onClick={handleUpdateUserProfile}
                 className="w-full px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
-                disabled={loading || !authToken}
+                disabled={loading}
               >
                 プロフィールを更新
               </button>
-              {!authToken && (
-                <p className="text-sm text-red-500">※ 認証が必要です</p>
-              )}
+              <p className="text-sm text-gray-500">※ 認証が必要です（自動でトークンが使用されます）</p>
             </div>
           </div>
 
