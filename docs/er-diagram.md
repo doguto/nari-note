@@ -17,6 +17,9 @@ User ||--o{ Follow: "followed"
 User ||--o{ Like: "has many"
 Article ||--o{ Like: "has many"
 
+User ||--o{ Comment: "has many"
+Article ||--o{ Comment: "has many"
+
 User ||--o{ Notification: "has many"
 
 User {
@@ -66,6 +69,15 @@ Like {
     user_id integer FK
     article_id integer FK
     created_at datetime
+}
+
+Comment {
+    id integer PK
+    user_id integer FK
+    article_id integer FK
+    message text
+    created_at datetime
+    updated_at datetime
 }
 
 Follow {
