@@ -1,7 +1,4 @@
-'use client';
-
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 interface HomeArticleCardProps {
   id: number;
@@ -28,16 +25,10 @@ export function HomeArticleCard({
   date,
   image,
 }: HomeArticleCardProps) {
-  const router = useRouter();
-
-  const handleCardClick = () => {
-    router.push(`/articles/${id}`);
-  };
-
   return (
-    <div
-      onClick={handleCardClick}
-      className="block bg-[#2d3e1f] rounded-lg p-4 text-white hover:bg-[#3d4e2f] transition-colors cursor-pointer"
+    <Link
+      href={`/articles/${id}`}
+      className="block bg-[#2d3e1f] rounded-lg p-4 text-white hover:bg-[#3d4e2f] transition-colors"
     >
       <div className="flex gap-4">
         <div className="w-24 h-24 bg-[#1a2515] rounded flex items-center justify-center text-4xl">
@@ -61,6 +52,6 @@ export function HomeArticleCard({
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

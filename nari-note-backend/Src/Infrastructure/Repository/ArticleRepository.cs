@@ -146,6 +146,9 @@ public class ArticleRepository : IArticleRepository
             .Where(a => a.IsPublished)
             .OrderByDescending(a => a.CreatedAt);
 
+        // 注: ページネーションの標準的な実装として、
+        // 総数取得とデータ取得を別々に実行しています。
+        // 大量データがある場合は、キャッシュの利用を検討してください。
         var totalCount = await query.CountAsync();
         var articles = await query
             .Skip(offset)

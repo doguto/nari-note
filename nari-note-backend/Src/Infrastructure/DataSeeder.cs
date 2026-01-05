@@ -14,6 +14,8 @@ public static class DataSeeder
         }
 
         // ユーザー作成
+        // ⚠️ 注意: 開発環境用のシードデータです。本番環境では使用しないでください。
+        // パスワード: password123 (セキュリティ上、本番環境ではより強力なパスワードを使用してください)
         var users = new List<User>
         {
             new User

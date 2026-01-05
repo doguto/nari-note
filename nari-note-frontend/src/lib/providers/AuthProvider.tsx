@@ -17,21 +17,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 初期化時にlocalStorageからユーザーIDを取得
-    const storedUserId = localStorage.getItem('userId');
-    if (storedUserId) {
-      setUserId(parseInt(storedUserId, 10));
+    // SSRチェック: クライアントサイドでのみlocalStorageにアクセス
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      if (storedUserId) {
+        setUserId(parseInt(storedUserId, 10));
+      }
     }
     setIsLoading(false);
   }, []);
 
   const login = useCallback((newUserId: number) => {
-    localStorage.setItem('userId', newUserId.toString());
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('userId', newUserId.toString());
+    }
     setUserId(newUserId);
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('userId');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('userId');
+    }
     setUserId(null);
   }, []);
 

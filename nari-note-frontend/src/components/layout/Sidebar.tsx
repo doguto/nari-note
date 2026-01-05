@@ -57,13 +57,13 @@ export function Sidebar() {
         </h3>
         <div className="space-y-3">
           {[
-            { image: '👤', label: 'プログラミング入門', count: '471いいね' },
-            { image: '🎮', label: 'ゲーム開発', count: '356いいね' },
-            { image: '🎮', label: 'Web開発', count: '289いいね' }
-          ].map((item, index) => (
+            { id: 1, image: '👤', label: 'プログラミング入門', count: '471いいね' },
+            { id: 2, image: '🎮', label: 'ゲーム開発', count: '356いいね' },
+            { id: 3, image: '📱', label: 'Web開発', count: '289いいね' }
+          ].map((item) => (
             <Link 
-              key={index} 
-              href="/articles/1" 
+              key={item.id} 
+              href={`/articles/${item.id}`} 
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <div className="w-12 h-12 bg-[#e8e4d0] rounded flex items-center justify-center text-xl flex-shrink-0">

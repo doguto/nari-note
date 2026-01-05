@@ -36,9 +36,9 @@ export function ArticleCard({ article, onLike }: ArticleCardProps) {
       
       {article.tags && article.tags.length > 0 && (
         <div className="flex gap-2 flex-wrap mb-4">
-          {article.tags.map((tag, index) => (
+          {article.tags.map((tag) => (
             <Link
-              key={index}
+              key={tag}
               href={`/tags/${tag}`}
               onClick={(e) => e.stopPropagation()}
               className="px-2 py-1 bg-[#f5f3e8] text-[#2d3e1f] rounded text-sm hover:bg-[#e8e4d0] transition-colors"

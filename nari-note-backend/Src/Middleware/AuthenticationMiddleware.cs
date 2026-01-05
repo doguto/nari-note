@@ -23,11 +23,42 @@ public class AuthenticationMiddleware
         var path = context.Request.Path.Value?.ToLower() ?? "";
         var method = context.Request.Method;
         
-        if (path.Contains("/auth/") || 
-            path.Contains("/health") ||
-            method == "OPTIONS" ||
-            (method == "GET" && path.StartsWith("/api/articles")) ||
-            (method == "GET" && path.StartsWith("/api/users")))
+        // 認証不要のエンドポイントリスト（ホワイトリスト方式）
+        var publicEndpoints = new[]
+        {
+            ("/auth/signin", "POST"),
+            ("/auth/signup", "POST"),
+            ("/health", "GET"),
+            ("/api/articles", "GET"),          // 記事一覧の取得
+            ("/api/users", "GET")              // ユーザー一覧の取得（プロフィール表示用）
+        };
+        
+        // パスパターンマッチング: /api/articles/{id} のような動的パスに対応
+        var isPublicEndpoint = publicEndpoints.Any(endpoint =>
+        {
+            var (endpointPath, endpointMethod) = endpoint;
+            
+            // メソッドが一致しない場合はスキップ
+            if (method != endpointMethod && endpointMethod != "OPTIONS")
+                return false;
+            
+            // 完全一致
+            if (path == endpointPath)
+                return true;
+            
+            // 動的パス対応: /api/articles/{id} パターン
+            if (endpointPath == "/api/articles" && path.StartsWith("/api/articles/") && method == "GET")
+                return true;
+            
+            // 動的パス対応: /api/users/{id} パターン（プロフィール取得のみ）
+            if (endpointPath == "/api/users" && path.StartsWith("/api/users/") && method == "GET")
+                return true;
+            
+            return false;
+        });
+        
+        // OPTIONSリクエストは常に許可
+        if (method == "OPTIONS" || isPublicEndpoint)
         {
             await next(context);
             return;

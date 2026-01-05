@@ -30,12 +30,19 @@ export function HomeArticleListContainer() {
     return <p className="text-gray-500 text-center py-8">まだ記事がありません</p>;
   }
 
+  // IDが存在しない記事をフィルタリング
+  const articlesWithId = data.articles.filter((article) => article.id != null);
+
+  if (articlesWithId.length === 0) {
+    return <p className="text-gray-500 text-center py-8">有効な記事がありません</p>;
+  }
+
   return (
     <div className="space-y-4">
-      {data.articles.map((article) => (
+      {articlesWithId.map((article) => (
         <HomeArticleCard
           key={article.id}
-          id={article.id ?? 0}
+          id={article.id!}
           title={article.title ?? ''}
           author={article.authorName ?? ''}
           authorId={article.authorId ?? 0}

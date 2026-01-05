@@ -51,9 +51,9 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
       
       {article.tags && article.tags.length > 0 && (
         <div className="flex gap-2 flex-wrap pt-6 border-t border-gray-200">
-          {article.tags.map((tag, index) => (
+          {article.tags.map((tag) => (
             <Link
-              key={index}
+              key={tag}
               href={`/tags/${tag}`}
               className="px-3 py-1 bg-[#f5f3e8] text-[#2d3e1f] rounded-full text-sm hover:bg-[#e8e4d0] transition-colors"
             >
