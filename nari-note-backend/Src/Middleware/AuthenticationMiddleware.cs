@@ -21,9 +21,13 @@ public class AuthenticationMiddleware
     {
         // 認証が不要なエンドポイントはスキップ
         var path = context.Request.Path.Value?.ToLower() ?? "";
+        var method = context.Request.Method;
+        
         if (path.Contains("/auth/") || 
             path.Contains("/health") ||
-            context.Request.Method == "OPTIONS")
+            method == "OPTIONS" ||
+            (method == "GET" && path.StartsWith("/api/articles")) ||
+            (method == "GET" && path.StartsWith("/api/users")))
         {
             await next(context);
             return;

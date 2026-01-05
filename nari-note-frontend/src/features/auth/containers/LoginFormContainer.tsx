@@ -1,39 +1,60 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { LoginForm } from '../components/LoginForm';
+import { useSignIn } from '@/lib/api';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 /**
  * ログインフォームコンテナ - Container Component
  * 
  * ログインのロジックを管理し、LoginFormに渡します。
- * TODO: 実際の認証APIと連携
  */
 export function LoginFormContainer() {
+  const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>();
+  
+  const signInMutation = useSignIn({
+    onSuccess: (data) => {
+      // ログイン成功時、AuthProvider経由でログイン状態を更新してホームへリダイレクト
+      if (data.userId) {
+        login(data.userId);
+      }
+      router.push('/');
+    },
+    onError: (err) => {
+      // APIエラーメッセージを表示
+      if (err instanceof Error) {
+        setError(err.message || 'ログインに失敗しました');
+      } else {
+        setError('ログインに失敗しました');
+      }
+    },
+  });
 
   const handleSubmit = async () => {
     setError(undefined);
-    setIsSubmitting(true);
     
-    try {
-      // TODO: 認証APIを実装後、ここにログインロジックを追加
-      console.log('Login attempt:', { email, password });
-      
-      // 仮の処理
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 成功時の処理
-      alert('ログイン機能は実装中です');
-    } catch (err) {
-      setError('ログインに失敗しました');
-      console.error('Login error:', err);
-    } finally {
-      setIsSubmitting(false);
+    // バリデーション
+    if (!email.trim()) {
+      setError('メールアドレスまたはユーザー名を入力してください');
+      return;
     }
+    
+    if (!password) {
+      setError('パスワードを入力してください');
+      return;
+    }
+    
+    // API呼び出し
+    signInMutation.mutate({
+      usernameOrEmail: email.trim(),
+      password,
+    });
   };
 
   return (
@@ -43,7 +64,7 @@ export function LoginFormContainer() {
       onEmailChange={setEmail}
       onPasswordChange={setPassword}
       onSubmit={handleSubmit}
-      isSubmitting={isSubmitting}
+      isSubmitting={signInMutation.isPending}
       error={error}
     />
   );

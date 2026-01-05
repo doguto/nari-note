@@ -12,41 +12,40 @@ export function Sidebar() {
       <div className="bg-[#2d3e1f] rounded-lg p-4 text-white mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold" style={{ fontFamily: 'serif' }}>
-            トランド
+            トレンド
           </h3>
           <span className="text-2xl">🔥</span>
         </div>
         <div className="space-y-2">
           <Link 
-            href="/tags/trend" 
+            href="/tags/React" 
             className="block text-sm hover:text-[#88b04b] cursor-pointer transition-colors"
-            style={{ fontFamily: 'serif' }}
           >
-            テランド
+            #React
           </Link>
           <Link 
-            href="/tags/角換貨" 
+            href="/tags/TypeScript" 
             className="block text-sm hover:text-[#88b04b] cursor-pointer transition-colors"
           >
-            #角換貨
+            #TypeScript
           </Link>
           <Link 
-            href="/tags/厚井古天" 
+            href="/tags/NextJS" 
             className="block text-sm hover:text-[#88b04b] cursor-pointer transition-colors"
           >
-            #厚井古天
+            #Next.js
           </Link>
           <Link 
-            href="/tags/定齢" 
+            href="/tags/Python" 
             className="block text-sm hover:text-[#88b04b] cursor-pointer transition-colors"
           >
-            #定齢
+            #Python
           </Link>
           <Link 
-            href="/tags/AI折翼" 
+            href="/tags/AI" 
             className="block text-sm hover:text-[#88b04b] cursor-pointer transition-colors"
           >
-            #AI折翼
+            #AI
           </Link>
         </div>
       </div>
@@ -54,13 +53,13 @@ export function Sidebar() {
       {/* 注目の記事セクション */}
       <div className="bg-[#f5f3e8] rounded-lg p-4 border border-[#d4cdb3]">
         <h3 className="text-lg font-bold text-[#2d3e1f] mb-4" style={{ fontFamily: 'serif' }}>
-          注倒の議記
+          注目の記事
         </h3>
         <div className="space-y-3">
           {[
-            { image: '👤', label: '鬼賓值 #無直敢', count: '471萬雨' },
-            { image: '🎮', label: '紬任', count: '011 6001' },
-            { image: '🎮', label: '紬任', count: '18萬' }
+            { image: '👤', label: 'プログラミング入門', count: '471いいね' },
+            { image: '🎮', label: 'ゲーム開発', count: '356いいね' },
+            { image: '🎮', label: 'Web開発', count: '289いいね' }
           ].map((item, index) => (
             <Link 
               key={index} 
@@ -81,7 +80,7 @@ export function Sidebar() {
 
       {/* フッター */}
       <div className="mt-6 text-center text-sm text-gray-500">
-        © 2024刊伦 プライセンポトレブ
+        © 2024 なりノート
       </div>
     </aside>
   );

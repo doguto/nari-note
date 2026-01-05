@@ -1,26 +1,57 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { SignUpForm } from '../components/SignUpForm';
+import { useSignUp } from '@/lib/api';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 /**
  * サインアップフォームコンテナ - Container Component
  * 
  * サインアップのロジックを管理し、SignUpFormに渡します。
- * TODO: 実際の認証APIと連携
  */
 export function SignUpFormContainer() {
+  const router = useRouter();
+  const { login } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>();
+  
+  const signUpMutation = useSignUp({
+    onSuccess: (data) => {
+      // 登録成功時、AuthProvider経由でログイン状態を更新してホームへリダイレクト
+      if (data.userId) {
+        login(data.userId);
+      }
+      router.push('/');
+    },
+    onError: (err) => {
+      // APIエラーメッセージを表示
+      if (err instanceof Error) {
+        setError(err.message || '新規登録に失敗しました');
+      } else {
+        setError('新規登録に失敗しました');
+      }
+    },
+  });
 
   const handleSubmit = async () => {
     setError(undefined);
     
     // バリデーション
+    if (!name.trim()) {
+      setError('ユーザー名を入力してください');
+      return;
+    }
+    
+    if (!email.trim()) {
+      setError('メールアドレスを入力してください');
+      return;
+    }
+    
     if (password !== passwordConfirm) {
       setError('パスワードが一致しません');
       return;
@@ -31,23 +62,12 @@ export function SignUpFormContainer() {
       return;
     }
     
-    setIsSubmitting(true);
-    
-    try {
-      // TODO: 認証APIを実装後、ここにサインアップロジックを追加
-      console.log('SignUp attempt:', { name, email, password });
-      
-      // 仮の処理
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 成功時の処理
-      alert('新規登録機能は実装中です');
-    } catch (err) {
-      setError('新規登録に失敗しました');
-      console.error('SignUp error:', err);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // API呼び出し
+    signUpMutation.mutate({
+      name: name.trim(),
+      email: email.trim(),
+      password,
+    });
   };
 
   return (
@@ -61,7 +81,7 @@ export function SignUpFormContainer() {
       onPasswordChange={setPassword}
       onPasswordConfirmChange={setPasswordConfirm}
       onSubmit={handleSubmit}
-      isSubmitting={isSubmitting}
+      isSubmitting={signUpMutation.isPending}
       error={error}
     />
   );

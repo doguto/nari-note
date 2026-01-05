@@ -135,4 +135,23 @@ public class ArticleRepository : IArticleRepository
             await context.SaveChangesAsync();
         }
     }
+
+    public async Task<(List<Article> Articles, int TotalCount)> FindLatestAsync(int limit, int offset)
+    {
+        var query = context.Articles
+            .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(a => a.Likes)
+            .Where(a => a.IsPublished)
+            .OrderByDescending(a => a.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var articles = await query
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+
+        return (articles, totalCount);
+    }
 }

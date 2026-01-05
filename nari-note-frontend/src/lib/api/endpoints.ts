@@ -13,6 +13,8 @@ import type {
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
   GetArticlesByTagResponse,
+  GetArticlesRequest,
+  GetArticlesResponse,
   GetHealthResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -28,6 +30,10 @@ import type {
 
 // Articles API
 export const articlesApi = {
+  getArticles: async (data: GetArticlesRequest): Promise<GetArticlesResponse> => {
+    const response = await apiClient.get<GetArticlesResponse>('/api/articles', { params: data });
+    return response.data;
+  },
   createArticle: async (data: CreateArticleRequest): Promise<CreateArticleResponse> => {
     const response = await apiClient.post<CreateArticleResponse>('/api/articles', data);
     return response.data;

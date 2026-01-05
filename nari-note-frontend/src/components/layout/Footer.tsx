@@ -10,7 +10,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-center md:text-left">
             <p className="text-sm text-gray-400">
-              © 2024刊伦 プライセンポトレブ
+              © 2024 なりノート
             </p>
           </div>
           <div className="flex gap-6 text-sm">

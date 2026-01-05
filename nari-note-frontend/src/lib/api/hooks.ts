@@ -14,6 +14,8 @@ import type {
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
   GetArticlesByTagResponse,
+  GetArticlesRequest,
+  GetArticlesResponse,
   GetHealthResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -30,6 +32,7 @@ import type {
 // Query Keys
 export const queryKeys = {
   articles: {
+    getArticles: ['articles', 'getArticles'] as const,
     getArticle: ['articles', 'getArticle'] as const,
     getArticlesByAuthor: ['articles', 'getArticlesByAuthor'] as const,
     getArticlesByTag: ['articles', 'getArticlesByTag'] as const,
@@ -45,6 +48,14 @@ export const queryKeys = {
 };
 
 // Articles Hooks
+export function useGetArticles(params: GetArticlesRequest, options?: Omit<UseQueryOptions<GetArticlesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticlesResponse>({
+    queryKey: [...queryKeys.articles.getArticles, params],
+    queryFn: () => articlesApi.getArticles(params),
+    ...options,
+  });
+}
+
 export function useCreateArticle(options?: UseMutationOptions<CreateArticleResponse, Error, CreateArticleRequest>) {
   const queryClient = useQueryClient();
   return useMutation<CreateArticleResponse, Error, CreateArticleRequest>({
