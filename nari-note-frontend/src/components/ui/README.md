@@ -4,72 +4,148 @@
 
 ## 概要
 
-このディレクトリには、アプリケーション全体で再利用される基本的なUIコンポーネントを配置します。
-ボタン、入力フィールド、カードなど、機能に依存しない汎用的なコンポーネントです。
+このディレクトリには、shadcn/uiベースのコンポーネントを配置しています。
+アプリケーション全体で再利用される基本的なUIコンポーネントで、機能に依存しない汎用的なコンポーネントです。
 
-## コンポーネント例
+## 導入されているコンポーネント
 
-### Button.tsx
+### Button
 ボタンコンポーネント
 
+**バリアント:**
+- `default`: 標準のプライマリボタン
+- `secondary`: セカンダリボタン
+- `destructive`: 削除などの破壊的アクションに使用
+- `outline`: アウトラインボタン
+- `ghost`: 背景なしボタン
+- `link`: リンクスタイルのボタン
+
+**サイズ:**
+- `sm`: 小サイズ
+- `default`: 標準サイズ
+- `lg`: 大サイズ
+- `icon`: アイコン専用（正方形）
+
 ```tsx
-interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
-  children: React.ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-  type?: 'button' | 'submit' | 'reset';
-}
+import { Button } from '@/components/ui';
+
+<Button variant="default" size="default">
+  送信
+</Button>
 ```
 
-### Input.tsx
+### Input
 入力フィールドコンポーネント
 
 ```tsx
-interface InputProps {
-  type?: 'text' | 'email' | 'password' | 'number';
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  label?: string;
-  error?: string;
-  disabled?: boolean;
-}
+import { Input } from '@/components/ui';
+
+<Input 
+  type="email"
+  placeholder="example@example.com"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+/>
 ```
 
-### Card.tsx
-カードコンポーネント
+### Textarea
+複数行テキスト入力コンポーネント
 
 ```tsx
-interface CardProps {
-  children: React.ReactNode;
-  className?: string;
-  padding?: 'sm' | 'md' | 'lg';
-}
+import { Textarea } from '@/components/ui';
+
+<Textarea
+  placeholder="メッセージを入力"
+  value={message}
+  onChange={(e) => setMessage(e.target.value)}
+  rows={5}
+/>
 ```
 
-### Modal.tsx
-モーダルコンポーネント
+### Label
+フォームラベルコンポーネント
 
 ```tsx
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  children: React.ReactNode;
+import { Label } from '@/components/ui';
+
+<Label htmlFor="email">メールアドレス</Label>
+<Input id="email" type="email" />
+```
+
+### Card
+カードコンポーネント（複数のサブコンポーネントで構成）
+
+**サブコンポーネント:**
+- `Card`: カードコンテナ
+- `CardHeader`: ヘッダー部分
+- `CardTitle`: タイトル
+- `CardDescription`: 説明文
+- `CardContent`: メインコンテンツ
+- `CardFooter`: フッター部分
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui';
+
+<Card>
+  <CardHeader>
+    <CardTitle>カードタイトル</CardTitle>
+    <CardDescription>説明文がここに入ります</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <p>カードのコンテンツ</p>
+  </CardContent>
+  <CardFooter>
+    <Button>アクション</Button>
+  </CardFooter>
+</Card>
+```
+
+## インポート方法
+
+すべてのコンポーネントは `@/components/ui` からインポートできます：
+
+```tsx
+import { Button, Input, Label, Card, CardContent } from '@/components/ui';
+```
+
+個別のファイルからもインポート可能です：
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+```
+
+## デモページ
+
+すべてのコンポーネントの使用例は `/ui-demo` ページで確認できます。
+
+## 技術スタック
+
+- **shadcn/ui**: コンポーネントのベース
+- **Radix UI**: アクセシブルなプリミティブ
+- **Tailwind CSS**: スタイリング
+- **class-variance-authority**: バリアント管理
+- **clsx & tailwind-merge**: クラス名の結合と最適化
+
+## カスタマイズ
+
+コンポーネントのスタイルは `src/app/globals.css` のCSS変数で調整できます：
+
+```css
+:root {
+  --primary: 0 0% 9%;
+  --secondary: 0 0% 96%;
+  --destructive: 0 84% 60%;
+  /* その他の変数 */
 }
 ```
-
-## shadcn/ui について
-
-将来的に shadcn/ui を導入する場合、このディレクトリに配置します。
-
-```bash
-npx shadcn-ui@latest add button
-```
-
-生成されたコンポーネントは `src/components/ui/` に配置されます。
 
 ## 作成ガイドライン
 
@@ -78,27 +154,17 @@ npx shadcn-ui@latest add button
 3. **Tailwind CSS**でスタイリング
 4. **型定義**を明確にする
 5. **デフォルト値**を適切に設定
+6. **アクセシビリティ**を考慮
 
-## 使用例
+## 新しいコンポーネントの追加
 
-```tsx
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
+shadcn/uiから追加のコンポーネントを導入する場合：
 
-export function MyForm() {
-  return (
-    <Card>
-      <Input
-        label="メールアドレス"
-        type="email"
-        value={email}
-        onChange={setEmail}
-      />
-      <Button variant="primary" type="submit">
-        送信
-      </Button>
-    </Card>
-  );
-}
+```bash
+npx shadcn@latest add [component-name]
 ```
+
+ただし、Tailwind CSS v4を使用しているため、生成されたコンポーネントのクラス名を調整する必要がある場合があります：
+- `bg-primary` → `bg-[hsl(var(--primary))]`
+- `text-muted-foreground` → `text-[hsl(var(--muted-foreground))]`
+
