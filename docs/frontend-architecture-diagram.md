@@ -73,25 +73,26 @@ src/
 
 ```mermaid
 sequenceDiagram
-    participant Page as Page Component<br/>src/app/articles/[id]/page.tsx
-    participant Container as Container Component<br/>src/features/article/containers/<br/>ArticleDetailContainer.tsx
-    participant Hook as useGetArticle()<br/>TanStack Query
-    participant Presentational as Presentational Component<br/>src/features/article/components/<br/>ArticleDetail.tsx
+    participant Page as Page Component
+    participant Container as Container Component
+    participant Hook as useGetArticle()
+    participant Presentational as Presentational Component
     
-    Note over Page: export default function ArticleDetailPage() {<br/>  const params = useParams();<br/>  const articleId = Number(params.id);<br/>  return <ArticleDetailContainer articleId={articleId} />;<br/>}
+    Note over Page: src/app/articles/[id]/page.tsx<br/>① ユーザーがアクセス
     
-    Page->>Container: articleIdを渡す
+    Page->>Container: ② articleIdを渡す
     
-    Note over Container: 'use client';<br/>export function ArticleDetailContainer({ articleId }) {
+    Note over Container: src/features/article/containers/<br/>ArticleDetailContainer.tsx
     
-    Container->>Hook: ④ API呼び出し<br/>const { data, isLoading, error } = useGetArticle({ id: articleId })
-    Hook-->>Container: ③ 状態管理
+    Container->>Hook: ③ API呼び出し
+    Note over Hook: TanStack Query<br/>データフェッチング
+    Hook-->>Container: ④ データ返却
     
-    Note over Container: if (isLoading) return <Loading />;<br/>if (error) return <ErrorMessage />;<br/>if (!data) return null;
+    Note over Container: 状態管理<br/>(Loading/Error/Data)
     
-    Container->>Presentational: articleデータを渡す
+    Container->>Presentational: ⑤ articleデータを渡す
     
-    Note over Presentational: ⑤ propsを受取<br/>export function ArticleDetail({ article }) {<br/>  return (<br/>    <article><br/>      <h1>{article.title}</h1> ← ⑥ データを表示<br/>      <p>{article.authorName}</p><br/>      <div>{article.body}</div><br/>    </article><br/>  );<br/>}
+    Note over Presentational: src/features/article/components/<br/>ArticleDetail.tsx<br/>⑥ UIを表示
 ```
 
 ## API通信フロー
