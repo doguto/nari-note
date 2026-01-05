@@ -1,40 +1,12 @@
 import Link from "next/link";
+import { Header } from "@/components/layout/Header";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Footer } from "@/components/layout/Footer";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f5f3e8] to-[#e8e4d0]">
-      {/* ヘッダー */}
-      <header className="bg-[#f5f3e8] border-b border-[#d4cdb3] shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#88b04b] rounded-lg flex items-center justify-center text-white font-bold">
-              な
-            </div>
-            <span className="text-xl font-bold text-[#2d3e1f]">なりノート</span>
-          </div>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-[#2d3e1f] hover:text-[#88b04b] font-medium border-b-2 border-[#88b04b] pb-1">
-              ホーム
-            </Link>
-            <Link href="/posts" className="text-[#555] hover:text-[#88b04b]">
-              記事発見
-            </Link>
-            <Link href="/submit" className="text-[#555] hover:text-[#88b04b]">
-              貢献する
-            </Link>
-          </nav>
-          
-          <div className="flex items-center gap-4">
-            <button className="px-4 py-2 text-[#2d3e1f] hover:text-[#88b04b]">
-              ログイン
-            </button>
-            <Link href="/debug" className="px-4 py-2 bg-[#88b04b] text-white rounded-lg hover:bg-[#769939] transition-colors">
-              API Debug
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* ヒーローセクション */}
       <section className="max-w-7xl mx-auto px-4 py-16 text-center">
@@ -113,49 +85,11 @@ export default function Home() {
             </div>
           </div>
 
-          {/* サイドバー */}
-          <aside className="w-80 hidden lg:block">
-            <div className="bg-[#2d3e1f] rounded-lg p-4 text-white mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold">トレンド</h3>
-                <span className="text-2xl">🔥</span>
-              </div>
-              <div className="space-y-2">
-                <div className="text-sm hover:text-[#88b04b] cursor-pointer">トレンド</div>
-                <div className="text-sm hover:text-[#88b04b] cursor-pointer">#角槙操鍊記</div>
-                <div className="text-sm hover:text-[#88b04b] cursor-pointer">#厚井古物味したる。</div>
-                <div className="text-sm hover:text-[#88b04b] cursor-pointer">#定わ分録坐しよう</div>
-                <div className="text-sm hover:text-[#88b04b] cursor-pointer">#AI研究</div>
-              </div>
-            </div>
-
-            <div className="bg-[#f5f3e8] rounded-lg p-4 border border-[#d4cdb3]">
-              <h3 className="text-lg font-bold text-[#2d3e1f] mb-4">注目の議記</h3>
-              <div className="space-y-3">
-                {[
-                  { image: "👤", label: "#要 #将貫館", count: "471萬雨" },
-                  { image: "🎮", label: "紬任", count: "011 600丁" },
-                  { image: "🎮", label: "紬任", count: "18 5" }
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="w-12 h-12 bg-[#e8e4d0] rounded flex items-center justify-center text-xl">
-                      {item.image}
-                    </div>
-                    <div className="flex-1 text-sm">
-                      <div className="text-[#555]">{item.label}</div>
-                      <div className="text-gray-400">{item.count}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6 text-center text-sm text-gray-500">
-              © 2024刊伦 プライモンポトレブ
-            </div>
-          </aside>
+          <Sidebar />
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
