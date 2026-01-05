@@ -4,46 +4,22 @@ nari-note-frontendのアーキテクチャを図解で説明します。
 
 ## 全体構造
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Browser (User)                          │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             ↓
-┌─────────────────────────────────────────────────────────────────┐
-│                    Next.js App (Frontend)                       │
-│                                                                 │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │                    App Router (Pages)                     │ │
-│  │                  src/app/***/page.tsx                     │ │
-│  └─────────────────────────┬─────────────────────────────────┘ │
-│                            │                                    │
-│                            ↓                                    │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │              Container Components (データ管理)              │ │
-│  │          src/features/{feature}/containers/               │ │
-│  │                                                            │ │
-│  │  • データフェッチング (TanStack Query)                      │ │
-│  │  • ビジネスロジック                                        │ │
-│  │  • 状態管理                                                │ │
-│  └─────────────────────────┬─────────────────────────────────┘ │
-│                            │                                    │
-│                            ↓                                    │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │         Presentational Components (UI表示)                │ │
-│  │          src/features/{feature}/components/               │ │
-│  │                                                            │ │
-│  │  • UI描画のみ                                              │ │
-│  │  • propsを受け取る                                         │ │
-│  │  • スタイリング (Tailwind CSS)                            │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                                                                 │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             ↓
-┌─────────────────────────────────────────────────────────────────┐
-│                    Backend API (ASP.NET Core)                   │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    Browser["Browser (User)"]
+    
+    subgraph Frontend["Next.js App (Frontend)"]
+        Pages["App Router (Pages)<br/>src/app/***/page.tsx"]
+        Container["Container Components (データ管理)<br/>src/features/{feature}/containers/<br/><br/>• データフェッチング (TanStack Query)<br/>• ビジネスロジック<br/>• 状態管理"]
+        Presentational["Presentational Components (UI表示)<br/>src/features/{feature}/components/<br/><br/>• UI描画のみ<br/>• propsを受け取る<br/>• スタイリング (Tailwind CSS)"]
+    end
+    
+    Backend["Backend API (ASP.NET Core)"]
+    
+    Browser --> Pages
+    Pages --> Container
+    Container --> Presentational
+    Frontend --> Backend
 ```
 
 ## ディレクトリ構造とデータフロー
@@ -95,101 +71,43 @@ src/
 
 ### データフロー
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                         Page Component                           │
-│                    (src/app/articles/[id]/page.tsx)             │
-│                                                                  │
-│  export default function ArticleDetailPage() {                  │
-│    const params = useParams();                                  │
-│    const articleId = Number(params.id);                         │
-│                                                                  │
-│    return <ArticleDetailContainer articleId={articleId} />;    │
-│  }                                                               │
-└────────────────────────┬─────────────────────────────────────────┘
-                         │ articleId を渡す
-                         ↓
-┌──────────────────────────────────────────────────────────────────┐
-│                    Container Component                           │
-│    (src/features/article/containers/ArticleDetailContainer.tsx) │
-│                                                                  │
-│  'use client';  ← Client Component ディレクティブ                │
-│                                                                  │
-│  export function ArticleDetailContainer({ articleId }) {        │
-│    const { data, isLoading, error } = useGetArticle({          │
-│      id: articleId                                              │
-│    }); ← ④ API呼び出し                                          │
-│                                                                  │
-│    if (isLoading) return <Loading />;                          │
-│    if (error) return <ErrorMessage />;                         │
-│    if (!data) return null;                                      │
-│                                                                  │
-│    return <ArticleDetail article={data} />;                    │
-│  }         ↑                         ↓                          │
-│            │                    article データを渡す             │
-│         ③ 状態管理                                               │
-└────────────────────────┬─────────────────────────────────────────┘
-                         │
-                         ↓
-┌──────────────────────────────────────────────────────────────────┐
-│                 Presentational Component                         │
-│       (src/features/article/components/ArticleDetail.tsx)       │
-│                                                                  │
-│  export function ArticleDetail({ article }) {  ← ⑤ propsを受取  │
-│    return (                                                      │
-│      <article>                                                   │
-│        <h1>{article.title}</h1>  ← ⑥ データを表示              │
-│        <p>{article.authorName}</p>                              │
-│        <div>{article.body}</div>                                │
-│      </article>                                                  │
-│    );                                                            │
-│  }                                                               │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+sequenceDiagram
+    participant Page as Page Component<br/>src/app/articles/[id]/page.tsx
+    participant Container as Container Component<br/>src/features/article/containers/<br/>ArticleDetailContainer.tsx
+    participant Hook as useGetArticle()<br/>TanStack Query
+    participant Presentational as Presentational Component<br/>src/features/article/components/<br/>ArticleDetail.tsx
+    
+    Note over Page: export default function ArticleDetailPage() {<br/>  const params = useParams();<br/>  const articleId = Number(params.id);<br/>  return <ArticleDetailContainer articleId={articleId} />;<br/>}
+    
+    Page->>Container: articleIdを渡す
+    
+    Note over Container: 'use client';<br/>export function ArticleDetailContainer({ articleId }) {
+    
+    Container->>Hook: ④ API呼び出し<br/>const { data, isLoading, error } = useGetArticle({ id: articleId })
+    Hook-->>Container: ③ 状態管理
+    
+    Note over Container: if (isLoading) return <Loading />;<br/>if (error) return <ErrorMessage />;<br/>if (!data) return null;
+    
+    Container->>Presentational: articleデータを渡す
+    
+    Note over Presentational: ⑤ propsを受取<br/>export function ArticleDetail({ article }) {<br/>  return (<br/>    <article><br/>      <h1>{article.title}</h1> ← ⑥ データを表示<br/>      <p>{article.authorName}</p><br/>      <div>{article.body}</div><br/>    </article><br/>  );<br/>}
 ```
 
 ## API通信フロー
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      Container Component                        │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ↓ useGetArticle({ id: 1 })
-┌─────────────────────────────────────────────────────────────────┐
-│                   TanStack Query Hook                           │
-│                  (src/lib/api/hooks.ts)                         │
-│                                                                 │
-│  • キャッシュチェック                                            │
-│  • データ取得                                                    │
-│  • 自動リフェッチ                                                │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ↓ articlesApi.getArticle({ id: 1 })
-┌─────────────────────────────────────────────────────────────────┐
-│                    API Endpoint Function                        │
-│                  (src/lib/api/endpoints.ts)                     │
-│                                                                 │
-│  getArticle: async ({ id }) => {                               │
-│    const { data } = await apiClient.get(`/api/articles/${id}`)│
-│    return data;                                                 │
-│  }                                                              │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ↓ GET /api/articles/1
-┌─────────────────────────────────────────────────────────────────┐
-│                       Axios Client                              │
-│                   (src/lib/api/client.ts)                       │
-│                                                                 │
-│  • ベースURL設定                                                 │
-│  • 認証トークン自動付与                                          │
-│  • エラーハンドリング                                            │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ↓ HTTP Request
-┌─────────────────────────────────────────────────────────────────┐
-│                    Backend API                                  │
-│                  (ASP.NET Core)                                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    Container["Container Component"]
+    TanStackQuery["TanStack Query Hook<br/>src/lib/api/hooks.ts<br/><br/>• キャッシュチェック<br/>• データ取得<br/>• 自動リフェッチ"]
+    APIEndpoint["API Endpoint Function<br/>src/lib/api/endpoints.ts<br/><br/>getArticle: async ({ id }) => {<br/>  const { data } = await apiClient.get(`/api/articles/${dollar}{id}`)<br/>  return data;<br/>}"]
+    AxiosClient["Axios Client<br/>src/lib/api/client.ts<br/><br/>• ベースURL設定<br/>• 認証トークン自動付与<br/>• エラーハンドリング"]
+    Backend["Backend API<br/>(ASP.NET Core)"]
+    
+    Container -->|"useGetArticle({ id: 1 })"| TanStackQuery
+    TanStackQuery -->|"articlesApi.getArticle({ id: 1 })"| APIEndpoint
+    APIEndpoint -->|"GET /api/articles/1"| AxiosClient
+    AxiosClient -->|"HTTP Request"| Backend
 ```
 
 ## 機能追加のフロー
@@ -250,98 +168,69 @@ export default function ArticleDetailPage() {
 
 ## 共通コンポーネントの活用
 
-```
-機能コンポーネント（feature）
-    ↓ 使用
-共通コンポーネント（components）
-
-┌─────────────────────────────────────────────────┐
-│     ArticleDetailContainer.tsx                  │
-│                                                 │
-│  if (isLoading) return <Loading />;      ←─┐   │
-│  if (error) return <ErrorMessage />;     ←─┤   │
-│  if (!data) return <EmptyState />;       ←─┤   │
-└─────────────────────────────────────────────┼───┘
-                                              │
-                                              │ import
-                                              │
-┌─────────────────────────────────────────────┼───┐
-│  src/components/common/                     │   │
-│  ├── Loading.tsx          ←─────────────────┘   │
-│  ├── ErrorMessage.tsx     ←─────────────────┐   │
-│  └── EmptyState.tsx       ←─────────────────┘   │
-└─────────────────────────────────────────────────┘
-
-これにより、
-• コードの再利用性が向上
-• 一貫したUI/UX
-• メンテナンスが容易
+```mermaid
+graph TB
+    Feature["機能コンポーネント (feature)"]
+    Common["共通コンポーネント (components)"]
+    
+    subgraph ArticleContainer["ArticleDetailContainer.tsx"]
+        LoadingUse["if (isLoading) return &lt;Loading /&gt;;"]
+        ErrorUse["if (error) return &lt;ErrorMessage /&gt;;"]
+        EmptyUse["if (!data) return &lt;EmptyState /&gt;;"]
+    end
+    
+    subgraph CommonComponents["src/components/common/"]
+        Loading["Loading.tsx"]
+        ErrorMessage["ErrorMessage.tsx"]
+        EmptyState["EmptyState.tsx"]
+    end
+    
+    Feature --> Common
+    LoadingUse -.-> Loading
+    ErrorUse -.-> ErrorMessage
+    EmptyUse -.-> EmptyState
+    
+    Note1["これにより、<br/>• コードの再利用性が向上<br/>• 一貫したUI/UX<br/>• メンテナンスが容易"]
 ```
 
 ## スタイリングの流れ
 
-```
-Tailwind CSS クラス
-    ↓
-コンポーネントに適用
-    ↓
-ビルド時にCSSが生成
-    ↓
-ブラウザで表示
-
-┌──────────────────────────────────────────────┐
-│  ArticleCard.tsx                             │
-│                                              │
-│  <div className="                            │
-│    bg-white              ← 背景白            │
-│    rounded-lg            ← 角丸              │
-│    shadow                ← 影                │
-│    p-6                   ← パディング         │
-│    hover:shadow-lg       ← ホバー時に影強調   │
-│    transition-shadow     ← トランジション     │
-│  ">                                          │
-│    ...                                       │
-│  </div>                                      │
-└──────────────────────────────────────────────┘
+```mermaid
+graph LR
+    TailwindClass["Tailwind CSS クラス"]
+    Component["コンポーネントに適用"]
+    Build["ビルド時にCSSが生成"]
+    Browser["ブラウザで表示"]
+    
+    TailwindClass --> Component
+    Component --> Build
+    Build --> Browser
+    
+    subgraph Example["ArticleCard.tsx"]
+        Code["&lt;div className=&quot;<br/>  bg-white ← 背景白<br/>  rounded-lg ← 角丸<br/>  shadow ← 影<br/>  p-6 ← パディング<br/>  hover:shadow-lg ← ホバー時に影強調<br/>  transition-shadow ← トランジション<br/>&quot;&gt;<br/>  ...<br/>&lt;/div&gt;"]
+    end
 ```
 
 ## 型安全性の確保
 
-```
-API型定義（バックエンドから生成）
-    ↓
-src/lib/api/types.ts
-    ↓
-コンポーネントで使用
-
-┌──────────────────────────────────────────────┐
-│  types.ts                                    │
-│                                              │
-│  export interface GetArticleResponse {      │
-│    id: number;                              │
-│    title: string;                           │
-│    body: string;                            │
-│    authorName: string;                      │
-│    likeCount: number;                       │
-│    tags: string[];                          │
-│  }                                           │
-└────────────────┬─────────────────────────────┘
-                 │ import
-                 ↓
-┌──────────────────────────────────────────────┐
-│  ArticleDetail.tsx                           │
-│                                              │
-│  interface ArticleDetailProps {             │
-│    article: GetArticleResponse;  ← 型安全   │
-│  }                                           │
-│                                              │
-│  export function ArticleDetail({            │
-│    article                                   │
-│  }: ArticleDetailProps) {                   │
-│    return <h1>{article.title}</h1>;        │
-│  }              ↑                           │
-│                 └─ TypeScriptが型チェック    │
-└──────────────────────────────────────────────┘
+```mermaid
+graph TB
+    Backend["API型定義<br/>(バックエンドから生成)"]
+    Types["src/lib/api/types.ts"]
+    Component["コンポーネントで使用"]
+    
+    Backend --> Types
+    Types --> Component
+    
+    subgraph TypesDef["types.ts"]
+        TypeCode["export interface GetArticleResponse {<br/>  id: number;<br/>  title: string;<br/>  body: string;<br/>  authorName: string;<br/>  likeCount: number;<br/>  tags: string[];<br/>}"]
+    end
+    
+    subgraph ComponentDef["ArticleDetail.tsx"]
+        ComponentCode["interface ArticleDetailProps {<br/>  article: GetArticleResponse; ← 型安全<br/>}<br/><br/>export function ArticleDetail({<br/>  article<br/>}: ArticleDetailProps) {<br/>  return &lt;h1&gt;{article.title}&lt;/h1&gt;;<br/>} ↑<br/>  └─ TypeScriptが型チェック"]
+    end
+    
+    Types -.->|import| ComponentDef
 ```
 
 ## まとめ

@@ -35,6 +35,7 @@ export function ArticleCardContainer({ articleId }: ArticleCardContainerProps) {
   }
 
   if (error) {
+    // TODO: バックエンドから自動生成されるエラーハンドリングを使用する予定
     return (
       <ErrorMessage 
         message="記事の取得に失敗しました" 
