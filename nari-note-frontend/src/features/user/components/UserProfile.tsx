@@ -1,8 +1,8 @@
-import type { GetUserResponse } from '@/lib/api/types';
+import type { GetUserProfileResponse } from '@/lib/api/types';
 import Link from 'next/link';
 
 interface UserProfileProps {
-  user: GetUserResponse;
+  user: GetUserProfileResponse;
 }
 
 /**
@@ -17,15 +17,15 @@ export function UserProfile({ user }: UserProfileProps) {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-start gap-6">
           <div className="w-24 h-24 bg-[#88b04b] rounded-full flex items-center justify-center text-white text-4xl font-bold flex-shrink-0">
-            {user.name.charAt(0).toUpperCase()}
+            {user.username?.charAt(0).toUpperCase() || 'U'}
           </div>
           
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-[#2d3e1f] mb-2">
-              {user.name}
+              {user.username || 'Unknown User'}
             </h1>
             <p className="text-gray-600 mb-4">
-              @{user.email.split('@')[0]}
+              @{user.username || 'unknown'}
             </p>
             
             {user.bio && (
@@ -36,15 +36,15 @@ export function UserProfile({ user }: UserProfileProps) {
             
             <div className="flex gap-6 text-sm text-gray-600">
               <div>
-                <span className="font-bold text-[#2d3e1f]">{user.articleCount || 0}</span>
+                <span className="font-bold text-[#2d3e1f]">0</span>
                 <span className="ml-1">記事</span>
               </div>
               <div>
-                <span className="font-bold text-[#2d3e1f]">{user.followerCount || 0}</span>
+                <span className="font-bold text-[#2d3e1f]">0</span>
                 <span className="ml-1">フォロワー</span>
               </div>
               <div>
-                <span className="font-bold text-[#2d3e1f]">{user.followingCount || 0}</span>
+                <span className="font-bold text-[#2d3e1f]">0</span>
                 <span className="ml-1">フォロー中</span>
               </div>
             </div>

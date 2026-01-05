@@ -15,7 +15,7 @@ interface TagArticleListContainerProps {
  * タグに紐づく記事一覧を取得してTagArticleListに渡します。
  */
 export function TagArticleListContainer({ tag }: TagArticleListContainerProps) {
-  const { data, isLoading, error, refetch } = useGetArticlesByTag({ tag });
+  const { data, isLoading, error, refetch } = useGetArticlesByTag({ tagName: tag });
 
   if (isLoading) {
     return <Loading text="記事を読み込み中..." />;

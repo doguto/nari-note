@@ -20,14 +20,14 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
       <div className="flex items-center gap-6 mb-8 pb-6 border-b border-gray-200">
         <Link href={`/users/${article.authorId}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="w-12 h-12 bg-[#88b04b] rounded-full flex items-center justify-center text-white font-bold">
-            {article.authorName.charAt(0).toUpperCase()}
+            {article.authorName?.charAt(0).toUpperCase() || 'A'}
           </div>
           <div>
             <div className="font-medium text-[#2d3e1f]">
-              {article.authorName}
+              {article.authorName || 'Unknown Author'}
             </div>
             <div className="text-sm text-gray-500">
-              {new Date(article.createdAt).toLocaleDateString('ja-JP')}
+              {article.createdAt ? new Date(article.createdAt).toLocaleDateString('ja-JP') : ''}
             </div>
           </div>
         </Link>

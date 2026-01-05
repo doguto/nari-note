@@ -1,6 +1,6 @@
 'use client';
 
-import { useGetUser } from '@/lib/api';
+import { useGetUserProfile } from '@/lib/api';
 import { UserProfile } from '../components/UserProfile';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
@@ -15,7 +15,7 @@ interface UserProfileContainerProps {
  * ユーザー情報を取得してUserProfileに渡します。
  */
 export function UserProfileContainer({ userId }: UserProfileContainerProps) {
-  const { data, isLoading, error, refetch } = useGetUser({ id: userId });
+  const { data, isLoading, error, refetch } = useGetUserProfile({ id: userId });
 
   if (isLoading) {
     return <Loading text="ユーザー情報を読み込み中..." />;
