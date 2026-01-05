@@ -26,9 +26,6 @@ nari-note-frontendは、**Container/Presentationalパターン**を採用したN
 - **react-markdown**: マークダウンレンダリング（今後追加予定）
 - **@uiw/react-md-editor**: マークダウンエディタ（今後追加予定）
 
-### 認証
-- **NextAuth.js**: 認証管理（今後追加予定）
-
 ## ディレクトリ構造
 
 ```
