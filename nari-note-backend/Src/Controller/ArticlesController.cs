@@ -12,6 +12,7 @@ public class ArticlesController : ApplicationController
 {
     readonly CreateArticleService createArticleService;
     readonly UpdateArticleService updateArticleService;
+    readonly GetArticlesService getArticlesService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticlesByTagService getArticlesByTagService;
     readonly GetArticleService getArticleService;
@@ -21,6 +22,7 @@ public class ArticlesController : ApplicationController
     public ArticlesController(
         CreateArticleService createArticleService,
         UpdateArticleService updateArticleService,
+        GetArticlesService getArticlesService,
         GetArticlesByAuthorService getArticlesByAuthorService,
         GetArticlesByTagService getArticlesByTagService,
         GetArticleService getArticleService,
@@ -29,6 +31,7 @@ public class ArticlesController : ApplicationController
     {
         this.createArticleService = createArticleService;
         this.updateArticleService = updateArticleService;
+        this.getArticlesService = getArticlesService;
         this.getArticlesByAuthorService = getArticlesByAuthorService;
         this.getArticlesByTagService = getArticlesByTagService;
         this.getArticleService = getArticleService;
@@ -36,6 +39,14 @@ public class ArticlesController : ApplicationController
         this.toggleLikeService = toggleLikeService;
     }
     
+    [HttpGet]
+    public async Task<ActionResult<GetArticlesResponse>> GetArticles([FromQuery] int limit = 20, [FromQuery] int offset = 0)
+    {
+        var request = new GetArticlesRequest { Limit = limit, Offset = offset };
+        var response = await getArticlesService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
     [HttpPost]
     [ValidateModelState]
     public async Task<ActionResult> CreateArticle([FromBody] CreateArticleRequest request)

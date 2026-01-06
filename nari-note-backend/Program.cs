@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Infrastructure;
@@ -29,6 +30,15 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
 var app = builder.Build();
+
+// 開発環境でのマイグレーション適用とシードデータ投入
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<NariNoteDbContext>();
+    await context.Database.MigrateAsync();
+    await DataSeeder.SeedAsync(context);
+}
 
 // if (app.Environment.IsDevelopment())
 // {

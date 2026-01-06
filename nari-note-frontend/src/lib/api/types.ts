@@ -77,6 +77,16 @@ export interface GetArticlesByTagResponse {
   articles?: ArticleDto[];
 }
 
+export interface GetArticlesRequest {
+  limit?: number;
+  offset?: number;
+}
+
+export interface GetArticlesResponse {
+  articles?: ArticleDto[];
+  totalCount?: number;
+}
+
 export interface GetHealthResponse {
   statusCode?: number;
   message?: string;

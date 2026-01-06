@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
+import { AuthProvider } from "@/lib/providers/AuthProvider";
 
 export const metadata: Metadata = {
   title: "なりノート",
-  description: "持続の裁判、ソノビビュー、自我記。知識分全全を譲しよ。う",
+  description: "技術の記録、レビュー、自分の記。知識を共有しよう。",
 };
 
 export default function RootLayout({
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="ja">
       <body className="antialiased">
         <QueryProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

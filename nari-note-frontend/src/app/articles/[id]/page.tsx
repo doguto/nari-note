@@ -1,0 +1,35 @@
+'use client';
+
+import { useParams } from 'next/navigation';
+import { Header } from '@/components/layout/Header';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { Footer } from '@/components/layout/Footer';
+import { ArticleDetailContainer } from '@/features/article/containers/ArticleDetailContainer';
+
+/**
+ * 記事詳細ページ
+ * 
+ * 記事の詳細情報を表示します。
+ */
+export default function ArticleDetailPage() {
+  const params = useParams();
+  const articleId = Number(params.id);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#f5f3e8] to-[#e8e4d0]">
+      <Header />
+      
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex gap-8">
+          <div className="flex-1">
+            <ArticleDetailContainer articleId={articleId} />
+          </div>
+          
+          <Sidebar />
+        </div>
+      </div>
+      
+      <Footer />
+    </div>
+  );
+}
