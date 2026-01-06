@@ -7,7 +7,14 @@ import ReactMarkdown from 'react-markdown';
 // Dynamically import MDEditor to avoid SSR issues
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor').then((mod) => mod.default),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-[400px] border border-gray-300 rounded-lg bg-gray-50">
+        <div className="text-gray-500">エディターを読み込み中...</div>
+      </div>
+    )
+  }
 );
 
 interface ArticleFormProps {

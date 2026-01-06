@@ -49,20 +49,28 @@ export function useArticleForm() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges, createArticle.isSuccess]);
 
-  const handleSubmit = () => {
-    // バリデーション
+  // バリデーションロジックを抽出
+  const validateForm = (): boolean => {
     if (!title.trim()) {
       alert('タイトルを入力してください');
-      return;
+      return false;
     }
 
     if (tags.length === 0) {
       alert('少なくとも1つのタグを追加してください');
-      return;
+      return false;
     }
 
     if (body.length > 65535) {
       alert(`文字数が上限を超えています。65,535文字以内に収めてください。`);
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = () => {
+    if (!validateForm()) {
       return;
     }
 
@@ -76,19 +84,7 @@ export function useArticleForm() {
   };
 
   const handleSaveDraft = () => {
-    // バリデーション
-    if (!title.trim()) {
-      alert('タイトルを入力してください');
-      return;
-    }
-
-    if (tags.length === 0) {
-      alert('少なくとも1つのタグを追加してください');
-      return;
-    }
-
-    if (body.length > 65535) {
-      alert(`文字数が上限を超えています。65,535文字以内に収めてください。`);
+    if (!validateForm()) {
       return;
     }
 
