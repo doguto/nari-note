@@ -13,17 +13,17 @@ interface ArticleDetailProps {
 export function ArticleDetail({ article }: ArticleDetailProps) {
   return (
     <article className="bg-white rounded-lg shadow-lg p-8">
-      <h1 className="text-4xl font-bold text-[#2d3e1f] mb-6">
+      <h1 className="text-4xl font-bold text-brand-text mb-6">
         {article.title}
       </h1>
       
       <div className="flex items-center gap-6 mb-8 pb-6 border-b border-gray-200">
         <Link href={`/users/${article.authorId}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="w-12 h-12 bg-[#88b04b] rounded-full flex items-center justify-center text-white font-bold">
+          <div className="w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center text-white font-bold">
             {article.authorName?.charAt(0).toUpperCase() || 'A'}
           </div>
           <div>
-            <div className="font-medium text-[#2d3e1f]">
+            <div className="font-medium text-brand-text">
               {article.authorName || 'Unknown Author'}
             </div>
             <div className="text-sm text-gray-500">
@@ -33,7 +33,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
         </Link>
         
         <div className="flex items-center gap-4 ml-auto">
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#88b04b] text-white rounded hover:bg-[#769939] transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors">
             <span>❤️</span>
             <span>{article.likeCount}</span>
           </button>
@@ -55,7 +55,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
             <Link
               key={tag}
               href={`/tags/${tag}`}
-              className="px-3 py-1 bg-[#f5f3e8] text-[#2d3e1f] rounded-full text-sm hover:bg-[#e8e4d0] transition-colors"
+              className="px-3 py-1 bg-brand-bg-light text-brand-text rounded-full text-sm hover:bg-brand-bg-gradient-to transition-colors"
             >
               #{tag}
             </Link>

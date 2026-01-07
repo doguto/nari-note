@@ -21,6 +21,18 @@
   --color-input: 0 0% 90%;
   --color-ring: 0 0% 9%;
   --radius: 0.5rem;
+  
+  /* Nari-note brand colors for Tailwind */
+  --color-brand-primary: #88b04b;
+  --color-brand-primary-hover: #769939;
+  --color-brand-text: #2d3e1f;
+  --color-brand-text-dark: #1a2515;
+  --color-brand-text-hover: #3d4e2f;
+  --color-brand-bg-light: #f5f3e8;
+  --color-brand-bg-gradient-from: #f5f3e8;
+  --color-brand-bg-gradient-to: #e8e4d0;
+  --color-brand-border: #d4cdb3;
+  --color-brand-secondary-text: #555;
 }
 
 :root {
@@ -49,9 +61,13 @@
   --brand-primary: #88b04b;
   --brand-primary-hover: #769939;
   --brand-text: #2d3e1f;
+  --brand-text-dark: #1a2515;
+  --brand-text-hover: #3d4e2f;
   --brand-bg-light: #f5f3e8;
   --brand-bg-gradient-from: #f5f3e8;
   --brand-bg-gradient-to: #e8e4d0;
+  --brand-border: #d4cdb3;
+  --brand-secondary-text: #555;
 }
 
 .dark {

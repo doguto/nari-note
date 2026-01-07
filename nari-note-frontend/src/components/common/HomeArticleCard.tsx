@@ -22,10 +22,10 @@ export function HomeArticleCard({
   return (
     <Link
       href={`/articles/${id}`}
-      className="block bg-[#2d3e1f] rounded-lg p-4 text-white hover:bg-[#3d4e2f] transition-colors"
+      className="block bg-brand-text rounded-lg p-4 text-white hover:bg-brand-text-hover transition-colors"
     >
       <div className="flex gap-4">
-        <div className="w-24 h-24 bg-[#1a2515] rounded flex items-center justify-center text-4xl">
+        <div className="w-24 h-24 bg-brand-text-dark rounded flex items-center justify-center text-4xl">
           {image}
         </div>
         <div className="flex-1">
@@ -35,7 +35,7 @@ export function HomeArticleCard({
             <Link
               href={`/users/${authorId}`}
               onClick={(e) => e.stopPropagation()}
-              className="hover:text-[#88b04b] hover:underline"
+              className="hover:text-brand-primary hover:underline"
             >
               {author}
             </Link>

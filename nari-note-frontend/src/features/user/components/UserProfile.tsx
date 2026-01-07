@@ -16,12 +16,12 @@ export function UserProfile({ user }: UserProfileProps) {
       {/* プロフィールヘッダー */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-start gap-6">
-          <div className="w-24 h-24 bg-[#88b04b] rounded-full flex items-center justify-center text-white text-4xl font-bold flex-shrink-0">
+          <div className="w-24 h-24 bg-brand-primary rounded-full flex items-center justify-center text-white text-4xl font-bold flex-shrink-0">
             {user.username?.charAt(0).toUpperCase() || 'U'}
           </div>
           
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-[#2d3e1f] mb-2">
+            <h1 className="text-3xl font-bold text-brand-text mb-2">
               {user.username || 'Unknown User'}
             </h1>
             <p className="text-gray-600 mb-4">
@@ -36,21 +36,21 @@ export function UserProfile({ user }: UserProfileProps) {
             
             <div className="flex gap-6 text-sm text-gray-600">
               <div>
-                <span className="font-bold text-[#2d3e1f]">0</span>
+                <span className="font-bold text-brand-text">0</span>
                 <span className="ml-1">記事</span>
               </div>
               <div>
-                <span className="font-bold text-[#2d3e1f]">0</span>
+                <span className="font-bold text-brand-text">0</span>
                 <span className="ml-1">フォロワー</span>
               </div>
               <div>
-                <span className="font-bold text-[#2d3e1f]">0</span>
+                <span className="font-bold text-brand-text">0</span>
                 <span className="ml-1">フォロー中</span>
               </div>
             </div>
           </div>
           
-          <button className="px-6 py-2 bg-[#88b04b] text-white rounded hover:bg-[#769939] transition-colors">
+          <button className="px-6 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors">
             フォロー
           </button>
         </div>
@@ -62,19 +62,19 @@ export function UserProfile({ user }: UserProfileProps) {
           <nav className="flex gap-8 px-6">
             <Link 
               href="#articles" 
-              className="py-4 border-b-2 border-[#88b04b] text-[#2d3e1f] font-medium"
+              className="py-4 border-b-2 border-brand-primary text-brand-text font-medium"
             >
               記事
             </Link>
             <Link 
               href="#likes" 
-              className="py-4 text-gray-600 hover:text-[#2d3e1f]"
+              className="py-4 text-gray-600 hover:text-brand-text"
             >
               いいね
             </Link>
             <Link 
               href="#following" 
-              className="py-4 text-gray-600 hover:text-[#2d3e1f]"
+              className="py-4 text-gray-600 hover:text-brand-text"
             >
               フォロー中のタグ
             </Link>

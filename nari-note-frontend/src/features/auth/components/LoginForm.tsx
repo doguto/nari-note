@@ -31,7 +31,7 @@ export function LoginForm({
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
-      <h1 className="text-3xl font-bold text-[#2d3e1f] mb-6 text-center" style={{ fontFamily: 'serif' }}>
+      <h1 className="text-3xl font-bold text-brand-text mb-6 text-center" style={{ fontFamily: 'serif' }}>
         ログイン
       </h1>
       
@@ -51,7 +51,7 @@ export function LoginForm({
             type="email"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#88b04b] focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="example@email.com"
             required
           />
@@ -66,7 +66,7 @@ export function LoginForm({
             type="password"
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#88b04b] focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="••••••••"
             required
             minLength={8}
@@ -76,7 +76,7 @@ export function LoginForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full px-6 py-3 bg-[#88b04b] text-white rounded hover:bg-[#769939] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-6 py-3 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'ログイン中...' : 'ログイン'}
         </button>
@@ -85,7 +85,7 @@ export function LoginForm({
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
           アカウントをお持ちでない方は
-          <Link href="/signup" className="text-[#88b04b] hover:underline ml-1">
+          <Link href="/signup" className="text-brand-primary hover:underline ml-1">
             新規登録
           </Link>
         </p>
