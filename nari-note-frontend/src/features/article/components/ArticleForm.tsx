@@ -78,7 +78,7 @@ export function ArticleForm({
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
       {/* タイトル入力 */}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-[#2d3e1f] mb-2">
+        <label htmlFor="title" className="block text-sm font-medium text-[var(--brand-text)] mb-2">
           タイトル <span className="text-red-500">*</span>
         </label>
         <input
@@ -86,7 +86,7 @@ export function ArticleForm({
           type="text"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#88b04b] focus:border-transparent"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
           placeholder="記事のタイトルを入力してください"
           required
         />
@@ -94,7 +94,7 @@ export function ArticleForm({
 
       {/* タグ入力 */}
       <div>
-        <label htmlFor="tags" className="block text-sm font-medium text-[#2d3e1f] mb-2">
+        <label htmlFor="tags" className="block text-sm font-medium text-[var(--brand-text)] mb-2">
           タグ <span className="text-red-500">*</span>
         </label>
         <div className="flex gap-2 mb-2">
@@ -104,13 +104,13 @@ export function ArticleForm({
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#88b04b] focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
             placeholder="タグを入力してEnterで追加"
           />
           <button
             type="button"
             onClick={handleAddTag}
-            className="px-4 py-2 bg-[#88b04b] text-white rounded-lg hover:bg-[#769939] transition-colors"
+            className="px-4 py-2 bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary-hover)] transition-colors"
           >
             追加
           </button>
@@ -120,7 +120,7 @@ export function ArticleForm({
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="px-3 py-1 bg-[#f5f3e8] text-[#2d3e1f] rounded-full text-sm flex items-center gap-2"
+                className="px-3 py-1 bg-[var(--brand-bg-light)] text-[var(--brand-text)] rounded-full text-sm flex items-center gap-2"
               >
                 #{tag}
                 <button
@@ -143,7 +143,7 @@ export function ArticleForm({
       {/* 本文入力 */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label htmlFor="body" className="block text-sm font-medium text-[#2d3e1f]">
+          <label htmlFor="body" className="block text-sm font-medium text-[var(--brand-text)]">
             本文 <span className="text-red-500">*</span>
           </label>
           <div className="flex items-center gap-4">
@@ -192,14 +192,14 @@ export function ArticleForm({
           type="button"
           onClick={onSaveDraft}
           disabled={isSubmitting || !title || tags.length === 0 || isOverLimit}
-          className="px-6 py-3 border border-[#88b04b] text-[#88b04b] rounded-lg hover:bg-[#f5f3e8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 border border-[var(--brand-primary)] text-[var(--brand-primary)] rounded-lg hover:bg-[var(--brand-bg-light)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           下書き保存
         </button>
         <button
           type="submit"
           disabled={isSubmitting || !title || tags.length === 0 || isOverLimit}
-          className="flex-1 px-6 py-3 bg-[#88b04b] text-white rounded-lg hover:bg-[#769939] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          className="flex-1 px-6 py-3 bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
         >
           {isSubmitting ? '投稿中...' : '投稿する'}
         </button>
