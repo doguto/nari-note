@@ -39,7 +39,7 @@ export function SignUpForm({
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
-      <h1 className="text-3xl font-bold text-[#2d3e1f] mb-6 text-center" style={{ fontFamily: 'serif' }}>
+      <h1 className="text-3xl font-bold text-brand-text mb-6 text-center" style={{ fontFamily: 'serif' }}>
         新規登録
       </h1>
       
@@ -59,7 +59,7 @@ export function SignUpForm({
             type="text"
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#88b04b] focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="山田太郎"
             required
           />
@@ -74,7 +74,7 @@ export function SignUpForm({
             type="email"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#88b04b] focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="example@email.com"
             required
           />
@@ -89,7 +89,7 @@ export function SignUpForm({
             type="password"
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#88b04b] focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="••••••••"
             required
             minLength={8}
@@ -108,7 +108,7 @@ export function SignUpForm({
             type="password"
             value={passwordConfirm}
             onChange={(e) => onPasswordConfirmChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#88b04b] focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="••••••••"
             required
             minLength={8}
@@ -118,7 +118,7 @@ export function SignUpForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full px-6 py-3 bg-[#88b04b] text-white rounded hover:bg-[#769939] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-6 py-3 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? '登録中...' : '新規登録'}
         </button>
@@ -127,7 +127,7 @@ export function SignUpForm({
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
           すでにアカウントをお持ちの方は
-          <Link href="/login" className="text-[#88b04b] hover:underline ml-1">
+          <Link href="/login" className="text-brand-primary hover:underline ml-1">
             ログイン
           </Link>
         </p>

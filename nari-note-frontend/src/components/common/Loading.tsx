@@ -18,7 +18,7 @@ export function Loading({ size = 'md', text = '読み込み中...' }: LoadingPro
   return (
     <div className="flex flex-col items-center justify-center py-8">
       <div 
-        className={`animate-spin rounded-full border-b-2 border-[#88b04b] ${sizeClasses[size]}`}
+        className={`animate-spin rounded-full border-b-2 border-brand-primary ${sizeClasses[size]}`}
         role="status"
         aria-label="読み込み中"
       />

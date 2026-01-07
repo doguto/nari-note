@@ -16,7 +16,7 @@ export function TagArticleList({ tag, articles }: TagArticleListProps) {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-3xl font-bold text-[#2d3e1f] mb-2">
+        <h1 className="text-3xl font-bold text-brand-text mb-2">
           #{tag}
         </h1>
         <p className="text-gray-600">

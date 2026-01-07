@@ -11,7 +11,7 @@ export default function TagPage() {
   const tagName = decodeURIComponent(params.name as string);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f5f3e8] to-[#e8e4d0]">
+    <div className="min-h-screen bg-gradient-to-b from-brand-bg-gradient-from to-brand-bg-gradient-to">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 py-8">

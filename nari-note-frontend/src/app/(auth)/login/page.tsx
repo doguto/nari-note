@@ -4,7 +4,7 @@ import { LoginFormContainer } from '@/features/auth/containers/LoginFormContaine
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f5f3e8] to-[#e8e4d0] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-brand-bg-gradient-from to-brand-bg-gradient-to flex flex-col">
       <Header />
       
       <div className="flex-1 flex items-center justify-center py-12 px-4">

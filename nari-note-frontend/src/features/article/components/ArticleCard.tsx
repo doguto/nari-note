@@ -9,7 +9,7 @@ interface ArticleCardProps {
 export function ArticleCard({ article, onLike }: ArticleCardProps) {
   return (
     <Link href={`/articles/${article.id}`} className="block bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-      <h2 className="text-2xl font-bold text-[#2d3e1f] mb-2">
+      <h2 className="text-2xl font-bold text-brand-text mb-2">
         {article.title}
       </h2>
       
@@ -17,7 +17,7 @@ export function ArticleCard({ article, onLike }: ArticleCardProps) {
         <Link
           href={`/users/${article.authorId}`}
           onClick={(e) => e.stopPropagation()}
-          className="hover:text-[#88b04b] hover:underline"
+          className="hover:text-brand-primary hover:underline"
         >
           著者: {article.authorName}
         </Link>
@@ -35,7 +35,7 @@ export function ArticleCard({ article, onLike }: ArticleCardProps) {
               key={tag}
               href={`/tags/${tag}`}
               onClick={(e) => e.stopPropagation()}
-              className="px-2 py-1 bg-[#f5f3e8] text-[#2d3e1f] rounded text-sm hover:bg-[#e8e4d0] transition-colors"
+              className="px-2 py-1 bg-brand-bg-light text-brand-text rounded text-sm hover:bg-brand-bg-gradient-to transition-colors"
             >
               #{tag}
             </Link>
@@ -49,7 +49,7 @@ export function ArticleCard({ article, onLike }: ArticleCardProps) {
             e.preventDefault();
             onLike();
           }}
-          className="px-4 py-2 bg-[#88b04b] text-white rounded hover:bg-[#769939] transition-colors"
+          className="px-4 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors"
         >
           いいね
         </button>
