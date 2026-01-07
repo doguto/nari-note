@@ -92,6 +92,12 @@ export function ArticleForm({
           </div>
         </div>
         
+        {isOverLimit && (
+          <p className="text-sm text-red-500">
+            文字数が上限を超えています。{maxCharacters.toLocaleString()}文字以内に収めてください。
+          </p>
+        )}
+        
         {showPreview ? (
           <div className="min-h-[400px] px-4 py-3 border border-gray-300 rounded-lg bg-white markdown-preview">
             <ReactMarkdown>{body}</ReactMarkdown>
