@@ -42,7 +42,7 @@ export function Header() {
             記事を探す
           </Link>
           <Link 
-            href="/submit" 
+            href="/articles/new" 
             className="text-white hover:text-[#88b04b] transition-colors"
             style={{ fontFamily: 'serif' }}
           >

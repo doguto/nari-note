@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Footer } from "@/components/layout/Footer";
@@ -11,18 +10,12 @@ export default function Home() {
 
       {/* ヒーローセクション */}
       <section className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#2d3e1f] mb-4" style={{ fontFamily: 'serif' }}>
-            技術の記録、レビュー、自分の記。
-          </h1>
-          <p className="text-2xl md:text-3xl text-[#555] mb-8" style={{ fontFamily: 'serif' }}>
-            知識を共有しよう。
-          </p>
-        </div>
-        
-        <Link href="/debug" className="inline-block px-8 py-3 bg-[#88b04b] text-white rounded-lg hover:bg-[#769939] transition-colors font-medium text-lg">
-          新規記事を作成
-        </Link>
+        <h1 className="text-4xl md:text-5xl font-bold text-[#2d3e1f] mb-4" style={{ fontFamily: 'serif' }}>
+          技術の記録、レビュー、自分の記。
+        </h1>
+        <p className="text-2xl md:text-3xl text-[#555] mb-8" style={{ fontFamily: 'serif' }}>
+          知識を共有しよう。
+        </p>
       </section>
 
       {/* メインコンテンツ */}
