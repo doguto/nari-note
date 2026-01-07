@@ -17,8 +17,7 @@
 
 データフェッチングとビジネスロジックを担当するコンポーネント。
 
-- **ArticleCardContainer.tsx** - 記事カードのデータ管理
-- **ArticleListContainer.tsx** - 記事一覧のデータ管理
+- **HomeArticleListContainer.tsx** - ホーム画面の記事一覧のデータ管理
 - **ArticleDetailContainer.tsx** - 記事詳細のデータ管理
 - **ArticleFormContainer.tsx** - 記事フォームのデータ管理
 

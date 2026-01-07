@@ -7,11 +7,13 @@
 ```
 lib/
 ├── api/            # API関連（既存）
-├── providers/      # Reactプロバイダー（既存）
-├── utils/          # ユーティリティ関数
-├── hooks/          # 共通カスタムフック
-└── constants/      # 定数定義
+└── providers/      # Reactプロバイダー（既存）
 ```
+
+将来的に以下のディレクトリを追加予定：
+- `utils/` - ユーティリティ関数
+- `hooks/` - 共通カスタムフック
+- `constants/` - 定数定義
 
 ## API（`api/`）
 
