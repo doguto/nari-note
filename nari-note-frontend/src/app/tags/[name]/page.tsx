@@ -6,11 +6,6 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Footer } from '@/components/layout/Footer';
 import { TagArticleListContainer } from '@/features/tag/containers/TagArticleListContainer';
 
-/**
- * タグページ
- * 
- * 特定のタグに紐づく記事一覧を表示します。
- */
 export default function TagPage() {
   const params = useParams();
   const tagName = decodeURIComponent(params.name as string);

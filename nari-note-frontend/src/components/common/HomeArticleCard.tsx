@@ -10,12 +10,6 @@ interface HomeArticleCardProps {
   image: string;
 }
 
-/**
- * ホームページ用記事カード
- * 
- * トップページの記事一覧で使用されるカードコンポーネント。
- * 著者名クリックでユーザーページに遷移できます。
- */
 export function HomeArticleCard({
   id,
   title,

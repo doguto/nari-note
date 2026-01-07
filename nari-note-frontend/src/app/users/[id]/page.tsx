@@ -6,11 +6,6 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Footer } from '@/components/layout/Footer';
 import { UserProfileContainer } from '@/features/user/containers/UserProfileContainer';
 
-/**
- * ユーザープロフィールページ
- * 
- * ユーザーの詳細情報と記事一覧を表示します。
- */
 export default function UserProfilePage() {
   const params = useParams();
   const userId = Number(params.id);

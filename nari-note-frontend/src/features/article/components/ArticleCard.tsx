@@ -6,12 +6,6 @@ interface ArticleCardProps {
   onLike?: () => void;
 }
 
-/**
- * 記事カード - Presentational Component
- * 
- * 記事の概要を表示するカードコンポーネント。
- * 一覧表示で使用されます。
- */
 export function ArticleCard({ article, onLike }: ArticleCardProps) {
   return (
     <Link href={`/articles/${article.id}`} className="block bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
