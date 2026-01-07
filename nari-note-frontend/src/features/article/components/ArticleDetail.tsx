@@ -5,11 +5,6 @@ interface ArticleDetailProps {
   article: GetArticleResponse;
 }
 
-/**
- * 記事詳細 - Presentational Component
- * 
- * 記事の詳細情報を表示するコンポーネント。
- */
 export function ArticleDetail({ article }: ArticleDetailProps) {
   return (
     <article className="bg-white rounded-lg shadow-lg p-8">

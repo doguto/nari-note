@@ -7,11 +7,6 @@ interface TagArticleListProps {
   articles: GetArticleResponse[];
 }
 
-/**
- * タグ記事一覧 - Presentational Component
- * 
- * 特定のタグに紐づく記事一覧を表示します。
- */
 export function TagArticleList({ tag, articles }: TagArticleListProps) {
   return (
     <div className="space-y-6">
@@ -23,7 +18,7 @@ export function TagArticleList({ tag, articles }: TagArticleListProps) {
           {articles.length}件の記事
         </p>
       </div>
-      
+
       {articles.length === 0 ? (
         <EmptyState
           icon="📝"

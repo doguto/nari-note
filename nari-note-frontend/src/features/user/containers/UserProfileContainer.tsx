@@ -9,11 +9,6 @@ interface UserProfileContainerProps {
   userId: number;
 }
 
-/**
- * ユーザープロフィールコンテナ - Container Component
- * 
- * ユーザー情報を取得してUserProfileに渡します。
- */
 export function UserProfileContainer({ userId }: UserProfileContainerProps) {
   const { data, isLoading, error, refetch } = useGetUserProfile({ id: userId });
 

@@ -13,11 +13,6 @@ interface LoginFormProps {
   error?: string;
 }
 
-/**
- * ログインフォーム - Presentational Component
- * 
- * ユーザーのログインフォームを表示します。
- */
 export function LoginForm({
   email,
   password,

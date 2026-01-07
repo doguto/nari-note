@@ -12,7 +12,7 @@ export function ArticleCard({ article, onLike }: ArticleCardProps) {
       <h2 className="text-2xl font-bold text-brand-text mb-2">
         {article.title}
       </h2>
-      
+
       <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
         <Link
           href={`/users/${article.authorId}`}
@@ -23,11 +23,11 @@ export function ArticleCard({ article, onLike }: ArticleCardProps) {
         </Link>
         <span>いいね: {article.likeCount}</span>
       </div>
-      
+
       <p className="text-gray-700 mb-4 line-clamp-3">
         {article.body}
       </p>
-      
+
       {article.tags && article.tags.length > 0 && (
         <div className="flex gap-2 flex-wrap mb-4">
           {article.tags.map((tag) => (
@@ -42,7 +42,7 @@ export function ArticleCard({ article, onLike }: ArticleCardProps) {
           ))}
         </div>
       )}
-      
+
       {onLike && (
         <button
           onClick={(e) => {

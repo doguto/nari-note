@@ -17,11 +17,6 @@ interface SignUpFormProps {
   error?: string;
 }
 
-/**
- * サインアップフォーム - Presentational Component
- * 
- * ユーザーの新規登録フォームを表示します。
- */
 export function SignUpForm({
   name,
   email,

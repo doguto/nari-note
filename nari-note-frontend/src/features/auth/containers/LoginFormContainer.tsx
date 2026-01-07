@@ -6,11 +6,6 @@ import { LoginForm } from '../components/LoginForm';
 import { useSignIn } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
 
-/**
- * ログインフォームコンテナ - Container Component
- * 
- * ログインのロジックを管理し、LoginFormに渡します。
- */
 export function LoginFormContainer() {
   const router = useRouter();
   const { login } = useAuth();

@@ -9,11 +9,6 @@ interface ArticleDetailContainerProps {
   articleId: number;
 }
 
-/**
- * 記事詳細コンテナ - Container Component
- * 
- * 記事情報を取得してArticleDetailに渡します。
- */
 export function ArticleDetailContainer({ articleId }: ArticleDetailContainerProps) {
   const { data, isLoading, error, refetch } = useGetArticle({ id: articleId });
 

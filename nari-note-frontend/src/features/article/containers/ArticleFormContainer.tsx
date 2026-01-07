@@ -3,11 +3,6 @@
 import { ArticleForm } from '../components/ArticleForm';
 import { useArticleForm } from '../hooks/useArticleForm';
 
-/**
- * 記事作成フォーム - Container Component
- * 
- * 記事作成フォームのデータとロジックを管理するコンテナコンポーネント。
- */
 export function ArticleFormContainer() {
   const {
     title,

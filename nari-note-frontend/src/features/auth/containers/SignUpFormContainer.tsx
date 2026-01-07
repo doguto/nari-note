@@ -6,11 +6,6 @@ import { SignUpForm } from '../components/SignUpForm';
 import { useSignUp } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
 
-/**
- * サインアップフォームコンテナ - Container Component
- * 
- * サインアップのロジックを管理し、SignUpFormに渡します。
- */
 export function SignUpFormContainer() {
   const router = useRouter();
   const { login } = useAuth();

@@ -9,11 +9,6 @@ interface TagArticleListContainerProps {
   tag: string;
 }
 
-/**
- * タグ記事一覧コンテナ - Container Component
- * 
- * タグに紐づく記事一覧を取得してTagArticleListに渡します。
- */
 export function TagArticleListContainer({ tag }: TagArticleListContainerProps) {
   const { data, isLoading, error, refetch } = useGetArticlesByTag({ tagName: tag });
 
