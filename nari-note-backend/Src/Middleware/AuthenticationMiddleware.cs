@@ -8,57 +8,26 @@ namespace NariNoteBackend.Middleware;
 public class AuthenticationMiddleware
 {
     readonly RequestDelegate next;
-    
-    public AuthenticationMiddleware(RequestDelegate next)
+    readonly ILogger<AuthenticationMiddleware> logger;
+
+    public AuthenticationMiddleware(RequestDelegate next, ILogger<AuthenticationMiddleware> logger)
     {
         this.next = next;
+        this.logger = logger;
     }
-    
+
     public async Task InvokeAsync(
         HttpContext context, 
         IJwtHelper jwtHelper, 
         ISessionRepository sessionRepository)
     {
-        // 認証が不要なエンドポイントはスキップ
         var path = context.Request.Path.Value?.ToLower() ?? "";
         var method = context.Request.Method;
+
         
-        // 認証不要のエンドポイントリスト（ホワイトリスト方式）
-        var publicEndpoints = new[]
-        {
-            ("/auth/signin", "POST"),
-            ("/auth/signup", "POST"),
-            ("/health", "GET"),
-            ("/api/articles", "GET"),          // 記事一覧の取得
-            ("/api/users", "GET")              // ユーザー一覧の取得（プロフィール表示用）
-        };
-        
-        // パスパターンマッチング: /api/articles/{id} のような動的パスに対応
-        var isPublicEndpoint = publicEndpoints.Any(endpoint =>
-        {
-            var (endpointPath, endpointMethod) = endpoint;
-            
-            // メソッドが一致しない場合はスキップ
-            if (method != endpointMethod && endpointMethod != "OPTIONS")
-                return false;
-            
-            // 完全一致
-            if (path == endpointPath)
-                return true;
-            
-            // 動的パス対応: /api/articles/{id} パターン
-            if (endpointPath == "/api/articles" && path.StartsWith("/api/articles/") && method == "GET")
-                return true;
-            
-            // 動的パス対応: /api/users/{id} パターン（プロフィール取得のみ）
-            if (endpointPath == "/api/users" && path.StartsWith("/api/users/") && method == "GET")
-                return true;
-            
-            return false;
-        });
-        
+
         // OPTIONSリクエストは常に許可
-        if (method == "OPTIONS" || isPublicEndpoint)
+        if (method == "OPTIONS" || IsPublicEndpoint(method, path))
         {
             await next(context);
             return;
@@ -76,11 +45,11 @@ public class AuthenticationMiddleware
                 token = authHeader.Substring("Bearer ".Length).Trim();
             }
         }
-        
+
         // トークンが見つからない場合
         if (token.IsNullOrEmpty())
         {
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            context.Response.StatusCode = HttpStatusCode.Unauthorized.AsInt();
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 
@@ -97,7 +66,7 @@ public class AuthenticationMiddleware
         var principal = jwtHelper.ValidateToken(token!);
         if (principal == null)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            context.Response.StatusCode = HttpStatusCode.Unauthorized.AsInt();
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 
@@ -110,7 +79,7 @@ public class AuthenticationMiddleware
             });
             return;
         }
-        
+
         var sessionKeyClaim = principal.FindFirst("sessionKey");
         if (sessionKeyClaim == null)
         {
@@ -131,7 +100,7 @@ public class AuthenticationMiddleware
         var session = await sessionRepository.FindBySessionKeyAsync(sessionKeyClaim.Value);
         if (session == null || session.ExpiresAt < DateTime.UtcNow)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            context.Response.StatusCode = HttpStatusCode.Unauthorized.AsInt();
             await context.Response.WriteAsJsonAsync(new 
             { 
                 error = new 
@@ -150,5 +119,38 @@ public class AuthenticationMiddleware
         context.Items["UserId"] = session.UserId;
         
         await next(context);
+    }
+
+    bool IsPublicEndpoint(string method, string path)
+    {
+        // 認証不要のエンドポイントリスト（ホワイトリスト方式）
+        var publicEndpoints = new[]
+        {
+            ("/api/auth/signin", HttpMethod.Post.ToString()),
+            ("/api/auth/signup", HttpMethod.Post.ToString()),
+            ("/api/health", HttpMethod.Get.ToString()),
+            ("/api/articles", HttpMethod.Get.ToString()),
+            ("/api/users", HttpMethod.Get.ToString())
+        };
+
+        // パスパターンマッチング: /api/articles/{id} のような動的パスに対応
+        return publicEndpoints.Any(endpoint =>
+        {
+            var (endpointPath, endpointMethod) = endpoint;
+
+            // メソッドが一致しない場合はスキップ
+            if (method != endpointMethod && endpointMethod != "OPTIONS") return false;
+
+            // 完全一致
+            if (path == endpointPath) return true;
+
+            // 動的パス対応: /api/articles/{id} パターン
+            if (endpointPath == "/api/articles" && path.StartsWith("/api/articles/") && method == "GET") return true;
+
+            // 動的パス対応: /api/users/{id} パターン（プロフィール取得のみ）
+            if (endpointPath == "/api/users" && path.StartsWith("/api/users/") && method == "GET") return true;
+
+            return false;
+        });
     }
 }
