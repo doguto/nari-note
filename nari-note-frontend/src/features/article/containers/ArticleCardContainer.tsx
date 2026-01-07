@@ -9,11 +9,6 @@ interface ArticleCardContainerProps {
   articleId: number;
 }
 
-/**
- * 記事カード Container Component
- * 
- * 記事データの取得といいね機能を管理します。
- */
 export function ArticleCardContainer({ articleId }: ArticleCardContainerProps) {
   const { data, isLoading, error, refetch } = useGetArticle({ id: articleId });
   const toggleLike = useToggleLike();

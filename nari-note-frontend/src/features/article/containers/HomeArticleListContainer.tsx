@@ -5,11 +5,6 @@ import { HomeArticleCard } from '@/components/common/HomeArticleCard';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 
-/**
- * ホームページ用記事一覧コンテナ - Container Component
- * 
- * 新着記事一覧を取得して表示します。
- */
 export function HomeArticleListContainer() {
   const { data, isLoading, error, refetch } = useGetArticles({ limit: 20, offset: 0 });
 

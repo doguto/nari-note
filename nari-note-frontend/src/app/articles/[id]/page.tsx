@@ -6,11 +6,6 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Footer } from '@/components/layout/Footer';
 import { ArticleDetailContainer } from '@/features/article/containers/ArticleDetailContainer';
 
-/**
- * 記事詳細ページ
- * 
- * 記事の詳細情報を表示します。
- */
 export default function ArticleDetailPage() {
   const params = useParams();
   const articleId = Number(params.id);

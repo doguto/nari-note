@@ -26,7 +26,6 @@ public class AuthController : ApplicationController
     public async Task<ActionResult<AuthResponse>> SignUp([FromBody] SignUpRequest request)
     {
         var response = await signUpService.ExecuteAsync(request, Response);
-        
         return Ok(response);
     }
     
@@ -35,7 +34,6 @@ public class AuthController : ApplicationController
     public async Task<ActionResult<AuthResponse>> SignIn([FromBody] SignInRequest request)
     {
         var response = await signInService.ExecuteAsync(request, Response);
-        
         return Ok(response);
     }
 }
