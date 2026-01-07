@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface SignUpFormProps {
   name: string;
@@ -50,78 +53,74 @@ export function SignUpForm({
       )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-2">
+          <Label htmlFor="name">
             ユーザー名
-          </label>
-          <input
+          </Label>
+          <Input
             id="name"
             type="text"
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="山田太郎"
             required
           />
         </div>
         
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-2">
+          <Label htmlFor="email">
             メールアドレス
-          </label>
-          <input
+          </Label>
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="example@email.com"
             required
           />
         </div>
         
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-2">
+          <Label htmlFor="password">
             パスワード
-          </label>
-          <input
+          </Label>
+          <Input
             id="password"
             type="password"
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="••••••••"
             required
             minLength={8}
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500">
             8文字以上で入力してください
           </p>
         </div>
         
-        <div>
-          <label htmlFor="passwordConfirm" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-2">
+          <Label htmlFor="passwordConfirm">
             パスワード（確認）
-          </label>
-          <input
+          </Label>
+          <Input
             id="passwordConfirm"
             type="password"
             value={passwordConfirm}
             onChange={(e) => onPasswordConfirmChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="••••••••"
             required
             minLength={8}
           />
         </div>
         
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full px-6 py-3 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-brand-primary hover:bg-brand-primary-hover"
         >
           {isSubmitting ? '登録中...' : '新規登録'}
-        </button>
+        </Button>
       </form>
       
       <div className="mt-6 text-center">

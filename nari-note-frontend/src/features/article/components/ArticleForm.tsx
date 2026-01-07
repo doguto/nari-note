@@ -3,6 +3,9 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor').then((mod) => mod.default),
@@ -69,42 +72,41 @@ export function ArticleForm({
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-[var(--brand-text)] mb-2">
+      <div className="space-y-2">
+        <Label htmlFor="title">
           タイトル <span className="text-red-500">*</span>
-        </label>
-        <input
+        </Label>
+        <Input
           id="title"
           type="text"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
           placeholder="記事のタイトルを入力してください"
           required
         />
       </div>
 
-      <div>
-        <label htmlFor="tags" className="block text-sm font-medium text-[var(--brand-text)] mb-2">
+      <div className="space-y-2">
+        <Label htmlFor="tags">
           タグ <span className="text-red-500">*</span>
-        </label>
+        </Label>
         <div className="flex gap-2 mb-2">
-          <input
+          <Input
             id="tags"
             type="text"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
             placeholder="タグを入力してEnterで追加"
+            className="flex-1"
           />
-          <button
+          <Button
             type="button"
             onClick={handleAddTag}
-            className="px-4 py-2 bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary-hover)] transition-colors"
+            className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
           >
             追加
-          </button>
+          </Button>
         </div>
         {tags.length > 0 && (
           <div className="flex gap-2 flex-wrap">
@@ -131,22 +133,23 @@ export function ArticleForm({
         )}
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label htmlFor="body" className="block text-sm font-medium text-[var(--brand-text)]">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="body">
             本文 <span className="text-red-500">*</span>
-          </label>
+          </Label>
           <div className="flex items-center gap-4">
             <span className={`text-sm ${isOverLimit ? 'text-red-500 font-bold' : 'text-gray-600'}`}>
               {characterCount.toLocaleString()} / {maxCharacters.toLocaleString()} 文字
             </span>
-            <button
+            <Button
               type="button"
               onClick={onTogglePreview}
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors text-sm"
+              variant="secondary"
+              size="sm"
             >
               {showPreview ? '編集モード' : 'プレビュー'}
-            </button>
+            </Button>
           </div>
         </div>
         
@@ -175,21 +178,22 @@ export function ArticleForm({
       </div>
 
       <div className="flex gap-4 pt-4">
-        <button
+        <Button
           type="button"
           onClick={onSaveDraft}
           disabled={isSubmitting || !title || tags.length === 0 || isOverLimit}
-          className="px-6 py-3 border border-[var(--brand-primary)] text-[var(--brand-primary)] rounded-lg hover:bg-[var(--brand-bg-light)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="outline"
+          className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-bg-light)]"
         >
           下書き保存
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           disabled={isSubmitting || !title || tags.length === 0 || isOverLimit}
-          className="flex-1 px-6 py-3 bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          className="flex-1 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
         >
           {isSubmitting ? '投稿中...' : '投稿する'}
-        </button>
+        </Button>
       </div>
     </form>
   );

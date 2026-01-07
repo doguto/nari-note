@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface LoginFormProps {
   email: string;
@@ -42,44 +45,42 @@ export function LoginForm({
       )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-2">
+          <Label htmlFor="email">
             メールアドレス
-          </label>
-          <input
+          </Label>
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="example@email.com"
             required
           />
         </div>
         
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-2">
+          <Label htmlFor="password">
             パスワード
-          </label>
-          <input
+          </Label>
+          <Input
             id="password"
             type="password"
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             placeholder="••••••••"
             required
             minLength={8}
           />
         </div>
         
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full px-6 py-3 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-brand-primary hover:bg-brand-primary-hover"
         >
           {isSubmitting ? 'ログイン中...' : 'ログイン'}
-        </button>
+        </Button>
       </form>
       
       <div className="mt-6 text-center">

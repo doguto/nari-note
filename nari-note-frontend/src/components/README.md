@@ -6,8 +6,30 @@
 
 ```
 components/
+├── ui/         # 基本UIコンポーネント（ボタン、入力フィールドなど）
 ├── layout/     # レイアウトコンポーネント（ヘッダー、フッターなど）
 └── common/     # その他共通コンポーネント（ローディング、エラー表示など）
+```
+
+## UI Components（`ui/`）
+
+基本的なUIコンポーネント。機能に依存しない汎用的なコンポーネント。
+
+**例:**
+- `Button.tsx` - ボタン
+- `Input.tsx` - 入力フィールド
+- `Card.tsx` - カード
+- `Modal.tsx` - モーダル
+- `Select.tsx` - セレクトボックス
+- `Textarea.tsx` - テキストエリア
+
+**使用例:**
+```tsx
+import { Button } from '@/components/ui/Button';
+
+<Button variant="primary" onClick={handleClick}>
+  クリック
+</Button>
 ```
 
 ## Layout Components（`layout/`）
