@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-// Dynamically import MDEditor to avoid SSR issues
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor').then((mod) => mod.default),
   { 
@@ -31,12 +30,6 @@ interface ArticleFormProps {
   onTogglePreview: () => void;
 }
 
-/**
- * 記事作成フォーム - Presentational Component
- * 
- * 記事の作成・編集に使用するフォームコンポーネント。
- * マークダウンエディターとプレビュー機能を提供します。
- */
 export function ArticleForm({
   title,
   body,
@@ -76,7 +69,6 @@ export function ArticleForm({
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-6">
-      {/* タイトル入力 */}
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-[var(--brand-text)] mb-2">
           タイトル <span className="text-red-500">*</span>
@@ -92,7 +84,6 @@ export function ArticleForm({
         />
       </div>
 
-      {/* タグ入力 */}
       <div>
         <label htmlFor="tags" className="block text-sm font-medium text-[var(--brand-text)] mb-2">
           タグ <span className="text-red-500">*</span>
@@ -140,7 +131,6 @@ export function ArticleForm({
         )}
       </div>
 
-      {/* 本文入力 */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label htmlFor="body" className="block text-sm font-medium text-[var(--brand-text)]">
@@ -161,9 +151,7 @@ export function ArticleForm({
         </div>
         
         {showPreview ? (
-          <div 
-            className="min-h-[400px] px-4 py-3 border border-gray-300 rounded-lg bg-white prose max-w-none"
-          >
+          <div className="min-h-[400px] px-4 py-3 border border-gray-300 rounded-lg bg-white markdown-preview">
             <ReactMarkdown>{body}</ReactMarkdown>
           </div>
         ) : (
@@ -186,7 +174,6 @@ export function ArticleForm({
         )}
       </div>
 
-      {/* 送信ボタン */}
       <div className="flex gap-4 pt-4">
         <button
           type="button"
