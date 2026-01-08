@@ -1,7 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Footer } from "@/components/layout/Footer";
-import { HomeArticleListContainer } from "@/features/article/containers/HomeArticleListContainer";
+import { HomeArticleList } from "@/features/article/organisms";
 
 export default function Home() {
   return (
@@ -24,7 +24,7 @@ export default function Home() {
           {/* 記事一覧 */}
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-brand-text mb-6">新着記事</h2>
-            <HomeArticleListContainer />
+            <HomeArticleList />
           </div>
 
           <Sidebar />

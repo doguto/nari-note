@@ -1,11 +1,41 @@
-import type { GetArticleResponse } from '@/lib/api/types';
-import Link from 'next/link';
+'use client';
 
-interface ArticleDetailProps {
-  article: GetArticleResponse;
+import Link from 'next/link';
+import { useGetArticle } from '@/lib/api';
+import { Loading } from '@/components/common/Loading';
+import { ErrorMessage } from '@/components/common/ErrorMessage';
+
+interface ArticleDetailPageProps {
+  articleId: number;
 }
 
-export function ArticleDetail({ article }: ArticleDetailProps) {
+/**
+ * ArticleDetailPage - Organism Component
+ * 
+ * 記事詳細ページの完全な機能を持つコンポーネント
+ * Atomic Designパターンにおける Organism として、
+ * ビジネスロジックと UI を統合
+ */
+export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
+  const { data: article, isLoading, error, refetch } = useGetArticle({ id: articleId });
+
+  if (isLoading) {
+    return <Loading text="記事を読み込み中..." />;
+  }
+
+  if (error) {
+    return (
+      <ErrorMessage 
+        message="記事の取得に失敗しました" 
+        onRetry={refetch}
+      />
+    );
+  }
+
+  if (!article) {
+    return <ErrorMessage message="記事が見つかりません" />;
+  }
+
   return (
     <article className="bg-white rounded-lg shadow-lg p-8">
       <h1 className="text-4xl font-bold text-brand-text mb-6">

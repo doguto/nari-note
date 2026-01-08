@@ -1,11 +1,41 @@
-import type { GetUserProfileResponse } from '@/lib/api/types';
-import Link from 'next/link';
+'use client';
 
-interface UserProfileProps {
-  user: GetUserProfileResponse;
+import Link from 'next/link';
+import { useGetUserProfile } from '@/lib/api';
+import { Loading } from '@/components/common/Loading';
+import { ErrorMessage } from '@/components/common/ErrorMessage';
+
+interface UserProfilePageProps {
+  userId: number;
 }
 
-export function UserProfile({ user }: UserProfileProps) {
+/**
+ * UserProfilePage - Organism Component
+ * 
+ * ユーザープロフィールページの完全な機能を持つコンポーネント
+ * Atomic Designパターンにおける Organism として、
+ * ビジネスロジックと UI を統合
+ */
+export function UserProfilePage({ userId }: UserProfilePageProps) {
+  const { data: user, isLoading, error, refetch } = useGetUserProfile({ id: userId });
+
+  if (isLoading) {
+    return <Loading text="ユーザー情報を読み込み中..." />;
+  }
+
+  if (error) {
+    return (
+      <ErrorMessage 
+        message="ユーザー情報の取得に失敗しました" 
+        onRetry={refetch}
+      />
+    );
+  }
+
+  if (!user) {
+    return <ErrorMessage message="ユーザーが見つかりません" />;
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">

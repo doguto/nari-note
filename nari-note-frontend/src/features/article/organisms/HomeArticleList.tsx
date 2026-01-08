@@ -5,7 +5,14 @@ import { HomeArticleCard } from '@/components/common/HomeArticleCard';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 
-export function HomeArticleListContainer() {
+/**
+ * HomeArticleList - Organism Component
+ * 
+ * ホーム画面の記事一覧の完全な機能を持つコンポーネント
+ * Atomic Designパターンにおける Organism として、
+ * ビジネスロジックと UI を統合
+ */
+export function HomeArticleList() {
   const { data, isLoading, error, refetch } = useGetArticles({ limit: 20, offset: 0 });
 
   if (isLoading) {

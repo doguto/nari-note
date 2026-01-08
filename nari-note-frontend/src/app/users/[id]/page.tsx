@@ -4,9 +4,9 @@ import { useParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Footer } from '@/components/layout/Footer';
-import { UserProfileContainer } from '@/features/user/containers/UserProfileContainer';
+import { UserProfilePage } from '@/features/user/organisms';
 
-export default function UserProfilePage() {
+export default function UserProfilePageRoute() {
   const params = useParams();
   const userId = Number(params.id);
 
@@ -17,7 +17,7 @@ export default function UserProfilePage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-8">
           <div className="flex-1">
-            <UserProfileContainer userId={userId} />
+            <UserProfilePage userId={userId} />
           </div>
           
           <Sidebar />
