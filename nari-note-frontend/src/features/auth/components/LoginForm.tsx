@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { FormTitle, ErrorAlert } from '@/components/common/atoms';
+import { EmailField, PasswordField } from '@/components/common/molecules';
 
 interface LoginFormProps {
   email: string;
@@ -29,45 +29,14 @@ export function LoginForm({
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
-      <h1 className="text-3xl font-bold text-brand-text mb-6 text-center" style={{ fontFamily: 'serif' }}>
-        ログイン
-      </h1>
+      <FormTitle>ログイン</FormTitle>
       
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded p-3 mb-4">
-          <p className="text-red-600 text-sm">{error}</p>
-        </div>
-      )}
+      {error && <ErrorAlert message={error} />}
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">
-            メールアドレス
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => onEmailChange(e.target.value)}
-            placeholder="example@email.com"
-            required
-          />
-        </div>
+        <EmailField value={email} onChange={onEmailChange} />
         
-        <div className="space-y-2">
-          <Label htmlFor="password">
-            パスワード
-          </Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => onPasswordChange(e.target.value)}
-            placeholder="••••••••"
-            required
-            minLength={8}
-          />
-        </div>
+        <PasswordField value={password} onChange={onPasswordChange} />
         
         <Button
           type="submit"

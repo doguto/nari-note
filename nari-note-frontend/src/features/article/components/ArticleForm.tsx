@@ -1,11 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { TagInput, CharacterCounter } from '@/components/common/molecules';
 
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor').then((mod) => mod.default),
@@ -33,6 +33,12 @@ interface ArticleFormProps {
   onTogglePreview: () => void;
 }
 
+/**
+ * ArticleForm - Organism Component
+ * 
+ * 記事作成・編集フォームを表示します。
+ * Atomic Designパターンに基づいて、Atoms/Moleculesを組み合わせて構築
+ */
 export function ArticleForm({
   title,
   body,
@@ -46,26 +52,6 @@ export function ArticleForm({
   showPreview,
   onTogglePreview,
 }: ArticleFormProps) {
-  const [tagInput, setTagInput] = useState('');
-
-  const handleAddTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      onTagsChange([...tags, tagInput.trim()]);
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    onTagsChange(tags.filter(tag => tag !== tagToRemove));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
-
   const characterCount = body.length;
   const maxCharacters = 65535;
   const isOverLimit = characterCount > maxCharacters;
@@ -86,52 +72,7 @@ export function ArticleForm({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="tags">
-          タグ <span className="text-red-500">*</span>
-        </Label>
-        <div className="flex gap-2 mb-2">
-          <Input
-            id="tags"
-            type="text"
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="タグを入力してEnterで追加"
-            className="flex-1"
-          />
-          <Button
-            type="button"
-            onClick={handleAddTag}
-            className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
-          >
-            追加
-          </Button>
-        </div>
-        {tags.length > 0 && (
-          <div className="flex gap-2 flex-wrap">
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1 bg-[var(--brand-bg-light)] text-[var(--brand-text)] rounded-full text-sm flex items-center gap-2"
-              >
-                #{tag}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveTag(tag)}
-                  className="text-red-500 hover:text-red-700"
-                  aria-label={`${tag}を削除`}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-        {tags.length === 0 && (
-          <p className="text-sm text-gray-500">少なくとも1つのタグを追加してください</p>
-        )}
-      </div>
+      <TagInput tags={tags} onTagsChange={onTagsChange} />
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -139,9 +80,7 @@ export function ArticleForm({
             本文 <span className="text-red-500">*</span>
           </Label>
           <div className="flex items-center gap-4">
-            <span className={`text-sm ${isOverLimit ? 'text-red-500 font-bold' : 'text-gray-600'}`}>
-              {characterCount.toLocaleString()} / {maxCharacters.toLocaleString()} 文字
-            </span>
+            <CharacterCounter count={characterCount} max={maxCharacters} />
             <Button
               type="button"
               onClick={onTogglePreview}
@@ -152,6 +91,12 @@ export function ArticleForm({
             </Button>
           </div>
         </div>
+        
+        {isOverLimit && (
+          <p className="text-sm text-red-500">
+            文字数が上限を超えています。{maxCharacters.toLocaleString()}文字以内に収めてください。
+          </p>
+        )}
         
         {showPreview ? (
           <div className="min-h-[400px] px-4 py-3 border border-gray-300 rounded-lg bg-white markdown-preview">
@@ -168,12 +113,6 @@ export function ArticleForm({
               visibleDragbar={false}
             />
           </div>
-        )}
-        
-        {isOverLimit && (
-          <p className="mt-2 text-sm text-red-500">
-            文字数が上限を超えています。{maxCharacters.toLocaleString()}文字以内に収めてください。
-          </p>
         )}
       </div>
 
