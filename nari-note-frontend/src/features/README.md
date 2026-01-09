@@ -14,7 +14,7 @@
 └── types.ts        # 型定義（機能固有の型）
 ```
 
-**注意**: 以前のcontainers/components/hooks構造から、Atomic Design準拠のorganisms構造に移行しました。
+**注意**: 以前のcontainers/components/hooks構造から、Atomic Design準拠のorganisms構造に移行しました。既存のコードは段階的に移行中です。新規実装は必ずorganisms構造を使用してください。
 
 ## Atomic Designにおける配置
 

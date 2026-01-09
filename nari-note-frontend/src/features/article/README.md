@@ -33,10 +33,11 @@ article/
 - propsで記事データを受け取って表示
 
 ### ArticleDetailContainer.tsx
-記事詳細のデータフェッチング。Container。
+記事詳細のデータフェッチング。Container（実装例として記載、必要に応じて実装）。
 
 - ArticleDetailPageにデータを渡す
 - Loading/ErrorMessage（ユーティリティ）を使用
+- **注意**: 現在の実装ではArticleDetailPageが直接データフェッチングを行っている場合があります
 
 ### HomeArticleList.tsx
 ホームページの記事一覧表示。
