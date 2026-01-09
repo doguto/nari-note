@@ -150,10 +150,8 @@ export interface UpdateUserProfileRequest {
 export interface UpdateUserProfileResponse {
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface GetDraftArticlesRequest {
-  // 認証ヘッダーから自動的にAuthorIdが設定されるため、パラメータ不要
-}
+// 認証ヘッダーから自動的にAuthorIdが設定されるため、パラメータ不要
+export type GetDraftArticlesRequest = Record<string, never>;
 
 export interface GetDraftArticlesResponse {
   articles?: ArticleDto[];
