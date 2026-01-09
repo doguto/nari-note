@@ -4,9 +4,9 @@ import { useParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Footer } from '@/components/layout/Footer';
-import { ArticleDetailContainer } from '@/features/article/containers/ArticleDetailContainer';
+import { ArticleDetailPage } from '@/features/article/organisms';
 
-export default function ArticleDetailPage() {
+export default function ArticleDetailPageRoute() {
   const params = useParams();
   const articleId = Number(params.id);
 
@@ -17,7 +17,7 @@ export default function ArticleDetailPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-8">
           <div className="flex-1">
-            <ArticleDetailContainer articleId={articleId} />
+            <ArticleDetailPage articleId={articleId} />
           </div>
           
           <Sidebar />

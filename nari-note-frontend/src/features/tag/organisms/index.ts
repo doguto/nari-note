@@ -1,0 +1,1 @@
+export { TagArticleListPage } from './TagArticleListPage';

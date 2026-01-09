@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Footer } from '@/components/layout/Footer';
-import { TagArticleListContainer } from '@/features/tag/containers/TagArticleListContainer';
+import { TagArticleListPage } from '@/features/tag/organisms';
 
 export default function TagPage() {
   const params = useParams();
@@ -17,7 +17,7 @@ export default function TagPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-8">
           <div className="flex-1">
-            <TagArticleListContainer tag={tagName} />
+            <TagArticleListPage tag={tagName} />
           </div>
           
           <Sidebar />

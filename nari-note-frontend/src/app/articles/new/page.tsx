@@ -1,6 +1,6 @@
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { ArticleFormContainer } from '@/features/article/containers/ArticleFormContainer';
+import { ArticleFormPage } from '@/features/article/organisms';
 
 export default function NewArticlePage() {
   return (
@@ -18,7 +18,7 @@ export default function NewArticlePage() {
         </div>
         
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <ArticleFormContainer />
+          <ArticleFormPage />
         </div>
       </div>
       
