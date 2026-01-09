@@ -4,8 +4,10 @@
 
 ## 概要
 
-nari-note-frontendは、**Container/Presentationalパターン**を採用したNext.jsアプリケーションです。
-このパターンにより、ビジネスロジック（データ取得、状態管理）とUI表示を明確に分離します。
+nari-note-frontendは、**Container/Presentationalパターン**と**Atomic Designパターン**を組み合わせたNext.jsアプリケーションです。
+
+- **Container/Presentationalパターン**: ビジネスロジック（データ取得、状態管理）とUI表示を明確に分離
+- **Atomic Designパターン**: UIコンポーネントを小さな単位（Atoms → Molecules → Organisms）で階層的に構成
 
 ## 技術スタック
 
@@ -52,39 +54,23 @@ nari-note-frontend/
 │   │   └── globals.css               # グローバルスタイル
 │   ├── features/                     # 機能ごとのモジュール
 │   │   ├── article/                  # 記事機能
-│   │   │   ├── components/           # 記事機能専用コンポーネント
-│   │   │   │   ├── ArticleCard.tsx           # Presentational
-│   │   │   │   ├── ArticleDetail.tsx         # Presentational
-│   │   │   │   ├── ArticleForm.tsx           # Presentational
-│   │   │   │   └── ArticleList.tsx           # Presentational
-│   │   │   ├── containers/           # 記事機能のContainer
-│   │   │   │   ├── ArticleCardContainer.tsx
-│   │   │   │   ├── ArticleDetailContainer.tsx
-│   │   │   │   ├── ArticleFormContainer.tsx
-│   │   │   │   └── ArticleListContainer.tsx
-│   │   │   ├── hooks/                # 記事機能専用カスタムフック
-│   │   │   │   └── useArticleForm.ts
+│   │   │   ├── organisms/            # Organisms（完全な機能ブロック）
+│   │   │   │   ├── ArticleFormPage.tsx      # 記事作成・編集フォーム
+│   │   │   │   ├── ArticleDetailPage.tsx    # 記事詳細表示
+│   │   │   │   └── HomeArticleList.tsx      # 記事一覧表示
 │   │   │   └── types.ts              # 記事機能の型定義
 │   │   ├── auth/                     # 認証機能
-│   │   │   ├── components/
-│   │   │   │   ├── LoginForm.tsx             # Presentational
-│   │   │   │   └── SignUpForm.tsx            # Presentational
-│   │   │   ├── containers/
-│   │   │   │   ├── LoginFormContainer.tsx
-│   │   │   │   └── SignUpFormContainer.tsx
-│   │   │   ├── hooks/
-│   │   │   │   └── useAuth.ts
+│   │   │   ├── organisms/
+│   │   │   │   ├── LoginPage.tsx            # ログインフォーム
+│   │   │   │   └── SignUpPage.tsx           # 新規登録フォーム
 │   │   │   └── types.ts
-│   │   └── user/                     # ユーザー機能
-│   │       ├── components/
-│   │       │   ├── UserProfile.tsx           # Presentational
-│   │       │   └── UserProfileForm.tsx       # Presentational
-│   │       ├── containers/
-│   │       │   ├── UserProfileContainer.tsx
-│   │       │   └── UserProfileFormContainer.tsx
-│   │       ├── hooks/
-│   │       │   └── useUserProfile.ts
-│   │       └── types.ts
+│   │   ├── user/                     # ユーザー機能
+│   │   │   ├── organisms/
+│   │   │   │   └── UserProfilePage.tsx      # ユーザープロフィール
+│   │   │   └── types.ts
+│   │   └── tag/                      # タグ機能
+│   │       └── organisms/
+│   │           └── TagArticleListPage.tsx   # タグ別記事一覧
 │   ├── components/                   # 共通UIコンポーネント
 │   │   ├── ui/                       # 基本UIコンポーネント（shadcn/ui等）
 │   │   │   ├── Button.tsx
@@ -95,10 +81,21 @@ nari-note-frontend/
 │   │   │   ├── Header.tsx
 │   │   │   ├── Footer.tsx
 │   │   │   └── Sidebar.tsx
-│   │   └── common/                   # その他共通コンポーネント
-│   │       ├── Loading.tsx
-│   │       ├── ErrorMessage.tsx
-│   │       └── EmptyState.tsx
+│   │   └── common/                   # Atomic Design構造の共通コンポーネント
+│   │       ├── atoms/                # 最小単位のコンポーネント
+│   │       │   ├── FormField.tsx     # ラベル + 入力フィールド
+│   │       │   ├── ErrorAlert.tsx    # エラー表示
+│   │       │   ├── FormTitle.tsx     # フォームタイトル
+│   │       │   └── TagChip.tsx       # タグチップ
+│   │       ├── molecules/            # Atomsを組み合わせたコンポーネント
+│   │       │   ├── EmailField.tsx    # メール入力フィールド
+│   │       │   ├── PasswordField.tsx # パスワード入力フィールド
+│   │       │   ├── NameField.tsx     # 名前入力フィールド
+│   │       │   ├── TagInput.tsx      # タグ入力
+│   │       │   └── CharacterCounter.tsx # 文字数カウンター
+│   │       ├── Loading.tsx           # ローディング表示
+│   │       ├── ErrorMessage.tsx      # エラーメッセージ
+│   │       └── EmptyState.tsx        # 空状態表示
 │   ├── lib/                          # 共通ロジック・ユーティリティ
 │   │   ├── api/                      # API関連
 │   │   │   ├── client.ts             # Axiosクライアント設定
@@ -135,6 +132,8 @@ nari-note-frontend/
 ### 概要
 
 このパターンは、コンポーネントを**Container（データ管理）**と**Presentational（表示）**の2つの役割に分離します。
+
+**注意**: Atomic Designパターンの導入により、featuresディレクトリ内では主に**Organisms（生体）**として完全な機能ブロックを実装します。細かいコンポーネントはAtomsやMoleculesとして`components/common/`に配置します。
 
 ### Container Component（コンテナコンポーネント）
 
@@ -236,20 +235,247 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
 }
 ```
 
-## コンポーネント分類
+## Atomic Designパターン
 
-### 1. Feature Components（機能コンポーネント）
+### 概要
 
-**配置:** `src/features/{feature}/components/`
+Atomic Designは、UIコンポーネントを化学の原子・分子・生体の概念で階層的に構成する設計手法です。小さく再利用可能なコンポーネントを組み合わせて、複雑なUIを構築します。
 
-特定の機能に紐づくコンポーネント。他の機能では再利用しない。
+### Atoms（原子）- 最小単位のコンポーネント
+
+**配置:** `src/components/common/atoms/`
+
+**特徴:**
+- これ以上分割できない最小単位の基本要素
+- shadcn UIコンポーネントまたは基本的なHTML要素で構築
+- 他のコンポーネントに依存しない
+- 単一責任の原則に従う
 
 **例:**
-- `ArticleCard.tsx` - 記事カード
-- `ArticleList.tsx` - 記事一覧
-- `LoginForm.tsx` - ログインフォーム
+- **FormField.tsx** - ラベル + 入力フィールドのセット
+- **ErrorAlert.tsx** - エラーメッセージ表示
+- **FormTitle.tsx** - フォームタイトル
+- **TagChip.tsx** - タグチップ（削除ボタン付き）
 
-### 2. UI Components（基本UIコンポーネント）
+**実装例:**
+```tsx
+// src/components/common/atoms/FormField.tsx
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+interface FormFieldProps {
+  id: string;
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  error?: string;
+}
+
+export function FormField({
+  id,
+  label,
+  type = 'text',
+  value,
+  onChange,
+  placeholder,
+  error,
+}: FormFieldProps) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
+  );
+}
+```
+
+### Molecules（分子）- Atomsを組み合わせたコンポーネント
+
+**配置:** `src/components/common/molecules/`
+
+**特徴:**
+- 複数のAtomsを組み合わせて特定の機能を実装
+- 再利用可能な機能単位
+- 独自のビジネスロジックは持たない
+- propsで柔軟にカスタマイズ可能
+
+**例:**
+- **EmailField.tsx** - メールアドレス入力（FormFieldを使用）
+- **PasswordField.tsx** - パスワード入力（FormFieldを使用）
+- **NameField.tsx** - ユーザー名入力（FormFieldを使用）
+- **TagInput.tsx** - タグ入力（Input + Button + TagChipを使用）
+- **CharacterCounter.tsx** - 文字数カウンター
+
+**実装例:**
+```tsx
+// src/components/common/molecules/EmailField.tsx
+import { FormField } from '@/components/common/atoms/FormField';
+
+interface EmailFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}
+
+export function EmailField({ value, onChange, error }: EmailFieldProps) {
+  return (
+    <FormField
+      id="email"
+      label="メールアドレス"
+      type="email"
+      value={value}
+      onChange={onChange}
+      placeholder="example@example.com"
+      error={error}
+    />
+  );
+}
+```
+
+### Organisms（生体）- 完全な機能を持つコンポーネント
+
+**配置:** `src/features/{feature}/organisms/`
+
+**特徴:**
+- Atoms/Moleculesを組み合わせた完全な機能ブロック
+- ビジネスロジックやデータフェッチングを含む
+- Container/Presentationalパターンと組み合わせて使用可能
+- 特定の機能に特化
+
+**例:**
+- **LoginPage.tsx** - ログインフォーム（EmailField + PasswordField + Buttonを使用）
+- **SignUpPage.tsx** - 新規登録フォーム（NameField + EmailField + PasswordFieldを使用）
+- **ArticleFormPage.tsx** - 記事作成・編集フォーム（複数のMoleculesを組み合わせ）
+
+**実装例:**
+```tsx
+// src/features/auth/organisms/LoginPage.tsx
+'use client';
+
+import { useState } from 'react';
+import { EmailField } from '@/components/common/molecules/EmailField';
+import { PasswordField } from '@/components/common/molecules/PasswordField';
+import { Button } from '@/components/ui/button';
+import { useLogin } from '@/lib/api';
+
+export function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  
+  const login = useLogin({
+    onSuccess: () => {
+      // ログイン成功時の処理
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    login.mutate({ email, password });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <EmailField 
+        value={email} 
+        onChange={setEmail} 
+        error={errors.email}
+      />
+      <PasswordField 
+        value={password} 
+        onChange={setPassword}
+        error={errors.password}
+      />
+      <Button type="submit" disabled={login.isPending}>
+        {login.isPending ? 'ログイン中...' : 'ログイン'}
+      </Button>
+    </form>
+  );
+}
+```
+
+### インポート方法
+
+**Atomsのインポート:**
+```tsx
+import { FormField, ErrorAlert, FormTitle, TagChip } from '@/components/common/atoms';
+```
+
+**Moleculesのインポート:**
+```tsx
+import { EmailField, PasswordField, TagInput } from '@/components/common/molecules';
+```
+
+**Organismsのインポート:**
+```tsx
+import { LoginPage } from '@/features/auth/organisms/LoginPage';
+```
+
+### Atomic Designのメリット
+
+1. **再利用性**: 小さなコンポーネントを組み合わせて複雑なUIを構築
+2. **保守性**: 各コンポーネントが独立しているため、変更の影響範囲が明確
+3. **テスト容易性**: 小さな単位でテストが可能
+4. **一貫性**: 同じコンポーネントを使用することでUIの一貫性を保つ
+5. **レビュー容易性**: ファイルが細かく分かれているため、レビューがしやすい
+6. **開発効率**: AIエージェントが小さな粒度で実装できる
+
+### 実装ガイドライン
+
+1. **Atoms**: 最小単位で、他のコンポーネントに依存しない
+2. **Molecules**: Atomsを組み合わせて特定の機能を実装
+3. **Organisms**: featuresディレクトリ内でAtoms/Moleculesを組み合わせて完全な機能を実装
+4. **各コンポーネントは単一責任の原則に従う**
+5. **propsの型定義を明確にする**
+6. **新しいコンポーネントを作る前に、既存のAtoms/Moleculesで対応できないか確認する**
+
+## コンポーネント分類
+
+### 1. Atoms（原子）- 最小単位
+
+**配置:** `src/components/common/atoms/`
+
+基本的なUI要素。これ以上分割できない最小単位。
+
+**例:**
+- `FormField.tsx` - フォームフィールド
+- `ErrorAlert.tsx` - エラーアラート
+- `FormTitle.tsx` - フォームタイトル
+- `TagChip.tsx` - タグチップ
+
+### 2. Molecules（分子）- 機能単位
+
+**配置:** `src/components/common/molecules/`
+
+Atomsを組み合わせた機能コンポーネント。
+
+**例:**
+- `EmailField.tsx` - メールアドレス入力
+- `PasswordField.tsx` - パスワード入力
+- `TagInput.tsx` - タグ入力
+- `CharacterCounter.tsx` - 文字数カウンター
+
+### 3. Organisms（生体）- 完全な機能ブロック
+
+**配置:** `src/features/{feature}/organisms/`
+
+特定の機能に紐づく完全なコンポーネント。Atoms/Moleculesを組み合わせて実装。
+
+**例:**
+- `LoginPage.tsx` - ログインフォーム
+- `ArticleFormPage.tsx` - 記事作成・編集フォーム
+- `UserProfilePage.tsx` - ユーザープロフィール
+
+### 4. UI Components（基本UIコンポーネント）
 
 **配置:** `src/components/ui/`
 
@@ -273,7 +499,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
 - `Footer.tsx` - フッター
 - `Sidebar.tsx` - サイドバー
 
-### 4. Common Components（共通コンポーネント）
+### 4. Common Components（その他共通コンポーネント）
 
 **配置:** `src/components/common/`
 
@@ -627,18 +853,29 @@ const MarkdownEditor = dynamic(() => import('@/components/ui/MarkdownEditor'), {
 
 ### 開発者が覚えるべきこと
 
-1. **Container/Presentationalパターン**を理解する
-2. **features配下**に機能ごとのコンポーネントを配置
-3. **components配下**に共通コンポーネントを配置
-4. **TanStack Query フック**をContainerで使用
-5. **型定義**を活用して型安全に開発
+1. **Atomic Designパターン**を理解する
+   - Atoms: 最小単位のコンポーネント
+   - Molecules: Atomsを組み合わせた機能コンポーネント
+   - Organisms: 完全な機能ブロック
+2. **Container/Presentationalパターン**を理解する（必要に応じて適用）
+3. **components/common/atoms, molecules**に共通コンポーネントを配置
+4. **features/{feature}/organisms**に機能固有のOrganismsを配置
+5. **TanStack Query フック**でデータフェッチング
+6. **型定義**を活用して型安全に開発
 
 ### AIエージェントが生成すべきコード
 
-1. **Container Component**: `src/features/{feature}/containers/`
-2. **Presentational Component**: `src/features/{feature}/components/`
-3. **Custom Hook**: `src/features/{feature}/hooks/`
+1. **Atoms**: `src/components/common/atoms/`
+2. **Molecules**: `src/components/common/molecules/`
+3. **Organisms**: `src/features/{feature}/organisms/`
 4. **Page Component**: `src/app/{route}/page.tsx`
+
+### 実装の順序
+
+1. まず必要なAtomsが存在するか確認・作成
+2. 次にAtomsを組み合わせてMoleculesを作成
+3. 最後にMoleculesを組み合わせてOrganismsを実装
+4. PageコンポーネントからOrganismsを呼び出す
 
 ## 関連ドキュメント
 

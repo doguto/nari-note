@@ -2,6 +2,8 @@
 
 このドキュメントは、AIエージェントがnari-note-frontendのコードを生成する際の具体的なガイドラインです。
 
+**重要**: nari-noteではAtomic Designパターンを採用しています。コンポーネントを小さな単位（Atoms → Molecules → Organisms）で実装してください。
+
 ## 目次
 
 1. [コード生成の基本ルール](#コード生成の基本ルール)
@@ -12,34 +14,124 @@
 
 ## コード生成の基本ルール
 
-### 1. Container/Presentationalパターンを必ず使用
+### 1. Atomic Designパターンを必ず使用
 
-データを扱うコンポーネントは、必ずContainerとPresentationalに分離してください。
+コンポーネントを小さな単位で階層的に実装してください。
+
+#### 実装の順序
+
+1. **Atomsの確認・作成** (`components/common/atoms/`)
+   - 必要な基本要素が既に存在するか確認
+   - 存在しない場合は新規作成
+   - 例: FormField, ErrorAlert, TagChip
+
+2. **Moleculesの確認・作成** (`components/common/molecules/`)
+   - Atomsを組み合わせて機能コンポーネントを作成
+   - 既存のMoleculesで対応できないか確認
+   - 例: EmailField, PasswordField, TagInput
+
+3. **Organismsの実装** (`features/{feature}/organisms/`)
+   - Atoms/Moleculesを組み合わせて完全な機能を実装
+   - データフェッチングやビジネスロジックを含む
+   - 例: LoginPage, ArticleFormPage
 
 ```tsx
-// ❌ 悪い例: 1つのコンポーネントにすべてを詰め込む
-export function ArticleCard({ articleId }: { articleId: number }) {
-  const { data } = useGetArticle({ id: articleId });
-  return <div>{data?.title}</div>;
+// ❌ 悪い例: すべてを1つのコンポーネントに詰め込む
+export function LoginForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  return (
+    <form>
+      <div>
+        <label>メールアドレス</label>
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
+      <div>
+        <label>パスワード</label>
+        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      </div>
+      <button type="submit">ログイン</button>
+    </form>
+  );
 }
 
-// ✅ 良い例: Container/Presentationalに分離
+// ✅ 良い例: Atomic Designで小さく分割
+// Atom: FormField (components/common/atoms/FormField.tsx)
+export function FormField({ id, label, type, value, onChange, error }: FormFieldProps) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)} />
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
+  );
+}
+
+// Molecule: EmailField (components/common/molecules/EmailField.tsx)
+export function EmailField({ value, onChange, error }: EmailFieldProps) {
+  return (
+    <FormField
+      id="email"
+      label="メールアドレス"
+      type="email"
+      value={value}
+      onChange={onChange}
+      error={error}
+    />
+  );
+}
+
+// Molecule: PasswordField (components/common/molecules/PasswordField.tsx)
+export function PasswordField({ value, onChange, error }: PasswordFieldProps) {
+  return (
+    <FormField
+      id="password"
+      label="パスワード"
+      type="password"
+      value={value}
+      onChange={onChange}
+      error={error}
+    />
+  );
+}
+
+// Organism: LoginPage (features/auth/organisms/LoginPage.tsx)
+export function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const login = useLogin();
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <EmailField value={email} onChange={setEmail} />
+      <PasswordField value={password} onChange={setPassword} />
+      <Button type="submit">ログイン</Button>
+    </form>
+  );
+}
+```
+
+### 2. Container/Presentationalパターン（必要に応じて）
+
+Organismsが複雑になる場合や、データフェッチングロジックが大きい場合はContainer/Presentationalに分離してください。
+
+```tsx
 // Container
-export function ArticleCardContainer({ articleId }: { articleId: number }) {
+export function ArticleDetailContainer({ articleId }: { articleId: number }) {
   const { data, isLoading, error } = useGetArticle({ id: articleId });
   if (isLoading) return <Loading />;
   if (error) return <ErrorMessage message="エラー" />;
   if (!data) return null;
-  return <ArticleCard article={data} />;
+  return <ArticleDetailPage article={data} />;
 }
 
-// Presentational
-export function ArticleCard({ article }: { article: GetArticleResponse }) {
-  return <div>{article.title}</div>;
+// Presentational (Organism)
+export function ArticleDetailPage({ article }: { article: GetArticleResponse }) {
+  return <article>{/* ... */}</article>;
 }
 ```
 
-### 2. 型定義を明確にする
+### 3. 型定義を明確にする
 
 すべてのpropsに型定義を追加してください。
 
@@ -56,7 +148,7 @@ export function ArticleCard({ article, onLike, showAuthor = true }: ArticleCardP
 }
 ```
 
-### 3. 共通コンポーネントを活用する
+### 4. 共通コンポーネントを活用する
 
 Loading、ErrorMessage、EmptyStateなどの共通コンポーネントを使用してください。
 
@@ -68,67 +160,66 @@ import { EmptyState } from '@/components/common/EmptyState';
 
 ## ディレクトリ配置ルール
 
-### 機能コンポーネント（Article、Auth、Userなど）
+### Atomic Design構造
 
 ```
-src/features/{feature}/
-├── components/          # Presentational Components
-│   └── {ComponentName}.tsx
-├── containers/          # Container Components
-│   └── {ComponentName}Container.tsx
-├── hooks/              # カスタムフック（必要な場合）
-│   └── use{HookName}.ts
-└── types.ts            # 型定義（必要な場合）
-```
-
-**例:**
-```
-src/features/article/
+src/
 ├── components/
-│   ├── ArticleCard.tsx
-│   ├── ArticleList.tsx
-│   └── ArticleDetail.tsx
-├── containers/
-│   ├── ArticleCardContainer.tsx
-│   ├── ArticleListContainer.tsx
-│   └── ArticleDetailContainer.tsx
-└── hooks/
-    └── useArticleForm.ts
+│   ├── common/
+│   │   ├── atoms/              # 最小単位のコンポーネント
+│   │   │   ├── FormField.tsx
+│   │   │   ├── ErrorAlert.tsx
+│   │   │   ├── FormTitle.tsx
+│   │   │   ├── TagChip.tsx
+│   │   │   └── index.ts
+│   │   ├── molecules/          # Atomsを組み合わせたコンポーネント
+│   │   │   ├── EmailField.tsx
+│   │   │   ├── PasswordField.tsx
+│   │   │   ├── NameField.tsx
+│   │   │   ├── TagInput.tsx
+│   │   │   ├── CharacterCounter.tsx
+│   │   │   └── index.ts
+│   │   ├── Loading.tsx
+│   │   ├── ErrorMessage.tsx
+│   │   └── EmptyState.tsx
+│   ├── ui/                     # 基本UIコンポーネント（shadcn/ui等）
+│   └── layout/                 # レイアウトコンポーネント
+├── features/
+│   ├── article/
+│   │   ├── organisms/          # 完全な機能ブロック
+│   │   │   ├── ArticleFormPage.tsx
+│   │   │   ├── ArticleDetailPage.tsx
+│   │   │   └── HomeArticleList.tsx
+│   │   └── types.ts
+│   ├── auth/
+│   │   ├── organisms/
+│   │   │   ├── LoginPage.tsx
+│   │   │   └── SignUpPage.tsx
+│   │   └── types.ts
+│   ├── user/
+│   │   ├── organisms/
+│   │   │   └── UserProfilePage.tsx
+│   │   └── types.ts
+│   └── tag/
+│       └── organisms/
+│           └── TagArticleListPage.tsx
+└── app/                        # Next.js App Router
+    └── ...
 ```
 
-### 共通コンポーネント
+### 配置ルール
 
-```
-src/components/
-├── ui/                 # 基本UIコンポーネント
-│   ├── Button.tsx
-│   └── Input.tsx
-├── layout/             # レイアウトコンポーネント
-│   ├── Header.tsx
-│   └── Footer.tsx
-└── common/             # その他共通コンポーネント
-    ├── Loading.tsx
-    ├── ErrorMessage.tsx
-    └── EmptyState.tsx
-```
-
-### ページコンポーネント
-
-```
-src/app/
-├── page.tsx                    # トップページ
-├── articles/
-│   ├── page.tsx               # 記事一覧
-│   ├── [id]/
-│   │   └── page.tsx          # 記事詳細
-│   └── new/
-│       └── page.tsx          # 記事作成
-└── (auth)/
-    ├── login/
-    │   └── page.tsx
-    └── signup/
-        └── page.tsx
-```
+| 何を作る？ | どこに配置？ | 例 |
+|-----------|------------|-----|
+| 最小単位のコンポーネント | `src/components/common/atoms/` | `FormField.tsx`, `ErrorAlert.tsx` |
+| 機能コンポーネント | `src/components/common/molecules/` | `EmailField.tsx`, `TagInput.tsx` |
+| 完全な機能ブロック | `src/features/{feature}/organisms/` | `LoginPage.tsx`, `ArticleFormPage.tsx` |
+| 基本UIコンポーネント | `src/components/ui/` | `Button.tsx`, `Input.tsx` |
+| レイアウトコンポーネント | `src/components/layout/` | `Header.tsx`, `Footer.tsx` |
+| ユーティリティコンポーネント | `src/components/common/` | `Loading.tsx`, `ErrorMessage.tsx` |
+| ページコンポーネント | `src/app/{route}/` | `page.tsx` |
+| ユーティリティ関数 | `src/lib/utils/` | `format.ts`, `validation.ts` |
+| カスタムフック（共通） | `src/lib/hooks/` | `useDebounce.ts` |
 
 ## 命名規則
 
@@ -160,45 +251,230 @@ src/app/
 
 ## コンポーネント生成パターン
 
-### パターン1: データ取得を伴う表示コンポーネント
+### パターン1: Atomの作成
 
-**要件:** 記事詳細を表示するコンポーネントを作成
+**要件:** フォームフィールドの基本コンポーネントを作成
 
 **生成するファイル:**
-1. `src/features/article/components/ArticleDetail.tsx` (Presentational)
-2. `src/features/article/containers/ArticleDetailContainer.tsx` (Container)
+1. `src/components/common/atoms/FormField.tsx`
 
-**Presentational Component:**
+**実装例:**
 ```tsx
-// src/features/article/components/ArticleDetail.tsx
-import type { GetArticleResponse } from '@/lib/api/types';
+// src/components/common/atoms/FormField.tsx
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-interface ArticleDetailProps {
-  article: GetArticleResponse;
+interface FormFieldProps {
+  id: string;
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  error?: string;
+  required?: boolean;
 }
 
-export function ArticleDetail({ article }: ArticleDetailProps) {
+export function FormField({
+  id,
+  label,
+  type = 'text',
+  value,
+  onChange,
+  placeholder,
+  error,
+  required = false,
+}: FormFieldProps) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </Label>
+      <Input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={error ? 'border-red-500' : ''}
+      />
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
+  );
+}
+```
+
+### パターン2: Moleculeの作成
+
+**要件:** メールアドレス入力フィールドを作成
+
+**生成するファイル:**
+1. `src/components/common/molecules/EmailField.tsx`
+
+**実装例:**
+```tsx
+// src/components/common/molecules/EmailField.tsx
+import { FormField } from '@/components/common/atoms/FormField';
+
+interface EmailFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  required?: boolean;
+}
+
+export function EmailField({ 
+  value, 
+  onChange, 
+  error,
+  required = true,
+}: EmailFieldProps) {
+  return (
+    <FormField
+      id="email"
+      label="メールアドレス"
+      type="email"
+      value={value}
+      onChange={onChange}
+      placeholder="example@example.com"
+      error={error}
+      required={required}
+    />
+  );
+}
+```
+
+### パターン3: Organism（シンプルなフォーム）の作成
+
+**要件:** ログインフォームを作成
+
+**生成するファイル:**
+1. `src/features/auth/organisms/LoginPage.tsx`
+
+**実装例:**
+```tsx
+// src/features/auth/organisms/LoginPage.tsx
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { EmailField } from '@/components/common/molecules/EmailField';
+import { PasswordField } from '@/components/common/molecules/PasswordField';
+import { ErrorAlert } from '@/components/common/atoms/ErrorAlert';
+import { Button } from '@/components/ui/button';
+import { useLogin } from '@/lib/api';
+
+export function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const router = useRouter();
+
+  const login = useLogin({
+    onSuccess: () => {
+      router.push('/');
+    },
+    onError: (error) => {
+      // エラーハンドリング
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // バリデーション
+    const newErrors: typeof errors = {};
+    if (!email) newErrors.email = 'メールアドレスを入力してください';
+    if (!password) newErrors.password = 'パスワードを入力してください';
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    login.mutate({ email, password });
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">ログイン</h1>
+      
+      {login.error && (
+        <ErrorAlert message="ログインに失敗しました" />
+      )}
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <EmailField 
+          value={email} 
+          onChange={setEmail} 
+          error={errors.email}
+        />
+        <PasswordField 
+          value={password} 
+          onChange={setPassword}
+          error={errors.password}
+        />
+        <Button 
+          type="submit" 
+          disabled={login.isPending}
+          className="w-full"
+        >
+          {login.isPending ? 'ログイン中...' : 'ログイン'}
+        </Button>
+      </form>
+    </div>
+  );
+}
+```
+
+### パターン4: Organism（データ取得を伴う）の作成
+
+**要件:** 記事詳細ページを作成
+
+**生成するファイル:**
+1. `src/features/article/organisms/ArticleDetailPage.tsx` (Presentational Organism)
+2. `src/features/article/organisms/ArticleDetailContainer.tsx` (Container) - 必要に応じて
+
+**Presentational Organism:**
+```tsx
+// src/features/article/organisms/ArticleDetailPage.tsx
+import type { GetArticleResponse } from '@/lib/api/types';
+import { TagChip } from '@/components/common/atoms/TagChip';
+
+interface ArticleDetailPageProps {
+  article: GetArticleResponse;
+  onLike?: () => void;
+}
+
+export function ArticleDetailPage({ article, onLike }: ArticleDetailPageProps) {
   return (
     <article className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold text-[#2d3e1f] mb-4">
         {article.title}
       </h1>
+      
       <div className="flex items-center gap-4 mb-6 text-gray-600">
         <span>著者: {article.authorName}</span>
         <span>いいね: {article.likeCount}</span>
+        {onLike && (
+          <button 
+            onClick={onLike}
+            className="px-4 py-2 bg-[#88b04b] text-white rounded hover:bg-[#769939]"
+          >
+            いいね
+          </button>
+        )}
       </div>
-      <div className="prose max-w-none">
+      
+      <div className="prose max-w-none mb-6">
         {article.body}
       </div>
+      
       {article.tags && article.tags.length > 0 && (
-        <div className="flex gap-2 mt-6">
+        <div className="flex gap-2">
           {article.tags.map((tag, index) => (
-            <span
-              key={index}
-              className="px-3 py-1 bg-[#f5f3e8] rounded-full text-sm"
-            >
-              #{tag}
-            </span>
+            <TagChip key={index} tag={tag} />
           ))}
         </div>
       )}
@@ -207,13 +483,13 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
 }
 ```
 
-**Container Component:**
+**Container（必要に応じて）:**
 ```tsx
-// src/features/article/containers/ArticleDetailContainer.tsx
+// src/features/article/organisms/ArticleDetailContainer.tsx
 'use client';
 
-import { useGetArticle } from '@/lib/api';
-import { ArticleDetail } from '../components/ArticleDetail';
+import { useGetArticle, useToggleArticleLike } from '@/lib/api';
+import { ArticleDetailPage } from './ArticleDetailPage';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 
@@ -223,6 +499,7 @@ interface ArticleDetailContainerProps {
 
 export function ArticleDetailContainer({ articleId }: ArticleDetailContainerProps) {
   const { data, isLoading, error, refetch } = useGetArticle({ id: articleId });
+  const toggleLike = useToggleArticleLike();
 
   if (isLoading) {
     return <Loading />;
@@ -241,96 +518,78 @@ export function ArticleDetailContainer({ articleId }: ArticleDetailContainerProp
     return <ErrorMessage message="記事が見つかりません" />;
   }
 
-  return <ArticleDetail article={data} />;
+  const handleLike = () => {
+    toggleLike.mutate({ articleId });
+  };
+
+  return <ArticleDetailPage article={data} onLike={handleLike} />;
 }
 ```
 
-### パターン2: フォームコンポーネント
+### パターン5: 複雑なOrganism（フォーム + カスタムフック）
 
 **要件:** 記事作成フォームを作成
 
 **生成するファイル:**
-1. `src/features/article/components/ArticleForm.tsx` (Presentational)
-2. `src/features/article/containers/ArticleFormContainer.tsx` (Container)
-3. `src/features/article/hooks/useArticleForm.ts` (カスタムフック)
+1. `src/components/common/molecules/TitleField.tsx` (Molecule)
+2. `src/components/common/molecules/BodyField.tsx` (Molecule)
+3. `src/features/article/organisms/ArticleFormPage.tsx` (Organism)
 
-**Presentational Component:**
+**Molecule: TitleField:**
 ```tsx
-// src/features/article/components/ArticleForm.tsx
-interface ArticleFormProps {
-  title: string;
-  body: string;
-  tags: string[];
-  onTitleChange: (value: string) => void;
-  onBodyChange: (value: string) => void;
-  onTagsChange: (tags: string[]) => void;
-  onSubmit: () => void;
-  isSubmitting: boolean;
+// src/components/common/molecules/TitleField.tsx
+import { FormField } from '@/components/common/atoms/FormField';
+import { CharacterCounter } from '@/components/common/molecules/CharacterCounter';
+
+interface TitleFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  maxLength?: number;
 }
 
-export function ArticleForm({
-  title,
-  body,
-  tags,
-  onTitleChange,
-  onBodyChange,
-  onTagsChange,
-  onSubmit,
-  isSubmitting,
-}: ArticleFormProps) {
+export function TitleField({ 
+  value, 
+  onChange, 
+  error,
+  maxLength = 100,
+}: TitleFieldProps) {
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            タイトル
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => onTitleChange(e.target.value)}
-            className="w-full px-4 py-2 border rounded"
-            placeholder="記事のタイトル"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            本文
-          </label>
-          <textarea
-            value={body}
-            onChange={(e) => onBodyChange(e.target.value)}
-            className="w-full px-4 py-2 border rounded"
-            rows={10}
-            placeholder="記事の内容"
-          />
-        </div>
-        
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2 bg-[#88b04b] text-white rounded hover:bg-[#769939] disabled:opacity-50"
-        >
-          {isSubmitting ? '投稿中...' : '投稿する'}
-        </button>
-      </div>
-    </form>
+    <div className="space-y-2">
+      <FormField
+        id="title"
+        label="タイトル"
+        value={value}
+        onChange={onChange}
+        error={error}
+        required
+        placeholder="記事のタイトルを入力"
+      />
+      <CharacterCounter current={value.length} max={maxLength} />
+    </div>
   );
 }
 ```
 
-**Custom Hook:**
+**Organism: ArticleFormPage:**
 ```tsx
-// src/features/article/hooks/useArticleForm.ts
-import { useState } from 'react';
-import { useCreateArticle } from '@/lib/api';
-import { useRouter } from 'next/navigation';
+// src/features/article/organisms/ArticleFormPage.tsx
+'use client';
 
-export function useArticleForm() {
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { TitleField } from '@/components/common/molecules/TitleField';
+import { BodyField } from '@/components/common/molecules/BodyField';
+import { TagInput } from '@/components/common/molecules/TagInput';
+import { ErrorAlert } from '@/components/common/atoms/ErrorAlert';
+import { Button } from '@/components/ui/button';
+import { useCreateArticle } from '@/lib/api';
+
+export function ArticleFormPage() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+  const [errors, setErrors] = useState<{ title?: string; body?: string }>({});
   
   const router = useRouter();
   
@@ -340,132 +599,58 @@ export function useArticleForm() {
     },
   });
 
-  const handleSubmit = () => {
-    createArticle.mutate({
-      title,
-      body,
-      tags,
-    });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // バリデーション
+    const newErrors: typeof errors = {};
+    if (!title) newErrors.title = 'タイトルを入力してください';
+    if (!body) newErrors.body = '本文を入力してください';
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    createArticle.mutate({ title, body, tags });
   };
 
-  return {
-    title,
-    setTitle,
-    body,
-    setBody,
-    tags,
-    setTags,
-    handleSubmit,
-    isSubmitting: createArticle.isPending,
-  };
-}
-```
-
-**Container Component:**
-```tsx
-// src/features/article/containers/ArticleFormContainer.tsx
-'use client';
-
-import { ArticleForm } from '../components/ArticleForm';
-import { useArticleForm } from '../hooks/useArticleForm';
-
-export function ArticleFormContainer() {
-  const {
-    title,
-    setTitle,
-    body,
-    setBody,
-    tags,
-    setTags,
-    handleSubmit,
-    isSubmitting,
-  } = useArticleForm();
-
   return (
-    <ArticleForm
-      title={title}
-      body={body}
-      tags={tags}
-      onTitleChange={setTitle}
-      onBodyChange={setBody}
-      onTagsChange={setTags}
-      onSubmit={handleSubmit}
-      isSubmitting={isSubmitting}
-    />
-  );
-}
-```
-
-### パターン3: 一覧表示コンポーネント
-
-**要件:** 記事一覧を表示
-
-**生成するファイル:**
-1. `src/features/article/components/ArticleList.tsx` (Presentational)
-2. `src/features/article/containers/ArticleListContainer.tsx` (Container)
-
-**Presentational Component:**
-```tsx
-// src/features/article/components/ArticleList.tsx
-import type { GetArticleResponse } from '@/lib/api/types';
-import { ArticleCard } from './ArticleCard';
-
-interface ArticleListProps {
-  articles: GetArticleResponse[];
-}
-
-export function ArticleList({ articles }: ArticleListProps) {
-  if (articles.length === 0) {
-    return (
-      <EmptyState
-        icon="📝"
-        title="記事がありません"
-        description="まだ記事が投稿されていません。"
-      />
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {articles.map((article) => (
-        <ArticleCard key={article.id} article={article} />
-      ))}
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">新規記事作成</h1>
+      
+      {createArticle.error && (
+        <ErrorAlert message="記事の作成に失敗しました" />
+      )}
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <TitleField 
+          value={title} 
+          onChange={setTitle} 
+          error={errors.title}
+        />
+        
+        <BodyField 
+          value={body} 
+          onChange={setBody}
+          error={errors.body}
+        />
+        
+        <TagInput 
+          tags={tags} 
+          onChange={setTags}
+        />
+        
+        <Button 
+          type="submit" 
+          disabled={createArticle.isPending}
+          className="w-full"
+        >
+          {createArticle.isPending ? '作成中...' : '記事を作成'}
+        </Button>
+      </form>
     </div>
   );
-}
-```
-
-**Container Component:**
-```tsx
-// src/features/article/containers/ArticleListContainer.tsx
-'use client';
-
-import { useGetArticlesByAuthor } from '@/lib/api';
-import { ArticleList } from '../components/ArticleList';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
-
-interface ArticleListContainerProps {
-  authorId: number;
-}
-
-export function ArticleListContainer({ authorId }: ArticleListContainerProps) {
-  const { data, isLoading, error, refetch } = useGetArticlesByAuthor({ authorId });
-
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  if (error) {
-    return (
-      <ErrorMessage 
-        message="記事の取得に失敗しました" 
-        onRetry={refetch}
-      />
-    );
-  }
-
-  return <ArticleList articles={data?.articles ?? []} />;
 }
 ```
 
@@ -479,7 +664,7 @@ export function ArticleListContainer({ authorId }: ArticleListContainerProps) {
 'use client';
 
 import { useParams } from 'next/navigation';
-import { ArticleDetailContainer } from '@/features/article/containers/ArticleDetailContainer';
+import { ArticleDetailContainer } from '@/features/article/organisms/ArticleDetailContainer';
 
 export default function ArticleDetailPage() {
   const params = useParams();
@@ -497,16 +682,12 @@ export default function ArticleDetailPage() {
 
 ```tsx
 // src/app/articles/new/page.tsx
-'use client';
-
-import { ArticleFormContainer } from '@/features/article/containers/ArticleFormContainer';
+import { ArticleFormPage } from '@/features/article/organisms/ArticleFormPage';
 
 export default function NewArticlePage() {
-  // 認証チェックは後で実装
   return (
     <div className="container mx-auto max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">新規記事作成</h1>
-      <ArticleFormContainer />
+      <ArticleFormPage />
     </div>
   );
 }
@@ -534,21 +715,30 @@ if (!data) {
   return <ErrorMessage message="記事が見つかりません" />;
 }
 
-return <ArticleDetail article={data} />;
+return <ArticleDetailPage article={data} />;
 ```
 
 ## チェックリスト
 
 新しいコンポーネントを生成する際は、以下を確認してください：
 
-- [ ] Container/Presentationalパターンに分離されているか
+### Atomic Design関連
+- [ ] 既存のAtomsで対応できないか確認したか
+- [ ] 既存のMoleculesで対応できないか確認したか
+- [ ] コンポーネントを小さな単位（Atoms → Molecules → Organisms）で分割しているか
+- [ ] Atomsは `components/common/atoms/` に配置されているか
+- [ ] Moleculesは `components/common/molecules/` に配置されているか
+- [ ] Organismsは `features/{feature}/organisms/` に配置されているか
+
+### 基本事項
 - [ ] 型定義が明確に記述されているか
-- [ ] `'use client'`ディレクティブが必要な場所（Container）に記述されているか
+- [ ] `'use client'`ディレクティブが必要な場所（データフェッチングを含むOrganism）に記述されているか
 - [ ] 共通コンポーネント（Loading、ErrorMessage）を使用しているか
 - [ ] nari-noteのブランドカラーを使用しているか
 - [ ] ファイルが適切なディレクトリに配置されているか
 - [ ] 命名規則に従っているか
 - [ ] エラーハンドリングが実装されているか
+- [ ] propsの型定義が明確か
 
 ## 関連ドキュメント
 
