@@ -164,7 +164,6 @@ public class ArticleRepository : IArticleRepository
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
-            .Include(a => a.Likes)
             .Where(a => a.AuthorId == authorId && !a.IsPublished)
             .OrderByDescending(a => a.UpdatedAt)
             .ToListAsync();

@@ -14,9 +14,9 @@ public class GetDraftArticlesService
         this.articleRepository = articleRepository;
     }
     
-    public async Task<GetDraftArticlesResponse> ExecuteAsync(GetDraftArticlesRequest request)
+    public async Task<GetDraftArticlesResponse> ExecuteAsync(int authorId)
     {
-        var articles = await articleRepository.FindDraftsByAuthorAsync(request.AuthorId);
+        var articles = await articleRepository.FindDraftsByAuthorAsync(authorId);
 
         var articleDtos = articles.Select(a => new ArticleDto
         {
@@ -26,7 +26,7 @@ public class GetDraftArticlesService
             AuthorId = a.AuthorId,
             AuthorName = a.Author.Name,
             Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
-            LikeCount = a.Likes.Count,
+            LikeCount = 0, // 下書きにはLikeが存在しない
             IsPublished = a.IsPublished,
             CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
@@ -34,8 +34,7 @@ public class GetDraftArticlesService
 
         return new GetDraftArticlesResponse
         {
-            Articles = articleDtos,
-            TotalCount = articles.Count
+            Articles = articleDtos
         };
     }
 }

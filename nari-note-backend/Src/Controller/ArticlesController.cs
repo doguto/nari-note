@@ -116,8 +116,7 @@ public class ArticlesController : ApplicationController
     [HttpGet("drafts")]
     public async Task<ActionResult<GetDraftArticlesResponse>> GetDraftArticles()
     {
-        var request = new GetDraftArticlesRequest { AuthorId = UserId };
-        var response = await getDraftArticlesService.ExecuteAsync(request);
+        var response = await getDraftArticlesService.ExecuteAsync(UserId);
         return Ok(response);
     }
 }

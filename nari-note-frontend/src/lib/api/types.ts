@@ -155,5 +155,4 @@ export type GetDraftArticlesRequest = Record<string, never>;
 
 export interface GetDraftArticlesResponse {
   articles?: ArticleDto[];
-  totalCount?: number;
 }
