@@ -2,33 +2,51 @@
 
 認証に関する機能を提供するモジュールです。
 
-## コンポーネント一覧
+**重要**: Atomic Designパターンに従い、完全な機能ブロックは`organisms/`ディレクトリに配置されます。
 
-### Presentational Components（`components/`）
+## ディレクトリ構造
 
-- **LoginForm.tsx** - ログインフォーム
-- **SignUpForm.tsx** - サインアップフォーム
+```
+auth/
+├── organisms/          # Organisms（完全な機能ブロック）
+│   ├── LoginPage.tsx
+│   └── SignUpPage.tsx
+└── types.ts           # 型定義（必要に応じて）
+```
 
-### Container Components（`containers/`）
+## Organisms一覧
 
-- **LoginFormContainer.tsx** - ログインフォームのデータ管理
-- **SignUpFormContainer.tsx** - サインアップフォームのデータ管理
+### LoginPage.tsx
+ログインフォーム。Atoms/Moleculesを組み合わせた完全な機能。
 
-### Custom Hooks（`hooks/`）
+- EmailField（Molecule）を使用
+- PasswordField（Molecule）を使用
+- ErrorAlert（Atom）を使用
+- データフェッチングとビジネスロジックを含む
 
-- **useAuth.ts** - 認証状態の管理
+### SignUpPage.tsx
+新規登録フォーム。Atoms/Moleculesを組み合わせた完全な機能。
+
+- NameField（Molecule）を使用
+- EmailField（Molecule）を使用
+- PasswordField（Molecule）を使用
+- ErrorAlert（Atom）を使用
+- データフェッチングとビジネスロジックを含む
 
 ## 使用方法
 
 ### ログインページ
 
 ```tsx
-import { LoginFormContainer } from '@/features/auth/containers/LoginFormContainer';
+// src/app/(auth)/login/page.tsx
+import { LoginPage } from '@/features/auth/organisms/LoginPage';
 
-export default function LoginPage() {
+export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <LoginFormContainer />
+      <div className="max-w-md w-full">
+        <LoginPage />
+      </div>
     </div>
   );
 }
@@ -37,16 +55,35 @@ export default function LoginPage() {
 ### サインアップページ
 
 ```tsx
-import { SignUpFormContainer } from '@/features/auth/containers/SignUpFormContainer';
+// src/app/(auth)/signup/page.tsx
+import { SignUpPage } from '@/features/auth/organisms/SignUpPage';
 
-export default function SignUpPage() {
+export default function SignUp() {
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <SignUpFormContainer />
+      <div className="max-w-md w-full">
+        <SignUpPage />
+      </div>
     </div>
   );
 }
 ```
+
+## Atomic Design構成
+
+### 使用しているAtoms
+- `FormField` - 基本フォームフィールド
+- `ErrorAlert` - エラー表示
+- `FormTitle` - フォームタイトル
+
+### 使用しているMolecules
+- `EmailField` - メールアドレス入力（FormFieldを使用）
+- `PasswordField` - パスワード入力（FormFieldを使用）
+- `NameField` - ユーザー名入力（FormFieldを使用）
+
+### Organisms
+- `LoginPage` - 完全なログインフォーム（Molecules + ビジネスロジック）
+- `SignUpPage` - 完全な新規登録フォーム（Molecules + ビジネスロジック）
 
 ## 認証フロー
 

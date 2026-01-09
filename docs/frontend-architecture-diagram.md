@@ -2,6 +2,8 @@
 
 nari-note-frontendのアーキテクチャを図解で説明します。
 
+**注意**: このドキュメントは古いContainer/Presentational構造を示しています。現在はAtomic Designパターン（Atoms → Molecules → Organisms）を採用しています。最新のアーキテクチャについては [frontend-architecture.md](./frontend-architecture.md) を参照してください。
+
 ## 全体構造
 
 ```mermaid
