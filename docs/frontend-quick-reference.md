@@ -2,13 +2,15 @@
 
 開発者とAIエージェントのための簡易リファレンスです。
 
+**重要**: nari-noteではAtomic Designパターンを採用しています。小さな単位（Atoms → Molecules → Organisms）でコンポーネントを構築してください。
+
 ## ディレクトリ配置
 
 | 何を作る？ | どこに配置？ | ファイル名 |
 |-----------|------------|-----------|
-| 記事表示コンポーネント | `src/features/article/components/` | `ArticleDetail.tsx` |
-| 記事表示Container | `src/features/article/containers/` | `ArticleDetailContainer.tsx` |
-| 記事フォーム用フック | `src/features/article/hooks/` | `useArticleForm.ts` |
+| 最小単位のコンポーネント | `src/components/common/atoms/` | `FormField.tsx`, `ErrorAlert.tsx` |
+| 機能コンポーネント | `src/components/common/molecules/` | `EmailField.tsx`, `TagInput.tsx` |
+| 完全な機能ブロック | `src/features/{feature}/organisms/` | `LoginPage.tsx`, `ArticleFormPage.tsx` |
 | ボタンコンポーネント | `src/components/ui/` | `Button.tsx` |
 | ヘッダーコンポーネント | `src/components/layout/` | `Header.tsx` |
 | ローディング表示 | `src/components/common/` | `Loading.tsx` |
@@ -16,62 +18,182 @@
 | 日付フォーマット関数 | `src/lib/utils/` | `format.ts` |
 | カスタムフック（共通） | `src/lib/hooks/` | `useDebounce.ts` |
 
+## Atomic Design階層
+
+### Atoms（原子）- 最小単位
+```
+components/common/atoms/
+├── FormField.tsx       # ラベル + 入力フィールド
+├── ErrorAlert.tsx      # エラー表示
+├── FormTitle.tsx       # フォームタイトル
+└── TagChip.tsx         # タグチップ
+```
+
+### Molecules（分子）- 機能単位
+```
+components/common/molecules/
+├── EmailField.tsx          # メール入力（FormFieldを使用）
+├── PasswordField.tsx       # パスワード入力
+├── NameField.tsx           # 名前入力
+├── TagInput.tsx            # タグ入力
+└── CharacterCounter.tsx    # 文字数カウンター
+```
+
+### Organisms（生体）- 完全な機能
+```
+features/{feature}/organisms/
+├── LoginPage.tsx           # ログインフォーム
+├── SignUpPage.tsx          # 新規登録フォーム
+├── ArticleFormPage.tsx     # 記事作成フォーム
+└── ArticleDetailPage.tsx   # 記事詳細表示
+```
+
 ## コンポーネント作成テンプレート
 
-### Presentational Component
+### Atom（最小単位）
 
 ```tsx
-import type { GetArticleResponse } from '@/lib/api/types';
+// src/components/common/atoms/FormField.tsx
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-interface ArticleCardProps {
-  article: GetArticleResponse;
-  onLike?: () => void;
+interface FormFieldProps {
+  id: string;
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
 }
 
-export function ArticleCard({ article, onLike }: ArticleCardProps) {
+export function FormField({ id, label, type = 'text', value, onChange, error }: FormFieldProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold">{article.title}</h2>
-      {onLike && (
-        <button onClick={onLike}>いいね</button>
-      )}
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );
 }
 ```
 
-### Container Component
+### Molecule（機能単位）
 
 ```tsx
+// src/components/common/molecules/EmailField.tsx
+import { FormField } from '@/components/common/atoms/FormField';
+
+interface EmailFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}
+
+export function EmailField({ value, onChange, error }: EmailFieldProps) {
+  return (
+    <FormField
+      id="email"
+      label="メールアドレス"
+      type="email"
+      value={value}
+      onChange={onChange}
+      error={error}
+    />
+  );
+}
+```
+
+### Organism（完全な機能）
+
+```tsx
+// src/features/auth/organisms/LoginPage.tsx
+'use client';
+
+import { useState } from 'react';
+import { EmailField } from '@/components/common/molecules/EmailField';
+import { PasswordField } from '@/components/common/molecules/PasswordField';
+import { Button } from '@/components/ui/button';
+import { useLogin } from '@/lib/api';
+
+export function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const login = useLogin();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    login.mutate({ email, password });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <EmailField value={email} onChange={setEmail} />
+      <PasswordField value={password} onChange={setPassword} />
+      <Button type="submit" disabled={login.isPending}>
+        {login.isPending ? 'ログイン中...' : 'ログイン'}
+      </Button>
+    </form>
+  );
+}
+```
+
+### Organism + Container（データ取得を伴う場合）
+
+```tsx
+// src/features/article/organisms/ArticleDetailContainer.tsx
 'use client';
 
 import { useGetArticle } from '@/lib/api';
-import { ArticleCard } from '../components/ArticleCard';
+import { ArticleDetailPage } from './ArticleDetailPage';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 
-interface ArticleCardContainerProps {
+interface ArticleDetailContainerProps {
   articleId: number;
 }
 
-export function ArticleCardContainer({ articleId }: ArticleCardContainerProps) {
+export function ArticleDetailContainer({ articleId }: ArticleDetailContainerProps) {
   const { data, isLoading, error, refetch } = useGetArticle({ id: articleId });
 
   if (isLoading) return <Loading />;
   if (error) return <ErrorMessage message="エラー" onRetry={refetch} />;
   if (!data) return null;
 
-  return <ArticleCard article={data} />;
+  return <ArticleDetailPage article={data} />;
+}
+```
+
+```tsx
+// src/features/article/organisms/ArticleDetailPage.tsx
+import type { GetArticleResponse } from '@/lib/api/types';
+
+interface ArticleDetailPageProps {
+  article: GetArticleResponse;
+}
+
+export function ArticleDetailPage({ article }: ArticleDetailPageProps) {
+  return (
+    <article className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold">{article.title}</h1>
+      <div className="prose">{article.body}</div>
+    </article>
+  );
 }
 ```
 
 ### Page Component
 
 ```tsx
+// src/app/articles/[id]/page.tsx
 'use client';
 
 import { useParams } from 'next/navigation';
-import { ArticleDetailContainer } from '@/features/article/containers/ArticleDetailContainer';
+import { ArticleDetailContainer } from '@/features/article/organisms/ArticleDetailContainer';
 
 export default function ArticleDetailPage() {
   const params = useParams();
@@ -81,7 +203,7 @@ export default function ArticleDetailPage() {
 }
 ```
 
-### Custom Hook
+### Custom Hook (必要に応じて)
 
 ```tsx
 import { useState } from 'react';
@@ -150,6 +272,12 @@ createArticle.mutate({
 import { useGetArticle, useCreateArticle } from '@/lib/api';
 import type { GetArticleResponse } from '@/lib/api/types';
 
+// Atoms
+import { FormField, ErrorAlert, FormTitle, TagChip } from '@/components/common/atoms';
+
+// Molecules
+import { EmailField, PasswordField, TagInput, CharacterCounter } from '@/components/common/molecules';
+
 // 共通コンポーネント
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
@@ -201,9 +329,14 @@ className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
 
 新しいコンポーネントを作成したら：
 
-- [ ] Container/Presentationalに分離されているか
+### Atomic Design
+- [ ] 既存のAtomsで対応できないか確認したか
+- [ ] 既存のMoleculesで対応できないか確認したか
+- [ ] 適切な粒度（Atoms/Molecules/Organisms）で分割されているか
+
+### 基本事項
 - [ ] 型定義が明確か
-- [ ] `'use client'`がContainerに記述されているか
+- [ ] `'use client'`が必要な場所（データフェッチングを含むOrganism）に記述されているか
 - [ ] Loading/ErrorMessageを使用しているか
 - [ ] ブランドカラーを使用しているか
 - [ ] 適切なディレクトリに配置されているか

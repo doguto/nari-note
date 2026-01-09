@@ -1,13 +1,146 @@
 # Common Components
 
-アプリケーション全体で使用される共通のユーティリティコンポーネントを配置するディレクトリです。
+アプリケーション全体で使用される共通コンポーネントを配置するディレクトリです。
 
-## 概要
+**重要**: このディレクトリはAtomic Designパターンに従って構造化されています。
 
-このディレクトリには、ローディング表示、エラーメッセージ、空状態表示など、
-アプリケーション全体で共通して使用されるコンポーネントを配置します。
+## ディレクトリ構造
 
-## コンポーネント例
+```
+common/
+├── atoms/              # 最小単位のコンポーネント
+│   ├── FormField.tsx
+│   ├── ErrorAlert.tsx
+│   ├── FormTitle.tsx
+│   ├── TagChip.tsx
+│   └── index.ts
+├── molecules/          # Atomsを組み合わせたコンポーネント
+│   ├── EmailField.tsx
+│   ├── PasswordField.tsx
+│   ├── NameField.tsx
+│   ├── TagInput.tsx
+│   ├── CharacterCounter.tsx
+│   └── index.ts
+├── Loading.tsx         # ユーティリティコンポーネント
+├── ErrorMessage.tsx
+├── EmptyState.tsx
+├── ATOMIC_DESIGN.md    # Atomic Designの詳細ドキュメント
+└── README.md           # このファイル
+```
+
+詳細は `ATOMIC_DESIGN.md` を参照してください。
+
+## Atoms（原子）
+
+最小単位の再利用可能なUIコンポーネント。
+
+### FormField.tsx
+ラベル + 入力フィールドのセット
+
+```tsx
+import { FormField } from '@/components/common/atoms';
+
+<FormField
+  id="username"
+  label="ユーザー名"
+  value={username}
+  onChange={setUsername}
+  error={errors.username}
+/>
+```
+
+### ErrorAlert.tsx
+エラーメッセージ表示
+
+```tsx
+import { ErrorAlert } from '@/components/common/atoms';
+
+<ErrorAlert message="エラーが発生しました" />
+```
+
+### FormTitle.tsx
+フォームタイトル
+
+```tsx
+import { FormTitle } from '@/components/common/atoms';
+
+<FormTitle>ログイン</FormTitle>
+```
+
+### TagChip.tsx
+タグチップ（削除ボタン付き）
+
+```tsx
+import { TagChip } from '@/components/common/atoms';
+
+<TagChip tag="TypeScript" onRemove={() => handleRemove('TypeScript')} />
+```
+
+## Molecules（分子）
+
+複数のAtomsを組み合わせた機能コンポーネント。
+
+### EmailField.tsx
+メールアドレス入力（FormFieldを使用）
+
+```tsx
+import { EmailField } from '@/components/common/molecules';
+
+<EmailField
+  value={email}
+  onChange={setEmail}
+  error={errors.email}
+/>
+```
+
+### PasswordField.tsx
+パスワード入力（FormFieldを使用）
+
+```tsx
+import { PasswordField } from '@/components/common/molecules';
+
+<PasswordField
+  value={password}
+  onChange={setPassword}
+  error={errors.password}
+/>
+```
+
+### NameField.tsx
+ユーザー名入力（FormFieldを使用）
+
+```tsx
+import { NameField } from '@/components/common/molecules';
+
+<NameField
+  value={name}
+  onChange={setName}
+  error={errors.name}
+/>
+```
+
+### TagInput.tsx
+タグ入力（Input + Button + TagChipを使用）
+
+```tsx
+import { TagInput } from '@/components/common/molecules';
+
+<TagInput
+  tags={tags}
+  onChange={setTags}
+/>
+```
+
+### CharacterCounter.tsx
+文字数カウンター
+
+```tsx
+import { CharacterCounter } from '@/components/common/molecules';
+
+<CharacterCounter current={title.length} max={100} />
+```
+
+## ユーティリティコンポーネント
 
 ### Loading.tsx
 ローディング表示コンポーネント
@@ -96,14 +229,39 @@ export function EmptyState({ title, description, icon, action }: EmptyStateProps
 
 ## 使用例
 
-### Containerコンポーネントで使用
+### Organism（features内）で使用
 
 ```tsx
+// src/features/auth/organisms/LoginPage.tsx
+import { EmailField, PasswordField } from '@/components/common/molecules';
+import { ErrorAlert } from '@/components/common/atoms';
 import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
-import { EmptyState } from '@/components/common/EmptyState';
-import { useGetArticle } from '@/lib/api';
+import { useLogin } from '@/lib/api';
 
+export function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const login = useLogin();
+
+  if (login.isLoading) {
+    return <Loading />;
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {login.error && <ErrorAlert message="ログインに失敗しました" />}
+      <EmailField value={email} onChange={setEmail} />
+      <PasswordField value={password} onChange={setPassword} />
+      <button type="submit">ログイン</button>
+    </form>
+  );
+}
+```
+
+### Container + Organism パターンで使用
+
+```tsx
+// Container
 export function ArticleDetailContainer({ articleId }: { articleId: number }) {
   const { data, isLoading, error, refetch } = useGetArticle({ id: articleId });
 
@@ -130,18 +288,34 @@ export function ArticleDetailContainer({ articleId }: { articleId: number }) {
     );
   }
 
-  return <ArticleDetail article={data} />;
+  return <ArticleDetailPage article={data} />;
 }
 ```
 
 ## 作成ガイドライン
 
+### Atomsを作成する際
+1. **これ以上分割できない最小単位**であることを確認
+2. **shadcn UIコンポーネントまたは基本的なHTML要素**で構築
+3. **他のコンポーネントに依存しない**
+4. **単一責任の原則**に従う
+5. **propsの型定義**を明確にする
+
+### Moleculesを作成する際
+1. **Atomsを組み合わせて**特定の機能を実装
+2. **既存のAtomsで対応できないか**確認
+3. **再利用可能な機能単位**として設計
+4. **独自のビジネスロジックは持たない**
+5. **propsで柔軟にカスタマイズ可能**にする
+
+### 一般的なガイドライン
 1. **アプリケーション全体で統一されたデザイン**を提供
-2. **nari-noteのブランドカラー**を使用
+2. **nari-noteのブランドカラー**（`#88b04b`, `#2d3e1f`, `#f5f3e8`）を使用
 3. **適切なデフォルト値**を設定
 4. **柔軟なカスタマイズ**を可能にする
+5. **TypeScriptの型安全性**を活用
 
-## その他のコンポーネント例
+## その他の参考コンポーネント例
 
 - **SuccessMessage.tsx** - 成功メッセージ
 - **Pagination.tsx** - ページネーション
