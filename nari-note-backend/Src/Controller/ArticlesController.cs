@@ -18,6 +18,7 @@ public class ArticlesController : ApplicationController
     readonly GetArticleService getArticleService;
     readonly DeleteArticleService deleteArticleService;
     readonly ToggleLikeService toggleLikeService;
+    readonly GetDraftArticlesService getDraftArticlesService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
@@ -27,7 +28,8 @@ public class ArticlesController : ApplicationController
         GetArticlesByTagService getArticlesByTagService,
         GetArticleService getArticleService,
         DeleteArticleService deleteArticleService,
-        ToggleLikeService toggleLikeService)
+        ToggleLikeService toggleLikeService,
+        GetDraftArticlesService getDraftArticlesService)
     {
         this.createArticleService = createArticleService;
         this.updateArticleService = updateArticleService;
@@ -37,6 +39,7 @@ public class ArticlesController : ApplicationController
         this.getArticleService = getArticleService;
         this.deleteArticleService = deleteArticleService;
         this.toggleLikeService = toggleLikeService;
+        this.getDraftArticlesService = getDraftArticlesService;
     }
     
     [HttpGet]
@@ -107,6 +110,14 @@ public class ArticlesController : ApplicationController
             ArticleId = id
         };
         var response = await this.toggleLikeService.ExecuteAsync(UserId, request);
+        return Ok(response);
+    }
+
+    [HttpGet("drafts")]
+    public async Task<ActionResult<GetDraftArticlesResponse>> GetDraftArticles()
+    {
+        var request = new GetDraftArticlesRequest { AuthorId = UserId };
+        var response = await getDraftArticlesService.ExecuteAsync(request);
         return Ok(response);
     }
 }
