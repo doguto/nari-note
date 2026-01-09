@@ -2,63 +2,99 @@
 
 記事に関する機能を提供するモジュールです。
 
-## コンポーネント一覧
+**重要**: Atomic Designパターンに従い、完全な機能ブロックは`organisms/`ディレクトリに配置されます。
 
-### Presentational Components（`components/`）
+## ディレクトリ構造
 
-表示のみを担当するコンポーネント。propsを受け取ってUIを描画します。
+```
+article/
+├── organisms/              # Organisms（完全な機能ブロック）
+│   ├── ArticleFormPage.tsx
+│   ├── ArticleDetailPage.tsx
+│   ├── ArticleDetailContainer.tsx
+│   └── HomeArticleList.tsx
+└── types.ts               # 型定義（必要に応じて）
+```
 
-- **ArticleCard.tsx** - 記事カード（一覧で使用）
-- **ArticleList.tsx** - 記事一覧
-- **ArticleDetail.tsx** - 記事詳細
-- **ArticleForm.tsx** - 記事作成・編集フォーム
+## Organisms一覧
 
-### Container Components（`containers/`）
+### ArticleFormPage.tsx
+記事作成・編集フォーム。Atoms/Moleculesを組み合わせた完全な機能。
 
-データフェッチングとビジネスロジックを担当するコンポーネント。
+- TitleField（Molecule）を使用
+- BodyField（Molecule）を使用
+- TagInput（Molecule）を使用
+- データフェッチングとビジネスロジックを含む
 
-- **ArticleCardContainer.tsx** - 記事カードのデータ管理
-- **ArticleListContainer.tsx** - 記事一覧のデータ管理
-- **ArticleDetailContainer.tsx** - 記事詳細のデータ管理
-- **ArticleFormContainer.tsx** - 記事フォームのデータ管理
+### ArticleDetailPage.tsx
+記事詳細表示。Presentational Organism。
 
-### Custom Hooks（`hooks/`）
+- TagChip（Atom）を使用
+- propsで記事データを受け取って表示
 
-記事機能固有のカスタムフック。
+### ArticleDetailContainer.tsx
+記事詳細のデータフェッチング。Container。
 
-- **useArticleForm.ts** - 記事フォームのロジック管理
+- ArticleDetailPageにデータを渡す
+- Loading/ErrorMessage（ユーティリティ）を使用
+
+### HomeArticleList.tsx
+ホームページの記事一覧表示。
 
 ## 使用方法
 
-### 記事一覧を表示
+### ページから記事詳細を表示
 
 ```tsx
-import { ArticleListContainer } from '@/features/article/containers/ArticleListContainer';
+// src/app/articles/[id]/page.tsx
+'use client';
 
-export default function ArticlesPage() {
-  return <ArticleListContainer />;
+import { useParams } from 'next/navigation';
+import { ArticleDetailContainer } from '@/features/article/organisms/ArticleDetailContainer';
+
+export default function ArticleDetailPage() {
+  const params = useParams();
+  const articleId = Number(params.id);
+
+  return (
+    <div className="container mx-auto">
+      <ArticleDetailContainer articleId={articleId} />
+    </div>
+  );
 }
 ```
 
-### 記事詳細を表示
+### ページから記事作成フォームを表示
 
 ```tsx
-import { ArticleDetailContainer } from '@/features/article/containers/ArticleDetailContainer';
-
-export default function ArticleDetailPage({ params }: { params: { id: string } }) {
-  return <ArticleDetailContainer articleId={Number(params.id)} />;
-}
-```
-
-### 記事作成フォーム
-
-```tsx
-import { ArticleFormContainer } from '@/features/article/containers/ArticleFormContainer';
+// src/app/articles/new/page.tsx
+import { ArticleFormPage } from '@/features/article/organisms/ArticleFormPage';
 
 export default function NewArticlePage() {
-  return <ArticleFormContainer />;
+  return (
+    <div className="container mx-auto max-w-4xl">
+      <ArticleFormPage />
+    </div>
+  );
 }
 ```
+
+## Atomic Design構成
+
+### 使用しているAtoms
+- `FormField` - 基本フォームフィールド
+- `ErrorAlert` - エラー表示
+- `TagChip` - タグ表示
+
+### 使用しているMolecules
+- `TitleField` - タイトル入力（FormField + CharacterCounter）
+- `BodyField` - 本文入力
+- `TagInput` - タグ入力（Input + Button + TagChip）
+
+### Organisms
+- `ArticleFormPage` - 完全な記事フォーム
+- `ArticleDetailPage` - 完全な記事詳細表示
+- `ArticleDetailContainer` - データフェッチング + ArticleDetailPage
 
 ## 型定義
 
