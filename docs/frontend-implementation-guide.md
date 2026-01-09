@@ -578,11 +578,11 @@ export function TitleField({
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-// 注意: 以下のMoleculesは必要に応じて実装してください
-// または既存のFormFieldを直接使用することもできます
 import { TitleField } from '@/components/common/molecules/TitleField';
 import { BodyField } from '@/components/common/molecules/BodyField';
 import { TagInput } from '@/components/common/molecules/TagInput';
+// または既存のFormFieldを直接使用する場合：
+// import { FormField } from '@/components/common/atoms/FormField';
 import { ErrorAlert } from '@/components/common/atoms/ErrorAlert';
 import { Button } from '@/components/ui/button';
 import { useCreateArticle } from '@/lib/api';
