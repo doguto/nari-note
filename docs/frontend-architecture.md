@@ -189,25 +189,26 @@ export function ArticleDetailContainer({ articleId }: ArticleDetailContainerProp
 - DOMイベントをpropsのコールバック関数に渡す
 - スタイリング
 
-**配置場所:** `src/features/{feature}/components/` または `src/components/`
+**配置場所:** `src/features/{feature}/organisms/` (Organisms) または `src/components/common/atoms/`, `src/components/common/molecules/` (Atoms/Molecules)
 
-**命名規則:** `{ComponentName}.tsx`
+**命名規則:** `{ComponentName}.tsx` または `{ComponentName}Page.tsx` (Organisms)
 
 **特徴:**
 - `'use client'` ディレクティブは不要（親がClient Componentなら不要）
-- APIフックを使用しない
+- APIフックを使用しない（ただしOrganismsは例外）
 - 状態を持たない（または表示のみの状態のみ）
 
-**例:**
+**例（Organism - Presentational）:**
 ```tsx
-// src/features/article/components/ArticleDetail.tsx
+// src/features/article/organisms/ArticleDetailPage.tsx
 import { GetArticleResponse } from '@/lib/api/types';
+import { TagChip } from '@/components/common/atoms';
 
-interface ArticleDetailProps {
+interface ArticleDetailPageProps {
   article: GetArticleResponse;
 }
 
-export function ArticleDetail({ article }: ArticleDetailProps) {
+export function ArticleDetailPage({ article }: ArticleDetailPageProps) {
   return (
     <article className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
@@ -221,12 +222,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
       {article.tags && article.tags.length > 0 && (
         <div className="flex gap-2 mt-6">
           {article.tags.map((tag, index) => (
-            <span
-              key={index}
-              className="px-3 py-1 bg-gray-100 rounded-full text-sm"
-            >
-              {tag}
-            </span>
+            <TagChip key={index} tag={tag} />
           ))}
         </div>
       )}
