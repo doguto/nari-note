@@ -16,6 +16,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetDraftArticlesResponse,
   GetHealthResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -36,6 +37,7 @@ export const queryKeys = {
     getArticle: ['articles', 'getArticle'] as const,
     getArticlesByAuthor: ['articles', 'getArticlesByAuthor'] as const,
     getArticlesByTag: ['articles', 'getArticlesByTag'] as const,
+    getDraftArticles: ['articles', 'getDraftArticles'] as const,
   },
   auth: {
   },
@@ -124,6 +126,14 @@ export function useToggleLike(options?: UseMutationOptions<ToggleLikeResponse, E
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       options?.onSuccess?.(...args);
     },
+    ...options,
+  });
+}
+
+export function useGetDraftArticles(options?: Omit<UseQueryOptions<GetDraftArticlesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetDraftArticlesResponse>({
+    queryKey: queryKeys.articles.getDraftArticles,
+    queryFn: () => articlesApi.getDraftArticles(),
     ...options,
   });
 }

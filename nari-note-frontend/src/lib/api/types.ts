@@ -149,3 +149,13 @@ export interface UpdateUserProfileRequest {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdateUserProfileResponse {
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface GetDraftArticlesRequest {
+  // 認証ヘッダーから自動的にAuthorIdが設定されるため、パラメータ不要
+}
+
+export interface GetDraftArticlesResponse {
+  articles?: ArticleDto[];
+  totalCount?: number;
+}
