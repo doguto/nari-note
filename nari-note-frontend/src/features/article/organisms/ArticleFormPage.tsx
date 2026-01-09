@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { TagInput, CharacterCounter } from '@/components/common/molecules';
-import { useCreateArticle } from '@/lib/api';
+import { useCreateArticle, useUpdateArticle, useGetArticle } from '@/lib/api';
+import { Loading } from '@/components/common/Loading';
+import { ErrorMessage } from '@/components/common/ErrorMessage';
 
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor').then((mod) => mod.default),
@@ -22,21 +24,37 @@ const MDEditor = dynamic(
   }
 );
 
+interface ArticleFormPageProps {
+  articleId?: number;
+  mode?: 'create' | 'edit';
+}
+
 /**
  * ArticleFormPage - Organism Component
  * 
- * 記事作成ページの完全な機能を持つコンポーネント
+ * 記事作成・編集ページの完全な機能を持つコンポーネント
  * Atomic Designパターンにおける Organism として、
  * ビジネスロジックと UI を統合
+ * 
+ * @param articleId - 編集モード時の記事ID
+ * @param mode - 'create' または 'edit' (デフォルト: 'create')
  */
-export function ArticleFormPage() {
+export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageProps = {}) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   const router = useRouter();
+  const isEditMode = mode === 'edit' && articleId;
+  
+  // 編集モード時の記事データ取得
+  const { data: article, isLoading: isLoadingArticle, error: articleError, refetch } = useGetArticle(
+    { id: articleId || 0 },
+    { enabled: !!isEditMode }
+  );
   
   const createArticle = useCreateArticle({
     onSuccess: (data) => {
@@ -49,21 +67,42 @@ export function ArticleFormPage() {
     },
   });
 
+  const updateArticle = useUpdateArticle({
+    onSuccess: () => {
+      setHasUnsavedChanges(false);
+      router.push(`/articles/${articleId}`);
+    },
+    onError: (error) => {
+      console.error('記事の更新に失敗しました:', error);
+      alert('記事の更新に失敗しました。もう一度お試しください。');
+    },
+  });
+
+  // 編集モード時のデータ初期化
+  useEffect(() => {
+    if (isEditMode && article && !isInitialized) {
+      setTitle(article.title || '');
+      setBody(article.body || '');
+      setTags(article.tags || []);
+      setIsInitialized(true);
+    }
+  }, [isEditMode, article, isInitialized]);
+
   const characterCount = body.length;
   const maxCharacters = 65535;
   const isOverLimit = characterCount > maxCharacters;
 
   // フォームの変更を追跡
   useEffect(() => {
-    if (title || body || tags.length > 0) {
+    if (isInitialized && (title || body || tags.length > 0)) {
       setHasUnsavedChanges(true);
     }
-  }, [title, body, tags]);
+  }, [title, body, tags, isInitialized]);
 
   // ページ離脱時の確認
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges && !createArticle.isSuccess) {
+      if (hasUnsavedChanges && !createArticle.isSuccess && !updateArticle.isSuccess) {
         e.preventDefault();
         e.returnValue = '';
       }
@@ -71,7 +110,27 @@ export function ArticleFormPage() {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges, createArticle.isSuccess]);
+  }, [hasUnsavedChanges, createArticle.isSuccess, updateArticle.isSuccess]);
+
+  // ローディング状態
+  if (isEditMode && isLoadingArticle) {
+    return <Loading text="記事を読み込み中..." />;
+  }
+
+  // エラー状態
+  if (isEditMode && articleError) {
+    return (
+      <ErrorMessage 
+        message="記事の取得に失敗しました" 
+        onRetry={refetch}
+      />
+    );
+  }
+
+  // 記事が見つからない場合
+  if (isEditMode && !article) {
+    return <ErrorMessage message="記事が見つかりません" />;
+  }
 
   const validateForm = (): boolean => {
     if (!title.trim()) {
@@ -99,12 +158,24 @@ export function ArticleFormPage() {
       return;
     }
 
-    createArticle.mutate({
-      title: title.trim(),
-      body: body,
-      tags: tags,
-      isPublished: true,
-    });
+    if (isEditMode) {
+      // 編集モード: 記事を更新
+      updateArticle.mutate({
+        id: articleId,
+        title: title.trim(),
+        body: body,
+        tags: tags,
+        isPublished: true,
+      });
+    } else {
+      // 作成モード: 新規記事を作成
+      createArticle.mutate({
+        title: title.trim(),
+        body: body,
+        tags: tags,
+        isPublished: true,
+      });
+    }
   };
 
   const handleSaveDraft = () => {
@@ -112,12 +183,24 @@ export function ArticleFormPage() {
       return;
     }
 
-    createArticle.mutate({
-      title: title.trim(),
-      body: body,
-      tags: tags,
-      isPublished: false,
-    });
+    if (isEditMode) {
+      // 編集モード: 記事を更新（下書きとして）
+      updateArticle.mutate({
+        id: articleId,
+        title: title.trim(),
+        body: body,
+        tags: tags,
+        isPublished: article?.isPublished || false,
+      });
+    } else {
+      // 作成モード: 下書きとして保存
+      createArticle.mutate({
+        title: title.trim(),
+        body: body,
+        tags: tags,
+        isPublished: false,
+      });
+    }
   };
 
   const togglePreview = () => {
@@ -185,21 +268,25 @@ export function ArticleFormPage() {
       </div>
 
       <div className="flex gap-4 pt-4">
-        <Button
-          type="button"
-          onClick={handleSaveDraft}
-          disabled={createArticle.isPending || !title || tags.length === 0 || isOverLimit}
-          variant="outline"
-          className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-bg-light)]"
-        >
-          下書き保存
-        </Button>
+        {!isEditMode && (
+          <Button
+            type="button"
+            onClick={handleSaveDraft}
+            disabled={createArticle.isPending || !title || tags.length === 0 || isOverLimit}
+            variant="outline"
+            className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-bg-light)]"
+          >
+            下書き保存
+          </Button>
+        )}
         <Button
           type="submit"
-          disabled={createArticle.isPending || !title || tags.length === 0 || isOverLimit}
+          disabled={createArticle.isPending || updateArticle.isPending || !title || tags.length === 0 || isOverLimit}
           className="flex-1 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
         >
-          {createArticle.isPending ? '投稿中...' : '投稿する'}
+          {createArticle.isPending || updateArticle.isPending 
+            ? (isEditMode ? '更新中...' : '投稿中...') 
+            : (isEditMode ? '更新する' : '投稿する')}
         </Button>
       </div>
     </form>
