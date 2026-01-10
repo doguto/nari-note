@@ -18,6 +18,7 @@ CONTROLLER_DIR = BACKEND_ROOT / "Controller"
 REQUEST_DIR = BACKEND_ROOT / "Application/Dto/Request"
 RESPONSE_DIR = BACKEND_ROOT / "Application/Dto/Response"
 DTO_DIR = BACKEND_ROOT / "Application/Dto"
+VALUE_OBJECT_FILE = BACKEND_ROOT / "Domain/ValueObject/EntityKeyObject.cs"
 
 
 @dataclass
@@ -49,7 +50,31 @@ class EndpointInfo:
     has_body_param: bool = False  # [FromBody]パラメータがあるかどうか
 
 
-def csharp_type_to_typescript(csharp_type: str) -> tuple[str, bool]:
+def load_value_object_types() -> set[str]:
+    """EntityKeyObject.csからValueObject型を読み込む"""
+    value_object_types = set()
+    
+    if not VALUE_OBJECT_FILE.exists():
+        print(f"⚠️  ValueObject file not found: {VALUE_OBJECT_FILE}")
+        return value_object_types
+    
+    try:
+        content = VALUE_OBJECT_FILE.read_text(encoding='utf-8')
+        # [ValueObject<int>] public partial struct XxxId; のパターンを探す
+        pattern = r'\[ValueObject<\w+>\]\s+public\s+partial\s+struct\s+(\w+);'
+        for match in re.finditer(pattern, content):
+            type_name = match.group(1)
+            value_object_types.add(type_name)
+        
+        if value_object_types:
+            print(f"📦 Loaded {len(value_object_types)} ValueObject types: {', '.join(sorted(value_object_types))}")
+    except Exception as e:
+        print(f"⚠️  Error loading ValueObject types: {e}")
+    
+    return value_object_types
+
+
+def csharp_type_to_typescript(csharp_type: str, value_object_types: set[str]) -> tuple[str, bool]:
     """C#の型をTypeScriptの型に変換（型とnullable情報を返す）"""
     type_mapping = {
         'string': 'string',
@@ -67,21 +92,25 @@ def csharp_type_to_typescript(csharp_type: str) -> tuple[str, bool]:
     is_nullable = csharp_type.endswith('?')
     base_type = csharp_type.rstrip('?')
     
+    # ValueObject型をnumberに変換
+    if base_type in value_object_types:
+        return 'number', is_nullable
+    
     # Dictionary<TKey, TValue> を Record<K, V> に変換
     dict_match = re.match(r'Dictionary<(.+),\s*(.+)>', base_type)
     if dict_match:
         key_type = dict_match.group(1).strip()
         value_type = dict_match.group(2).strip()
         # 再帰的に内部の型も変換
-        ts_key, _ = csharp_type_to_typescript(key_type)
-        ts_value, _ = csharp_type_to_typescript(value_type)
+        ts_key, _ = csharp_type_to_typescript(key_type, value_object_types)
+        ts_value, _ = csharp_type_to_typescript(value_type, value_object_types)
         return f"Record<{ts_key}, {ts_value}>", is_nullable
     
     # List<T> を T[] に変換
     list_match = re.match(r'List<(.+)>', base_type)
     if list_match:
         inner_type = list_match.group(1)
-        converted, _ = csharp_type_to_typescript(inner_type)
+        converted, _ = csharp_type_to_typescript(inner_type, value_object_types)
         return f"{converted}[]", is_nullable
     
     ts_type = type_mapping.get(base_type, base_type)
@@ -204,14 +233,14 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
     return endpoints
 
 
-def generate_types_file(classes: List[CSharpClass]) -> str:
+def generate_types_file(classes: List[CSharpClass], value_object_types: set[str]) -> str:
     """types.tsファイルを生成"""
     lines = [TYPES_HEADER, ""]
     
     for cls in sorted(classes, key=lambda x: x.name):
         lines.append(generate_interface_declaration(cls.name, bool(cls.properties)))
         for prop in cls.properties:
-            ts_type, is_nullable = csharp_type_to_typescript(prop.type)
+            ts_type, is_nullable = csharp_type_to_typescript(prop.type, value_object_types)
             is_optional = is_nullable or prop.is_optional
             lines.append(generate_property_declaration(prop.name, ts_type, is_optional))
         lines.append("}")
@@ -384,6 +413,10 @@ def main():
         print(f"❌ Backend directory not found: {BACKEND_ROOT}")
         return
     
+    # ValueObject型を読み込み
+    print("\n📦 Loading ValueObject types...")
+    value_object_types = load_value_object_types()
+    
     # Request/Response/DTOクラスをパース
     print("\n📖 Parsing Request/Response/DTO classes...")
     classes: List[CSharpClass] = []
@@ -441,7 +474,7 @@ def main():
     
     # types.tsを生成
     print("\n✏️  Generating types.ts...")
-    types_content = generate_types_file(classes)
+    types_content = generate_types_file(classes, value_object_types)
     types_file.write_text(types_content, encoding='utf-8')
     print(f"  ✓ {types_file}")
     
