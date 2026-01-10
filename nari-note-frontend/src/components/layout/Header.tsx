@@ -2,6 +2,12 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 /**
  * ヘッダーコンポーネント
@@ -55,18 +61,49 @@ export function Header() {
             // ローディング中はスケルトン表示
             <div className="w-24 h-8 bg-brand-text-dark rounded animate-pulse" />
           ) : isLoggedIn ? (
-            // ログイン時: マイページへのリンクとログアウトボタン
+            // ログイン時: マイページメニューとログアウトボタン
             <>
-              <Link
-                href={`/users/${userId}`}
-                className="flex items-center gap-2 text-white hover:text-brand-primary transition-colors"
-                style={{ fontFamily: 'serif' }}
-              >
-                <div className="w-8 h-8 bg-brand-primary rounded-full flex items-center justify-center text-white text-sm font-bold">
-                  👤
-                </div>
-                <span>マイページ</span>
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="flex items-center gap-2 text-white hover:text-brand-primary transition-colors"
+                    style={{ fontFamily: 'serif' }}
+                  >
+                    <div className="w-8 h-8 bg-brand-primary rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      👤
+                    </div>
+                    <span>マイページ</span>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/users/${userId}`}
+                      className="cursor-pointer"
+                      style={{ fontFamily: 'serif' }}
+                    >
+                      マイページ
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/articles/drafts"
+                      className="cursor-pointer"
+                      style={{ fontFamily: 'serif' }}
+                    >
+                      下書き一覧
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <button
                 onClick={logout}
                 className="text-white hover:text-brand-primary transition-colors"

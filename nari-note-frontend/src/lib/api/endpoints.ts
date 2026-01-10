@@ -15,6 +15,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetDraftArticlesResponse,
   GetHealthResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -59,6 +60,10 @@ export const articlesApi = {
   },
   toggleLike: async (data: ToggleLikeRequest): Promise<ToggleLikeResponse> => {
     const response = await apiClient.post<ToggleLikeResponse>(`/api/articles/${data.articleId}/like`);
+    return response.data;
+  },
+  getDraftArticles: async (): Promise<GetDraftArticlesResponse> => {
+    const response = await apiClient.get<GetDraftArticlesResponse>('/api/articles/drafts');
     return response.data;
   },
 };

@@ -157,4 +157,15 @@ public class ArticleRepository : IArticleRepository
 
         return (articles, totalCount);
     }
+
+    public async Task<List<Article>> FindDraftsByAuthorAsync(int authorId)
+    {
+        return await context.Articles
+            .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Where(a => a.AuthorId == authorId && !a.IsPublished)
+            .OrderByDescending(a => a.UpdatedAt)
+            .ToListAsync();
+    }
 }
