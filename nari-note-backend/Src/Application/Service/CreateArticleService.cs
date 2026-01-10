@@ -2,6 +2,7 @@ using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -23,9 +24,9 @@ public class CreateArticleService
             AuthorId = request.AuthorId,
             IsPublished = request.IsPublished
         };
-        
+
         var created = await articleRepository.CreateAsync(article);
-        
+
         return new CreateArticleResponse
         {
             Id = created.Id,

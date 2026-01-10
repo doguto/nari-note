@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -12,13 +13,13 @@ public class UserRepository : IUserRepository
     {
         this.context = context;
     }
-    
-    public async Task<User?> FindByIdAsync(int id)
+
+    public async Task<User?> FindByIdAsync(UserId id)
     {
         return await context.Users.FindAsync(id);
     }
 
-    public async Task<User> FindForceByIdAsync(int id)
+    public async Task<User> FindForceByIdAsync(UserId id)
     {
         var user = await FindByIdAsync(id);
         if (user == null) throw new KeyNotFoundException($"User with ID {id} not found");
@@ -33,7 +34,7 @@ public class UserRepository : IUserRepository
         return entity;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(UserId id)
     {
         var user = await context.Users.FindAsync(id);
         if (user != null)

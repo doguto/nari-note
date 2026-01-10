@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Controller;
@@ -21,7 +22,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetUserProfile(int id)
+    public async Task<ActionResult> GetUserProfile(UserId id)
     {
         var request = new GetUserProfileRequest { Id = id };
         var response = await getUserProfileService.ExecuteAsync(request);

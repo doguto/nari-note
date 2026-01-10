@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -20,7 +21,7 @@ public class CommentRepository : ICommentRepository
         return comment;
     }
 
-    public async Task<Comment?> FindByIdAsync(int id)
+    public async Task<Comment?> FindByIdAsync(CommentId id)
     {
         return await context.Comments
             .Include(c => c.User)
@@ -28,7 +29,7 @@ public class CommentRepository : ICommentRepository
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    public async Task<Comment> FindForceByIdAsync(int id)
+    public async Task<Comment> FindForceByIdAsync(CommentId id)
     {
         var comment = await FindByIdAsync(id);
         if (comment == null)
@@ -45,7 +46,7 @@ public class CommentRepository : ICommentRepository
         return entity;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(CommentId id)
     {
         var comment = await context.Comments.FindAsync(id);
         if (comment == null) return;
@@ -54,7 +55,7 @@ public class CommentRepository : ICommentRepository
         await context.SaveChangesAsync();
     }
 
-    public async Task<List<Comment>> FindByArticleAsync(int articleId)
+    public async Task<List<Comment>> FindByArticleAsync(ArticleId articleId)
     {
         return await context.Comments
             .Include(c => c.User)
@@ -63,7 +64,7 @@ public class CommentRepository : ICommentRepository
             .ToListAsync();
     }
 
-    public async Task<List<Comment>> FindByUserAsync(int userId)
+    public async Task<List<Comment>> FindByUserAsync(UserId userId)
     {
         return await context.Comments
             .Include(c => c.Article)
@@ -72,7 +73,7 @@ public class CommentRepository : ICommentRepository
             .ToListAsync();
     }
 
-    public async Task<int> CountByArticleAsync(int articleId)
+    public async Task<int> CountByArticleAsync(ArticleId articleId)
     {
         return await context.Comments.CountAsync(c => c.ArticleId == articleId);
     }

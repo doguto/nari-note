@@ -1,6 +1,8 @@
+using NariNoteBackend.Domain.ValueObject;
+
 namespace NariNoteBackend.Application.Dto.Request;
 
 public class GetArticlesByAuthorRequest
 {
-    public int AuthorId { get; set; }
+    public UserId AuthorId { get; set; }
 }

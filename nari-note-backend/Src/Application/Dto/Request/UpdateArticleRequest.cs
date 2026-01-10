@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Dto.Request;
 
 public class UpdateArticleRequest
 {
-    public int Id { get; set; }
+    public ArticleId Id { get; set; }
     
     [MaxLength(50)]
     public string? Title { get; set; }

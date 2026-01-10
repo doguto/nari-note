@@ -1,16 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
 public class Article : EntityBase
 {
     [Key]
-    public int Id { get; set; }
+    public ArticleId Id { get; set; }
 
     [Required]
     [ForeignKey("Author")]
-    public int AuthorId { get; set; }
+    public UserId AuthorId { get; set; }
 
     [Required]
     [MaxLength(50)]

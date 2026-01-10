@@ -18,10 +18,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+    {
+        options.ModelBinderProviders.Insert(0, new ValueObjectModelBinderProvider());
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.Converters.Add(new ValueObjectJsonConverterFactory());
     });
 // builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks().AddCheck<HealthCheckService>("health_check");

@@ -2,6 +2,7 @@ using NariNoteBackend.Application.Dto;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -14,7 +15,7 @@ public class GetDraftArticlesService
         this.articleRepository = articleRepository;
     }
     
-    public async Task<GetDraftArticlesResponse> ExecuteAsync(int authorId)
+    public async Task<GetDraftArticlesResponse> ExecuteAsync(UserId authorId)
     {
         var articles = await articleRepository.FindDraftsByAuthorAsync(authorId);
 
