@@ -7,3 +7,7 @@ archive/
 
 # solution files
 nari-note.sln
+
+# Python
+__pycache__/
+
