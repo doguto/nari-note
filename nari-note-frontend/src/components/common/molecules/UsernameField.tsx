@@ -19,17 +19,21 @@ export function UsernameField({
   error,
   required = true,
 }: UsernameFieldProps) {
+  // error は FormField に渡すのではなく、親コンポーネントで表示される想定
   return (
-    <FormField
-      id="username"
-      label="ユーザー名"
-      type="text"
-      value={value}
-      onChange={onChange}
-      placeholder="user_name123"
-      required={required}
-      minLength={3}
-      helperText="英数字とアンダースコアのみ使用可能（3文字以上）"
-    />
+    <div className="space-y-2">
+      <FormField
+        id="username"
+        label="ユーザー名"
+        type="text"
+        value={value}
+        onChange={onChange}
+        placeholder="user_name123"
+        required={required}
+        minLength={3}
+        helperText="英数字とアンダースコアのみ使用可能（3文字以上）"
+      />
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
   );
 }

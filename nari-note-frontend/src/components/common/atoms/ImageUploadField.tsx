@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
@@ -81,11 +82,13 @@ export function ImageUploadField({
       
       <div className="flex items-start gap-4">
         {preview && (
-          <div className="relative">
-            <img
+          <div className="relative w-24 h-24">
+            <Image
               src={preview}
               alt="プレビュー"
-              className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
+              width={96}
+              height={96}
+              className="rounded-full object-cover border-2 border-gray-300"
             />
           </div>
         )}

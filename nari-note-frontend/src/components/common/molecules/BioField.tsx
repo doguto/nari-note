@@ -35,7 +35,7 @@ export function BioField({
         maxLength={maxLength}
         error={error}
       />
-      <CharacterCounter current={value.length} max={maxLength} />
+      <CharacterCounter count={value.length} max={maxLength} />
     </div>
   );
 }

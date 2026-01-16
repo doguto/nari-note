@@ -20,15 +20,18 @@ export function DisplayNameField({
   required = false,
 }: DisplayNameFieldProps) {
   return (
-    <FormField
-      id="displayName"
-      label="表示名"
-      type="text"
-      value={value}
-      onChange={onChange}
-      placeholder="山田太郎"
-      required={required}
-      helperText="20文字以内"
-    />
+    <div className="space-y-2">
+      <FormField
+        id="displayName"
+        label="表示名"
+        type="text"
+        value={value}
+        onChange={onChange}
+        placeholder="山田太郎"
+        required={required}
+        helperText="20文字以内"
+      />
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
   );
 }
