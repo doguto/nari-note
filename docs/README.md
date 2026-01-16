@@ -2,6 +2,36 @@
 
 このディレクトリにはnari-noteプロジェクトの設計ドキュメントが格納されています。
 
+## プロジェクト管理
+
+### [remaining-tasks-summary.md](./remaining-tasks-summary.md) ⭐ 新規追加
+**残タスクのサマリー**
+
+プロジェクトの実装状況と未実装機能の概要をまとめたドキュメントです。
+
+**内容:**
+- 実装済み機能と未実装機能の概要
+- 優先順位別タスクリスト
+- 主要機能の詳細説明
+- 工数見積もり
+- 次のアクション
+
+**プロジェクトの進捗確認や計画策定の際は、このドキュメントを参照してください。**
+
+### [remaining-tasks.md](./remaining-tasks.md) ⭐ 新規追加
+**残タスクの詳細リスト**
+
+spec/ディレクトリの仕様ファイルと現在の実装を比較し、未実装機能を詳細にリストアップしたドキュメントです。
+
+**内容:**
+- 各機能の詳細な仕様と実装状況
+- 影響範囲の分析
+- 実装に必要な作業の詳細
+- フェーズ別の実装計画
+- 技術的負債の一覧
+
+**新規機能の実装やスプリント計画の際は、このドキュメントを参照してください。**
+
 ## アーキテクチャ関連
 
 ### [architecture.md](./architecture.md)
@@ -88,12 +118,17 @@
 
 ## ドキュメントの使い方
 
+### プロジェクト計画・進捗確認をする場合
+1. `remaining-tasks-summary.md` で実装状況と優先順位を確認 ⭐
+2. `remaining-tasks.md` で詳細な未実装機能を確認 ⭐
+
 ### 新規機能を実装する場合
-1. `backend-implementation-guide.md` で実装パターンとコーディング規約を確認 ⭐
-2. `development-workflow.md` で具体的な開発手順を確認 ⭐
-3. `architecture.md` でアーキテクチャの全体像を確認
-4. `error-handling-strategy.md` でエラーハンドリング方針を確認
-5. `error-handling-examples.md` で具体的な実装例を参照
+1. `remaining-tasks.md` で実装する機能の詳細を確認
+2. `backend-implementation-guide.md` で実装パターンとコーディング規約を確認 ⭐
+3. `development-workflow.md` で具体的な開発手順を確認 ⭐
+4. `architecture.md` でアーキテクチャの全体像を確認
+5. `error-handling-strategy.md` でエラーハンドリング方針を確認
+6. `error-handling-examples.md` で具体的な実装例を参照
 
 ### エラーハンドリングを実装する場合
 1. `error-handling-strategy.md` で詳細な戦略を確認
@@ -110,13 +145,16 @@
 これらのドキュメントは、AI開発支援ツールが自動的に参照し、コード生成やレビューに活用できるように構造化されています。
 
 **特に重要なドキュメント:**
+- `remaining-tasks-summary.md` - 残タスクのサマリーと優先順位 ⭐ 新規追加
+- `remaining-tasks.md` - 残タスクの詳細リスト ⭐ 新規追加
 - `backend-implementation-guide.md` - 実装パターンとコーディング規約の完全なガイド ⭐
 - `development-workflow.md` - 開発ワークフローと実践的タスクガイド ⭐
 - `error-handling-strategy.md` - エラーハンドリングの完全なガイド
 - `architecture.md` - アーキテクチャの基本方針
 
 **実装の優先順位:**
-1. まず `backend-implementation-guide.md` で全体像とコーディング規約を把握
-2. 次に `development-workflow.md` で具体的な開発手順を理解
-3. `error-handling-strategy.md` でエラーハンドリングを理解
-4. 必要に応じて `architecture.md` で設計思想を確認
+1. まず `remaining-tasks-summary.md` でプロジェクトの全体像を把握
+2. 次に `backend-implementation-guide.md` で実装規約を理解
+3. `development-workflow.md` で具体的な開発手順を理解
+4. `error-handling-strategy.md` でエラーハンドリングを理解
+5. 必要に応じて `architecture.md` で設計思想を確認
