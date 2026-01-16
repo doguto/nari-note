@@ -32,22 +32,25 @@ export function ImageUploadField({
   required = false,
 }: ImageUploadFieldProps) {
   const [preview, setPreview] = useState<string | undefined>(currentImage);
+  const [validationError, setValidationError] = useState<string>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setValidationError(undefined);
+
     // ファイルタイプチェック
     if (!file.type.startsWith('image/')) {
-      alert('画像ファイルのみアップロード可能です');
+      setValidationError('画像ファイルのみアップロード可能です');
       return;
     }
 
     // ファイルサイズチェック
     const maxSize = maxSizeMB * 1024 * 1024;
     if (file.size > maxSize) {
-      alert(`ファイルサイズは${maxSizeMB}MB以下である必要があります`);
+      setValidationError(`ファイルサイズは${maxSizeMB}MB以下である必要があります`);
       return;
     }
 
@@ -63,6 +66,7 @@ export function ImageUploadField({
 
   const handleRemoveClick = () => {
     setPreview(undefined);
+    setValidationError(undefined);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -72,6 +76,8 @@ export function ImageUploadField({
   const handleButtonClick = () => {
     fileInputRef.current?.click();
   };
+
+  const displayError = error || validationError;
 
   return (
     <div className="space-y-2">
@@ -129,8 +135,8 @@ export function ImageUploadField({
         </div>
       </div>
       
-      {error && (
-        <p className="text-sm text-red-500">{error}</p>
+      {displayError && (
+        <p className="text-sm text-red-500">{displayError}</p>
       )}
     </div>
   );

@@ -72,7 +72,8 @@ export function ProfileEditPage() {
   useEffect(() => {
     if (user) {
       setUsername(user.username || '');
-      setDisplayName(user.username || ''); // DisplayNameがAPIにない場合はusernameを使用
+      // Use username as display name if displayName is not available in API
+      setDisplayName(user.username || '');
       setBio(user.bio || '');
     }
   }, [user]);
@@ -80,9 +81,10 @@ export function ProfileEditPage() {
   // 変更検知
   useEffect(() => {
     if (user) {
+      const originalDisplayName = user.username || '';
       const changed = 
         username !== (user.username || '') ||
-        displayName !== (user.username || '') ||
+        displayName !== originalDisplayName ||
         bio !== (user.bio || '') ||
         profileImage !== null;
       setHasChanges(changed);
@@ -123,12 +125,12 @@ export function ProfileEditPage() {
       return;
     }
 
-    // TODO: 画像アップロード処理は後で実装
-    // 現在はテキストフィールドのみ更新
+    // TODO: Implement image upload processing later
+    // Currently only updating text fields
     updateProfile.mutate({
       name: displayName || username,
       bio: bio || undefined,
-      profileImage: undefined, // 画像アップロードAPIが必要
+      profileImage: undefined, // Image upload API needed
     });
   };
 
@@ -146,7 +148,7 @@ export function ProfileEditPage() {
 
   const handleImageSelect = (file: File) => {
     setProfileImage(file);
-    // プレビューは ImageUploadField 内で管理される
+    // Preview is managed within ImageUploadField
   };
 
   const handleImageRemove = () => {
