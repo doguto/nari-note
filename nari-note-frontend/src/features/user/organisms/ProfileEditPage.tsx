@@ -24,7 +24,7 @@ import { useAuth } from '@/lib/providers/AuthProvider';
  */
 export function ProfileEditPage() {
   const router = useRouter();
-  const { userId } = useAuth();
+  const { userId, isLoggedIn, isLoading: authLoading } = useAuth();
   
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -40,6 +40,13 @@ export function ProfileEditPage() {
   const [generalError, setGeneralError] = useState<string>();
   const [hasChanges, setHasChanges] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  // 認証チェック - 未ログインの場合はログインページへリダイレクト
+  useEffect(() => {
+    if (!authLoading && !isLoggedIn) {
+      router.push('/login');
+    }
+  }, [authLoading, isLoggedIn, router]);
 
   // ユーザー情報取得
   const { data: user, isLoading, error: loadError, refetch } = useGetUserProfile(
@@ -147,10 +154,13 @@ export function ProfileEditPage() {
     setProfileImagePreview(undefined);
   };
 
+  // 認証確認中の表示
+  if (authLoading) {
+    return <Loading text="認証情報を確認中..." />;
+  }
+
   if (!userId) {
-    return (
-      <ErrorMessage message="ログインが必要です" />
-    );
+    return null; // リダイレクト中
   }
 
   if (isLoading) {
