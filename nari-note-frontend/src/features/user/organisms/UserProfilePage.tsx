@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useGetUserProfile } from '@/lib/api';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { useAuth } from '@/lib/providers/AuthProvider';
+import { Button } from '@/components/ui/button';
 
 interface UserProfilePageProps {
   userId: number;
@@ -18,6 +20,9 @@ interface UserProfilePageProps {
  */
 export function UserProfilePage({ userId }: UserProfilePageProps) {
   const { data: user, isLoading, error, refetch } = useGetUserProfile({ id: userId });
+  const { userId: currentUserId } = useAuth();
+  
+  const isOwnProfile = currentUserId === userId;
 
   if (isLoading) {
     return <Loading text="ユーザー情報を読み込み中..." />;
@@ -74,9 +79,17 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
             </div>
           </div>
           
-          <button className="px-6 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors">
-            フォロー
-          </button>
+          {isOwnProfile ? (
+            <Link href="/settings/profile">
+              <Button variant="outline">
+                プロフィール編集
+              </Button>
+            </Link>
+          ) : (
+            <button className="px-6 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors">
+              フォロー
+            </button>
+          )}
         </div>
       </div>
       
