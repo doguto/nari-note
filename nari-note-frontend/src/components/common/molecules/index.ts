@@ -3,3 +3,7 @@ export { PasswordField } from './PasswordField';
 export { NameField } from './NameField';
 export { TagInput } from './TagInput';
 export { CharacterCounter } from './CharacterCounter';
+export { UsernameField } from './UsernameField';
+export { DisplayNameField } from './DisplayNameField';
+export { BioField } from './BioField';
+export { ProfileImageUpload } from './ProfileImageUpload';
