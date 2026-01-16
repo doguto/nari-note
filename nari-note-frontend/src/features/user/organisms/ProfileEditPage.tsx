@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { FormTitle, ErrorAlert } from '@/components/common/atoms';
 import { 
   UsernameField, 
-  DisplayNameField, 
   BioField, 
   ProfileImageUpload 
 } from '@/components/common/molecules';
@@ -27,13 +26,10 @@ export function ProfileEditPage() {
   const { userId, isLoggedIn, isLoading: authLoading } = useAuth();
   
   const [username, setUsername] = useState('');
-  const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [profileImagePreview, setProfileImagePreview] = useState<string | undefined>();
   const [errors, setErrors] = useState<{
     username?: string;
-    displayName?: string;
     bio?: string;
     profileImage?: string;
   }>({});
@@ -72,8 +68,6 @@ export function ProfileEditPage() {
   useEffect(() => {
     if (user) {
       setUsername(user.username || '');
-      // Use username as display name if displayName is not available in API
-      setDisplayName(user.username || '');
       setBio(user.bio || '');
     }
   }, [user]);
@@ -81,15 +75,13 @@ export function ProfileEditPage() {
   // 変更検知
   useEffect(() => {
     if (user) {
-      const originalDisplayName = user.username || '';
       const changed = 
         username !== (user.username || '') ||
-        displayName !== originalDisplayName ||
         bio !== (user.bio || '') ||
         profileImage !== null;
       setHasChanges(changed);
     }
-  }, [username, displayName, bio, profileImage, user]);
+  }, [username, bio, profileImage, user]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -101,11 +93,6 @@ export function ProfileEditPage() {
       newErrors.username = 'ユーザー名は3文字以上である必要があります';
     } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
       newErrors.username = 'ユーザー名は英数字とアンダースコアのみ使用可能です';
-    }
-
-    // 表示名バリデーション
-    if (displayName.length > 20) {
-      newErrors.displayName = '表示名は20文字以内である必要があります';
     }
 
     // 自己紹介文バリデーション
@@ -128,7 +115,7 @@ export function ProfileEditPage() {
     // TODO: Implement image upload processing later
     // Currently only updating text fields
     updateProfile.mutate({
-      name: displayName || username,
+      name: username,
       bio: bio || undefined,
       profileImage: undefined, // Image upload API needed
     });
@@ -148,12 +135,10 @@ export function ProfileEditPage() {
 
   const handleImageSelect = (file: File) => {
     setProfileImage(file);
-    // Preview is managed within ImageUploadField
   };
 
   const handleImageRemove = () => {
     setProfileImage(null);
-    setProfileImagePreview(undefined);
   };
 
   // 認証確認中の表示
@@ -186,7 +171,6 @@ export function ProfileEditPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <ProfileImageUpload
-          currentImage={profileImagePreview}
           onImageSelect={handleImageSelect}
           onImageRemove={handleImageRemove}
           error={errors.profileImage}
@@ -196,12 +180,6 @@ export function ProfileEditPage() {
           value={username}
           onChange={setUsername}
           error={errors.username}
-        />
-
-        <DisplayNameField
-          value={displayName}
-          onChange={setDisplayName}
-          error={errors.displayName}
         />
 
         <BioField
