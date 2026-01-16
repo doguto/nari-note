@@ -13,6 +13,11 @@ import { useGetUserProfile, useUpdateUserProfile } from '@/lib/api';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import type { GetUserProfileResponse } from '@/lib/api/types';
+
+interface ProfileEditPageProps {
+  initialUserData?: GetUserProfileResponse;
+}
 
 /**
  * ProfileEditPage - Organism Component
@@ -20,8 +25,10 @@ import { useAuth } from '@/lib/providers/AuthProvider';
  * プロフィール編集ページの完全な機能を持つコンポーネント
  * Atomic Designパターンにおける Organism として、
  * ビジネスロジックと UI を統合
+ * 
+ * @param initialUserData - Optional pre-fetched user data to avoid redundant API calls
  */
-export function ProfileEditPage() {
+export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) {
   const router = useRouter();
   const { userId, isLoggedIn, isLoading: authLoading } = useAuth();
   
@@ -44,11 +51,14 @@ export function ProfileEditPage() {
     }
   }, [authLoading, isLoggedIn, router]);
 
-  // ユーザー情報取得
-  const { data: user, isLoading, error: loadError, refetch } = useGetUserProfile(
+  // ユーザー情報取得 (initialUserDataがない場合のみフェッチ)
+  const { data: fetchedUser, isLoading, error: loadError, refetch } = useGetUserProfile(
     { id: userId || 0 },
-    { enabled: !!userId }
+    { enabled: !!userId && !initialUserData }
   );
+
+  // Use initialUserData if provided, otherwise use fetched data
+  const user = initialUserData || fetchedUser;
 
   // プロフィール更新
   const updateProfile = useUpdateUserProfile({
@@ -150,11 +160,12 @@ export function ProfileEditPage() {
     return null; // リダイレクト中
   }
 
-  if (isLoading) {
+  // Only show loading if we're actually fetching (not using initialUserData)
+  if (!initialUserData && isLoading) {
     return <Loading text="プロフィール情報を読み込み中..." />;
   }
 
-  if (loadError) {
+  if (!initialUserData && loadError) {
     return (
       <ErrorMessage 
         message="プロフィール情報の取得に失敗しました" 
