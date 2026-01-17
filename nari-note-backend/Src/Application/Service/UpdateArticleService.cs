@@ -34,17 +34,17 @@ public class UpdateArticleService
         if (request.IsPublished.HasValue)
         {
             article.IsPublished = request.IsPublished.Value;
-            
-            // IsPublishedがtrueになり、PublishedAtが未設定の場合は現在時刻を設定
-            if (article.IsPublished && !article.PublishedAt.HasValue && !request.PublishedAt.HasValue)
-            {
-                article.PublishedAt = DateTime.UtcNow;
-            }
         }
 
+        // PublishedAtが明示的に指定されている場合はそれを使用
         if (request.PublishedAt.HasValue)
         {
             article.PublishedAt = request.PublishedAt.Value;
+        }
+        // IsPublishedがtrueになり、PublishedAtがまだ未設定の場合は現在時刻を設定
+        else if (article.IsPublished && !article.PublishedAt.HasValue)
+        {
+            article.PublishedAt = DateTime.UtcNow;
         }
 
         article.UpdatedAt = DateTime.UtcNow;

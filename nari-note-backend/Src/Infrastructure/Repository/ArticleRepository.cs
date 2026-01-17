@@ -49,13 +49,12 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<List<Article>> FindByAuthorAsync(UserId authorId)
     {
-        var now = DateTime.UtcNow;
         return await context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
-            .Where(a => a.AuthorId == authorId && (!a.IsPublished || (a.PublishedAt.HasValue && a.PublishedAt.Value <= now)))
+            .Where(a => a.AuthorId == authorId)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
