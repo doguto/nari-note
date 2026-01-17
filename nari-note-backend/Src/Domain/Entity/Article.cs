@@ -30,6 +30,6 @@ public class Article : EntityBase
     public List<Comment> Comments { get; set; } = new();
 
     // Domain Logic
-    public bool IsLikedBy(int userId) => Likes.Any(l => l.UserId == userId);
+    public bool IsLikedBy(UserId userId) => Likes.Any(l => l.UserId == userId);
     public int LikeCount => Likes.Count;
 }

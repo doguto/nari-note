@@ -20,6 +20,6 @@ public class Notification : EntityBase
     public bool IsRead { get; set; } = false;
 
     // Navigation Properties
-    public required User User { get; set; }
-    public required Article Article { get; set; }
+    public User User { get; set; }
+    public Article Article { get; set; }
 }

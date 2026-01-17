@@ -2,30 +2,29 @@ using Vogen;
 
 namespace NariNoteBackend.Domain.ValueObject;
 
-[ValueObject<int>]
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct ArticleId;
 
-[ValueObject<int>]
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct ArticleTagId;
 
-[ValueObject<int>]
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct CommentId;
 
-[ValueObject<int>]
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct FollowId;
 
-[ValueObject<int>]
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct LikeId;
 
-[ValueObject<int>]
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct NotificationId;
 
-[ValueObject<int>]
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct SessionId;
 
-[ValueObject<int>]
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct TagId;
 
-[ValueObject<int>]
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct UserId;
-
