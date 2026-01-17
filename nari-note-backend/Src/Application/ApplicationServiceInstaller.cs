@@ -21,5 +21,6 @@ public static class ApplicationServiceInstaller
         services.AddScoped<HealthCheckService>();
         services.AddScoped<ToggleLikeService>();
         services.AddScoped<GetDraftArticlesService>();
+        services.AddScoped<CreateCommentService>();
     }
 }
