@@ -116,6 +116,17 @@ export interface GetUserProfileResponse {
 export interface HealthCheckRequest {
 }
 
+export interface SearchArticlesRequest {
+  keyword?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface SearchArticlesResponse {
+  articles?: ArticleDto[];
+  totalCount?: number;
+}
+
 export interface SignInRequest {
   usernameOrEmail?: string;
   password?: string;

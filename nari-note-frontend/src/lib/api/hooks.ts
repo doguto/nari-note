@@ -21,6 +21,8 @@ import type {
   GetHealthResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  SearchArticlesRequest,
+  SearchArticlesResponse,
   SignInRequest,
   SignUpRequest,
   ToggleLikeRequest,
@@ -39,6 +41,7 @@ export const queryKeys = {
     getArticlesByAuthor: ['articles', 'getArticlesByAuthor'] as const,
     getArticlesByTag: ['articles', 'getArticlesByTag'] as const,
     getDraftArticles: ['articles', 'getDraftArticles'] as const,
+    searchArticles: ['articles', 'searchArticles'] as const,
   },
   auth: {
   },
@@ -135,6 +138,14 @@ export function useGetDraftArticles(params: GetDraftArticlesRequest, options?: O
   return useQuery<GetDraftArticlesResponse>({
     queryKey: [...queryKeys.articles.getDraftArticles, params],
     queryFn: () => articlesApi.getDraftArticles(params),
+    ...options,
+  });
+}
+
+export function useSearchArticles(params: SearchArticlesRequest, options?: Omit<UseQueryOptions<SearchArticlesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<SearchArticlesResponse>({
+    queryKey: [...queryKeys.articles.searchArticles, params],
+    queryFn: () => articlesApi.searchArticles(params),
     ...options,
   });
 }

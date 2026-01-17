@@ -20,6 +20,8 @@ import type {
   GetHealthResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  SearchArticlesRequest,
+  SearchArticlesResponse,
   SignInRequest,
   SignUpRequest,
   ToggleLikeRequest,
@@ -65,6 +67,10 @@ export const articlesApi = {
   },
   getDraftArticles: async (data: GetDraftArticlesRequest): Promise<GetDraftArticlesResponse> => {
     const response = await apiClient.get<GetDraftArticlesResponse>('/api/articles/drafts', { params: data });
+    return response.data;
+  },
+  searchArticles: async (data: SearchArticlesRequest): Promise<SearchArticlesResponse> => {
+    const response = await apiClient.get<SearchArticlesResponse>('/api/articles/search', { params: data });
     return response.data;
   },
 };
