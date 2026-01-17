@@ -14,4 +14,5 @@ public class GetArticleResponse
     public bool IsPublished { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public List<CommentDto> Comments { get; set; } = new();
 }
