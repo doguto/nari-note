@@ -60,8 +60,8 @@ def load_value_object_types() -> set[str]:
     
     try:
         content = VALUE_OBJECT_FILE.read_text(encoding='utf-8')
-        # [ValueObject<int>] public partial struct XxxId; のパターンを探す
-        pattern = r'\[ValueObject<\w+>\]\s+public\s+partial\s+struct\s+(\w+);'
+        # [ValueObject<int>(Conversions.EfCoreValueConverter)] public partial struct XxxId; のパターンを探す
+        pattern = r'\[ValueObject<\w+>(?:\([^)]+\))?\]\s+public\s+partial\s+struct\s+(\w+);'
         for match in re.finditer(pattern, content):
             type_name = match.group(1)
             value_object_types.add(type_name)
