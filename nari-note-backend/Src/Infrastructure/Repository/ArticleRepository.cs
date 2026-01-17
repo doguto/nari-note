@@ -190,7 +190,7 @@ public class ArticleRepository : IArticleRepository
     public async Task<int> CountByAuthorAsync(UserId authorId)
     {
         return await context.Articles
-            .Where(a => a.AuthorId == authorId)
+            .Where(a => a.AuthorId == authorId && a.IsPublished)
             .CountAsync();
     }
 }
