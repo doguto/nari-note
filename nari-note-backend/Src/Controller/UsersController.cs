@@ -10,18 +10,19 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class UsersController : ApplicationController
 {
-    readonly GetUserProfileService getUserProfileService;
-    readonly UpdateUserProfileService updateUserProfileService;
-    readonly ToggleFollowService toggleFollowService;
     readonly GetFollowersService getFollowersService;
     readonly GetFollowingsService getFollowingsService;
+    readonly GetUserProfileService getUserProfileService;
+    readonly ToggleFollowService toggleFollowService;
+    readonly UpdateUserProfileService updateUserProfileService;
 
     public UsersController(
         GetUserProfileService getUserProfileService,
         UpdateUserProfileService updateUserProfileService,
         ToggleFollowService toggleFollowService,
         GetFollowersService getFollowersService,
-        GetFollowingsService getFollowingsService)
+        GetFollowingsService getFollowingsService
+    )
     {
         this.getUserProfileService = getUserProfileService;
         this.updateUserProfileService = updateUserProfileService;
@@ -34,8 +35,10 @@ public class UsersController : ApplicationController
     public async Task<ActionResult> GetUserProfile(UserId id)
     {
         var request = new GetUserProfileRequest { Id = id };
+
         // 認証済みの場合は現在のユーザーIDを渡す
-        var response = await getUserProfileService.ExecuteAsync(request, UserId);
+        UserId? userId = HasUserId ? UserId : null;
+        var response = await getUserProfileService.ExecuteAsync(request, userId);
         return Ok(response);
     }
 
@@ -50,8 +53,8 @@ public class UsersController : ApplicationController
     [HttpPost("{id}/follow")]
     public async Task<ActionResult> ToggleFollow(UserId id)
     {
-        var request = new ToggleFollowRequest 
-        { 
+        var request = new ToggleFollowRequest
+        {
             FollowingId = id
         };
         var response = await toggleFollowService.ExecuteAsync(UserId, request);
