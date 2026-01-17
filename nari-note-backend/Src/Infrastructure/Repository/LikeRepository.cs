@@ -92,4 +92,11 @@ public class LikeRepository : ILikeRepository
 
         return orderedArticles!;
     }
+
+    public async Task<int> CountLikedArticlesByUserAsync(UserId userId)
+    {
+        return await context.Likes
+            .Where(l => l.UserId == userId)
+            .CountAsync();
+    }
 }

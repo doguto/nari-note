@@ -39,12 +39,10 @@ public class GetUserProfileService
         }
 
         // 記事数を取得
-        var articles = await articleRepository.FindByAuthorAsync(request.Id);
-        var articleCount = articles.Count;
+        var articleCount = await articleRepository.CountByAuthorAsync(request.Id);
 
         // いいねした記事数を取得
-        var likedArticles = await likeRepository.FindLikedArticlesByUserAsync(request.Id);
-        var likedArticleCount = likedArticles.Count;
+        var likedArticleCount = await likeRepository.CountLikedArticlesByUserAsync(request.Id);
 
         return new GetUserProfileResponse
         {
