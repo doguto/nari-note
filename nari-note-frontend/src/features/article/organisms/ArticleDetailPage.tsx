@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { useGetArticle } from '@/lib/api';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { CommentForm } from './CommentForm';
 
 interface ArticleDetailPageProps {
   articleId: number;
@@ -112,6 +113,11 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
           ))}
         </div>
       )}
+
+      {/* コメント投稿フォーム */}
+      <div className="mt-8">
+        <CommentForm articleId={articleId} />
+      </div>
     </article>
   );
 }
