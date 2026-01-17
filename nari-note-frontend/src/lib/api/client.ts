@@ -1,5 +1,4 @@
-import axios from 'axios';
-import type { AxiosRequestConfig } from 'axios';
+import axios, { type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5243';
 
@@ -15,7 +14,7 @@ const axiosInstance = axios.create({
 
 // リクエストインターセプター（認証トークンの追加）
 axiosInstance.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -29,7 +28,8 @@ axiosInstance.interceptors.request.use(
 
 // レスポンスインターセプター（エラーハンドリング）
 axiosInstance.interceptors.response.use(
-  (response) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  <T = any>(response: AxiosResponse<T>): T => {
     return response.data;
   },
   (error) => {

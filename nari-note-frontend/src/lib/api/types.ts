@@ -19,6 +19,14 @@ export interface AuthResponse {
   userId?: number;
 }
 
+export interface CommentDto {
+  id?: number;
+  userId?: number;
+  userName?: string;
+  message?: string;
+  createdAt?: string;
+}
+
 export interface CreateArticleRequest {
   title?: string;
   body?: string;
@@ -67,6 +75,7 @@ export interface GetArticleResponse {
   isPublished?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  comments?: CommentDto[];
 }
 
 export interface GetArticlesByAuthorRequest {
@@ -129,6 +138,16 @@ export interface GetUserProfileResponse {
 export interface HealthCheckRequest {
 }
 
+export interface SearchArticlesRequest {
+  keyword?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface SearchArticlesResponse {
+  articles: ArticleDto[];
+}
+
 export interface SignInRequest {
   usernameOrEmail?: string;
   password?: string;
@@ -141,12 +160,12 @@ export interface SignUpRequest {
 }
 
 export interface ToggleFollowRequest {
-  followingId: number;
+  followingId?: number;
 }
 
 export interface ToggleFollowResponse {
-  isFollowing: boolean;
-  currentFollowerCount: number;
+  isFollowing?: boolean;
+  currentFollowerCount?: number;
 }
 
 export interface ToggleLikeRequest {

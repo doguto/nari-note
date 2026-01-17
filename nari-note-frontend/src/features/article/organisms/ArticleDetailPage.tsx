@@ -5,6 +5,9 @@ import ReactMarkdown from 'react-markdown';
 import { useGetArticle } from '@/lib/api';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { CommentForm } from './CommentForm';
+import { CommentList } from './CommentList';
+import { Comment } from '@/types/comment';
 
 interface ArticleDetailPageProps {
   articleId: number;
@@ -19,6 +22,11 @@ interface ArticleDetailPageProps {
  */
 export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const { data: article, isLoading, error, refetch } = useGetArticle({ id: articleId });
+
+  const handleCommentSuccess = () => {
+    // コメント投稿後、記事データを再取得してコメント一覧を更新
+    refetch();
+  };
 
   if (isLoading) {
     return <Loading text="記事を読み込み中..." />;
@@ -36,6 +44,15 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   if (!article) {
     return <ErrorMessage message="記事が見つかりません" />;
   }
+
+  // APIから取得したコメントをComment型に変換
+  const comments: Comment[] = (article.comments || []).map(c => ({
+    id: c.id || 0,
+    userId: c.userId || 0,
+    userName: c.userName || '',
+    message: c.message || '',
+    createdAt: c.createdAt || '',
+  }));
 
   return (
     <article className="bg-white rounded-lg shadow-lg p-8">
@@ -112,6 +129,16 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
           ))}
         </div>
       )}
+
+      {/* コメント一覧 */}
+      <div className="mt-8">
+        <CommentList comments={comments} />
+      </div>
+
+      {/* コメント投稿フォーム */}
+      <div className="mt-8">
+        <CommentForm articleId={articleId} onSuccess={handleCommentSuccess} />
+      </div>
     </article>
   );
 }
