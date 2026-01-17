@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.ValueObject;
-using NariNoteBackend.Infrastructure.Database;
 
-namespace NariNoteBackend.Infrastructure;
+namespace NariNoteBackend.Infrastructure.Database;
 
 public class NariNoteDbContext : DbContext
 {

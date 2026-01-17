@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.ValueObject;
 
-namespace NariNoteBackend.Infrastructure;
+namespace NariNoteBackend.Infrastructure.Database;
 
 public static class DataSeeder
 {
@@ -144,24 +144,66 @@ public static class DataSeeder
         var articleTags = new List<ArticleTag>
         {
             // 棒銀入門 -> 居飛車, 戦法, 初心者向け
-            new() { Id = ArticleTagId.From(1), ArticleId = articles[0].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = ArticleTagId.From(2), ArticleId = articles[0].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = ArticleTagId.From(3), ArticleId = articles[0].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow },
+            new()
+            {
+                Id = ArticleTagId.From(1), ArticleId = articles[0].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = ArticleTagId.From(2), ArticleId = articles[0].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = ArticleTagId.From(3), ArticleId = articles[0].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
+            },
             // 四間飛車 -> 振り飛車, 戦法, 初心者向け
-            new() { Id = ArticleTagId.From(4), ArticleId = articles[1].Id, TagId = tags[1].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = ArticleTagId.From(5), ArticleId = articles[1].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = ArticleTagId.From(6), ArticleId = articles[1].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow },
+            new()
+            {
+                Id = ArticleTagId.From(4), ArticleId = articles[1].Id, TagId = tags[1].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = ArticleTagId.From(5), ArticleId = articles[1].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = ArticleTagId.From(6), ArticleId = articles[1].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
+            },
             // 詰将棋 -> 詰将棋, 終盤, 初心者向け
-            new() { Id = ArticleTagId.From(7), ArticleId = articles[2].Id, TagId = tags[2].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = ArticleTagId.From(8), ArticleId = articles[2].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = ArticleTagId.From(9), ArticleId = articles[2].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow },
+            new()
+            {
+                Id = ArticleTagId.From(7), ArticleId = articles[2].Id, TagId = tags[2].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = ArticleTagId.From(8), ArticleId = articles[2].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = ArticleTagId.From(9), ArticleId = articles[2].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
+            },
             // 矢倉 -> 居飛車, 戦法
-            new() { Id = ArticleTagId.From(10), ArticleId = articles[3].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = ArticleTagId.From(11), ArticleId = articles[3].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow },
+            new()
+            {
+                Id = ArticleTagId.From(10), ArticleId = articles[3].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = ArticleTagId.From(11), ArticleId = articles[3].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
+            },
             // 王位戦感想 -> プロ棋戦, 棋譜解説, 終盤
-            new() { Id = ArticleTagId.From(12), ArticleId = articles[4].Id, TagId = tags[6].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = ArticleTagId.From(13), ArticleId = articles[4].Id, TagId = tags[5].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = ArticleTagId.From(14), ArticleId = articles[4].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow }
+            new()
+            {
+                Id = ArticleTagId.From(12), ArticleId = articles[4].Id, TagId = tags[6].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = ArticleTagId.From(13), ArticleId = articles[4].Id, TagId = tags[5].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = ArticleTagId.From(14), ArticleId = articles[4].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow
+            }
         };
 
         context.ArticleTags.AddRange(articleTags);
@@ -171,23 +213,71 @@ public static class DataSeeder
         var likes = new List<Like>
         {
             // 棒銀入門へのいいね
-            new() { Id = LikeId.From(1), UserId = users[1].Id, ArticleId = articles[0].Id, CreatedAt = DateTime.UtcNow.AddDays(-4) },
-            new() { Id = LikeId.From(2), UserId = users[2].Id, ArticleId = articles[0].Id, CreatedAt = DateTime.UtcNow.AddDays(-3) },
-            new() { Id = LikeId.From(3), UserId = users[3].Id, ArticleId = articles[0].Id, CreatedAt = DateTime.UtcNow.AddDays(-2) },
+            new()
+            {
+                Id = LikeId.From(1), UserId = users[1].Id, ArticleId = articles[0].Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-4)
+            },
+            new()
+            {
+                Id = LikeId.From(2), UserId = users[2].Id, ArticleId = articles[0].Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-3)
+            },
+            new()
+            {
+                Id = LikeId.From(3), UserId = users[3].Id, ArticleId = articles[0].Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-2)
+            },
             // 四間飛車へのいいね
-            new() { Id = LikeId.From(4), UserId = users[0].Id, ArticleId = articles[1].Id, CreatedAt = DateTime.UtcNow.AddDays(-3) },
-            new() { Id = LikeId.From(5), UserId = users[2].Id, ArticleId = articles[1].Id, CreatedAt = DateTime.UtcNow.AddDays(-2) },
-            new() { Id = LikeId.From(6), UserId = users[3].Id, ArticleId = articles[1].Id, CreatedAt = DateTime.UtcNow.AddDays(-1) },
+            new()
+            {
+                Id = LikeId.From(4), UserId = users[0].Id, ArticleId = articles[1].Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-3)
+            },
+            new()
+            {
+                Id = LikeId.From(5), UserId = users[2].Id, ArticleId = articles[1].Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-2)
+            },
+            new()
+            {
+                Id = LikeId.From(6), UserId = users[3].Id, ArticleId = articles[1].Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-1)
+            },
             // 詰将棋へのいいね
-            new() { Id = LikeId.From(7), UserId = users[0].Id, ArticleId = articles[2].Id, CreatedAt = DateTime.UtcNow.AddDays(-2) },
-            new() { Id = LikeId.From(8), UserId = users[1].Id, ArticleId = articles[2].Id, CreatedAt = DateTime.UtcNow.AddDays(-1) },
+            new()
+            {
+                Id = LikeId.From(7), UserId = users[0].Id, ArticleId = articles[2].Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-2)
+            },
+            new()
+            {
+                Id = LikeId.From(8), UserId = users[1].Id, ArticleId = articles[2].Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-1)
+            },
             // 矢倉へのいいね
-            new() { Id = LikeId.From(9), UserId = users[0].Id, ArticleId = articles[3].Id, CreatedAt = DateTime.UtcNow.AddDays(-1) },
-            new() { Id = LikeId.From(10), UserId = users[1].Id, ArticleId = articles[3].Id, CreatedAt = DateTime.UtcNow },
+            new()
+            {
+                Id = LikeId.From(9), UserId = users[0].Id, ArticleId = articles[3].Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-1)
+            },
+            new()
+            {
+                Id = LikeId.From(10), UserId = users[1].Id, ArticleId = articles[3].Id, CreatedAt = DateTime.UtcNow
+            },
             // 王位戦感想へのいいね
-            new() { Id = LikeId.From(11), UserId = users[0].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = LikeId.From(12), UserId = users[2].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow },
-            new() { Id = LikeId.From(13), UserId = users[3].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow }
+            new()
+            {
+                Id = LikeId.From(11), UserId = users[0].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = LikeId.From(12), UserId = users[2].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                Id = LikeId.From(13), UserId = users[3].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow
+            }
         };
 
         context.Likes.AddRange(likes);

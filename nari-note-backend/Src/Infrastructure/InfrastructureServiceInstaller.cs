@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Application.Security;
+using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Infrastructure.Database;
 using NariNoteBackend.Infrastructure.Repository;
 using NariNoteBackend.Infrastructure.Security;
 
@@ -10,7 +11,8 @@ public static class InfrastructureServiceInstaller
 {
     public static void AddInfrastructureServices(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration
+    )
     {
         // Register DbContext
         services.AddDbContext<NariNoteDbContext>(
@@ -23,7 +25,7 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<ISessionRepository, SessionRepository>();
         services.AddScoped<ILikeRepository, LikeRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
-        
+
         // Register helpers
         services.AddScoped<IJwtHelper, JwtHelper>();
         services.AddScoped<ICookieOptionsHelper, CookieOptionsHelper>();

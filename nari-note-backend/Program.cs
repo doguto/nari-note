@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Infrastructure;
+using NariNoteBackend.Infrastructure.Database;
 using NariNoteBackend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,14 +21,14 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers(options =>
-    {
-        options.ModelBinderProviders.Insert(0, new ValueObjectModelBinderProvider());
-    })
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-        options.JsonSerializerOptions.Converters.Add(new ValueObjectJsonConverterFactory());
-    });
+       {
+           options.ModelBinderProviders.Insert(0, new ValueObjectModelBinderProvider());
+       })
+       .AddJsonOptions(options =>
+       {
+           options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+           options.JsonSerializerOptions.Converters.Add(new ValueObjectJsonConverterFactory());
+       });
 // builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
 
