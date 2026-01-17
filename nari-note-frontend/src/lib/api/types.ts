@@ -60,6 +60,12 @@ export interface ErrorResponse {
   timeStamp?: string;
 }
 
+export interface FollowerUserDto {
+  id?: number;
+  username?: string;
+  profileImage?: string;
+}
+
 export interface GetArticleRequest {
   id?: number;
 }
@@ -115,6 +121,22 @@ export interface GetDraftArticlesResponse {
   articles?: ArticleDto[];
 }
 
+export interface GetFollowersRequest {
+  userId?: number;
+}
+
+export interface GetFollowersResponse {
+  followers?: FollowerUserDto[];
+}
+
+export interface GetFollowingsRequest {
+  userId?: number;
+}
+
+export interface GetFollowingsResponse {
+  followings?: FollowerUserDto[];
+}
+
 export interface GetHealthResponse {
   statusCode?: number;
   message?: string;
@@ -145,7 +167,7 @@ export interface SearchArticlesRequest {
 }
 
 export interface SearchArticlesResponse {
-  articles: ArticleDto[];
+  articles?: ArticleDto[];
 }
 
 export interface SignInRequest {
@@ -198,26 +220,4 @@ export interface UpdateUserProfileRequest {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdateUserProfileResponse {
-}
-
-export interface FollowerUserDto {
-  id?: number;
-  username?: string;
-  profileImage?: string;
-}
-
-export interface GetFollowersRequest {
-  id: number;
-}
-
-export interface GetFollowersResponse {
-  followers?: FollowerUserDto[];
-}
-
-export interface GetFollowingsRequest {
-  id: number;
-}
-
-export interface GetFollowingsResponse {
-  followings?: FollowerUserDto[];
 }
