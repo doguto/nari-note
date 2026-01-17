@@ -5,4 +5,7 @@ namespace NariNoteBackend.Domain.Repository;
 
 public interface IFollowRepository : IRepository<Follow, FollowId>
 {
+    Task<Follow?> FindByFollowerAndFollowingAsync(UserId followerId, UserId followingId);
+    Task<int> CountFollowersAsync(UserId userId);
+    Task<int> CountFollowingsAsync(UserId userId);
 }
