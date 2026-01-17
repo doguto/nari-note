@@ -128,12 +128,12 @@ export interface SignUpRequest {
 }
 
 export interface ToggleFollowRequest {
-  followingId?: number;
+  followingId: number;
 }
 
 export interface ToggleFollowResponse {
-  isFollowing?: boolean;
-  currentFollowerCount?: number;
+  isFollowing: boolean;
+  currentFollowerCount: number;
 }
 
 export interface ToggleLikeRequest {
