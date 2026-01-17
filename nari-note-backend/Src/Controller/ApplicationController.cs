@@ -5,5 +5,5 @@ namespace NariNoteBackend.Controller;
 
 public abstract class ApplicationController : ControllerBase
 {
-    protected UserId UserId => UserId.From((int)HttpContext.Items["UserId"]!);
+    protected UserId UserId => (UserId)HttpContext.Items["UserId"]!;
 }
