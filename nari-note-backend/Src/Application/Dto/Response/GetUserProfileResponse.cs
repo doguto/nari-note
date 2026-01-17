@@ -11,5 +11,7 @@ public class GetUserProfileResponse
     public int FollowerCount { get; set; }
     public int FollowingCount { get; set; }
     public bool IsFollowing { get; set; }
+    public int ArticleCount { get; set; }
+    public int LikedArticleCount { get; set; }
     // 注意: PasswordHash と Email は含めない
 }

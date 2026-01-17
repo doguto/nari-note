@@ -126,7 +126,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
                 onClick={handleArticlesClick}
                 className="hover:opacity-70 transition-opacity cursor-pointer"
               >
-                <span className="font-bold text-brand-text">{articlesData?.totalCount ?? 0}</span>
+                <span className="font-bold text-brand-text">{user.articleCount ?? 0}</span>
                 <span className="ml-1">記事</span>
               </button>
               <FollowStats

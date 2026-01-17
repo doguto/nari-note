@@ -164,6 +164,8 @@ export interface GetUserProfileResponse {
   followerCount?: number;
   followingCount?: number;
   isFollowing?: boolean;
+  articleCount?: number;
+  likedArticleCount?: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
