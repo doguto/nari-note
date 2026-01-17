@@ -123,8 +123,8 @@ export interface SearchArticlesRequest {
 }
 
 export interface SearchArticlesResponse {
-  articles?: ArticleDto[];
-  totalCount?: number;
+  articles: ArticleDto[];
+  totalCount: number;
 }
 
 export interface SignInRequest {
