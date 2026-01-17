@@ -13,22 +13,29 @@ public class UsersController : ApplicationController
     readonly GetUserProfileService getUserProfileService;
     readonly UpdateUserProfileService updateUserProfileService;
     readonly ToggleFollowService toggleFollowService;
+    readonly GetFollowersService getFollowersService;
+    readonly GetFollowingsService getFollowingsService;
 
     public UsersController(
         GetUserProfileService getUserProfileService,
         UpdateUserProfileService updateUserProfileService,
-        ToggleFollowService toggleFollowService)
+        ToggleFollowService toggleFollowService,
+        GetFollowersService getFollowersService,
+        GetFollowingsService getFollowingsService)
     {
         this.getUserProfileService = getUserProfileService;
         this.updateUserProfileService = updateUserProfileService;
         this.toggleFollowService = toggleFollowService;
+        this.getFollowersService = getFollowersService;
+        this.getFollowingsService = getFollowingsService;
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult> GetUserProfile(UserId id)
     {
         var request = new GetUserProfileRequest { Id = id };
-        var response = await getUserProfileService.ExecuteAsync(request);
+        // 認証済みの場合は現在のユーザーIDを渡す
+        var response = await getUserProfileService.ExecuteAsync(request, UserId);
         return Ok(response);
     }
 
@@ -48,6 +55,22 @@ public class UsersController : ApplicationController
             FollowingId = id
         };
         var response = await toggleFollowService.ExecuteAsync(UserId, request);
+        return Ok(response);
+    }
+
+    [HttpGet("{id}/followers")]
+    public async Task<ActionResult> GetFollowers(UserId id)
+    {
+        var request = new GetFollowersRequest { UserId = id };
+        var response = await getFollowersService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpGet("{id}/followings")]
+    public async Task<ActionResult> GetFollowings(UserId id)
+    {
+        var request = new GetFollowingsRequest { UserId = id };
+        var response = await getFollowingsService.ExecuteAsync(request);
         return Ok(response);
     }
 }

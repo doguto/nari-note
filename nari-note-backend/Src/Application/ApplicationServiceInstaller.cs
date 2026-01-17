@@ -23,5 +23,7 @@ public static class ApplicationServiceInstaller
         services.AddScoped<GetDraftArticlesService>();
         services.AddScoped<ToggleFollowService>();
         services.AddScoped<CreateCommentService>();
+        services.AddScoped<GetFollowersService>();
+        services.AddScoped<GetFollowingsService>();
     }
 }
