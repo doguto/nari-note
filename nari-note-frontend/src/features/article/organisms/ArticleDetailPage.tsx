@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { useGetArticle } from '@/lib/api';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { CommentForm } from './CommentForm';
+import { CommentList } from './CommentList';
+import { Comment } from '@/types/comment';
 
 interface ArticleDetailPageProps {
   articleId: number;
@@ -20,6 +23,11 @@ interface ArticleDetailPageProps {
  */
 export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const { data: article, isLoading, error, refetch } = useGetArticle({ id: articleId });
+  const [comments, setComments] = useState<Comment[]>([]);
+
+  const handleCommentSuccess = (newComment: Comment) => {
+    setComments((prev) => [...prev, newComment]);
+  };
 
   if (isLoading) {
     return <Loading text="記事を読み込み中..." />;
@@ -114,9 +122,14 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
         </div>
       )}
 
+      {/* コメント一覧 */}
+      <div className="mt-8">
+        <CommentList comments={comments} />
+      </div>
+
       {/* コメント投稿フォーム */}
       <div className="mt-8">
-        <CommentForm articleId={articleId} />
+        <CommentForm articleId={articleId} onCommentAdded={handleCommentSuccess} />
       </div>
     </article>
   );

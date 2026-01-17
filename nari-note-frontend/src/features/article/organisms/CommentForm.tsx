@@ -5,9 +5,11 @@ import { CommentField } from '@/components/common/molecules/CommentField';
 import { ErrorAlert } from '@/components/common/atoms/ErrorAlert';
 import { Button } from '@/components/ui/button';
 import { useCreateComment } from '@/lib/api';
+import { Comment } from '@/types/comment';
 
 interface CommentFormProps {
   articleId: number;
+  onCommentAdded?: (comment: Comment) => void;
   onSuccess?: () => void;
 }
 
@@ -18,12 +20,23 @@ interface CommentFormProps {
  * Atomic Designパターンにおける Organism として、
  * ビジネスロジックと UI を統合
  */
-export function CommentForm({ articleId, onSuccess }: CommentFormProps) {
+export function CommentForm({ articleId, onCommentAdded, onSuccess }: CommentFormProps) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState<string>('');
 
   const createComment = useCreateComment({
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // 投稿したコメントを作成（仮のユーザー情報を使用）
+      // TODO: 実際のユーザー情報をAPIから取得または認証コンテキストから取得
+      const newComment: Comment = {
+        id: data.id || Date.now(),
+        userId: 0, // 仮の値
+        userName: '現在のユーザー', // 仮の値
+        message: message,
+        createdAt: data.createdAt || new Date().toISOString(),
+      };
+      
+      onCommentAdded?.(newComment);
       setMessage('');
       setError('');
       onSuccess?.();
