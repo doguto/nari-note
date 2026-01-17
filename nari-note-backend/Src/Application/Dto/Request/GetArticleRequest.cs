@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Dto.Request;
 
 public class GetArticleRequest
 {
     [Required]
-    [Range(1, int.MaxValue, ErrorMessage = "Article ID must be a positive integer")]
-    public int Id { get; set; }
+    public ArticleId Id { get; set; }
 }

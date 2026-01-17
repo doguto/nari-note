@@ -16,6 +16,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetDraftArticlesRequest,
   GetDraftArticlesResponse,
   GetHealthResponse,
   GetUserProfileRequest,
@@ -130,10 +131,10 @@ export function useToggleLike(options?: UseMutationOptions<ToggleLikeResponse, E
   });
 }
 
-export function useGetDraftArticles(options?: Omit<UseQueryOptions<GetDraftArticlesResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetDraftArticles(params: GetDraftArticlesRequest, options?: Omit<UseQueryOptions<GetDraftArticlesResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetDraftArticlesResponse>({
-    queryKey: queryKeys.articles.getDraftArticles,
-    queryFn: () => articlesApi.getDraftArticles(),
+    queryKey: [...queryKeys.articles.getDraftArticles, params],
+    queryFn: () => articlesApi.getDraftArticles(params),
     ...options,
   });
 }

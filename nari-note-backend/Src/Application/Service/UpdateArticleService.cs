@@ -1,6 +1,7 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Application.Service;
@@ -14,7 +15,7 @@ public class UpdateArticleService
         this.articleRepository = articleRepository;
     }
 
-    public async Task<UpdateArticleResponse> ExecuteAsync(int userId, UpdateArticleRequest request)
+    public async Task<UpdateArticleResponse> ExecuteAsync(UserId userId, UpdateArticleRequest request)
     {
         var article = await articleRepository.FindForceByIdAsync(request.Id);
         if (article.AuthorId != userId) throw new UnauthorizedAccessException("この記事を更新する権限がありません");

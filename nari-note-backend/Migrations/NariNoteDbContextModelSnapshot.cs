@@ -25,10 +25,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer");
@@ -62,10 +59,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.ArticleTag", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ArticleId")
                         .HasColumnType("integer");
@@ -92,10 +86,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Comment", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ArticleId")
                         .HasColumnType("integer");
@@ -126,10 +117,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Follow", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -156,10 +144,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Like", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ArticleId")
                         .HasColumnType("integer");
@@ -186,10 +171,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Notification", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ArticleId")
                         .HasColumnType("integer");
@@ -218,10 +200,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Session", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -253,10 +232,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Tag", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -280,10 +256,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.User", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Bio")
                         .HasMaxLength(500)

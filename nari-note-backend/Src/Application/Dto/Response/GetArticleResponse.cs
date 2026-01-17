@@ -1,11 +1,13 @@
+using NariNoteBackend.Domain.ValueObject;
+
 namespace NariNoteBackend.Application.Dto.Response;
 
 public class GetArticleResponse
 {
-    public int Id { get; set; }
+    public ArticleId Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Body { get; set; } = string.Empty;
-    public int AuthorId { get; set; }
+    public UserId AuthorId { get; set; }
     public string AuthorName { get; set; } = string.Empty;
     public List<string> Tags { get; set; } = new();
     public int LikeCount { get; set; }

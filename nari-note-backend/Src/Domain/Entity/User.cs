@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
@@ -7,7 +8,7 @@ namespace NariNoteBackend.Domain.Entity;
 public class User : EntityBase
 {
     [Key]
-    public int Id { get; set; }
+    public UserId Id { get; set; }
 
     [Required]
     [MaxLength(50)]

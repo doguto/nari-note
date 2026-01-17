@@ -1,0 +1,52 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using NariNoteBackend.Domain.ValueObject;
+
+namespace NariNoteBackend.Middleware;
+
+public class ValueObjectJsonConverterFactory : JsonConverterFactory
+{
+    public override bool CanConvert(Type typeToConvert)
+    {
+        return {{CAN_CONVERT_CONDITIONS}};
+    }
+
+    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+    {
+        {{CREATE_CONVERTER_CASES}}
+
+        return null;
+    }
+}
+
+public class ValueObjectJsonConverter<T> : JsonConverter<T>
+{
+    public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            var value = reader.GetInt32();
+            var fromMethod = typeToConvert.GetMethod("From", new[] { typeof(int) });
+            if (fromMethod != null)
+            {
+                return (T)fromMethod.Invoke(null, new object[] { value })!;
+            }
+        }
+
+        throw new JsonException($"Unable to deserialize {typeToConvert.Name}");
+    }
+
+    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+    {
+        var valueProperty = typeof(T).GetProperty("Value");
+        if (valueProperty != null)
+        {
+            var intValue = (int)valueProperty.GetValue(value)!;
+            writer.WriteNumberValue(intValue);
+        }
+        else
+        {
+            throw new JsonException($"Unable to serialize {typeof(T).Name}");
+        }
+    }
+}

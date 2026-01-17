@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Controller;
@@ -60,7 +61,7 @@ public class ArticlesController : ApplicationController
     }
     
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetArticle(int id)
+    public async Task<ActionResult> GetArticle(ArticleId id)
     {
         var request = new GetArticleRequest { Id = id };
         var response = await getArticleService.ExecuteAsync(request);
@@ -69,7 +70,7 @@ public class ArticlesController : ApplicationController
     
     [HttpPut("{id}")]
     [ValidateModelState]
-    public async Task<ActionResult> UpdateArticle(int id, [FromBody] UpdateArticleRequest request)
+    public async Task<ActionResult> UpdateArticle(ArticleId id, [FromBody] UpdateArticleRequest request)
     {
         request.Id = id;
         var response = await updateArticleService.ExecuteAsync(UserId, request);
@@ -77,7 +78,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet("author/{authorId}")]
-    public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(int authorId)
+    public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(UserId authorId)
     {
         var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
         var response = await getArticlesByAuthorService.ExecuteAsync(request);
@@ -95,7 +96,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteArticle(int id)
+    public async Task<ActionResult> DeleteArticle(ArticleId id)
     {
         var request = new DeleteArticleRequest { Id = id };
         await deleteArticleService.ExecuteAsync(UserId, request);
@@ -103,13 +104,13 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost("{id}/like")]
-    public async Task<ActionResult> ToggleLike(int id)
+    public async Task<ActionResult> ToggleLike(ArticleId id)
     {
         var request = new ToggleLikeRequest 
         { 
             ArticleId = id
         };
-        var response = await this.toggleLikeService.ExecuteAsync(UserId, request);
+        var response = await toggleLikeService.ExecuteAsync(UserId, request);
         return Ok(response);
     }
 

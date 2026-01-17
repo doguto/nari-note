@@ -1,16 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
 public class Article : EntityBase
 {
     [Key]
-    public int Id { get; set; }
+    public ArticleId Id { get; set; }
 
     [Required]
     [ForeignKey("Author")]
-    public int AuthorId { get; set; }
+    public UserId AuthorId { get; set; }
 
     [Required]
     [MaxLength(50)]
@@ -29,6 +30,6 @@ public class Article : EntityBase
     public List<Comment> Comments { get; set; } = new();
 
     // Domain Logic
-    public bool IsLikedBy(int userId) => Likes.Any(l => l.UserId == userId);
+    public bool IsLikedBy(UserId userId) => Likes.Any(l => l.UserId == userId);
     public int LikeCount => Likes.Count;
 }

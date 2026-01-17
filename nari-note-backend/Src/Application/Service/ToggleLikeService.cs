@@ -2,6 +2,7 @@ using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -14,7 +15,7 @@ public class ToggleLikeService
         this.likeRepository = likeRepository;
     }
     
-    public async Task<ToggleLikeResponse> ExecuteAsync(int userId, ToggleLikeRequest request)
+    public async Task<ToggleLikeResponse> ExecuteAsync(UserId userId, ToggleLikeRequest request)
     {
         var existing = await likeRepository.FindByUserAndArticleAsync(userId, request.ArticleId);
         bool isLiked;

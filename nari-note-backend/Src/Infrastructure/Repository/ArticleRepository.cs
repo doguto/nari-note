@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -20,7 +22,7 @@ public class ArticleRepository : IArticleRepository
         return article;
     }
     
-    public async Task<Article?> FindByIdAsync(int id)
+    public async Task<Article?> FindByIdAsync(ArticleId id)
     {
         return await context.Articles
             .Include(a => a.Author)
@@ -30,7 +32,7 @@ public class ArticleRepository : IArticleRepository
             .FirstOrDefaultAsync(a => a.Id == id);
     }
 
-    public async Task<Article> FindForceByIdAsync(int id)
+    public async Task<Article> FindForceByIdAsync(ArticleId id)
     {
         var article = await FindByIdAsync(id);
         if (article == null) throw new KeyNotFoundException($"記事{id}が存在しません");
@@ -45,7 +47,7 @@ public class ArticleRepository : IArticleRepository
         return entity;
     }
 
-    public async Task<List<Article>> FindByAuthorAsync(int authorId)
+    public async Task<List<Article>> FindByAuthorAsync(UserId authorId)
     {
         return await context.Articles
             .Include(a => a.Author)
@@ -126,7 +128,7 @@ public class ArticleRepository : IArticleRepository
         return article;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(ArticleId id)
     {
         var article = await context.Articles.FindAsync(id);
         if (article != null)
@@ -158,7 +160,7 @@ public class ArticleRepository : IArticleRepository
         return (articles, totalCount);
     }
 
-    public async Task<List<Article>> FindDraftsByAuthorAsync(int authorId)
+    public async Task<List<Article>> FindDraftsByAuthorAsync(UserId authorId)
     {
         return await context.Articles
             .Include(a => a.Author)

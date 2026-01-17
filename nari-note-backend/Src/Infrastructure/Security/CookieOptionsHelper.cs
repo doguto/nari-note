@@ -1,5 +1,4 @@
-using Microsoft.AspNetCore.Http;
-using NariNoteBackend.Application.Security;
+using NariNoteBackend.Domain.Security;
 
 namespace NariNoteBackend.Infrastructure.Security;
 

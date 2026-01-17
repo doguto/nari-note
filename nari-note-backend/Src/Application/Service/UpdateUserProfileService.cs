@@ -1,6 +1,7 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Application.Service;
@@ -14,7 +15,7 @@ public class UpdateUserProfileService
         this.userRepository = userRepository;
     }
 
-    public async Task<UpdateUserProfileResponse> ExecuteAsync(int userId, UpdateUserProfileRequest request)
+    public async Task<UpdateUserProfileResponse> ExecuteAsync(UserId userId, UpdateUserProfileRequest request)
     {
         var user = await userRepository.FindForceByIdAsync(userId);
 

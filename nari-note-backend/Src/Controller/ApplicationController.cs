@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Controller;
 
 public abstract class ApplicationController : ControllerBase
 {
-    protected int UserId => (int)HttpContext.Items["UserId"]!;
+    protected UserId UserId => UserId.From((int)HttpContext.Items["UserId"]!);
 }

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
@@ -8,11 +9,11 @@ namespace NariNoteBackend.Domain.Entity;
 public class Session : EntityBase
 {
     [Key]
-    public int Id { get; set; }
+    public SessionId Id { get; set; }
 
     [Required]
     [ForeignKey("User")]
-    public int UserId { get; set; }
+    public UserId UserId { get; set; }
 
     [Required]
     [MaxLength(255)]
@@ -26,5 +27,5 @@ public class Session : EntityBase
     }
 
     // Navigation Properties
-    public required User User { get; set; }
+    public User User { get; set; }
 }

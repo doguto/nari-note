@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -20,12 +22,12 @@ public class SessionRepository : ISessionRepository
         return session;
     }
 
-    public async Task<Session?> FindByIdAsync(int id)
+    public async Task<Session?> FindByIdAsync(SessionId id)
     {
         return await context.Sessions.FindAsync(id);
     }
 
-    public async Task<Session> FindForceByIdAsync(int id)
+    public async Task<Session> FindForceByIdAsync(SessionId id)
     {
         var session = await FindByIdAsync(id);
         if (session == null) throw new KeyNotFoundException($"ID: {id} のセッションが見つかりません");
@@ -46,7 +48,7 @@ public class SessionRepository : ISessionRepository
             .FirstOrDefaultAsync(s => s.SessionKey == sessionKey);
     }
     
-    public async Task<List<Session>> FindByUserIdAsync(int userId)
+    public async Task<List<Session>> FindByUserIdAsync(UserId userId)
     {
         return await context.Sessions
             .Include(s => s.User)
@@ -55,7 +57,7 @@ public class SessionRepository : ISessionRepository
             .ToListAsync();
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(SessionId id)
     {
         var session = await context.Sessions.FindAsync(id);
         if (session != null)
@@ -65,7 +67,7 @@ public class SessionRepository : ISessionRepository
         }
     }
 
-    public async Task DeleteAllByUserIdAsync(int userId)
+    public async Task DeleteAllByUserIdAsync(UserId userId)
     {
         var sessions = await context.Sessions
             .Where(s => s.UserId == userId)
