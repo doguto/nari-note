@@ -81,6 +81,12 @@ export function PublishSettingsDialog({
     const selectedDate = new Date(scheduledDateTime);
     const now = new Date();
 
+    // 無効な日付をチェック
+    if (isNaN(selectedDate.getTime())) {
+      setValidationError('有効な日時を選択してください');
+      return false;
+    }
+
     if (selectedDate <= now) {
       setValidationError('未来の日時を選択してください');
       return false;
@@ -101,8 +107,18 @@ export function PublishSettingsDialog({
     } else {
       // 予約投稿: 選択した日時をISO 8601形式（UTC）で送信
       // datetime-local input から取得したローカル時刻を UTC に変換
-      const selectedDate = new Date(scheduledDateTime);
-      onPublish(selectedDate.toISOString());
+      try {
+        const selectedDate = new Date(scheduledDateTime);
+        if (isNaN(selectedDate.getTime())) {
+          setValidationError('有効な日時を選択してください');
+          return;
+        }
+        onPublish(selectedDate.toISOString());
+      } catch (error) {
+        console.error('日時の変換エラー:', error);
+        setValidationError('日時の形式が正しくありません');
+        return;
+      }
     }
   };
 
