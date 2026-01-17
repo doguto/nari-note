@@ -31,6 +31,8 @@ public class UpdateArticleService
             article.Body = request.Body!;
         }
 
+        var wasPublished = article.IsPublished;
+        
         if (request.IsPublished.HasValue)
         {
             article.IsPublished = request.IsPublished.Value;
@@ -41,8 +43,8 @@ public class UpdateArticleService
         {
             article.PublishedAt = request.PublishedAt.Value;
         }
-        // IsPublishedがtrueになり、PublishedAtがまだ未設定の場合は現在時刻を設定
-        else if (article.IsPublished && !article.PublishedAt.HasValue)
+        // IsPublishedがfalseからtrueに変わり、PublishedAtがまだ未設定の場合は現在時刻を設定
+        else if (!wasPublished && article.IsPublished && !article.PublishedAt.HasValue)
         {
             article.PublishedAt = DateTime.UtcNow;
         }
