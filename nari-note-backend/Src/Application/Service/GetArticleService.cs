@@ -33,14 +33,16 @@ public class GetArticleService
             IsPublished = article.IsPublished,
             CreatedAt = article.CreatedAt,
             UpdatedAt = article.UpdatedAt,
-            Comments = comments.Select(c => new CommentDto
-            {
-                Id = c.Id,
-                UserId = c.UserId,
-                UserName = c.User?.Name ?? "",
-                Message = c.Message,
-                CreatedAt = c.CreatedAt
-            }).OrderBy(c => c.CreatedAt).ToList()
+            Comments = comments
+                .Where(c => !string.IsNullOrEmpty(c.User?.Name))
+                .Select(c => new CommentDto
+                {
+                    Id = c.Id,
+                    UserId = c.UserId,
+                    UserName = c.User!.Name,
+                    Message = c.Message,
+                    CreatedAt = c.CreatedAt
+                }).OrderBy(c => c.CreatedAt).ToList()
         };
     }
 }
