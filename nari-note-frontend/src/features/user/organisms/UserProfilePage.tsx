@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useGetUserProfile, useToggleFollow, useGetFollowers, useGetFollowings } from '@/lib/api';
+import { useGetUserProfile, useToggleFollow, useGetFollowers, useGetFollowings, useGetArticlesByAuthor, useGetLikedArticles } from '@/lib/api';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { useAuth } from '@/lib/providers/AuthProvider';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { FollowButton } from '@/components/common/atoms';
 import { FollowStats } from '@/components/common/atoms';
 import { UserListItem } from '@/components/common/molecules';
+import { ArticleList } from './ArticleList';
 
 interface UserProfilePageProps {
   userId: number;
@@ -49,6 +50,18 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
   const { data: followingsData, isLoading: isFollowingsLoading, error: followingsError, refetch: refetchFollowings } = useGetFollowings(
     { userId: userId },
     { enabled: activeTab === 'followings' }
+  );
+  
+  // ユーザーの記事取得（タブがarticlesの場合のみ）
+  const { data: articlesData, isLoading: isArticlesLoading, error: articlesError, refetch: refetchArticles } = useGetArticlesByAuthor(
+    { authorId: userId },
+    { enabled: activeTab === 'articles' }
+  );
+  
+  // いいねした記事取得（タブがlikesの場合のみ）
+  const { data: likedArticlesData, isLoading: isLikedArticlesLoading, error: likedArticlesError, refetch: refetchLikedArticles } = useGetLikedArticles(
+    { userId: userId },
+    { enabled: activeTab === 'likes' }
   );
   
   const isOwnProfile = currentUserId === userId;
@@ -113,7 +126,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
                 onClick={handleArticlesClick}
                 className="hover:opacity-70 transition-opacity cursor-pointer"
               >
-                <span className="font-bold text-brand-text">0</span>
+                <span className="font-bold text-brand-text">{articlesData?.totalCount ?? 0}</span>
                 <span className="ml-1">記事</span>
               </button>
               <FollowStats
@@ -214,15 +227,23 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
         {/* タブコンテンツ */}
         <div className="p-6">
           {activeTab === 'articles' && (
-            <div className="text-center py-8 text-gray-500">
-              記事一覧は今後実装予定です
-            </div>
+            <ArticleList
+              articles={articlesData?.articles}
+              isLoading={isArticlesLoading}
+              error={articlesError}
+              onRetry={refetchArticles}
+              emptyMessage="まだ記事がありません"
+            />
           )}
           
           {activeTab === 'likes' && (
-            <div className="text-center py-8 text-gray-500">
-              いいね一覧は今後実装予定です
-            </div>
+            <ArticleList
+              articles={likedArticlesData?.articles}
+              isLoading={isLikedArticlesLoading}
+              error={likedArticlesError}
+              onRetry={refetchLikedArticles}
+              emptyMessage="いいねした記事がありません"
+            />
           )}
           
           {activeTab === 'following-tags' && (
