@@ -25,7 +25,7 @@ interface FollowersModalProps {
  */
 export function FollowersModal({ userId, isOpen, onClose }: FollowersModalProps) {
   const { data, isLoading, error, refetch } = useGetFollowers(
-    { id: userId },
+    { userId: userId },
     { enabled: isOpen } // モーダルが開いているときのみデータ取得
   );
 
