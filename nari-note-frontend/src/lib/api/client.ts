@@ -1,8 +1,10 @@
-import axios, { type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosResponse, type InternalAxiosRequestConfig, type AxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5243';
 
-export const apiClient = axios.create({
+// APIクライアントの型定義を拡張
+// インターセプターでresponse.dataを返すため、型を調整
+const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -11,7 +13,7 @@ export const apiClient = axios.create({
 });
 
 // リクエストインターセプター（認証トークンの追加）
-apiClient.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
     if (token) {
@@ -25,7 +27,7 @@ apiClient.interceptors.request.use(
 );
 
 // レスポンスインターセプター（エラーハンドリング）
-apiClient.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   <T = any>(response: AxiosResponse<T>): T => {
     return response.data;
@@ -40,3 +42,19 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// 型安全なAPIクライアント
+export const apiClient = {
+  get: <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
+    return axiosInstance.get(url, config) as Promise<T>;
+  },
+  post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
+    return axiosInstance.post(url, data, config) as Promise<T>;
+  },
+  put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
+    return axiosInstance.put(url, data, config) as Promise<T>;
+  },
+  delete: <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
+    return axiosInstance.delete(url, config) as Promise<T>;
+  },
+};

@@ -19,6 +19,10 @@ import type {
   GetArticlesResponse,
   GetDraftArticlesRequest,
   GetDraftArticlesResponse,
+  GetFollowersRequest,
+  GetFollowersResponse,
+  GetFollowingsRequest,
+  GetFollowingsResponse,
   GetHealthResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -115,6 +119,14 @@ export const usersApi = {
   },
   toggleFollow: async (data: ToggleFollowRequest): Promise<ToggleFollowResponse> => {
     const response = await apiClient.post<ToggleFollowResponse>(`/api/users/${data.id}/follow`);
+    return response;
+  },
+  getFollowers: async (data: GetFollowersRequest): Promise<GetFollowersResponse> => {
+    const response = await apiClient.get<GetFollowersResponse>(`/api/users/${data.userId}/followers`);
+    return response;
+  },
+  getFollowings: async (data: GetFollowingsRequest): Promise<GetFollowingsResponse> => {
+    const response = await apiClient.get<GetFollowingsResponse>(`/api/users/${data.userId}/followings`);
     return response;
   },
 };

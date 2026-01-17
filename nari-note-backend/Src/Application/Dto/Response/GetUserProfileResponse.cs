@@ -8,5 +8,8 @@ public class GetUserProfileResponse
     public string Username { get; set; } = string.Empty;
     public string? Bio { get; set; }
     public DateTime CreatedAt { get; set; }
+    public int FollowerCount { get; set; }
+    public int FollowingCount { get; set; }
+    public bool IsFollowing { get; set; }
     // 注意: PasswordHash と Email は含めない
 }
