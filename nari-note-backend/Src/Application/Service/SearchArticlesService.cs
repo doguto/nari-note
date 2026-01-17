@@ -16,7 +16,7 @@ public class SearchArticlesService
     
     public async Task<SearchArticlesResponse> ExecuteAsync(SearchArticlesRequest request)
     {
-        var (articles, totalCount) = await articleRepository.SearchAsync(request.Keyword, request.Limit, request.Offset);
+        var articles = await articleRepository.SearchAsync(request.Keyword, request.Limit, request.Offset);
 
         var articleDtos = articles.Select(a => new ArticleDto
         {
@@ -34,8 +34,7 @@ public class SearchArticlesService
 
         return new SearchArticlesResponse
         {
-            Articles = articleDtos,
-            TotalCount = totalCount
+            Articles = articleDtos
         };
     }
 }

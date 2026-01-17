@@ -133,8 +133,7 @@ export interface SearchArticlesRequest {
 }
 
 export interface SearchArticlesResponse {
-  articles?: ArticleDto[];
-  totalCount?: number;
+  articles: ArticleDto[];
 }
 
 export interface SignInRequest {

@@ -171,29 +171,19 @@ public class ArticleRepository : IArticleRepository
             .ToListAsync();
     }
 
-    public async Task<(List<Article> Articles, int TotalCount)> SearchAsync(string keyword, int limit, int offset)
+    public async Task<List<Article>> SearchAsync(string keyword, int limit, int offset)
     {
-        // Escape special characters to prevent SQL injection
-        // PostgreSQL LIKE special characters: % (any string) and _ (any single character)
-        var escapedKeyword = keyword
-            .Replace("\\", "\\\\")  // Escape backslash first
-            .Replace("%", "\\%")    // Escape percent
-            .Replace("_", "\\_");   // Escape underscore
-
-        var query = context.Articles
+        var articles = await context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
-            .Where(a => a.IsPublished && (EF.Functions.ILike(a.Title, $"%{escapedKeyword}%") || EF.Functions.ILike(a.Body, $"%{escapedKeyword}%")))
-            .OrderByDescending(a => a.CreatedAt);
-
-        var totalCount = await query.CountAsync();
-        var articles = await query
+            .Where(a => a.IsPublished && (a.Title.Contains(keyword) || a.Body.Contains(keyword)))
+            .OrderByDescending(a => a.CreatedAt)
             .Skip(offset)
             .Take(limit)
             .ToListAsync();
 
-        return (articles, totalCount);
+        return articles;
     }
 }
