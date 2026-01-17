@@ -6,6 +6,8 @@ import type {
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
+  CreateCommentRequest,
+  CreateCommentResponse,
   DeleteArticleRequest,
   GetArticleRequest,
   GetArticleResponse,
@@ -66,6 +68,10 @@ export const articlesApi = {
   getDraftArticles: async (data: GetDraftArticlesRequest): Promise<GetDraftArticlesResponse> => {
     const response = await apiClient.get<GetDraftArticlesResponse>('/api/articles/drafts', { params: data });
     return response;
+  },
+  createComment: async (data: CreateCommentRequest): Promise<CreateCommentResponse> => {
+    const response = await apiClient.post<CreateCommentResponse>(`/api/articles/${data.articleId}/comments`, data);
+    return response.data;
   },
 };
 
