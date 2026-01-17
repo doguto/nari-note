@@ -20,6 +20,7 @@ public class ArticlesController : ApplicationController
     readonly DeleteArticleService deleteArticleService;
     readonly ToggleLikeService toggleLikeService;
     readonly GetDraftArticlesService getDraftArticlesService;
+    readonly SearchArticlesService searchArticlesService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
@@ -30,7 +31,8 @@ public class ArticlesController : ApplicationController
         GetArticleService getArticleService,
         DeleteArticleService deleteArticleService,
         ToggleLikeService toggleLikeService,
-        GetDraftArticlesService getDraftArticlesService)
+        GetDraftArticlesService getDraftArticlesService,
+        SearchArticlesService searchArticlesService)
     {
         this.createArticleService = createArticleService;
         this.updateArticleService = updateArticleService;
@@ -41,6 +43,7 @@ public class ArticlesController : ApplicationController
         this.deleteArticleService = deleteArticleService;
         this.toggleLikeService = toggleLikeService;
         this.getDraftArticlesService = getDraftArticlesService;
+        this.searchArticlesService = searchArticlesService;
     }
     
     [HttpGet]
@@ -118,6 +121,15 @@ public class ArticlesController : ApplicationController
     public async Task<ActionResult<GetDraftArticlesResponse>> GetDraftArticles()
     {
         var response = await getDraftArticlesService.ExecuteAsync(UserId);
+        return Ok(response);
+    }
+
+    [HttpGet("search")]
+    [ValidateModelState]
+    public async Task<ActionResult<SearchArticlesResponse>> SearchArticles([FromQuery] string keyword, [FromQuery] int limit = 20, [FromQuery] int offset = 0)
+    {
+        var request = new SearchArticlesRequest { Keyword = keyword, Limit = limit, Offset = offset };
+        var response = await searchArticlesService.ExecuteAsync(request);
         return Ok(response);
     }
 }
