@@ -126,9 +126,8 @@ public class ArticlesController : ApplicationController
 
     [HttpGet("search")]
     [ValidateModelState]
-    public async Task<ActionResult<SearchArticlesResponse>> SearchArticles([FromQuery] string keyword, [FromQuery] int limit = 20, [FromQuery] int offset = 0)
+    public async Task<ActionResult<SearchArticlesResponse>> SearchArticles([FromQuery] SearchArticlesRequest request)
     {
-        var request = new SearchArticlesRequest { Keyword = keyword, Limit = limit, Offset = offset };
         var response = await searchArticlesService.ExecuteAsync(request);
         return Ok(response);
     }

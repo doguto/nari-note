@@ -117,7 +117,7 @@ export interface HealthCheckRequest {
 }
 
 export interface SearchArticlesRequest {
-  keyword?: string;
+  keyword: string;
   limit?: number;
   offset?: number;
 }
