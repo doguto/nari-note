@@ -1,6 +1,10 @@
 import re
 from pathlib import Path
 from typing import List
+import inflect
+
+# inflectエンジンの初期化
+P = inflect.engine()
 
 # プロジェクトのルートディレクトリ
 BACKEND_ROOT = Path(__file__).parent.parent
@@ -9,6 +13,7 @@ TEMPLATES_DIR = SCRIPTS_DIR / "templates"
 
 ENTITY_DIR = BACKEND_ROOT / "Src" / "Domain" / "Entity"
 REPOSITORY_DIR = BACKEND_ROOT / "Src" / "Domain" / "Repository"
+ID_VALUE_GENERATOR_DIR = BACKEND_ROOT / "Src" / "Infrastructure" / "Database" / "IdValueGenerator"
 VALUE_OBJECT_FILE = BACKEND_ROOT / "Src" / "Domain" / "ValueObject" / "EntityKeyObject.cs"
 CONVERTER_FILE = BACKEND_ROOT / "Src" / "Middleware" / "ValueObjectJsonConverterFactory.cs"
 
@@ -47,7 +52,7 @@ def generate_value_objects(entities: List[str]) -> str:
 
     definitions = []
     for entity in entities:
-        definitions.append(f"[ValueObject<int>]")
+        definitions.append(f"[ValueObject<int>(Conversions.EfCoreValueConverter)]")
         definitions.append(f"public partial struct {entity}Id;")
         definitions.append("")
 
@@ -92,6 +97,25 @@ def generate_repository_interfaces(entities: List[str]) -> List[str]:
     return generated
 
 
+# IdValueGeneratorの生成（既存ファイルはスキップ）
+def generate_id_value_generators(entities: List[str]) -> List[str]:
+    template = load_template("id_value_generator.template")
+    generated = []
+
+    for entity in entities:
+        file_path = ID_VALUE_GENERATOR_DIR / f"{entity}IdValueGenerator.cs"
+        if file_path.exists():
+            continue
+
+        plural_form = P.plural(entity)
+        content = template.replace("{{ENTITY_NAME}}", entity).replace("{{ENTITY_NAME_PLURAL}}", plural_form)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        generated.append(entity)
+
+    return generated
+
+
 def main():
     print("🔍 Entityファイルを解析中...")
     entities = extract_entities_from_files()
@@ -121,6 +145,14 @@ def main():
     generated_repos = generate_repository_interfaces(entities)
     if generated_repos:
         print(f"✅ 新規生成: {', '.join([f'I{e}Repository.cs' for e in generated_repos])}")
+    else:
+        print("ℹ️ 新規生成なし（すべて既存）")
+    
+    # IdValueGenerator生成（既存ファイルはスキップ）
+    print("\n📝 IdValueGeneratorを生成中...")
+    generated_generators = generate_id_value_generators(entities)
+    if generated_generators:
+        print(f"✅ 新規生成: {', '.join([f'{e}IdValueGenerator.cs' for e in generated_generators])}")
     else:
         print("ℹ️ 新規生成なし（すべて既存）")
     
