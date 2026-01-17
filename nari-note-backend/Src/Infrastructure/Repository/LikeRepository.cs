@@ -63,17 +63,23 @@ public class LikeRepository : ILikeRepository
 
     public async Task<List<Article>> FindLikedArticlesByUserAsync(UserId userId)
     {
-        return await context.Likes
+        var likedArticleIds = await context.Likes
             .Where(l => l.UserId == userId)
-            .Include(l => l.Article)
-                .ThenInclude(a => a.Author)
-            .Include(l => l.Article)
-                .ThenInclude(a => a.ArticleTags)
-                    .ThenInclude(at => at.Tag)
-            .Include(l => l.Article)
-                .ThenInclude(a => a.Likes)
             .OrderByDescending(l => l.CreatedAt)
-            .Select(l => l.Article)
+            .Select(l => l.ArticleId)
+            .ToListAsync();
+
+        if (!likedArticleIds.Any())
+        {
+            return new List<Article>();
+        }
+
+        return await context.Articles
+            .Where(a => likedArticleIds.Contains(a.Id))
+            .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(a => a.Likes)
             .ToListAsync();
     }
 }

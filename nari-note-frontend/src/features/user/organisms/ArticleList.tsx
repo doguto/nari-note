@@ -55,7 +55,7 @@ export function ArticleList({
       {articlesWithId.map((article) => (
         <HomeArticleCard
           key={article.id}
-          id={article.id!}
+          id={article.id as number}
           title={article.title ?? ''}
           author={article.authorName ?? ''}
           authorId={article.authorId ?? 0}
