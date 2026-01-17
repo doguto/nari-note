@@ -31,6 +31,7 @@ public class GetArticleService
             Tags = article.ArticleTags.Select(at => at.Tag?.Name ?? string.Empty).Where(name => !string.IsNullOrEmpty(name)).ToList(),
             LikeCount = article.LikeCount,
             IsPublished = article.IsPublished,
+            PublishedAt = article.PublishedAt,
             CreatedAt = article.CreatedAt,
             UpdatedAt = article.UpdatedAt,
             Comments = comments

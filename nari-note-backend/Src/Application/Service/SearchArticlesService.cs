@@ -28,6 +28,7 @@ public class SearchArticlesService
             Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
             LikeCount = a.Likes.Count,
             IsPublished = a.IsPublished,
+            PublishedAt = a.PublishedAt,
             CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
         }).ToList();

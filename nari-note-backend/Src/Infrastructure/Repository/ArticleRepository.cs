@@ -49,24 +49,26 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<List<Article>> FindByAuthorAsync(UserId authorId)
     {
+        var now = DateTime.UtcNow;
         return await context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
-            .Where(a => a.AuthorId == authorId)
+            .Where(a => a.AuthorId == authorId && (!a.IsPublished || (a.PublishedAt.HasValue && a.PublishedAt.Value <= now)))
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
     
     public async Task<List<Article>> FindByTagAsync(string tagName)
     {
+        var now = DateTime.UtcNow;
         return await context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
-            .Where(a => a.ArticleTags.Any(at => EF.Functions.ILike(at.Tag.Name, tagName)))
+            .Where(a => a.ArticleTags.Any(at => EF.Functions.ILike(at.Tag.Name, tagName)) && a.IsPublished && a.PublishedAt.HasValue && a.PublishedAt.Value <= now)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
@@ -140,12 +142,13 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<(List<Article> Articles, int TotalCount)> FindLatestAsync(int limit, int offset)
     {
+        var now = DateTime.UtcNow;
         var query = context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
-            .Where(a => a.IsPublished)
+            .Where(a => a.IsPublished && a.PublishedAt.HasValue && a.PublishedAt.Value <= now)
             .OrderByDescending(a => a.CreatedAt);
 
         // 注: ページネーションの標準的な実装として、
@@ -173,12 +176,13 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<List<Article>> SearchAsync(string keyword, int limit, int offset)
     {
+        var now = DateTime.UtcNow;
         var articles = await context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
-            .Where(a => a.IsPublished && (a.Title.Contains(keyword) || a.Body.Contains(keyword)))
+            .Where(a => a.IsPublished && a.PublishedAt.HasValue && a.PublishedAt.Value <= now && (a.Title.Contains(keyword) || a.Body.Contains(keyword)))
             .OrderByDescending(a => a.CreatedAt)
             .Skip(offset)
             .Take(limit)
