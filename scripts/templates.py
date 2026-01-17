@@ -47,10 +47,10 @@ def generate_api_function(func_name: str, request_type: str, response_type: str,
             lines.append(f"    await apiClient.delete({url_expression});")
         elif http_method == "GET":
             lines.append(f"    const response = await apiClient.get<{response_type}>({url_expression});")
-            lines.append("    return response.data;")
+            lines.append("    return response;")
         else:
             lines.append(f"    const response = await apiClient.{http_method.lower()}<{response_type}>({url_expression});")
-            lines.append("    return response.data;")
+            lines.append("    return response;")
     else:
         lines.append(f"  {func_name}: async (data: {request_type}): Promise<{response_type}> => {{")
         if http_method == "DELETE":
@@ -60,13 +60,13 @@ def generate_api_function(func_name: str, request_type: str, response_type: str,
                 lines.append(f"    const response = await apiClient.get<{response_type}>({url_expression});")
             else:
                 lines.append(f"    const response = await apiClient.get<{response_type}>({url_expression}, {{ params: data }});")
-            lines.append("    return response.data;")
+            lines.append("    return response;")
         else:
             if send_body:
                 lines.append(f"    const response = await apiClient.{http_method.lower()}<{response_type}>({url_expression}, data);")
             else:
                 lines.append(f"    const response = await apiClient.{http_method.lower()}<{response_type}>({url_expression});")
-            lines.append("    return response.data;")
+            lines.append("    return response;")
     
     lines.append("  },")
     return lines
