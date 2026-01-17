@@ -3,30 +3,30 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using NariNoteBackend.Application.Security;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.Security;
 
 namespace NariNoteBackend.Infrastructure.Security;
 
 public class JwtHelper : IJwtHelper
 {
-    readonly string secret;
-    readonly string issuer;
     readonly string audience;
     readonly int expirationInHours;
-    
+    readonly string issuer;
+    readonly string secret;
+
     public JwtHelper(IConfiguration configuration)
     {
-        secret = configuration["Jwt:Secret"] 
-            ?? throw new InvalidOperationException("JWT Secret is not configured");
-        issuer = configuration["Jwt:Issuer"] 
-            ?? throw new InvalidOperationException("JWT Issuer is not configured");
-        audience = configuration["Jwt:Audience"] 
-            ?? throw new InvalidOperationException("JWT Audience is not configured");
+        secret = configuration["Jwt:Secret"]
+                 ?? throw new InvalidOperationException("JWT Secret is not configured");
+        issuer = configuration["Jwt:Issuer"]
+                 ?? throw new InvalidOperationException("JWT Issuer is not configured");
+        audience = configuration["Jwt:Audience"]
+                   ?? throw new InvalidOperationException("JWT Audience is not configured");
         expirationInHours = int.Parse(
             configuration["Jwt:ExpirationInHours"] ?? "24");
     }
-    
+
     public int GetExpirationInHours()
     {
         return expirationInHours;
@@ -34,9 +34,9 @@ public class JwtHelper : IJwtHelper
 
     public string GenerateToken(User user, string sessionKey)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.secret));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        
+
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -45,23 +45,23 @@ public class JwtHelper : IJwtHelper
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim("sessionKey", sessionKey)
         };
-        
+
         var token = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddHours(this.expirationInHours),
+            issuer,
+            audience,
+            claims,
+            expires: DateTime.UtcNow.AddHours(expirationInHours),
             signingCredentials: credentials
         );
-        
+
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-    
+
     public ClaimsPrincipal? ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(secret);
-        
+
         try
         {
             var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
@@ -74,8 +74,8 @@ public class JwtHelper : IJwtHelper
                 ValidAudience = audience,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
-            }, out SecurityToken validatedToken);
-            
+            }, out var validatedToken);
+
             return principal;
         }
         catch (SecurityTokenException)
@@ -95,6 +95,7 @@ public class JwtHelper : IJwtHelper
         {
             rng.GetBytes(randomBytes);
         }
+
         return Convert.ToBase64String(randomBytes);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using NariNoteBackend.Domain.Entity;
 
-namespace NariNoteBackend.Application.Security;
+namespace NariNoteBackend.Domain.Security;
 
 public interface IJwtHelper
 {

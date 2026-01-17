@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Http;
-
-namespace NariNoteBackend.Application.Security;
+namespace NariNoteBackend.Domain.Security;
 
 public interface ICookieOptionsHelper
 {
