@@ -22,6 +22,8 @@ import type {
   GetUserProfileResponse,
   SignInRequest,
   SignUpRequest,
+  ToggleFollowRequest,
+  ToggleFollowResponse,
   ToggleLikeRequest,
   ToggleLikeResponse,
   UpdateArticleRequest,
@@ -97,6 +99,10 @@ export const usersApi = {
   },
   updateUserProfile: async (data: UpdateUserProfileRequest): Promise<UpdateUserProfileResponse> => {
     const response = await apiClient.put<UpdateUserProfileResponse>('/api/users', data);
+    return response.data;
+  },
+  toggleFollow: async (data: ToggleFollowRequest): Promise<ToggleFollowResponse> => {
+    const response = await apiClient.post<ToggleFollowResponse>(`/api/users/${data.followingId}/follow`);
     return response.data;
   },
 };

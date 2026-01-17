@@ -127,6 +127,15 @@ export interface SignUpRequest {
   password?: string;
 }
 
+export interface ToggleFollowRequest {
+  followingId?: number;
+}
+
+export interface ToggleFollowResponse {
+  isFollowing?: boolean;
+  currentFollowerCount?: number;
+}
+
 export interface ToggleLikeRequest {
   articleId?: number;
 }
