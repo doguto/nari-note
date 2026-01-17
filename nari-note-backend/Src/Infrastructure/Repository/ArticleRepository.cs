@@ -170,4 +170,20 @@ public class ArticleRepository : IArticleRepository
             .OrderByDescending(a => a.UpdatedAt)
             .ToListAsync();
     }
+
+    public async Task<List<Article>> SearchAsync(string keyword, int limit, int offset)
+    {
+        var articles = await context.Articles
+            .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(a => a.Likes)
+            .Where(a => a.IsPublished && (a.Title.Contains(keyword) || a.Body.Contains(keyword)))
+            .OrderByDescending(a => a.CreatedAt)
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+
+        return articles;
+    }
 }

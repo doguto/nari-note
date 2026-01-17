@@ -126,6 +126,16 @@ export interface GetUserProfileResponse {
 export interface HealthCheckRequest {
 }
 
+export interface SearchArticlesRequest {
+  keyword?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface SearchArticlesResponse {
+  articles: ArticleDto[];
+}
+
 export interface SignInRequest {
   usernameOrEmail?: string;
   password?: string;
@@ -138,12 +148,12 @@ export interface SignUpRequest {
 }
 
 export interface ToggleFollowRequest {
-  followingId: number;
+  followingId?: number;
 }
 
 export interface ToggleFollowResponse {
-  isFollowing: boolean;
-  currentFollowerCount: number;
+  isFollowing?: boolean;
+  currentFollowerCount?: number;
 }
 
 export interface ToggleLikeRequest {

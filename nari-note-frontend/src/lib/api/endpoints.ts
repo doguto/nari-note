@@ -22,6 +22,8 @@ import type {
   GetHealthResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  SearchArticlesRequest,
+  SearchArticlesResponse,
   SignInRequest,
   SignUpRequest,
   ToggleFollowRequest,
@@ -71,9 +73,13 @@ export const articlesApi = {
     const response = await apiClient.get<GetDraftArticlesResponse>('/api/articles/drafts', { params: data });
     return response;
   },
+  searchArticles: async (data: SearchArticlesRequest): Promise<SearchArticlesResponse> => {
+    const response = await apiClient.get<SearchArticlesResponse>('/api/articles/search', { params: data });
+    return response;
+  },
   createComment: async (data: CreateCommentRequest): Promise<CreateCommentResponse> => {
     const response = await apiClient.post<CreateCommentResponse>(`/api/articles/${data.articleId}/comments`, data);
-    return response.data;
+    return response;
   },
 };
 
@@ -108,7 +114,7 @@ export const usersApi = {
     return response;
   },
   toggleFollow: async (data: ToggleFollowRequest): Promise<ToggleFollowResponse> => {
-    const response = await apiClient.post<ToggleFollowResponse>(`/api/users/${data.followingId}/follow`);
-    return response.data;
+    const response = await apiClient.post<ToggleFollowResponse>(`/api/users/${data.id}/follow`);
+    return response;
   },
 };
