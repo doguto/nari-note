@@ -1,11 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { useGetUserProfile } from '@/lib/api';
+import { useGetUserProfile, useToggleFollow } from '@/lib/api';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
+import { FollowButton } from '@/components/common/atoms';
+import { FollowStats } from '@/components/common/atoms';
+import { FollowersModal } from './FollowersModal';
+import { FollowingsModal } from './FollowingsModal';
 
 interface UserProfilePageProps {
   userId: number;
@@ -21,8 +26,23 @@ interface UserProfilePageProps {
 export function UserProfilePage({ userId }: UserProfilePageProps) {
   const { data: user, isLoading, error, refetch } = useGetUserProfile({ id: userId });
   const { userId: currentUserId } = useAuth();
+  const { mutate: toggleFollow, isPending: isFollowPending } = useToggleFollow({
+    onSuccess: () => {
+      // フォロー/フォロー解除成功時にプロフィールを再取得
+      refetch();
+    },
+  });
+  
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingsModal, setShowFollowingsModal] = useState(false);
   
   const isOwnProfile = currentUserId === userId;
+
+  // フォローボタンクリックハンドラ
+  const handleFollowClick = () => {
+    if (isFollowPending) return;
+    toggleFollow({ followingId: userId });
+  };
 
   if (isLoading) {
     return <Loading text="ユーザー情報を読み込み中..." />;
@@ -68,14 +88,16 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
                 <span className="font-bold text-brand-text">0</span>
                 <span className="ml-1">記事</span>
               </div>
-              <div>
-                <span className="font-bold text-brand-text">0</span>
-                <span className="ml-1">フォロワー</span>
-              </div>
-              <div>
-                <span className="font-bold text-brand-text">0</span>
-                <span className="ml-1">フォロー中</span>
-              </div>
+              <FollowStats
+                label="フォロワー"
+                count={user.followerCount || 0}
+                onClick={() => setShowFollowersModal(true)}
+              />
+              <FollowStats
+                label="フォロー中"
+                count={user.followingCount || 0}
+                onClick={() => setShowFollowingsModal(true)}
+              />
             </div>
           </div>
           
@@ -86,9 +108,11 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
               </Button>
             </Link>
           ) : (
-            <button className="px-6 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors">
-              フォロー
-            </button>
+            <FollowButton
+              isFollowing={user.isFollowing || false}
+              onClick={handleFollowClick}
+              disabled={isFollowPending}
+            />
           )}
         </div>
       </div>
@@ -118,6 +142,20 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
           </nav>
         </div>
       </div>
+
+      {/* フォロワーモーダル */}
+      <FollowersModal
+        userId={userId}
+        isOpen={showFollowersModal}
+        onClose={() => setShowFollowersModal(false)}
+      />
+
+      {/* フォロー中モーダル */}
+      <FollowingsModal
+        userId={userId}
+        isOpen={showFollowingsModal}
+        onClose={() => setShowFollowingsModal(false)}
+      />
     </div>
   );
 }

@@ -20,6 +20,10 @@ import type {
   GetArticlesResponse,
   GetDraftArticlesRequest,
   GetDraftArticlesResponse,
+  GetFollowersRequest,
+  GetFollowersResponse,
+  GetFollowingsRequest,
+  GetFollowingsResponse,
   GetHealthResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -51,6 +55,8 @@ export const queryKeys = {
   },
   users: {
     getUserProfile: ['users', 'getUserProfile'] as const,
+    getFollowers: ['users', 'getFollowers'] as const,
+    getFollowings: ['users', 'getFollowings'] as const,
   },
 };
 
@@ -218,6 +224,22 @@ export function useToggleFollow(options?: UseMutationOptions<ToggleFollowRespons
       queryClient.invalidateQueries({ queryKey: ['users'] });
       options?.onSuccess?.(...args);
     },
+    ...options,
+  });
+}
+
+export function useGetFollowers(params: GetFollowersRequest, options?: Omit<UseQueryOptions<GetFollowersResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetFollowersResponse>({
+    queryKey: [...queryKeys.users.getFollowers, params],
+    queryFn: () => usersApi.getFollowers(params),
+    ...options,
+  });
+}
+
+export function useGetFollowings(params: GetFollowingsRequest, options?: Omit<UseQueryOptions<GetFollowingsResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetFollowingsResponse>({
+    queryKey: [...queryKeys.users.getFollowings, params],
+    queryFn: () => usersApi.getFollowings(params),
     ...options,
   });
 }

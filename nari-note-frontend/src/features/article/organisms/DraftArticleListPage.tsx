@@ -20,7 +20,7 @@ export function DraftArticleListPage() {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<number | null>(null);
   
-  const { data, isLoading, error, refetch } = useGetDraftArticles();
+  const { data, isLoading, error, refetch } = useGetDraftArticles({});
   
   const deleteArticle = useDeleteArticle({
     onSuccess: () => {

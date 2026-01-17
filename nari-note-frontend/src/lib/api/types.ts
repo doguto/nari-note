@@ -120,6 +120,9 @@ export interface GetUserProfileResponse {
   username?: string;
   bio?: string;
   createdAt?: string;
+  followerCount?: number;
+  followingCount?: number;
+  isFollowing?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -176,4 +179,26 @@ export interface UpdateUserProfileRequest {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdateUserProfileResponse {
+}
+
+export interface FollowerUserDto {
+  id?: number;
+  username?: string;
+  bio?: string;
+}
+
+export interface GetFollowersRequest {
+  id: number;
+}
+
+export interface GetFollowersResponse {
+  followers?: FollowerUserDto[];
+}
+
+export interface GetFollowingsRequest {
+  id: number;
+}
+
+export interface GetFollowingsResponse {
+  followings?: FollowerUserDto[];
 }

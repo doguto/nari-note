@@ -4,3 +4,5 @@ export { FormTitle } from './FormTitle';
 export { TagChip } from './TagChip';
 export { TextareaField } from './TextareaField';
 export { ImageUploadField } from './ImageUploadField';
+export { FollowButton } from './FollowButton';
+export { FollowStats } from './FollowStats';

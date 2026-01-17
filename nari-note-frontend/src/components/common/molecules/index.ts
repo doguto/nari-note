@@ -7,3 +7,4 @@ export { UsernameField } from './UsernameField';
 export { DisplayNameField } from './DisplayNameField';
 export { BioField } from './BioField';
 export { ProfileImageUpload } from './ProfileImageUpload';
+export { UserListItem } from './UserListItem';
