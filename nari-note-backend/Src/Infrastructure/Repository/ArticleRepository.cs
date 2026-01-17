@@ -16,7 +16,11 @@ public class ArticleRepository : IArticleRepository
         this.context = context;
     }
     
-    // 公開記事のフィルタ条件（現在時刻以前に公開されたもの）
+    /// <summary>
+    /// 公開記事のフィルタ条件を生成します。
+    /// </summary>
+    /// <param name="now">現在時刻（UTC）。この時刻以前に公開された記事のみを返します。</param>
+    /// <returns>公開記事のフィルタ条件</returns>
     static Expression<Func<Article, bool>> IsPubliclyVisible(DateTime now) =>
         a => a.IsPublished && a.PublishedAt.HasValue && a.PublishedAt.Value <= now;
     
@@ -193,8 +197,7 @@ public class ArticleRepository : IArticleRepository
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
-            .Where(visibilityFilter)
-            .Where(a => a.Title.Contains(keyword) || a.Body.Contains(keyword))
+            .Where(a => (a.IsPublished && a.PublishedAt.HasValue && a.PublishedAt.Value <= now) && (a.Title.Contains(keyword) || a.Body.Contains(keyword)))
             .OrderByDescending(a => a.CreatedAt)
             .Skip(offset)
             .Take(limit)
