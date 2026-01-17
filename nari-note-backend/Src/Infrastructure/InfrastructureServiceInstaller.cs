@@ -25,6 +25,7 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<ISessionRepository, SessionRepository>();
         services.AddScoped<ILikeRepository, LikeRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
+        services.AddScoped<IFollowRepository, FollowRepository>();
 
         // Register helpers
         services.AddScoped<IJwtHelper, JwtHelper>();

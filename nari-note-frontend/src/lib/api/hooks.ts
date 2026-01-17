@@ -7,6 +7,8 @@ import type {
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
+  CreateCommentRequest,
+  CreateCommentResponse,
   DeleteArticleRequest,
   GetArticleRequest,
   GetArticleResponse,
@@ -25,6 +27,8 @@ import type {
   SearchArticlesResponse,
   SignInRequest,
   SignUpRequest,
+  ToggleFollowRequest,
+  ToggleFollowResponse,
   ToggleLikeRequest,
   ToggleLikeResponse,
   UpdateArticleRequest,
@@ -150,6 +154,18 @@ export function useSearchArticles(params: SearchArticlesRequest, options?: Omit<
   });
 }
 
+export function useCreateComment(options?: UseMutationOptions<CreateCommentResponse, Error, CreateCommentRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<CreateCommentResponse, Error, CreateCommentRequest>({
+    mutationFn: (data) => articlesApi.createComment(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
 // Auth Hooks
 export function useSignUp(options?: UseMutationOptions<AuthResponse, Error, SignUpRequest>) {
   const queryClient = useQueryClient();
@@ -197,6 +213,18 @@ export function useUpdateUserProfile(options?: UseMutationOptions<UpdateUserProf
   const queryClient = useQueryClient();
   return useMutation<UpdateUserProfileResponse, Error, UpdateUserProfileRequest>({
     mutationFn: (data) => usersApi.updateUserProfile(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useToggleFollow(options?: UseMutationOptions<ToggleFollowResponse, Error, ToggleFollowRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<ToggleFollowResponse, Error, ToggleFollowRequest>({
+    mutationFn: (data) => usersApi.toggleFollow(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       options?.onSuccess?.(...args);

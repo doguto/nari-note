@@ -32,6 +32,16 @@ export interface CreateArticleResponse {
   createdAt?: string;
 }
 
+export interface CreateCommentRequest {
+  articleId?: number;
+  message?: string;
+}
+
+export interface CreateCommentResponse {
+  id?: number;
+  createdAt?: string;
+}
+
 export interface DeleteArticleRequest {
   id?: number;
 }
@@ -117,14 +127,14 @@ export interface HealthCheckRequest {
 }
 
 export interface SearchArticlesRequest {
-  keyword: string;
+  keyword?: string;
   limit?: number;
   offset?: number;
 }
 
 export interface SearchArticlesResponse {
-  articles: ArticleDto[];
-  totalCount: number;
+  articles?: ArticleDto[];
+  totalCount?: number;
 }
 
 export interface SignInRequest {
@@ -136,6 +146,15 @@ export interface SignUpRequest {
   name?: string;
   email?: string;
   password?: string;
+}
+
+export interface ToggleFollowRequest {
+  followingId?: number;
+}
+
+export interface ToggleFollowResponse {
+  isFollowing?: boolean;
+  currentFollowerCount?: number;
 }
 
 export interface ToggleLikeRequest {

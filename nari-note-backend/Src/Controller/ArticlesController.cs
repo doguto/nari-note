@@ -21,6 +21,7 @@ public class ArticlesController : ApplicationController
     readonly ToggleLikeService toggleLikeService;
     readonly GetDraftArticlesService getDraftArticlesService;
     readonly SearchArticlesService searchArticlesService;
+    readonly CreateCommentService createCommentService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
@@ -32,7 +33,8 @@ public class ArticlesController : ApplicationController
         DeleteArticleService deleteArticleService,
         ToggleLikeService toggleLikeService,
         GetDraftArticlesService getDraftArticlesService,
-        SearchArticlesService searchArticlesService)
+        SearchArticlesService searchArticlesService,
+        CreateCommentService createCommentService)
     {
         this.createArticleService = createArticleService;
         this.updateArticleService = updateArticleService;
@@ -44,6 +46,7 @@ public class ArticlesController : ApplicationController
         this.toggleLikeService = toggleLikeService;
         this.getDraftArticlesService = getDraftArticlesService;
         this.searchArticlesService = searchArticlesService;
+        this.createCommentService = createCommentService;
     }
     
     [HttpGet]
@@ -130,5 +133,14 @@ public class ArticlesController : ApplicationController
     {
         var response = await searchArticlesService.ExecuteAsync(request);
         return Ok(response);
+    }
+
+    [HttpPost("{id}/comments")]
+    [ValidateModelState]
+    public async Task<ActionResult> CreateComment(ArticleId id, [FromBody] CreateCommentRequest request)
+    {
+        request.ArticleId = id;
+        var response = await createCommentService.ExecuteAsync(UserId, request);
+        return Created($"/api/articles/{id}/comments/{response.Id}", response);
     }
 }
