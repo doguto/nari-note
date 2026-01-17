@@ -32,6 +32,16 @@ export interface CreateArticleResponse {
   createdAt?: string;
 }
 
+export interface CreateCommentRequest {
+  articleId?: number;
+  message?: string;
+}
+
+export interface CreateCommentResponse {
+  id?: number;
+  createdAt?: string;
+}
+
 export interface DeleteArticleRequest {
   id?: number;
 }
