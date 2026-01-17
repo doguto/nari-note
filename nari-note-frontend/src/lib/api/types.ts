@@ -184,7 +184,7 @@ export interface UpdateUserProfileResponse {
 export interface FollowerUserDto {
   id?: number;
   username?: string;
-  bio?: string;
+  profileImage?: string;
 }
 
 export interface GetFollowersRequest {

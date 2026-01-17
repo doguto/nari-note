@@ -66,7 +66,7 @@ export function FollowingsModal({ userId, isOpen, onClose }: FollowingsModalProp
                     key={following.id}
                     userId={following.id}
                     username={following.username}
-                    bio={following.bio}
+                    profileImage={following.profileImage}
                   />
                 ) : null
               ))}

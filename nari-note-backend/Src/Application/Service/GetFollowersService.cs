@@ -28,7 +28,7 @@ public class GetFollowersService
             {
                 Id = user.Id,
                 Username = user.Name,
-                Bio = user.Bio
+                ProfileImage = user.ProfileImage
             }).ToList()
         };
     }

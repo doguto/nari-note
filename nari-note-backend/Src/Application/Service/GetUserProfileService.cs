@@ -23,7 +23,7 @@ public class GetUserProfileService
         var followerCount = await followRepository.CountFollowersAsync(request.Id);
         var followingCount = await followRepository.CountFollowingsAsync(request.Id);
 
-        bool? isFollowing = null;
+        bool isFollowing = false;
         if (currentUserId.HasValue)
         {
             var follow = await followRepository.FindByFollowerAndFollowingAsync(currentUserId.Value, request.Id);

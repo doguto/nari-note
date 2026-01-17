@@ -10,6 +10,6 @@ public class GetUserProfileResponse
     public DateTime CreatedAt { get; set; }
     public int FollowerCount { get; set; }
     public int FollowingCount { get; set; }
-    public bool? IsFollowing { get; set; }  // 認証済みの場合のみセット
+    public bool IsFollowing { get; set; }
     // 注意: PasswordHash と Email は含めない
 }

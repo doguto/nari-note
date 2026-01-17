@@ -5,17 +5,17 @@ import { useRouter } from 'next/navigation';
 interface UserListItemProps {
   userId: number;
   username: string;
-  bio?: string;
+  profileImage?: string;
 }
 
 /**
  * UserListItem - Molecule Component
  * 
  * ユーザーリストアイテム
- * ユーザーアイコン、ユーザー名、bioを表示
+ * ユーザーアイコン、ユーザー名を表示
  * クリックでユーザープロフィールページに遷移
  */
-export function UserListItem({ userId, username, bio }: UserListItemProps) {
+export function UserListItem({ userId, username, profileImage }: UserListItemProps) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -25,7 +25,7 @@ export function UserListItem({ userId, username, bio }: UserListItemProps) {
   return (
     <div
       onClick={handleClick}
-      className="flex items-start gap-4 p-4 hover:bg-gray-50 cursor-pointer transition-colors rounded-lg"
+      className="flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer transition-colors rounded-lg"
     >
       {/* ユーザーアイコン */}
       <div className="w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
@@ -37,11 +37,6 @@ export function UserListItem({ userId, username, bio }: UserListItemProps) {
         <div className="font-bold text-brand-text truncate">
           {username}
         </div>
-        {bio && (
-          <div className="text-sm text-gray-600 truncate">
-            {bio}
-          </div>
-        )}
       </div>
     </div>
   );
