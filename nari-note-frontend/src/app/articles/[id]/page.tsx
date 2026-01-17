@@ -11,10 +11,10 @@ export default function ArticleDetailPageRoute() {
   const articleId = Number(params.id);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-bg-gradient-from to-brand-bg-gradient-to">
+    <div className="min-h-screen bg-gradient-to-b from-brand-bg-gradient-from to-brand-bg-gradient-to flex flex-col">
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
         <div className="flex gap-8">
           <div className="flex-1">
             <ArticleDetailPage articleId={articleId} />

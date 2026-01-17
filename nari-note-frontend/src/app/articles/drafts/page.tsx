@@ -27,9 +27,9 @@ export default function DraftsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[var(--brand-bg-gradient-from)] to-[var(--brand-bg-gradient-to)]">
+      <div className="min-h-screen bg-gradient-to-b from-[var(--brand-bg-gradient-from)] to-[var(--brand-bg-gradient-to)] flex flex-col">
         <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex-1 flex items-center justify-center">
           <Loading text="読み込み中..." />
         </div>
         <Footer />
@@ -42,10 +42,10 @@ export default function DraftsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[var(--brand-bg-gradient-from)] to-[var(--brand-bg-gradient-to)]">
+    <div className="min-h-screen bg-gradient-to-b from-[var(--brand-bg-gradient-from)] to-[var(--brand-bg-gradient-to)] flex flex-col">
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
         <div className="flex gap-8">
           <main className="flex-1">
             <DraftArticleListPage />

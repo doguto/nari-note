@@ -26,9 +26,9 @@ export default function EditArticlePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[var(--brand-bg-gradient-from)] to-[var(--brand-bg-gradient-to)]">
+      <div className="min-h-screen bg-gradient-to-b from-[var(--brand-bg-gradient-from)] to-[var(--brand-bg-gradient-to)] flex flex-col">
         <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex-1 flex items-center justify-center">
           <div className="text-gray-500">読み込み中...</div>
         </div>
         <Footer />
@@ -41,10 +41,10 @@ export default function EditArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[var(--brand-bg-gradient-from)] to-[var(--brand-bg-gradient-to)]">
+    <div className="min-h-screen bg-gradient-to-b from-[var(--brand-bg-gradient-from)] to-[var(--brand-bg-gradient-to)] flex flex-col">
       <Header />
       
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="flex-1 max-w-5xl mx-auto px-4 py-8 w-full">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[var(--brand-text)] mb-2">
             記事を編集
