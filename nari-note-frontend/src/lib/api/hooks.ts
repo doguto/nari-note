@@ -25,6 +25,8 @@ import type {
   GetFollowingsRequest,
   GetFollowingsResponse,
   GetHealthResponse,
+  GetLikedArticlesRequest,
+  GetLikedArticlesResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
   SearchArticlesRequest,
@@ -60,6 +62,7 @@ export const queryKeys = {
     getUserProfile: ['users', 'getUserProfile'] as const,
     getFollowers: ['users', 'getFollowers'] as const,
     getFollowings: ['users', 'getFollowings'] as const,
+    getLikedArticles: ['users', 'getLikedArticles'] as const,
   },
 };
 
@@ -251,6 +254,14 @@ export function useGetFollowings(params: GetFollowingsRequest, options?: Omit<Us
   return useQuery<GetFollowingsResponse>({
     queryKey: [...queryKeys.users.getFollowings, params],
     queryFn: () => usersApi.getFollowings(params),
+    ...options,
+  });
+}
+
+export function useGetLikedArticles(params: GetLikedArticlesRequest, options?: Omit<UseQueryOptions<GetLikedArticlesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetLikedArticlesResponse>({
+    queryKey: [...queryKeys.users.getLikedArticles, params],
+    queryFn: () => usersApi.getLikedArticles(params),
     ...options,
   });
 }

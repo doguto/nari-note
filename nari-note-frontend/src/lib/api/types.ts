@@ -137,6 +137,16 @@ export interface GetFollowingsResponse {
   followings?: FollowerUserDto[];
 }
 
+export interface GetLikedArticlesRequest {
+  userId?: number;
+}
+
+export interface GetLikedArticlesResponse {
+  userId?: number;
+  articles?: ArticleDto[];
+  totalCount?: number;
+}
+
 export interface GetHealthResponse {
   statusCode?: number;
   message?: string;
