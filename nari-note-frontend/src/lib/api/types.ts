@@ -19,6 +19,14 @@ export interface AuthResponse {
   userId?: number;
 }
 
+export interface CommentDto {
+  id?: number;
+  userId?: number;
+  userName?: string;
+  message?: string;
+  createdAt?: string;
+}
+
 export interface CreateArticleRequest {
   title?: string;
   body?: string;
@@ -67,6 +75,7 @@ export interface GetArticleResponse {
   isPublished?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  comments?: CommentDto[];
 }
 
 export interface GetArticlesByAuthorRequest {

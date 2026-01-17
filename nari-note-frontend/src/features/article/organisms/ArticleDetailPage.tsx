@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { useGetArticle } from '@/lib/api';
@@ -23,10 +22,10 @@ interface ArticleDetailPageProps {
  */
 export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const { data: article, isLoading, error, refetch } = useGetArticle({ id: articleId });
-  const [comments, setComments] = useState<Comment[]>([]);
 
-  const handleCommentSuccess = (newComment: Comment) => {
-    setComments((prev) => [...prev, newComment]);
+  const handleCommentSuccess = () => {
+    // コメント投稿後、記事データを再取得してコメント一覧を更新
+    refetch();
   };
 
   if (isLoading) {
@@ -45,6 +44,15 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   if (!article) {
     return <ErrorMessage message="記事が見つかりません" />;
   }
+
+  // APIから取得したコメントをComment型に変換
+  const comments: Comment[] = (article.comments || []).map(c => ({
+    id: c.id || 0,
+    userId: c.userId || 0,
+    userName: c.userName || '',
+    message: c.message || '',
+    createdAt: c.createdAt || '',
+  }));
 
   return (
     <article className="bg-white rounded-lg shadow-lg p-8">
@@ -129,7 +137,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
 
       {/* コメント投稿フォーム */}
       <div className="mt-8">
-        <CommentForm articleId={articleId} onCommentAdded={handleCommentSuccess} />
+        <CommentForm articleId={articleId} onSuccess={handleCommentSuccess} />
       </div>
     </article>
   );
