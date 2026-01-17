@@ -7,4 +7,5 @@ public interface ILikeRepository : IRepository<Like, LikeId>
 {
     Task<Like?> FindByUserAndArticleAsync(UserId userId, ArticleId articleId);
     Task<int> CountByArticleAsync(ArticleId articleId);
+    Task<List<Article>> FindLikedArticlesByUserAsync(UserId userId);
 }

@@ -12,6 +12,7 @@ public class UsersController : ApplicationController
 {
     readonly GetFollowersService getFollowersService;
     readonly GetFollowingsService getFollowingsService;
+    readonly GetLikedArticlesService getLikedArticlesService;
     readonly GetUserProfileService getUserProfileService;
     readonly ToggleFollowService toggleFollowService;
     readonly UpdateUserProfileService updateUserProfileService;
@@ -21,7 +22,8 @@ public class UsersController : ApplicationController
         UpdateUserProfileService updateUserProfileService,
         ToggleFollowService toggleFollowService,
         GetFollowersService getFollowersService,
-        GetFollowingsService getFollowingsService
+        GetFollowingsService getFollowingsService,
+        GetLikedArticlesService getLikedArticlesService
     )
     {
         this.getUserProfileService = getUserProfileService;
@@ -29,6 +31,7 @@ public class UsersController : ApplicationController
         this.toggleFollowService = toggleFollowService;
         this.getFollowersService = getFollowersService;
         this.getFollowingsService = getFollowingsService;
+        this.getLikedArticlesService = getLikedArticlesService;
     }
 
     [HttpGet("{id}")]
@@ -74,6 +77,14 @@ public class UsersController : ApplicationController
     {
         var request = new GetFollowingsRequest { UserId = id };
         var response = await getFollowingsService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpGet("{id}/liked-articles")]
+    public async Task<ActionResult> GetLikedArticles(UserId id)
+    {
+        var request = new GetLikedArticlesRequest { UserId = id };
+        var response = await getLikedArticlesService.ExecuteAsync(request);
         return Ok(response);
     }
 }
