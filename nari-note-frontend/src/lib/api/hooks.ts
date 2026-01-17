@@ -7,6 +7,8 @@ import type {
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
+  CreateCommentRequest,
+  CreateCommentResponse,
   DeleteArticleRequest,
   GetArticleRequest,
   GetArticleResponse,
@@ -137,6 +139,18 @@ export function useGetDraftArticles(params: GetDraftArticlesRequest, options?: O
   return useQuery<GetDraftArticlesResponse>({
     queryKey: [...queryKeys.articles.getDraftArticles, params],
     queryFn: () => articlesApi.getDraftArticles(params),
+    ...options,
+  });
+}
+
+export function useCreateComment(options?: UseMutationOptions<CreateCommentResponse, Error, CreateCommentRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<CreateCommentResponse, Error, CreateCommentRequest>({
+    mutationFn: (data) => articlesApi.createComment(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      options?.onSuccess?.(...args);
+    },
     ...options,
   });
 }
