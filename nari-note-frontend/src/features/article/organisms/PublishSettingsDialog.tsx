@@ -76,6 +76,8 @@ export function PublishSettingsDialog({
       return false;
     }
 
+    // datetime-local input はローカル時刻を返し、new Date() で作成される Date オブジェクトも
+    // ローカル時刻として解釈されるため、比較はローカル時刻同士で行われる
     const selectedDate = new Date(scheduledDateTime);
     const now = new Date();
 
@@ -97,7 +99,8 @@ export function PublishSettingsDialog({
       // 即座に公開: publishedAtを指定しない（バックエンドが現在時刻を設定）
       onPublish(undefined);
     } else {
-      // 予約投稿: 選択した日時をISO 8601形式で送信
+      // 予約投稿: 選択した日時をISO 8601形式（UTC）で送信
+      // datetime-local input から取得したローカル時刻を UTC に変換
       const selectedDate = new Date(scheduledDateTime);
       onPublish(selectedDate.toISOString());
     }
@@ -144,7 +147,7 @@ export function PublishSettingsDialog({
                 {publishType === 'scheduled' && (
                   <div className="space-y-2 pt-2">
                     <Label htmlFor="datetime" className="text-sm text-gray-600">
-                      公開日時
+                      公開日時（現地時刻）
                     </Label>
                     <Input
                       id="datetime"
@@ -157,6 +160,9 @@ export function PublishSettingsDialog({
                       className="w-full"
                       min={new Date().toISOString().slice(0, 16)}
                     />
+                    <p className="text-xs text-gray-500">
+                      選択した日時に記事が公開されます
+                    </p>
                     {validationError && (
                       <p className="text-sm text-red-500">{validationError}</p>
                     )}
