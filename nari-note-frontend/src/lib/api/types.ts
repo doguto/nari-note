@@ -11,6 +11,7 @@ export interface ArticleDto {
   tags?: string[];
   likeCount?: number;
   isPublished?: boolean;
+  publishedAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -33,6 +34,7 @@ export interface CreateArticleRequest {
   authorId?: number;
   tags?: string[];
   isPublished?: boolean;
+  publishedAt?: string;
 }
 
 export interface CreateArticleResponse {
@@ -79,6 +81,7 @@ export interface GetArticleResponse {
   tags?: string[];
   likeCount?: number;
   isPublished?: boolean;
+  publishedAt?: string;
   createdAt?: string;
   updatedAt?: string;
   comments?: CommentDto[];
@@ -205,6 +208,7 @@ export interface UpdateArticleRequest {
   body?: string;
   tags?: string[];
   isPublished?: boolean;
+  publishedAt?: string;
 }
 
 export interface UpdateArticleResponse {

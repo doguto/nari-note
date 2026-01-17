@@ -11,6 +11,7 @@ import { TagInput, CharacterCounter } from '@/components/common/molecules';
 import { useCreateArticle, useUpdateArticle, useGetArticle } from '@/lib/api';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { PublishSettingsDialog } from './PublishSettingsDialog';
 
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor').then((mod) => mod.default),
@@ -46,6 +47,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const [showPreview, setShowPreview] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
   
   const router = useRouter();
   const isEditMode = mode === 'edit' && articleId;
@@ -158,6 +160,11 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
       return;
     }
 
+    // バリデーションが通ったら、投稿設定ダイアログを開く
+    setShowPublishDialog(true);
+  };
+
+  const handlePublish = (publishedAt?: string) => {
     if (isEditMode) {
       // 編集モード: 記事を更新
       updateArticle.mutate({
@@ -166,6 +173,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         body: body,
         tags: tags,
         isPublished: true,
+        publishedAt: publishedAt,
       });
     } else {
       // 作成モード: 新規記事を作成
@@ -174,8 +182,12 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         body: body,
         tags: tags,
         isPublished: true,
+        publishedAt: publishedAt,
       });
     }
+    
+    // ダイアログを閉じる
+    setShowPublishDialog(false);
   };
 
   const handleSaveDraft = () => {
@@ -184,21 +196,23 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     }
 
     if (isEditMode) {
-      // 編集モード: 記事を更新（下書きとして）
+      // 編集モード: 記事を更新（下書きとして、既存のpublishedAtを保持）
       updateArticle.mutate({
         id: articleId,
         title: title.trim(),
         body: body,
         tags: tags,
         isPublished: article?.isPublished || false,
+        publishedAt: article?.publishedAt, // 既存のpublishedAtを保持
       });
     } else {
-      // 作成モード: 下書きとして保存
+      // 作成モード: 下書きとして保存（publishedAtなし）
       createArticle.mutate({
         title: title.trim(),
         body: body,
         tags: tags,
         isPublished: false,
+        publishedAt: undefined,
       });
     }
   };
@@ -289,6 +303,13 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
             : (isEditMode ? '更新する' : '投稿する')}
         </Button>
       </div>
+
+      <PublishSettingsDialog
+        open={showPublishDialog}
+        onOpenChange={setShowPublishDialog}
+        onPublish={handlePublish}
+        isLoading={createArticle.isPending || updateArticle.isPending}
+      />
     </form>
   );
 }
