@@ -27,6 +27,9 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
   const searchParams = useSearchParams();
   const activeTab = searchParams.get('tab') || 'articles';
   
+  // タブコンテキストを判定（content系 or follow系）
+  const tabContext = ['followers', 'followings'].includes(activeTab) ? 'follow' : 'content';
+  
   const { data: user, isLoading, error, refetch } = useGetUserProfile({ id: userId });
   const { userId: currentUserId } = useAuth();
   const { mutate: toggleFollow, isPending: isFollowPending } = useToggleFollow({
@@ -59,6 +62,11 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
   // タブ切り替えハンドラ
   const handleTabChange = (tab: string) => {
     router.push(`/users/${userId}?tab=${tab}`);
+  };
+  
+  // 記事数クリックハンドラ（contentタブに切り替え）
+  const handleArticlesClick = () => {
+    router.push(`/users/${userId}?tab=articles`);
   };
 
   if (isLoading) {
@@ -101,10 +109,13 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
             )}
             
             <div className="flex gap-6 text-sm text-gray-600">
-              <div>
+              <button
+                onClick={handleArticlesClick}
+                className="hover:opacity-70 transition-opacity cursor-pointer"
+              >
                 <span className="font-bold text-brand-text">0</span>
                 <span className="ml-1">記事</span>
-              </div>
+              </button>
               <FollowStats
                 label="フォロワー"
                 count={user.followerCount || 0}
@@ -138,56 +149,65 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
       <div className="bg-white rounded-lg shadow">
         <div className="border-b border-gray-200">
           <nav className="flex gap-8 px-6">
-            <button
-              onClick={() => handleTabChange('articles')}
-              className={`py-4 border-b-2 ${
-                activeTab === 'articles'
-                  ? 'border-brand-primary text-brand-text font-medium'
-                  : 'border-transparent text-gray-600 hover:text-brand-text'
-              }`}
-            >
-              記事
-            </button>
-            <button
-              onClick={() => handleTabChange('likes')}
-              className={`py-4 border-b-2 ${
-                activeTab === 'likes'
-                  ? 'border-brand-primary text-brand-text font-medium'
-                  : 'border-transparent text-gray-600 hover:text-brand-text'
-              }`}
-            >
-              いいね
-            </button>
-            <button
-              onClick={() => handleTabChange('following-tags')}
-              className={`py-4 border-b-2 ${
-                activeTab === 'following-tags'
-                  ? 'border-brand-primary text-brand-text font-medium'
-                  : 'border-transparent text-gray-600 hover:text-brand-text'
-              }`}
-            >
-              フォロー中のタグ
-            </button>
-            <button
-              onClick={() => handleTabChange('followers')}
-              className={`py-4 border-b-2 ${
-                activeTab === 'followers'
-                  ? 'border-brand-primary text-brand-text font-medium'
-                  : 'border-transparent text-gray-600 hover:text-brand-text'
-              }`}
-            >
-              フォロワー
-            </button>
-            <button
-              onClick={() => handleTabChange('followings')}
-              className={`py-4 border-b-2 ${
-                activeTab === 'followings'
-                  ? 'border-brand-primary text-brand-text font-medium'
-                  : 'border-transparent text-gray-600 hover:text-brand-text'
-              }`}
-            >
-              フォロー中
-            </button>
+            {tabContext === 'content' ? (
+              <>
+                {/* コンテンツタブ（記事/いいね/フォロー中のタグ） */}
+                <button
+                  onClick={() => handleTabChange('articles')}
+                  className={`py-4 border-b-2 ${
+                    activeTab === 'articles'
+                      ? 'border-brand-primary text-brand-text font-medium'
+                      : 'border-transparent text-gray-600 hover:text-brand-text'
+                  }`}
+                >
+                  記事
+                </button>
+                <button
+                  onClick={() => handleTabChange('likes')}
+                  className={`py-4 border-b-2 ${
+                    activeTab === 'likes'
+                      ? 'border-brand-primary text-brand-text font-medium'
+                      : 'border-transparent text-gray-600 hover:text-brand-text'
+                  }`}
+                >
+                  いいね
+                </button>
+                <button
+                  onClick={() => handleTabChange('following-tags')}
+                  className={`py-4 border-b-2 ${
+                    activeTab === 'following-tags'
+                      ? 'border-brand-primary text-brand-text font-medium'
+                      : 'border-transparent text-gray-600 hover:text-brand-text'
+                  }`}
+                >
+                  フォロー中のタグ
+                </button>
+              </>
+            ) : (
+              <>
+                {/* フォロータブ（フォロワー/フォロー中） */}
+                <button
+                  onClick={() => handleTabChange('followers')}
+                  className={`py-4 border-b-2 ${
+                    activeTab === 'followers'
+                      ? 'border-brand-primary text-brand-text font-medium'
+                      : 'border-transparent text-gray-600 hover:text-brand-text'
+                  }`}
+                >
+                  フォロワー
+                </button>
+                <button
+                  onClick={() => handleTabChange('followings')}
+                  className={`py-4 border-b-2 ${
+                    activeTab === 'followings'
+                      ? 'border-brand-primary text-brand-text font-medium'
+                      : 'border-transparent text-gray-600 hover:text-brand-text'
+                  }`}
+                >
+                  フォロー中
+                </button>
+              </>
+            )}
           </nav>
         </div>
         
