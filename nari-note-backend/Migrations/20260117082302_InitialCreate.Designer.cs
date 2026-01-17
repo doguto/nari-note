@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NariNoteBackend.Infrastructure;
+using NariNoteBackend.Infrastructure.Database;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NariNoteBackend.Migrations
 {
     [DbContext(typeof(NariNoteDbContext))]
-    [Migration("20260117070509_InitialCreate")]
+    [Migration("20260117082302_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
