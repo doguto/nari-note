@@ -30,7 +30,7 @@ interface ProfileEditPageProps {
  */
 export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) {
   const router = useRouter();
-  const { userId, isLoggedIn, isLoading: authLoading } = useAuth();
+  const { userId } = useAuth();
   
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
@@ -43,13 +43,6 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
   const [generalError, setGeneralError] = useState<string>();
   const [hasChanges, setHasChanges] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-
-  // 認証チェック - 未ログインの場合はログインページへリダイレクト
-  useEffect(() => {
-    if (!authLoading && !isLoggedIn) {
-      router.push('/login');
-    }
-  }, [authLoading, isLoggedIn, router]);
 
   // ユーザー情報取得 (initialUserDataがない場合のみフェッチ)
   const { data: fetchedUser, isLoading, error: loadError, refetch } = useGetUserProfile(
@@ -151,15 +144,6 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     setProfileImage(null);
   };
 
-  // 認証確認中の表示
-  if (authLoading) {
-    return <Loading text="認証情報を確認中..." />;
-  }
-
-  if (!userId) {
-    return null; // リダイレクト中
-  }
-
   // Only show loading if we're actually fetching (not using initialUserData)
   if (!initialUserData && isLoading) {
     return <Loading text="プロフィール情報を読み込み中..." />;
@@ -175,7 +159,7 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+    <div>
       <FormTitle>プロフィール編集</FormTitle>
 
       {generalError && <ErrorAlert message={generalError} />}
