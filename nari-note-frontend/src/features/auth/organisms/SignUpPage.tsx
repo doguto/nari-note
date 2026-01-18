@@ -73,12 +73,12 @@ export function SignUpPage() {
   };
 
   return (
-    <div className="max-w-lg w-full mx-auto bg-white rounded-lg shadow-lg p-10">
+    <div className="max-w-2xl w-full mx-auto bg-white rounded-lg shadow-lg px-10 py-12">
       <FormTitle>新規登録</FormTitle>
       
       {error && <ErrorAlert message={error} />}
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <NameField value={name} onChange={setName} />
         
         <EmailField value={email} onChange={setEmail} />
@@ -105,7 +105,7 @@ export function SignUpPage() {
         </Button>
       </form>
       
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <p className="text-sm text-gray-600">
           すでにアカウントをお持ちの方は
           <Link href="/login" className="text-brand-primary hover:underline ml-1">
