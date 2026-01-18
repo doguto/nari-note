@@ -4,8 +4,8 @@ import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "なりノート",
-  description: "技術の記録、レビュー、自分の記。知識を共有しよう。",
+  title: "将棋ブログ投稿サイト ～なりノート～",
+  description: "将棋の知識共有プラットフォーム\nあなたの将棋の知識を共有し、コミュニティと共に成長しましょう",
 };
 
 export default function RootLayout({
