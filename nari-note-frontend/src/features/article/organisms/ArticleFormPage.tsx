@@ -48,6 +48,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false); // 公開中かどうかを追跡
   
   const router = useRouter();
   const isEditMode = mode === 'edit' && articleId;
@@ -61,22 +62,32 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const createArticle = useCreateArticle({
     onSuccess: (data) => {
       setHasUnsavedChanges(false);
-      router.push(`/articles/${data.id}`);
+      // 公開中フラグで判定
+      if (isPublishing) {
+        router.push(`/articles/${data.id}`);
+      } else {
+        router.push(`/articles/drafts`);
+      }
+      setIsPublishing(false);
     },
     onError: (error) => {
       console.error('記事の投稿に失敗しました:', error);
       alert('記事の投稿に失敗しました。もう一度お試しください。');
+      setIsPublishing(false);
     },
   });
 
   const updateArticle = useUpdateArticle({
     onSuccess: () => {
       setHasUnsavedChanges(false);
+      // 更新後は記事ページへ遷移
       router.push(`/articles/${articleId}`);
+      setIsPublishing(false);
     },
     onError: (error) => {
       console.error('記事の更新に失敗しました:', error);
       alert('記事の更新に失敗しました。もう一度お試しください。');
+      setIsPublishing(false);
     },
   });
 
@@ -155,16 +166,11 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    // バリデーションが通ったら、投稿設定ダイアログを開く
-    setShowPublishDialog(true);
+    // フォーム送信は使用しない（ボタンで個別に処理）
   };
 
   const handlePublish = (publishedAt?: string) => {
+    setIsPublishing(true); // 公開中フラグを設定
     if (isEditMode) {
       // 編集モード: 記事を更新
       updateArticle.mutate({
@@ -190,13 +196,13 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     setShowPublishDialog(false);
   };
 
-  const handleSaveDraft = () => {
+  const handleSave = () => {
     if (!validateForm()) {
       return;
     }
 
     if (isEditMode) {
-      // 編集モード: 記事を更新（下書きとして、既存のpublishedAtを保持）
+      // 編集モード: 記事を更新（公開状態を保持）
       updateArticle.mutate({
         id: articleId,
         title: title.trim(),
@@ -215,6 +221,15 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         publishedAt: undefined,
       });
     }
+  };
+
+  const handleOpenPublishSettings = () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    // バリデーションが通ったら、投稿設定ダイアログを開く
+    setShowPublishDialog(true);
   };
 
   const togglePreview = () => {
@@ -282,25 +297,22 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
       </div>
 
       <div className="flex gap-4 pt-4">
-        {!isEditMode && (
-          <Button
-            type="button"
-            onClick={handleSaveDraft}
-            disabled={createArticle.isPending || !title || tags.length === 0 || isOverLimit}
-            variant="outline"
-            className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-bg-light)]"
-          >
-            下書き保存
-          </Button>
-        )}
         <Button
-          type="submit"
+          type="button"
+          onClick={handleSave}
+          disabled={createArticle.isPending || updateArticle.isPending || !title || tags.length === 0 || isOverLimit}
+          variant="outline"
+          className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-bg-light)]"
+        >
+          {createArticle.isPending || updateArticle.isPending ? '保存中...' : '保存'}
+        </Button>
+        <Button
+          type="button"
+          onClick={handleOpenPublishSettings}
           disabled={createArticle.isPending || updateArticle.isPending || !title || tags.length === 0 || isOverLimit}
           className="flex-1 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
         >
-          {createArticle.isPending || updateArticle.isPending 
-            ? (isEditMode ? '更新中...' : '投稿中...') 
-            : (isEditMode ? '更新する' : '投稿する')}
+          投稿設定
         </Button>
       </div>
 
