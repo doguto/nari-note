@@ -1,9 +1,8 @@
 'use client';
 
 import { useGetArticles } from '@/lib/api';
-import { HomeArticleCard } from '@/components/common/HomeArticleCard';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ArticleCard } from '@/components/common/molecules';
+import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
 
 /**
  * HomeArticleList - Organism Component
@@ -16,7 +15,7 @@ export function HomeArticleList() {
   const { data, isLoading, error, refetch } = useGetArticles({ limit: 20, offset: 0 });
 
   if (isLoading) {
-    return <Loading text="記事を読み込み中..." />;
+    return <LoadingSpinner text="記事を読み込み中..." />;
   }
 
   if (error) {
@@ -42,7 +41,7 @@ export function HomeArticleList() {
   return (
     <div className="space-y-4">
       {articlesWithId.map((article) => (
-        <HomeArticleCard
+        <ArticleCard
           key={article.id}
           id={article.id!}
           title={article.title ?? ''}

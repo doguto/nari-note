@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TagInput } from '@/components/common/molecules';
 import { useCreateArticle, useUpdateArticle, useGetArticle } from '@/lib/api';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
 import { PublishSettingsDialog } from './PublishSettingsDialog';
 import {
   ArticleTitleInput,
@@ -115,7 +114,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
 
   // ローディング状態
   if (isEditMode && isLoadingArticle) {
-    return <Loading text="記事を読み込み中..." />;
+    return <LoadingSpinner text="記事を読み込み中..." />;
   }
 
   // エラー状態

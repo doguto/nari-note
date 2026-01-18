@@ -1,14 +1,15 @@
-interface LoadingProps {
+interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
   text?: string;
 }
 
 /**
- * ローディング表示コンポーネント
+ * LoadingSpinner - Atom Component
  * 
- * データ取得中などに表示するローディングインジケーター。
+ * ローディング表示の最小単位コンポーネント
+ * データ取得中などに表示するローディングインジケーター
  */
-export function Loading({ size = 'md', text = '読み込み中...' }: LoadingProps) {
+export function LoadingSpinner({ size = 'md', text = '読み込み中...' }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-8 w-8',

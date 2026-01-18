@@ -10,8 +10,7 @@ import {
   ProfileImageUpload 
 } from '@/components/common/molecules';
 import { useGetUserProfile, useUpdateUserProfile } from '@/lib/api';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import type { GetUserProfileResponse } from '@/lib/api/types';
 
@@ -146,7 +145,7 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
 
   // Only show loading if we're actually fetching (not using initialUserData)
   if (!initialUserData && isLoading) {
-    return <Loading text="プロフィール情報を読み込み中..." />;
+    return <LoadingSpinner text="プロフィール情報を読み込み中..." />;
   }
 
   if (!initialUserData && loadError) {

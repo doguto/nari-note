@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-interface HomeArticleCardProps {
+interface ArticleCardProps {
   id: number;
   title: string;
   author: string;
@@ -10,7 +10,13 @@ interface HomeArticleCardProps {
   image: string;
 }
 
-export function HomeArticleCard({
+/**
+ * ArticleCard - Molecule Component
+ * 
+ * 記事カード表示コンポーネント
+ * ホーム画面などで記事の概要を表示します
+ */
+export function ArticleCard({
   id,
   title,
   author,
@@ -18,7 +24,7 @@ export function HomeArticleCard({
   stats,
   date,
   image,
-}: HomeArticleCardProps) {
+}: ArticleCardProps) {
   return (
     <Link
       href={`/articles/${id}`}

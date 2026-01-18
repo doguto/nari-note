@@ -2,7 +2,7 @@
 
 import { Comment } from '@/types/comment';
 import { CommentItem } from '@/components/common/molecules/CommentItem';
-import { EmptyState } from '@/components/common/EmptyState';
+import { EmptyState } from '@/components/common/atoms';
 
 interface CommentListProps {
   comments: Comment[];

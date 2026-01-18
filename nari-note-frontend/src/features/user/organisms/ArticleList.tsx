@@ -1,8 +1,7 @@
 'use client';
 
-import { HomeArticleCard } from '@/components/common/HomeArticleCard';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ArticleCard } from '@/components/common/molecules';
+import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
 import type { ArticleDto } from '@/lib/api';
 
 interface ArticleListProps {
@@ -27,7 +26,7 @@ export function ArticleList({
   emptyMessage = '記事がありません',
 }: ArticleListProps) {
   if (isLoading) {
-    return <Loading text="記事を読み込み中..." />;
+    return <LoadingSpinner text="記事を読み込み中..." />;
   }
 
   if (error) {
@@ -53,7 +52,7 @@ export function ArticleList({
   return (
     <div className="space-y-4">
       {articlesWithId.map((article) => (
-        <HomeArticleCard
+        <ArticleCard
           key={article.id}
           id={article.id as number}
           title={article.title ?? ''}

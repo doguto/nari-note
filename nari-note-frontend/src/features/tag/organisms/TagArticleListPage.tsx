@@ -1,10 +1,8 @@
 'use client';
 
 import { useGetArticlesByTag } from '@/lib/api';
-import { HomeArticleCard } from '@/components/common/HomeArticleCard';
-import { EmptyState } from '@/components/common/EmptyState';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ArticleCard } from '@/components/common/molecules';
+import { EmptyState, LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
 
 interface TagArticleListPageProps {
   tag: string;
@@ -21,7 +19,7 @@ export function TagArticleListPage({ tag }: TagArticleListPageProps) {
   const { data, isLoading, error, refetch } = useGetArticlesByTag({ tagName: tag });
 
   if (isLoading) {
-    return <Loading text="記事を読み込み中..." />;
+    return <LoadingSpinner text="記事を読み込み中..." />;
   }
 
   if (error) {
@@ -55,7 +53,7 @@ export function TagArticleListPage({ tag }: TagArticleListPageProps) {
       ) : (
         <div className="space-y-4">
           {articles.map((article) => (
-            <HomeArticleCard
+            <ArticleCard
               key={article.id}
               id={article.id!}
               title={article.title ?? ''}

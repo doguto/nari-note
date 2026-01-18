@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetUserProfile, useToggleFollow, useGetFollowers, useGetFollowings, useGetArticlesByAuthor, useGetLikedArticles } from '@/lib/api';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { FollowButton } from '@/components/common/atoms';
@@ -83,7 +82,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
   };
 
   if (isLoading) {
-    return <Loading text="ユーザー情報を読み込み中..." />;
+    return <LoadingSpinner text="ユーザー情報を読み込み中..." />;
   }
 
   if (error) {
@@ -256,7 +255,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
             <div>
               {isFollowersLoading && (
                 <div className="py-8">
-                  <Loading text="フォロワーを読み込み中..." />
+                  <LoadingSpinner text="フォロワーを読み込み中..." />
                 </div>
               )}
               
@@ -296,7 +295,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
             <div>
               {isFollowingsLoading && (
                 <div className="py-8">
-                  <Loading text="フォロー中のユーザーを読み込み中..." />
+                  <LoadingSpinner text="フォロー中のユーザーを読み込み中..." />
                 </div>
               )}
               
