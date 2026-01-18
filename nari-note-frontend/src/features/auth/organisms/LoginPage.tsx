@@ -60,7 +60,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
+    <div className="max-w-lg w-full mx-auto bg-white rounded-lg shadow-lg p-10">
       <FormTitle>ログイン</FormTitle>
       
       {error && <ErrorAlert message={error} />}
