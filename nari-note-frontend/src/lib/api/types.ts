@@ -78,6 +78,7 @@ export interface GetArticleResponse {
   authorName?: string;
   tags?: string[];
   likeCount?: number;
+  isLiked?: boolean;
   isPublished?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -142,6 +143,16 @@ export interface GetHealthResponse {
   message?: string;
 }
 
+export interface GetLikedArticlesRequest {
+  userId?: number;
+}
+
+export interface GetLikedArticlesResponse {
+  userId?: number;
+  articles?: ArticleDto[];
+  totalCount?: number;
+}
+
 export interface GetUserProfileRequest {
   id?: number;
 }
@@ -154,6 +165,8 @@ export interface GetUserProfileResponse {
   followerCount?: number;
   followingCount?: number;
   isFollowing?: boolean;
+  articleCount?: number;
+  likedArticleCount?: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

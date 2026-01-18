@@ -186,4 +186,11 @@ public class ArticleRepository : IArticleRepository
 
         return articles;
     }
+
+    public async Task<int> CountByAuthorAsync(UserId authorId)
+    {
+        return await context.Articles
+            .Where(a => a.AuthorId == authorId && a.IsPublished)
+            .CountAsync();
+    }
 }

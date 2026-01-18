@@ -9,17 +9,26 @@ public class GetArticleService
 {
     readonly IArticleRepository articleRepository;
     readonly ICommentRepository commentRepository;
+    readonly ILikeRepository likeRepository;
 
-    public GetArticleService(IArticleRepository articleRepository, ICommentRepository commentRepository)
+    public GetArticleService(IArticleRepository articleRepository, ICommentRepository commentRepository, ILikeRepository likeRepository)
     {
         this.articleRepository = articleRepository;
         this.commentRepository = commentRepository;
+        this.likeRepository = likeRepository;
     }
 
-    public async Task<GetArticleResponse> ExecuteAsync(GetArticleRequest request)
+    public async Task<GetArticleResponse> ExecuteAsync(GetArticleRequest request, Domain.ValueObject.UserId? userId = null)
     {
         var article = await articleRepository.FindForceByIdAsync(request.Id);
         var comments = await commentRepository.FindByArticleAsync(request.Id);
+        
+        bool isLiked = false;
+        if (userId.HasValue)
+        {
+            var like = await likeRepository.FindByUserAndArticleAsync(userId.Value, request.Id);
+            isLiked = like != null;
+        }
 
         return new GetArticleResponse
         {
@@ -30,6 +39,7 @@ public class GetArticleService
             AuthorName = article.Author?.Name ?? "",
             Tags = article.ArticleTags.Select(at => at.Tag?.Name ?? string.Empty).Where(name => !string.IsNullOrEmpty(name)).ToList(),
             LikeCount = article.LikeCount,
+            IsLiked = isLiked,
             IsPublished = article.IsPublished,
             CreatedAt = article.CreatedAt,
             UpdatedAt = article.UpdatedAt,

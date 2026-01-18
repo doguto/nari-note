@@ -9,11 +9,19 @@ public class GetUserProfileService
 {
     readonly IUserRepository userRepository;
     readonly IFollowRepository followRepository;
+    readonly IArticleRepository articleRepository;
+    readonly ILikeRepository likeRepository;
     
-    public GetUserProfileService(IUserRepository userRepository, IFollowRepository followRepository)
+    public GetUserProfileService(
+        IUserRepository userRepository, 
+        IFollowRepository followRepository,
+        IArticleRepository articleRepository,
+        ILikeRepository likeRepository)
     {
         this.userRepository = userRepository;
         this.followRepository = followRepository;
+        this.articleRepository = articleRepository;
+        this.likeRepository = likeRepository;
     }
     
     public async Task<GetUserProfileResponse> ExecuteAsync(GetUserProfileRequest request, UserId? currentUserId = null)
@@ -30,6 +38,12 @@ public class GetUserProfileService
             isFollowing = follow != null;
         }
 
+        // 記事数を取得
+        var articleCount = await articleRepository.CountByAuthorAsync(request.Id);
+
+        // いいねした記事数を取得
+        var likedArticleCount = await likeRepository.CountLikedArticlesByUserAsync(request.Id);
+
         return new GetUserProfileResponse
         {
             Id = user.Id,
@@ -38,7 +52,9 @@ public class GetUserProfileService
             CreatedAt = user.CreatedAt,
             FollowerCount = followerCount,
             FollowingCount = followingCount,
-            IsFollowing = isFollowing
+            IsFollowing = isFollowing,
+            ArticleCount = articleCount,
+            LikedArticleCount = likedArticleCount
         };
     }
 }

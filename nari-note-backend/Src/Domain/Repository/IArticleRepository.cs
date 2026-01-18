@@ -11,4 +11,5 @@ public interface IArticleRepository : IRepository<Article, ArticleId>
     Task<(List<Article> Articles, int TotalCount)> FindLatestAsync(int limit, int offset);
     Task<List<Article>> FindDraftsByAuthorAsync(UserId authorId);
     Task<List<Article>> SearchAsync(string keyword, int limit, int offset);
+    Task<int> CountByAuthorAsync(UserId authorId);
 }

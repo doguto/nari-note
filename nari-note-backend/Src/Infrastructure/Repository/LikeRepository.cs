@@ -60,4 +60,43 @@ public class LikeRepository : ILikeRepository
     {
         return await context.Likes.CountAsync(l => l.ArticleId == articleId);
     }
+
+    public async Task<List<Article>> FindLikedArticlesByUserAsync(UserId userId)
+    {
+        var likedArticles = await context.Likes
+            .Where(l => l.UserId == userId)
+            .OrderByDescending(l => l.CreatedAt)
+            .Select(l => new { l.ArticleId, l.CreatedAt })
+            .ToListAsync();
+
+        if (!likedArticles.Any())
+        {
+            return new List<Article>();
+        }
+
+        var articleIds = likedArticles.Select(la => la.ArticleId).ToList();
+
+        var articles = await context.Articles
+            .Where(a => articleIds.Contains(a.Id))
+            .Include(a => a.Author)
+            .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(a => a.Likes)
+            .ToListAsync();
+
+        // Preserve the original liked order
+        var orderedArticles = likedArticles
+            .Select(la => articles.FirstOrDefault(a => a.Id == la.ArticleId))
+            .Where(a => a != null)
+            .ToList();
+
+        return orderedArticles!;
+    }
+
+    public async Task<int> CountLikedArticlesByUserAsync(UserId userId)
+    {
+        return await context.Likes
+            .Where(l => l.UserId == userId)
+            .CountAsync();
+    }
 }

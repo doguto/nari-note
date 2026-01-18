@@ -26,5 +26,6 @@ public static class ApplicationServiceInstaller
         services.AddScoped<CreateCommentService>();
         services.AddScoped<GetFollowersService>();
         services.AddScoped<GetFollowingsService>();
+        services.AddScoped<GetLikedArticlesService>();
     }
 }

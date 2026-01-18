@@ -24,6 +24,8 @@ import type {
   GetFollowingsRequest,
   GetFollowingsResponse,
   GetHealthResponse,
+  GetLikedArticlesRequest,
+  GetLikedArticlesResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
   SearchArticlesRequest,
@@ -127,6 +129,10 @@ export const usersApi = {
   },
   getFollowings: async (data: GetFollowingsRequest): Promise<GetFollowingsResponse> => {
     const response = await apiClient.get<GetFollowingsResponse>(`/api/users/${data.userId}/followings`);
+    return response;
+  },
+  getLikedArticles: async (data: GetLikedArticlesRequest): Promise<GetLikedArticlesResponse> => {
+    const response = await apiClient.get<GetLikedArticlesResponse>(`/api/users/${data.userId}/liked-articles`);
     return response;
   },
 };
