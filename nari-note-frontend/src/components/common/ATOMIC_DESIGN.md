@@ -17,9 +17,15 @@ common/
 
 ### 例
 - **FormField** - ラベル + 入力フィールドのセット
-- **ErrorAlert** - エラーメッセージ表示
+- **ErrorAlert** - エラーメッセージ表示（インラインエラー用）
+- **ErrorMessage** - エラーメッセージ表示（再試行ボタン付き）
 - **FormTitle** - フォームタイトル
 - **TagChip** - タグチップ（削除ボタン付き）
+- **LoadingSpinner** - ローディングスピナー
+- **EmptyState** - 空状態表示
+- **LikeButton** - いいねボタン
+- **FollowButton** - フォローボタン
+- **FollowStats** - フォロワー統計表示
 
 ## Molecules（分子）
 
@@ -31,6 +37,9 @@ common/
 - **NameField** - ユーザー名入力（FormFieldを使用）
 - **TagInput** - タグ入力（Input + Button + TagChipを使用）
 - **CharacterCounter** - 文字数カウンター
+- **ArticleCard** - 記事カード（ホーム画面などで使用）
+- **CommentItem** - コメント表示項目
+- **UserListItem** - ユーザーリスト項目
 
 ## Organisms（生体）
 
@@ -38,22 +47,24 @@ Atoms/Moleculesを組み合わせた、完全な機能を持つコンポーネ�
 featuresディレクトリ内で定義されます。
 
 ### 例
-- **LoginForm** - ログインフォーム
-- **SignUpForm** - 新規登録フォーム
-- **ArticleForm** - 記事作成・編集フォーム
+- **LoginPage** - ログインページ
+- **SignUpPage** - 新規登録ページ
+- **ArticleFormPage** - 記事作成・編集ページ
+- **ArticleDetailPage** - 記事詳細ページ
+- **UserProfilePage** - ユーザープロフィールページ
 
 ## 使用方法
 
 ### Atomsのインポート
 
 ```tsx
-import { FormField, ErrorAlert, FormTitle } from '@/components/common/atoms';
+import { FormField, ErrorAlert, FormTitle, LoadingSpinner, EmptyState, ErrorMessage } from '@/components/common/atoms';
 ```
 
 ### Moleculesのインポート
 
 ```tsx
-import { EmailField, PasswordField, TagInput } from '@/components/common/molecules';
+import { EmailField, PasswordField, TagInput, ArticleCard } from '@/components/common/molecules';
 ```
 
 ## メリット
@@ -71,3 +82,24 @@ import { EmailField, PasswordField, TagInput } from '@/components/common/molecul
 - **Organisms** は features ディレクトリ内で Atoms/Molecules を組み合わせて完全な機能を実装
 - 各コンポーネントは単一責任の原則に従う
 - propsの型定義を明確にする
+
+## コンポーネント分類の基準
+
+### Atomsに分類すべきもの
+- これ以上分割できない最小単位のUI要素
+- 他のコンポーネントから独立して機能する
+- 状態管理やビジネスロジックを持たない
+- 例: ボタン、入力フィールド、ラベル、スピナー
+
+### Moleculesに分類すべきもの
+- 複数のAtomsを組み合わせた機能的なコンポーネント
+- 特定の機能を持つが、ページ全体の機能ではない
+- ビジネスロジックは最小限
+- 例: フォームフィールド（ラベル+入力+エラー）、カード、リスト項目
+
+### Organismsに分類すべきもの
+- ページの主要な機能ブロック
+- ビジネスロジックとデータ取得を含む
+- Atoms/Moleculesを組み合わせて完全な機能を実現
+- 例: ログインフォーム、記事詳細、ユーザープロフィール
+
