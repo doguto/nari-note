@@ -12,17 +12,17 @@ namespace NariNoteBackend.Controller;
 public class ArticlesController : ApplicationController
 {
     readonly CreateArticleService createArticleService;
-    readonly UpdateArticleService updateArticleService;
-    readonly GetArticlesService getArticlesService;
+    readonly CreateCommentService createCommentService;
+    readonly DeleteArticleService deleteArticleService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticlesByTagService getArticlesByTagService;
     readonly GetArticleService getArticleService;
-    readonly DeleteArticleService deleteArticleService;
-    readonly ToggleLikeService toggleLikeService;
+    readonly GetArticlesService getArticlesService;
     readonly GetDraftArticlesService getDraftArticlesService;
     readonly SearchArticlesService searchArticlesService;
-    readonly CreateCommentService createCommentService;
-    
+    readonly ToggleLikeService toggleLikeService;
+    readonly UpdateArticleService updateArticleService;
+
     public ArticlesController(
         CreateArticleService createArticleService,
         UpdateArticleService updateArticleService,
@@ -34,7 +34,8 @@ public class ArticlesController : ApplicationController
         ToggleLikeService toggleLikeService,
         GetDraftArticlesService getDraftArticlesService,
         SearchArticlesService searchArticlesService,
-        CreateCommentService createCommentService)
+        CreateCommentService createCommentService
+    )
     {
         this.createArticleService = createArticleService;
         this.updateArticleService = updateArticleService;
@@ -48,9 +49,11 @@ public class ArticlesController : ApplicationController
         this.searchArticlesService = searchArticlesService;
         this.createCommentService = createCommentService;
     }
-    
+
     [HttpGet]
-    public async Task<ActionResult<GetArticlesResponse>> GetArticles([FromQuery] int limit = 20, [FromQuery] int offset = 0)
+    public async Task<ActionResult<GetArticlesResponse>> GetArticles(
+        [FromQuery] int limit = 20, [FromQuery] int offset = 0
+    )
     {
         var request = new GetArticlesRequest { Limit = limit, Offset = offset };
         var response = await getArticlesService.ExecuteAsync(request);
@@ -65,15 +68,16 @@ public class ArticlesController : ApplicationController
         var response = await createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
-    
+
     [HttpGet("{id}")]
     public async Task<ActionResult> GetArticle(ArticleId id)
     {
         var request = new GetArticleRequest { Id = id };
-        var response = await getArticleService.ExecuteAsync(request);
+        UserId? userId = HasUserId ? UserId : null;
+        var response = await getArticleService.ExecuteAsync(request, userId);
         return Ok(response);
     }
-    
+
     [HttpPut("{id}")]
     [ValidateModelState]
     public async Task<ActionResult> UpdateArticle(ArticleId id, [FromBody] UpdateArticleRequest request)
@@ -112,8 +116,8 @@ public class ArticlesController : ApplicationController
     [HttpPost("{id}/like")]
     public async Task<ActionResult> ToggleLike(ArticleId id)
     {
-        var request = new ToggleLikeRequest 
-        { 
+        var request = new ToggleLikeRequest
+        {
             ArticleId = id
         };
         var response = await toggleLikeService.ExecuteAsync(UserId, request);

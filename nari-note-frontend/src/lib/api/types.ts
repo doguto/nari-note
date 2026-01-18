@@ -78,6 +78,7 @@ export interface GetArticleResponse {
   authorName?: string;
   tags?: string[];
   likeCount?: number;
+  isLiked?: boolean;
   isPublished?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -137,6 +138,11 @@ export interface GetFollowingsResponse {
   followings?: FollowerUserDto[];
 }
 
+export interface GetHealthResponse {
+  statusCode?: number;
+  message?: string;
+}
+
 export interface GetLikedArticlesRequest {
   userId?: number;
 }
@@ -145,11 +151,6 @@ export interface GetLikedArticlesResponse {
   userId?: number;
   articles?: ArticleDto[];
   totalCount?: number;
-}
-
-export interface GetHealthResponse {
-  statusCode?: number;
-  message?: string;
 }
 
 export interface GetUserProfileRequest {

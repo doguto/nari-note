@@ -6,3 +6,4 @@ export { TextareaField } from './TextareaField';
 export { ImageUploadField } from './ImageUploadField';
 export { FollowButton } from './FollowButton';
 export { FollowStats } from './FollowStats';
+export { LikeButton } from './LikeButton';

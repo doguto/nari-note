@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
-import { useGetArticle } from '@/lib/api';
+import { useGetArticle, useToggleLike } from '@/lib/api';
 import { Loading } from '@/components/common/Loading';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';
 import { Comment } from '@/types/comment';
+import { LikeButton } from '@/components/common/atoms';
 
 interface ArticleDetailPageProps {
   articleId: number;
@@ -22,10 +23,21 @@ interface ArticleDetailPageProps {
  */
 export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const { data: article, isLoading, error, refetch } = useGetArticle({ id: articleId });
+  const { mutate: toggleLike, isPending: isLikePending } = useToggleLike({
+    onSuccess: () => {
+      // いいね成功時、記事データを再取得
+      refetch();
+    },
+  });
 
   const handleCommentSuccess = () => {
     // コメント投稿後、記事データを再取得してコメント一覧を更新
     refetch();
+  };
+
+  const handleLikeClick = () => {
+    if (isLikePending) return;
+    toggleLike({ articleId: articleId });
   };
 
   if (isLoading) {
@@ -76,10 +88,12 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
         </Link>
         
         <div className="flex items-center gap-4 ml-auto">
-          <button className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors">
-            <span>❤️</span>
-            <span>{article.likeCount}</span>
-          </button>
+          <LikeButton
+            isLiked={article.isLiked || false}
+            likeCount={article.likeCount || 0}
+            onClick={handleLikeClick}
+            disabled={isLikePending}
+          />
           <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
             ストック
           </button>
