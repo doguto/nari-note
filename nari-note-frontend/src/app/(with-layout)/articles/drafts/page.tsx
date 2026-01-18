@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { DraftArticleListPage } from '@/features/article/organisms';
-import { Loading } from '@/components/common/Loading';
+import { LoadingSpinner } from '@/components/common/atoms';
 
 /**
  * 下書き記事一覧ページ
@@ -26,7 +26,7 @@ export default function DraftsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <Loading text="読み込み中..." />
+        <LoadingSpinner text="読み込み中..." />
       </div>
     );
   }

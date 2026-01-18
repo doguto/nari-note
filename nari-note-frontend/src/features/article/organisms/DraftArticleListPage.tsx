@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetDraftArticles, useDeleteArticle } from '@/lib/api';
 import { DraftArticleCard } from './DraftArticleCard';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
@@ -46,7 +45,7 @@ export function DraftArticleListPage() {
   };
 
   if (isLoading) {
-    return <Loading text="下書きを読み込み中..." />;
+    return <LoadingSpinner text="下書きを読み込み中..." />;
   }
 
   if (error) {
@@ -101,7 +100,7 @@ export function DraftArticleListPage() {
       {deletingId !== null && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg">
-            <Loading text="削除中..." />
+            <LoadingSpinner text="削除中..." />
           </div>
         </div>
       )}

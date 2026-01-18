@@ -2,8 +2,7 @@
 
 import { useGetFollowers } from '@/lib/api';
 import { UserListItem } from '@/components/common/molecules';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
 import {
   Dialog,
   DialogContent,
@@ -39,7 +38,7 @@ export function FollowersModal({ userId, isOpen, onClose }: FollowersModalProps)
         <div className="flex-1 overflow-y-auto">
           {isLoading && (
             <div className="py-8">
-              <Loading text="フォロワーを読み込み中..." />
+              <LoadingSpinner text="フォロワーを読み込み中..." />
             </div>
           )}
 

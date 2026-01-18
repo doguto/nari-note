@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { useGetArticle, useToggleLike } from '@/lib/api';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
 import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';
 import { Comment } from '@/types/comment';
@@ -41,7 +40,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   };
 
   if (isLoading) {
-    return <Loading text="記事を読み込み中..." />;
+    return <LoadingSpinner text="記事を読み込み中..." />;
   }
 
   if (error) {

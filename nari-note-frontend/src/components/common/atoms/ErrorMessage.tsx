@@ -6,9 +6,10 @@ interface ErrorMessageProps {
 }
 
 /**
- * エラーメッセージ表示コンポーネント
+ * ErrorMessage - Atom Component
  * 
- * APIエラーなどのエラー状態を表示します。
+ * エラーメッセージ表示の最小単位コンポーネント
+ * APIエラーなどのエラー状態を表示します
  */
 export function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
   return (

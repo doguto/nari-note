@@ -11,9 +11,10 @@ interface EmptyStateProps {
 }
 
 /**
- * 空状態表示コンポーネント
+ * EmptyState - Atom Component
  * 
- * データが存在しない場合に表示します。
+ * 空状態表示の最小単位コンポーネント
+ * データが存在しない場合に表示します
  */
 export function EmptyState({ title, description, icon, action }: EmptyStateProps) {
   return (
