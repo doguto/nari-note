@@ -60,12 +60,12 @@ export function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
+    <div className="max-w-2xl w-full mx-auto bg-white rounded-lg shadow-lg px-10 py-12">
       <FormTitle>ログイン</FormTitle>
       
       {error && <ErrorAlert message={error} />}
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <EmailField value={email} onChange={setEmail} />
         
         <PasswordField value={password} onChange={setPassword} />
@@ -79,7 +79,7 @@ export function LoginPage() {
         </Button>
       </form>
       
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <p className="text-sm text-gray-600">
           アカウントをお持ちでない方は
           <Link href="/signup" className="text-brand-primary hover:underline ml-1">
