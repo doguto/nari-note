@@ -73,7 +73,7 @@ export function SignUpPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
+    <div className="max-w-lg w-full mx-auto bg-white rounded-lg shadow-lg p-10">
       <FormTitle>新規登録</FormTitle>
       
       {error && <ErrorAlert message={error} />}
