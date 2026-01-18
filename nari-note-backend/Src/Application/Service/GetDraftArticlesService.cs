@@ -29,6 +29,7 @@ public class GetDraftArticlesService
             Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
             LikeCount = 0, // 下書きにはLikeが存在しない
             IsPublished = a.IsPublished,
+            PublishedAt = a.PublishedAt,
             CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
         }).ToList();

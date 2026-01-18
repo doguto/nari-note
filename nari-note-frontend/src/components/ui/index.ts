@@ -30,3 +30,5 @@ export {
   DialogTitle,
   DialogDescription,
 } from './dialog'
+
+export { RadioGroup, RadioGroupItem } from './radio-group'

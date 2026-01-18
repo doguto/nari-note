@@ -41,6 +41,7 @@ public class GetArticleService
             LikeCount = article.LikeCount,
             IsLiked = isLiked,
             IsPublished = article.IsPublished,
+            PublishedAt = article.PublishedAt,
             CreatedAt = article.CreatedAt,
             UpdatedAt = article.UpdatedAt,
             Comments = comments

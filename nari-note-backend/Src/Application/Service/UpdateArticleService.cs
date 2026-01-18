@@ -31,9 +31,23 @@ public class UpdateArticleService
             article.Body = request.Body!;
         }
 
+        var wasPublished = article.IsPublished;
+        
         if (request.IsPublished.HasValue)
         {
             article.IsPublished = request.IsPublished.Value;
+        }
+
+        // PublishedAtが明示的に指定されている場合はそれを使用
+        if (request.PublishedAt.HasValue)
+        {
+            article.PublishedAt = request.PublishedAt.Value;
+        }
+        // 下書きを公開する際に予約投稿日時が未設定の場合は現在時刻を自動設定
+        // （既に公開済みの記事を更新する場合は自動設定しない）
+        else if (!wasPublished && article.IsPublished && !article.PublishedAt.HasValue)
+        {
+            article.PublishedAt = DateTime.UtcNow;
         }
 
         article.UpdatedAt = DateTime.UtcNow;

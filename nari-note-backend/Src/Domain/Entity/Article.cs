@@ -22,6 +22,8 @@ public class Article : EntityBase
     public required string Body { get; set; }
 
     public bool IsPublished { get; set; } = false;
+    
+    public DateTime? PublishedAt { get; set; }
 
     // Navigation Properties
     public User Author { get; set; }

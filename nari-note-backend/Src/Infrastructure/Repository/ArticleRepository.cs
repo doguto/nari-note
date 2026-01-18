@@ -3,6 +3,7 @@ using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Infrastructure.Database;
+using System.Linq.Expressions;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -14,6 +15,24 @@ public class ArticleRepository : IArticleRepository
     {
         this.context = context;
     }
+    
+    /// <summary>
+    /// 公開記事のフィルタ条件を生成します。
+    /// </summary>
+    /// <param name="now">現在時刻（UTC）。この時刻以前に公開された記事のみを返します。</param>
+    /// <returns>公開記事のフィルタ条件</returns>
+    static Expression<Func<Article, bool>> IsPubliclyVisible(DateTime now) =>
+        a => a.IsPublished && a.PublishedAt.HasValue && a.PublishedAt.Value <= now;
+    
+    /// <summary>
+    /// 公開記事かつキーワードを含む記事のフィルタ条件を生成します。
+    /// </summary>
+    /// <param name="now">現在時刻（UTC）</param>
+    /// <param name="keyword">検索キーワード</param>
+    /// <returns>フィルタ条件</returns>
+    static Expression<Func<Article, bool>> IsPubliclyVisibleAndContainsKeyword(DateTime now, string keyword) =>
+        a => a.IsPublished && a.PublishedAt.HasValue && a.PublishedAt.Value <= now && 
+             (a.Title.Contains(keyword) || a.Body.Contains(keyword));
     
     public async Task<Article> CreateAsync(Article article)
     {
@@ -61,12 +80,16 @@ public class ArticleRepository : IArticleRepository
     
     public async Task<List<Article>> FindByTagAsync(string tagName)
     {
+        var now = DateTime.UtcNow;
+        var visibilityFilter = IsPubliclyVisible(now);
+        
         return await context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
             .Where(a => a.ArticleTags.Any(at => EF.Functions.ILike(at.Tag.Name, tagName)))
+            .Where(visibilityFilter)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
@@ -140,12 +163,15 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<(List<Article> Articles, int TotalCount)> FindLatestAsync(int limit, int offset)
     {
+        var now = DateTime.UtcNow;
+        var visibilityFilter = IsPubliclyVisible(now);
+        
         var query = context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
-            .Where(a => a.IsPublished)
+            .Where(visibilityFilter)
             .OrderByDescending(a => a.CreatedAt);
 
         // 注: ページネーションの標準的な実装として、
@@ -173,12 +199,15 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<List<Article>> SearchAsync(string keyword, int limit, int offset)
     {
+        var now = DateTime.UtcNow;
+        var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
+        
         var articles = await context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Likes)
-            .Where(a => a.IsPublished && (a.Title.Contains(keyword) || a.Body.Contains(keyword)))
+            .Where(searchFilter)
             .OrderByDescending(a => a.CreatedAt)
             .Skip(offset)
             .Take(limit)

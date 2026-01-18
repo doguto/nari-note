@@ -173,7 +173,8 @@ public class AuthenticationMiddleware
             if (path == endpointPath) return true;
 
             // 動的パス対応: /api/articles/{id} パターン
-            if (endpointPath == "/api/articles" && path.StartsWith("/api/articles/") && method == "GET") return true;
+            // ただし /api/articles/drafts は認証必須なので除外
+            if (endpointPath == "/api/articles" && path.StartsWith("/api/articles/") && path != "/api/articles/drafts" && method == "GET") return true;
 
             return false;
         });

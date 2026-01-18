@@ -24,7 +24,16 @@ article/
 - TitleField（Molecule）を使用
 - BodyField（Molecule）を使用
 - TagInput（Molecule）を使用
+- PublishSettingsDialog（Organism）を使用
 - データフェッチングとビジネスロジックを含む
+
+### PublishSettingsDialog.tsx
+記事の投稿設定を行うダイアログ。
+
+- 即座に公開または予約投稿を選択可能
+- 日時選択とバリデーション機能
+- ISO 8601形式（UTC）でAPIに送信
+- Radix UI Dialogを使用したアクセシブルなモーダル
 
 ### ArticleDetailPage.tsx
 記事詳細表示。Presentational Organism。

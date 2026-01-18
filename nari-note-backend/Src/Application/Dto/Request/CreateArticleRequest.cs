@@ -16,4 +16,5 @@ public class CreateArticleRequest
     
     public List<string> Tags { get; set; } = new();
     public bool IsPublished { get; set; } = false;
+    public DateTime? PublishedAt { get; set; }
 }

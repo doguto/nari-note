@@ -88,6 +88,7 @@ public static class DataSeeder
                     "棒銀は、初心者が最初に覚えるべき戦法の一つです。\n\n## 棒銀とは\n銀将を棒のようにまっすぐ進めて攻める戦法です。シンプルながら破壊力抜群！\n\n## 基本の駒組み\n1. ▲２六歩 △８四歩\n2. ▲２五歩 △８五歩\n3. ▲７八金 △３二金\n4. ▲３八銀 → ▲２七銀 → ▲２六銀\n\n## ポイント\n- 飛車先の歩を伸ばしてから銀を繰り出す\n- 相手の角頭（８七の地点）を狙う\n\nまずは棒銀をマスターして、将棋の基本を身につけましょう！",
                 AuthorId = users[3].Id,
                 IsPublished = true,
+                PublishedAt = DateTime.UtcNow.AddDays(-5),
                 CreatedAt = DateTime.UtcNow.AddDays(-5),
                 UpdatedAt = DateTime.UtcNow.AddDays(-5)
             },
@@ -99,6 +100,7 @@ public static class DataSeeder
                     "四間飛車は振り飛車の基本形です。美濃囲いとセットで覚えましょう。\n\n## 四間飛車とは\n飛車を４筋（左から４番目）に振る戦法です。\n\n## 美濃囲いの組み方\n1. ▲６八玉\n2. ▲７八玉\n3. ▲５八金右\n4. ▲９八香（穴熊にする場合）\n\n## 四間飛車のメリット\n- 駒組みが覚えやすい\n- カウンター狙いの戦い方ができる\n- 美濃囲いが堅い\n\n振り飛車党を目指すなら、まず四間飛車から始めましょう！",
                 AuthorId = users[1].Id,
                 IsPublished = true,
+                PublishedAt = DateTime.UtcNow.AddDays(-4),
                 CreatedAt = DateTime.UtcNow.AddDays(-4),
                 UpdatedAt = DateTime.UtcNow.AddDays(-4)
             },
@@ -110,6 +112,7 @@ public static class DataSeeder
                     "詰将棋は終盤力を鍛える最高のトレーニングです。\n\n## ５手詰めを解くコツ\n\n### 1. 王手の種類を確認\n- 駒を打つ王手\n- 駒を動かす王手\n- 両王手\n\n### 2. 玉の逃げ道を塞ぐ\n詰ますためには、まず玉の退路を断つことが重要です。\n\n### 3. 捨て駒を恐れない\n派手な捨て駒から始まる詰みが多いです。\n\n## おすすめの詰将棋本\n- 「３手詰ハンドブック」\n- 「５手詰ハンドブック」\n\n毎日コツコツ解くことが上達の近道です！",
                 AuthorId = users[2].Id,
                 IsPublished = true,
+                PublishedAt = DateTime.UtcNow.AddDays(-3),
                 CreatedAt = DateTime.UtcNow.AddDays(-3),
                 UpdatedAt = DateTime.UtcNow.AddDays(-3)
             },
@@ -121,6 +124,7 @@ public static class DataSeeder
                     "矢倉は「将棋の純文学」と呼ばれる格調高い戦法です。\n\n## 矢倉の歴史\n江戸時代から指されている伝統的な戦法で、長らく「相居飛車の王道」とされてきました。\n\n## 矢倉囲いの特徴\n- 上部に強い\n- 組み上がるまでに手数がかかる\n- 相矢倉では互いに攻め合いになりやすい\n\n## 現代での評価\n近年はソフト研究により急戦矢倉や雁木が増え、従来の矢倉は減少傾向にあります。\nしかし、矢倉の考え方を知ることは将棋の基礎力向上に役立ちます。\n\n一度は本格的な相矢倉を指してみてください！",
                 AuthorId = users[0].Id,
                 IsPublished = true,
+                PublishedAt = DateTime.UtcNow.AddDays(-2),
                 CreatedAt = DateTime.UtcNow.AddDays(-2),
                 UpdatedAt = DateTime.UtcNow.AddDays(-2)
             },
@@ -132,6 +136,7 @@ public static class DataSeeder
                     "先日行われた王位戦第５局を振り返ります。\n\n## 対局概要\n藤井竜王の先手番で、戦型は角換わり腰掛け銀に。\n\n## 見どころ\n中盤で挑戦者が優勢を築きましたが、藤井竜王の粘り強い指し回しが光りました。\n\n## 終盤のハイライト\n８７手目の▲５五角が勝負を決めた一手。この手を境に形勢が逆転しました。\n読み筋を外された挑戦者は時間に追われ、最後は即詰みに討ち取られました。\n\n## まとめ\n改めて藤井竜王の終盤力の凄さを実感した一局でした。\n詰将棋で鍛えた読みの力が存分に発揮されていましたね。",
                 AuthorId = users[0].Id,
                 IsPublished = true,
+                PublishedAt = DateTime.UtcNow.AddDays(-1),
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1)
             }
