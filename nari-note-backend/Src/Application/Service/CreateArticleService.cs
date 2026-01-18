@@ -28,6 +28,12 @@ public class CreateArticleService
 
         var created = await articleRepository.CreateAsync(article);
 
+        // タグと一緒に記事を更新（1回のDB操作に統合）
+        if (request.Tags != null && request.Tags.Count > 0)
+        {
+            await articleRepository.UpdateWithTagAsync(created, request.Tags);
+        }
+
         return new CreateArticleResponse
         {
             Id = created.Id,
