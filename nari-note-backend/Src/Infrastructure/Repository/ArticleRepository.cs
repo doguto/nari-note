@@ -148,6 +148,14 @@ public class ArticleRepository : IArticleRepository
         }
         
         await context.SaveChangesAsync();
+        
+        // Reload ArticleTags navigation property to ensure it reflects the saved changes
+        await context.Entry(article)
+            .Collection(a => a.ArticleTags)
+            .Query()
+            .Include(at => at.Tag)
+            .LoadAsync();
+        
         return article;
     }
 
