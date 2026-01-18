@@ -7,7 +7,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { User, FileText } from 'lucide-react';
 
 /**
  * ヘッダーコンポーネント
@@ -83,23 +85,29 @@ export function Header() {
                     </svg>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent 
+                  align="end" 
+                  className="w-56 bg-brand-text border-brand-text-dark"
+                >
                   <DropdownMenuItem asChild>
                     <Link
                       href={`/users/${userId}`}
-                      className="cursor-pointer"
+                      className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2"
                       style={{ fontFamily: 'serif' }}
                     >
-                      マイページ
+                      <User className="w-4 h-4" />
+                      <span>マイページ</span>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-brand-text-dark" />
                   <DropdownMenuItem asChild>
                     <Link
                       href="/articles/drafts"
-                      className="cursor-pointer"
+                      className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2"
                       style={{ fontFamily: 'serif' }}
                     >
-                      下書き一覧
+                      <FileText className="w-4 h-4" />
+                      <span>下書き一覧</span>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
