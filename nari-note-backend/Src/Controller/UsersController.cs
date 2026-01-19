@@ -35,17 +35,18 @@ public class UsersController : ApplicationController
     }
 
     [HttpGet("{id}")]
+    [OptionalAuth]
     public async Task<ActionResult> GetUserProfile(UserId id)
     {
         var request = new GetUserProfileRequest { Id = id };
 
         // 認証済みの場合は現在のユーザーIDを渡す
-        UserId? userId = HasUserId ? UserId : null;
-        var response = await getUserProfileService.ExecuteAsync(request, userId);
+        var response = await getUserProfileService.ExecuteAsync(request, NullableUserId);
         return Ok(response);
     }
 
     [HttpPut]
+    [RequireAuth]
     [ValidateModelState]
     public async Task<ActionResult> UpdateUserProfile([FromBody] UpdateUserProfileRequest request)
     {
@@ -54,6 +55,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpPost("{id}/follow")]
+    [RequireAuth]
     public async Task<ActionResult> ToggleFollow(UserId id)
     {
         var request = new ToggleFollowRequest

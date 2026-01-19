@@ -10,18 +10,15 @@ public class SignUpService
 {
     readonly ICookieOptionsHelper cookieOptionsHelper;
     readonly IJwtHelper jwtHelper;
-    readonly ISessionRepository sessionRepository;
     readonly IUserRepository userRepository;
 
     public SignUpService(
         IUserRepository userRepository,
-        ISessionRepository sessionRepository,
         IJwtHelper jwtHelper,
         ICookieOptionsHelper cookieOptionsHelper
     )
     {
         this.userRepository = userRepository;
-        this.sessionRepository = sessionRepository;
         this.jwtHelper = jwtHelper;
         this.cookieOptionsHelper = cookieOptionsHelper;
     }
@@ -42,19 +39,7 @@ public class SignUpService
 
         var createdUser = await userRepository.CreateAsync(user);
 
-        var sessionKey = jwtHelper.GenerateSessionKey();
-        var token = jwtHelper.GenerateToken(createdUser, sessionKey);
-
-        var session = new Session
-        {
-            UserId = createdUser.Id,
-            SessionKey = sessionKey,
-            ExpiresAt = DateTime.UtcNow.AddHours(jwtHelper.GetExpirationInHours()),
-            CreatedAt = DateTime.UtcNow,
-            User = createdUser
-        };
-
-        await sessionRepository.CreateAsync(session);
+        var token = jwtHelper.GenerateToken(createdUser);
 
         // HttpOnly Cookieにトークンを設定
         var cookieOptions = cookieOptionsHelper.CreateAuthCookieOptions(

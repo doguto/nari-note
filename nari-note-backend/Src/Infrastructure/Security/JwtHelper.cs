@@ -1,10 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Security;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Infrastructure.Security;
 
@@ -32,18 +32,17 @@ public class JwtHelper : IJwtHelper
         return expirationInHours;
     }
 
-    public string GenerateToken(User user, string sessionKey)
+    public string GenerateToken(User user)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Name, user.Name),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("sessionKey", sessionKey)
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
         var token = new JwtSecurityToken(
@@ -88,14 +87,19 @@ public class JwtHelper : IJwtHelper
         }
     }
 
-    public string GenerateSessionKey()
+    public UserId? GetUserIdFromToken(string token)
     {
-        var randomBytes = new byte[32];
-        using (var rng = RandomNumberGenerator.Create())
+        var principal = ValidateToken(token);
+        if (principal == null) return null;
+
+        var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub);
+        if (userIdClaim == null) return null;
+
+        if (int.TryParse(userIdClaim.Value, out var userIdValue))
         {
-            rng.GetBytes(randomBytes);
+            return UserId.From(userIdValue);
         }
 
-        return Convert.ToBase64String(randomBytes);
+        return null;
     }
 }
