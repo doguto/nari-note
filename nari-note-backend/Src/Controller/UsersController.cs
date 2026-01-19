@@ -41,7 +41,7 @@ public class UsersController : ApplicationController
         var request = new GetUserProfileRequest { Id = id };
 
         // 認証済みの場合は現在のユーザーIDを渡す
-        var response = await getUserProfileService.ExecuteAsync(request, NullableUserId);
+        var response = await getUserProfileService.ExecuteAsync(request, UserId);
         return Ok(response);
     }
 
@@ -49,7 +49,7 @@ public class UsersController : ApplicationController
     [ValidateModelState]
     public async Task<ActionResult> UpdateUserProfile([FromBody] UpdateUserProfileRequest request)
     {
-        var response = await updateUserProfileService.ExecuteAsync(UserId, request);
+        var response = await updateUserProfileService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
@@ -60,11 +60,12 @@ public class UsersController : ApplicationController
         {
             FollowingId = id
         };
-        var response = await toggleFollowService.ExecuteAsync(UserId, request);
+        var response = await toggleFollowService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
     [HttpGet("{id}/followers")]
+    [AllowAnonymous]
     public async Task<ActionResult> GetFollowers(UserId id)
     {
         var request = new GetFollowersRequest { UserId = id };
@@ -73,6 +74,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpGet("{id}/followings")]
+    [AllowAnonymous]
     public async Task<ActionResult> GetFollowings(UserId id)
     {
         var request = new GetFollowingsRequest { UserId = id };
@@ -81,6 +83,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpGet("{id}/liked-articles")]
+    [AllowAnonymous]
     public async Task<ActionResult> GetLikedArticles(UserId id)
     {
         var request = new GetLikedArticlesRequest { UserId = id };

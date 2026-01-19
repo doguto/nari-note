@@ -22,6 +22,7 @@ public class AuthController : ApplicationController
     }
     
     [HttpPost("signup")]
+    [AllowAnonymous]
     [ValidateModelState]
     public async Task<ActionResult<AuthResponse>> SignUp([FromBody] SignUpRequest request)
     {
@@ -30,6 +31,7 @@ public class AuthController : ApplicationController
     }
     
     [HttpPost("signin")]
+    [AllowAnonymous]
     [ValidateModelState]
     public async Task<ActionResult<AuthResponse>> SignIn([FromBody] SignInRequest request)
     {

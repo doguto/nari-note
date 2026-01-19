@@ -32,16 +32,14 @@ public class JwtHelper : IJwtHelper
         return expirationInHours;
     }
 
-    public string GenerateToken(User user)
+    public string GenerateToken(UserId userId)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Name, user.Name),
+            new Claim(JwtRegisteredClaimNames.Sub, userId.Value.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
