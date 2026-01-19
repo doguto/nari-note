@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { useMe } from '@/lib/api';
 
 interface AuthContextType {
   userId: number | null;
@@ -8,38 +9,36 @@ interface AuthContextType {
   isLoading: boolean;
   login: (userId: number) => void;
   logout: () => void;
+  refetch: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading, refetch } = useMe({
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
-    // SSRチェック: クライアントサイドでのみlocalStorageにアクセス
-    if (typeof window !== 'undefined') {
-      const storedUserId = localStorage.getItem('userId');
-      if (storedUserId) {
-        setUserId(parseInt(storedUserId, 10));
-      }
+    if (data?.userId) {
+      setUserId(data.userId);
+    } else if (!isLoading && data !== undefined) {
+      // データがロード済みでuserIdがnullの場合は、未ログイン状態
+      setUserId(null);
     }
-    setIsLoading(false);
-  }, []);
+  }, [data, isLoading]);
 
   const login = useCallback((newUserId: number) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('userId', newUserId.toString());
-    }
     setUserId(newUserId);
-  }, []);
+    refetch();
+  }, [refetch]);
 
   const logout = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('userId');
-    }
     setUserId(null);
-  }, []);
+    refetch();
+  }, [refetch]);
 
   return (
     <AuthContext.Provider
@@ -49,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login,
         logout,
+        refetch,
       }}
     >
       {children}

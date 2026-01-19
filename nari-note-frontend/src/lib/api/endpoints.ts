@@ -99,6 +99,13 @@ export const authApi = {
     const response = await apiClient.post<AuthResponse>('/api/auth/signin', data);
     return response;
   },
+  logout: async (): Promise<void> => {
+    await apiClient.post('/api/auth/logout');
+  },
+  me: async (): Promise<AuthResponse> => {
+    const response = await apiClient.get<AuthResponse>('/api/auth/me');
+    return response;
+  },
 };
 
 // Health API
