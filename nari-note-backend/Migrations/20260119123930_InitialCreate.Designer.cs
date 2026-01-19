@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NariNoteBackend.Migrations
 {
     [DbContext(typeof(NariNoteDbContext))]
-    [Migration("20260118033533_InitialCreate")]
+    [Migration("20260119123930_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -203,38 +203,6 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Session", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SessionKey")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SessionKey")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Sessions");
-                });
-
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -407,17 +375,6 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Session", b =>
-                {
-                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
-                        .WithMany("Sessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
                 {
                     b.Navigation("ArticleTags");
@@ -445,8 +402,6 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("Likes");
 
                     b.Navigation("Notifications");
-
-                    b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
         }

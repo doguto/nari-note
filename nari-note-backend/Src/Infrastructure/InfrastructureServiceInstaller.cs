@@ -22,7 +22,6 @@ public static class InfrastructureServiceInstaller
         // Register repositories
         services.AddScoped<IArticleRepository, ArticleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<ISessionRepository, SessionRepository>();
         services.AddScoped<ILikeRepository, LikeRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
         services.AddScoped<IFollowRepository, FollowRepository>();

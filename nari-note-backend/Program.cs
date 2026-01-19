@@ -57,8 +57,8 @@ app.UseCors();
 // グローバル例外ハンドラーを最初に登録（重要）
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
-// 認証ミドルウェアを登録
-app.UseMiddleware<AuthenticationMiddleware>();
+// JWT認証ミドルウェアを登録
+app.UseMiddleware<JwtAuthenticationMiddleware>();
 
 app.UseHttpsRedirection();
 
