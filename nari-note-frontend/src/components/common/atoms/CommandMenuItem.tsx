@@ -1,4 +1,5 @@
 import { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CommandMenuItemProps {
   icon: LucideIcon;
@@ -24,9 +25,10 @@ export function CommandMenuItem({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-gray-100 transition-colors ${
-        isSelected ? 'bg-gray-100' : ''
-      }`}
+      className={cn(
+        'w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-gray-100 transition-colors',
+        isSelected && 'bg-gray-100'
+      )}
     >
       <Icon className="w-5 h-5 mt-0.5 text-gray-600 flex-shrink-0" />
       <div className="flex-1 min-w-0">

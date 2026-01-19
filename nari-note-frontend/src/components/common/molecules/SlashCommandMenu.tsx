@@ -208,10 +208,11 @@ export function SlashCommandMenu({
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
+            aria-label="コマンドを検索"
           />
         </div>
 
-        <div className="overflow-y-auto max-h-[400px] border-t border-gray-200">
+        <div className="overflow-y-auto max-h-[400px] border-t border-gray-200" role="listbox">
           {filteredItems.length === 0 ? (
             <div className="px-6 py-8 text-center text-gray-500">
               該当するコマンドが見つかりません

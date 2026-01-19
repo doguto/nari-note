@@ -43,7 +43,6 @@ export function ArticleBodyEditor({
   const isOverLimit = characterCount > maxCharacters;
   const [showSlashCommand, setShowSlashCommand] = useState(false);
   const [slashPosition, setSlashPosition] = useState<number>(0);
-  const editorRef = useRef<HTMLDivElement>(null);
   const previousValueRef = useRef<string>('');
 
   // 値の変更を監視してスラッシュコマンドを検知
@@ -61,9 +60,9 @@ export function ArticleBodyEditor({
         // 「/」が入力された場合
         if (addedChar === '/') {
           // 行の先頭かどうかをチェック
-          const textBeforeCursor = value.substring(0, value.length);
-          const lastNewlineIndex = textBeforeCursor.lastIndexOf('\n');
-          const currentLine = textBeforeCursor.substring(lastNewlineIndex + 1);
+          const currentText = value.substring(0, value.length);
+          const lastNewlineIndex = currentText.lastIndexOf('\n');
+          const currentLine = currentText.substring(lastNewlineIndex + 1);
           
           // 行の先頭または空白のみの後に「/」が入力された場合
           if (currentLine === '/' || currentLine.match(/^\s+\/$/)) {
@@ -119,7 +118,6 @@ export function ArticleBodyEditor({
       ) : (
         <div data-color-mode="light">
           <MDEditor
-            ref={editorRef}
             value={value}
             onChange={(val) => onChange(val || '')}
             height={400}
