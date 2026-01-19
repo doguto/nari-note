@@ -12,3 +12,4 @@ export { CommentField } from './CommentField';
 export { CommentItem } from './CommentItem';
 export { ArticleCard } from './ArticleCard';
 export { UnauthorizedModal } from './UnauthorizedModal';
+export { SlashCommandMenu } from './SlashCommandMenu';

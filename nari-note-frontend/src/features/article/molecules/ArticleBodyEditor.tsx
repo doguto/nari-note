@@ -1,10 +1,11 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { CharacterCounter } from '@/components/common/molecules';
+import { CharacterCounter, SlashCommandMenu } from '@/components/common/molecules';
 
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor').then((mod) => mod.default),
@@ -40,6 +41,45 @@ export function ArticleBodyEditor({
 }: ArticleBodyEditorProps) {
   const characterCount = value.length;
   const isOverLimit = characterCount > maxCharacters;
+  const [showSlashCommand, setShowSlashCommand] = useState(false);
+  const [slashPosition, setSlashPosition] = useState<number>(0);
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  // エディター内のテキストエリアを監視してスラッシュコマンドを検知
+  useEffect(() => {
+    const handleInput = (e: Event) => {
+      const target = e.target as HTMLTextAreaElement;
+      if (target.tagName === 'TEXTAREA') {
+        const cursorPosition = target.selectionStart;
+        const textBeforeCursor = value.substring(0, cursorPosition);
+        
+        // 行の先頭または空白の後に「/」が入力された場合
+        const lastNewlineIndex = textBeforeCursor.lastIndexOf('\n');
+        const currentLine = textBeforeCursor.substring(lastNewlineIndex + 1);
+        
+        if (currentLine === '/' || currentLine.match(/^\s+\/$/)) {
+          setSlashPosition(cursorPosition);
+          setShowSlashCommand(true);
+        }
+      }
+    };
+
+    const editorContainer = document.querySelector('.w-md-editor-text-pre');
+    if (editorContainer) {
+      editorContainer.addEventListener('input', handleInput);
+      return () => editorContainer.removeEventListener('input', handleInput);
+    }
+  }, [value]);
+
+  const handleCommandSelect = (insertText: string) => {
+    // スラッシュを削除して挿入テキストに置き換え
+    const beforeSlash = value.substring(0, slashPosition - 1);
+    const afterSlash = value.substring(slashPosition);
+    
+    const newValue = beforeSlash + insertText + afterSlash;
+    onChange(newValue);
+    setShowSlashCommand(false);
+  };
 
   return (
     <div className="space-y-2">
@@ -73,6 +113,7 @@ export function ArticleBodyEditor({
       ) : (
         <div data-color-mode="light">
           <MDEditor
+            ref={editorRef}
             value={value}
             onChange={(val) => onChange(val || '')}
             height={400}
@@ -82,6 +123,12 @@ export function ArticleBodyEditor({
           />
         </div>
       )}
+
+      <SlashCommandMenu
+        open={showSlashCommand}
+        onClose={() => setShowSlashCommand(false)}
+        onSelect={handleCommandSelect}
+      />
     </div>
   );
 }
