@@ -100,7 +100,7 @@ export function ArticleSearchPage() {
           onChange={setKeyword}
         />
         <EmptyState
-          icon="🔍"
+          icon={<Search />}
           title="検索結果が見つかりませんでした"
           description={`「${keyword}」に一致する記事が見つかりませんでした。別のキーワードで検索してみてください。`}
         />
@@ -109,6 +109,7 @@ export function ArticleSearchPage() {
   }
 
   // 検索結果表示
+  // APIレスポンスの型定義上、IDが存在しない可能性があるためフィルタリング
   const articlesWithId = data.articles.filter((article) => article.id != null);
 
   return (
@@ -133,7 +134,7 @@ export function ArticleSearchPage() {
         {articlesWithId.map((article) => (
           <ArticleCard
             key={article.id}
-            id={article.id!}
+            id={article.id as number}
             title={article.title ?? ''}
             author={article.authorName ?? ''}
             authorId={article.authorId ?? 0}
