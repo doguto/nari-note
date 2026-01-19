@@ -14,7 +14,6 @@ public class ValueObjectJsonConverterFactory : JsonConverterFactory
                typeToConvert == typeof(FollowId) ||
                typeToConvert == typeof(LikeId) ||
                typeToConvert == typeof(NotificationId) ||
-               typeToConvert == typeof(SessionId) ||
                typeToConvert == typeof(TagId) ||
                typeToConvert == typeof(UserId);
     }
@@ -33,8 +32,6 @@ public class ValueObjectJsonConverterFactory : JsonConverterFactory
             return new ValueObjectJsonConverter<LikeId>();
         if (typeToConvert == typeof(NotificationId))
             return new ValueObjectJsonConverter<NotificationId>();
-        if (typeToConvert == typeof(SessionId))
-            return new ValueObjectJsonConverter<SessionId>();
         if (typeToConvert == typeof(TagId))
             return new ValueObjectJsonConverter<TagId>();
         if (typeToConvert == typeof(UserId))

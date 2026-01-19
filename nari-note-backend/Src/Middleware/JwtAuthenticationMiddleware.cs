@@ -36,6 +36,7 @@ public class JwtAuthenticationMiddleware
         // エンドポイントの属性を確認
         var allowAnonymous = endpoint?.Metadata.GetMetadata<AllowAnonymousAttribute>() != null;
         var optionalAuth = endpoint?.Metadata.GetMetadata<OptionalAuthAttribute>() != null;
+        var requireAuth = endpoint?.Metadata.GetMetadata<RequireAuthAttribute>() != null;
 
         // Cookieからトークンを取得
         var token = context.Request.Cookies["authToken"];
