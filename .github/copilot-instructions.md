@@ -49,3 +49,9 @@ Docs: READMEにセットアップ手順を追加
 - **private修飾子の省略**: クラスのフィールドにおいて、`private`修飾子は省略してください（C#ではデフォルトでprivateになります）
   - 良い例: `readonly NariNoteDbContext context;`
   - 悪い例: `private readonly NariNoteDbContext context;`
+
+#### ValueObject（ID型）
+
+- **Vogenの使用**: エンティティのIDには、Vogenライブラリを使用した型安全なValueObjectを使用してください
+  - 例: `ArticleId`, `UserId`, `TagId` など
+  - ValueObjectは `NariNoteBackend.Domain.ValueObject` 名前空間に定義されています
