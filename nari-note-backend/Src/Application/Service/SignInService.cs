@@ -34,7 +34,8 @@ public class SignInService
 
         // HttpOnly Cookieにトークンを設定
         var cookieOptions = cookieOptionsHelper.CreateAuthCookieOptions(
-            TimeSpan.FromHours(jwtHelper.GetExpirationInHours()));
+            TimeSpan.FromHours(jwtHelper.GetExpirationInHours())
+        );
         response.Cookies.Append("authToken", token, cookieOptions);
 
         return new AuthResponse

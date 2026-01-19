@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Domain.ValueObject;
 
@@ -23,9 +22,10 @@ public class JwtHelper : IJwtHelper
                  ?? throw new InvalidOperationException("JWT Issuer is not configured");
         audience = configuration["Jwt:Audience"]
                    ?? throw new InvalidOperationException("JWT Audience is not configured");
-        expirationInHours = int.Parse(
-            configuration["Jwt:ExpirationInHours"] ?? "24");
+        expirationInHours = int.Parse(configuration["Jwt:ExpirationInHours"] ?? "24");
     }
+
+    SymmetricSecurityKey SymmetricSecurityKey => new(Encoding.UTF8.GetBytes(secret));
 
     public int GetExpirationInHours()
     {
@@ -34,8 +34,7 @@ public class JwtHelper : IJwtHelper
 
     public string GenerateToken(UserId userId)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var credentials = new SigningCredentials(SymmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
@@ -57,21 +56,26 @@ public class JwtHelper : IJwtHelper
     public ClaimsPrincipal? ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(secret);
+        // ClaimタイプをASP.NETが自動でマッピングしてしまうのを無効化
+        tokenHandler.InboundClaimTypeMap.Clear();
 
         try
         {
-            var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = true,
-                ValidIssuer = issuer,
-                ValidateAudience = true,
-                ValidAudience = audience,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            }, out var validatedToken);
+            var principal = tokenHandler.ValidateToken(
+                token,
+                new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = SymmetricSecurityKey,
+                    ValidateIssuer = true,
+                    ValidIssuer = issuer,
+                    ValidateAudience = true,
+                    ValidAudience = audience,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                },
+                out _
+            );
 
             return principal;
         }
@@ -93,10 +97,7 @@ public class JwtHelper : IJwtHelper
         var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub);
         if (userIdClaim == null) return null;
 
-        if (int.TryParse(userIdClaim.Value, out var userIdValue))
-        {
-            return UserId.From(userIdValue);
-        }
+        if (int.TryParse(userIdClaim.Value, out var userIdValue)) return UserId.From(userIdValue);
 
         return null;
     }
