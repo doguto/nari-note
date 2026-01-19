@@ -4,6 +4,7 @@ import { Input } from '@/components/ui';
 interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   placeholder?: string;
   className?: string;
 }
@@ -17,6 +18,7 @@ interface SearchInputProps {
 export function SearchInput({ 
   value, 
   onChange, 
+  onKeyDown,
   placeholder = '検索...',
   className = ''
 }: SearchInputProps) {
@@ -27,6 +29,7 @@ export function SearchInput({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         className="pl-10 bg-white text-gray-900"
       />
