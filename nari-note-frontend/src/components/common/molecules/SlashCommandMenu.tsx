@@ -194,13 +194,8 @@ export function SlashCommandMenu({
   return (
     <div
       ref={menuRef}
-      className="absolute z-50 w-80 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto"
+      className="absolute z-50 w-80 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto mt-1"
       role="listbox"
-      style={{
-        top: '100%',
-        left: 0,
-        marginTop: '4px',
-      }}
     >
       {filteredItems.length === 0 ? (
         <div className="px-4 py-8 text-center text-gray-500 text-sm">

@@ -45,7 +45,6 @@ export function ArticleBodyEditor({
   const [slashPosition, setSlashPosition] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const previousValueRef = useRef<string>('');
-  const editorContainerRef = useRef<HTMLDivElement>(null);
 
   // 値の変更を監視してスラッシュコマンドを検知
   useEffect(() => {
@@ -143,7 +142,7 @@ export function ArticleBodyEditor({
           <ReactMarkdown>{value}</ReactMarkdown>
         </div>
       ) : (
-        <div data-color-mode="light" ref={editorContainerRef} className="relative">
+        <div data-color-mode="light" className="relative">
           <MDEditor
             value={value}
             onChange={(val) => onChange(val || '')}
@@ -153,7 +152,7 @@ export function ArticleBodyEditor({
             visibleDragbar={false}
           />
           {showSlashCommand && (
-            <div className="absolute" style={{ top: '60px', left: '20px' }}>
+            <div className="absolute top-[60px] left-[20px]">
               <SlashCommandMenu
                 open={showSlashCommand}
                 onClose={() => {
