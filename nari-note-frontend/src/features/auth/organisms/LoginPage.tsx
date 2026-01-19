@@ -33,7 +33,13 @@ export function LoginPage() {
       const redirectPath = searchParams.get('redirect');
       
       // セキュリティ: 相対パスのみ許可（外部URLへのリダイレクトを防ぐ）
-      if (redirectPath && redirectPath.startsWith('/') && !redirectPath.startsWith('//')) {
+      // /で始まり、//で始まらず、バックスラッシュを含まないパスのみ許可
+      if (
+        redirectPath && 
+        redirectPath.startsWith('/') && 
+        !redirectPath.startsWith('//') &&
+        !redirectPath.includes('\\')
+      ) {
         router.push(redirectPath);
       } else {
         router.push('/');
