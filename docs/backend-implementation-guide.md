@@ -725,6 +725,39 @@ public class Article : EntityBase
 6. **namespaceは `NariNoteBackend.Domain.Entity`**
    - Entityは `Domain/Entity/` ディレクトリ配下に配置
 
+#### ValueObject（Vogen）
+
+エンティティのIDには**Vogen**ライブラリを使用した型安全なValueObjectを使用します：
+
+```csharp
+using Vogen;
+
+namespace NariNoteBackend.Domain.ValueObject;
+
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct ArticleId;
+
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct UserId;
+```
+
+**ValueObjectの利点:**
+- IDの型が明確になり、誤った型の混在を防止
+- 型安全性により、コンパイル時にエラーを検出
+- EF Coreとの統合が容易
+
+**使用例:**
+```csharp
+public class Article : EntityBase
+{
+    [Key]
+    public ArticleId Id { get; set; }
+    
+    [Required]
+    public UserId AuthorId { get; set; }
+}
+```
+
 ---
 
 ## DTO設計パターン
