@@ -63,6 +63,6 @@ public class AuthController : ApplicationController
         // Cookieを削除
         Response.Cookies.Delete("authToken");
         
-        return Ok(new { message = "ログアウトしました" });
+        return NoContent();
     }
 }
