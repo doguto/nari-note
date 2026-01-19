@@ -34,18 +34,18 @@ export function UnauthorizedModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent className="bg-brand-bg-light border-brand-border">
         <DialogHeader>
-          <DialogTitle>認証が必要です</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-brand-text">認証が必要です</DialogTitle>
+          <DialogDescription className="text-brand-secondary-text">
             この操作を行うにはサインインが必要です。サインイン画面に遷移しますか?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>
+          <Button variant="outline" onClick={onCancel} className="border-brand-border text-brand-text hover:bg-brand-bg-gradient-to">
             キャンセル
           </Button>
-          <Button onClick={onNavigateToSignIn}>
+          <Button onClick={onNavigateToSignIn} className="bg-brand-primary hover:bg-brand-primary-hover">
             サインイン
           </Button>
         </DialogFooter>
