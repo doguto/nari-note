@@ -61,8 +61,7 @@ public class AuthController : ApplicationController
     public ActionResult Logout()
     {
         // Cookieを削除
-        var cookieOptions = cookieOptionsHelper.CreateAuthCookieOptions(TimeSpan.FromSeconds(-1));
-        Response.Cookies.Delete("authToken", cookieOptions);
+        Response.Cookies.Delete("authToken");
         
         return Ok(new { message = "ログアウトしました" });
     }

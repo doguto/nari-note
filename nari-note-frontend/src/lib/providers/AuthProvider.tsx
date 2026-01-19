@@ -32,13 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback((newUserId: number) => {
     setUserId(newUserId);
-    refetch();
-  }, [refetch]);
+  }, []);
 
   const logout = useCallback(() => {
     setUserId(null);
-    refetch();
-  }, [refetch]);
+  }, []);
 
   return (
     <AuthContext.Provider
