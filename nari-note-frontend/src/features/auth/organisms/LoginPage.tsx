@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { FormTitle, ErrorAlert } from '@/components/common/atoms';
@@ -18,6 +18,7 @@ import { useAuth } from '@/lib/providers/AuthProvider';
  */
 export function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +29,21 @@ export function LoginPage() {
       if (data.userId) {
         login(data.userId);
       }
-      router.push('/');
+      // redirectパラメータがあれば、そのページに遷移
+      const redirectPath = searchParams.get('redirect');
+      
+      // セキュリティ: 相対パスのみ許可（外部URLへのリダイレクトを防ぐ）
+      // /で始まり、//で始まらず、バックスラッシュを含まないパスのみ許可
+      if (
+        redirectPath && 
+        redirectPath.startsWith('/') && 
+        !redirectPath.startsWith('//') &&
+        !redirectPath.includes('\\')
+      ) {
+        router.push(redirectPath);
+      } else {
+        router.push('/');
+      }
     },
     onError: (err) => {
       if (err instanceof Error) {

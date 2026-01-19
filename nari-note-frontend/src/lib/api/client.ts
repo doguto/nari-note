@@ -1,4 +1,5 @@
 import axios, { type AxiosResponse, type InternalAxiosRequestConfig, type AxiosRequestConfig } from 'axios';
+import { unauthorizedHandler } from '@/lib/unauthorizedHandler';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5243';
 
@@ -38,6 +39,8 @@ axiosInstance.interceptors.response.use(
       if (typeof window !== 'undefined') {
         localStorage.removeItem('authToken');
       }
+      // モーダルを表示
+      unauthorizedHandler.trigger();
     }
     return Promise.reject(error);
   }
