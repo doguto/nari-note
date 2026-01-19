@@ -31,7 +31,9 @@ export function LoginPage() {
       }
       // redirectパラメータがあれば、そのページに遷移
       const redirectPath = searchParams.get('redirect');
-      if (redirectPath) {
+      
+      // セキュリティ: 相対パスのみ許可（外部URLへのリダイレクトを防ぐ）
+      if (redirectPath && redirectPath.startsWith('/') && !redirectPath.startsWith('//')) {
         router.push(redirectPath);
       } else {
         router.push('/');

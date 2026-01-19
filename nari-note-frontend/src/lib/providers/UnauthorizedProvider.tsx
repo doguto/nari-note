@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { UnauthorizedModal } from '@/components/common/molecules';
 import { unauthorizedHandler } from '@/lib/unauthorizedHandler';
 
@@ -14,6 +14,8 @@ const UnauthorizedContext = createContext<UnauthorizedContextType | undefined>(u
 export function UnauthorizedProvider({ children }: { children: ReactNode }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const showUnauthorizedModal = useCallback(() => {
     setIsModalOpen(true);
@@ -30,9 +32,10 @@ export function UnauthorizedProvider({ children }: { children: ReactNode }) {
   const handleNavigateToSignIn = useCallback(() => {
     setIsModalOpen(false);
     // 現在のパスを保存してログイン後に戻れるようにする
-    const currentPath = window.location.pathname + window.location.search;
+    const search = searchParams.toString();
+    const currentPath = search ? `${pathname}?${search}` : pathname;
     router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-  }, [router]);
+  }, [router, pathname, searchParams]);
 
   const handleCancel = useCallback(() => {
     setIsModalOpen(false);
