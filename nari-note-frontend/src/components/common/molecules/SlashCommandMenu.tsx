@@ -1,12 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { useState, useEffect, useRef } from 'react';
 import { CommandMenuItem } from '@/components/common/atoms';
 import {
   Heading1,
@@ -131,23 +125,26 @@ interface SlashCommandMenuProps {
   open: boolean;
   onClose: () => void;
   onSelect: (insertText: string) => void;
+  searchQuery: string;
 }
 
 /**
  * SlashCommandMenu - Molecule Component
  * 
- * スラッシュコマンドメニュー
+ * スラッシュコマンドメニュー（インライン表示）
  * マークダウン要素や将棋盤面/棋譜の挿入をサポート
  */
 export function SlashCommandMenu({
   open,
   onClose,
   onSelect,
+  searchQuery,
 }: SlashCommandMenuProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const filteredItems = COMMAND_ITEMS.filter((item) =>
+    item.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -155,9 +152,8 @@ export function SlashCommandMenu({
   useEffect(() => {
     if (open) {
       setSelectedIndex(0);
-      setSearchQuery('');
     }
-  }, [open]);
+  }, [open, searchQuery]);
 
   useEffect(() => {
     if (!open) return;
@@ -193,44 +189,35 @@ export function SlashCommandMenu({
     onClose();
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[600px] overflow-hidden p-0">
-        <DialogHeader className="px-6 pt-6 pb-4">
-          <DialogTitle>コマンドを選択</DialogTitle>
-        </DialogHeader>
-        
-        <div className="px-6 pb-4">
-          <input
-            type="text"
-            placeholder="検索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            autoFocus
-            aria-label="コマンドを検索"
-          />
-        </div>
+  if (!open) return null;
 
-        <div className="overflow-y-auto max-h-[400px] border-t border-gray-200" role="listbox">
-          {filteredItems.length === 0 ? (
-            <div className="px-6 py-8 text-center text-gray-500">
-              該当するコマンドが見つかりません
-            </div>
-          ) : (
-            filteredItems.map((item, index) => (
-              <CommandMenuItem
-                key={item.id}
-                icon={item.icon}
-                label={item.label}
-                description={item.description}
-                onClick={() => handleSelect(item.insertText)}
-                isSelected={index === selectedIndex}
-              />
-            ))
-          )}
+  return (
+    <div
+      ref={menuRef}
+      className="absolute z-50 w-80 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto"
+      role="listbox"
+      style={{
+        top: '100%',
+        left: 0,
+        marginTop: '4px',
+      }}
+    >
+      {filteredItems.length === 0 ? (
+        <div className="px-4 py-8 text-center text-gray-500 text-sm">
+          該当するコマンドが見つかりません
         </div>
-      </DialogContent>
-    </Dialog>
+      ) : (
+        filteredItems.map((item, index) => (
+          <CommandMenuItem
+            key={item.id}
+            icon={item.icon}
+            label={item.label}
+            description={item.description}
+            onClick={() => handleSelect(item.insertText)}
+            isSelected={index === selectedIndex}
+          />
+        ))
+      )}
+    </div>
   );
 }

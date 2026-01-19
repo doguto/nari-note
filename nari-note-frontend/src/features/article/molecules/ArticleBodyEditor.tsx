@@ -43,47 +43,74 @@ export function ArticleBodyEditor({
   const isOverLimit = characterCount > maxCharacters;
   const [showSlashCommand, setShowSlashCommand] = useState(false);
   const [slashPosition, setSlashPosition] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const previousValueRef = useRef<string>('');
+  const editorContainerRef = useRef<HTMLDivElement>(null);
 
   // 値の変更を監視してスラッシュコマンドを検知
   useEffect(() => {
     const prevValue = previousValueRef.current;
     
     // 値が増えた場合（何か入力された）
-    if (value.length > prevValue.length) {
-      const diff = value.length - prevValue.length;
-      
-      // 1文字だけ追加された場合
-      if (diff === 1) {
-        const addedChar = value.charAt(value.length - 1);
+    if (value.length >= prevValue.length) {
+      // スラッシュコマンドメニューが開いている場合
+      if (showSlashCommand) {
+        // スラッシュ以降のテキストを取得
+        const textAfterSlash = value.substring(slashPosition);
+        const newlineIndex = textAfterSlash.indexOf('\n');
+        const query = newlineIndex === -1 ? textAfterSlash : textAfterSlash.substring(0, newlineIndex);
         
-        // 「/」が入力された場合
-        if (addedChar === '/') {
-          // 行の先頭かどうかをチェック
-          const currentText = value.substring(0, value.length);
-          const lastNewlineIndex = currentText.lastIndexOf('\n');
-          const currentLine = currentText.substring(lastNewlineIndex + 1);
+        // スペースや改行が入力されたら閉じる
+        if (query.includes(' ') || query.includes('\n')) {
+          setShowSlashCommand(false);
+          setSearchQuery('');
+        } else {
+          setSearchQuery(query);
+        }
+      } else {
+        // 新しく「/」が入力されたかチェック
+        const diff = value.length - prevValue.length;
+        
+        if (diff === 1) {
+          const addedChar = value.charAt(value.length - 1);
           
-          // 行の先頭または空白のみの後に「/」が入力された場合
-          if (currentLine === '/' || currentLine.match(/^\s+\/$/)) {
-            setSlashPosition(value.length);
-            setShowSlashCommand(true);
+          // 「/」が入力された場合
+          if (addedChar === '/') {
+            // 行の先頭かどうかをチェック
+            const currentText = value.substring(0, value.length);
+            const lastNewlineIndex = currentText.lastIndexOf('\n');
+            const currentLine = currentText.substring(lastNewlineIndex + 1);
+            
+            // 行の先頭または空白のみの後に「/」が入力された場合
+            if (currentLine === '/' || currentLine.match(/^\s+\/$/)) {
+              setSlashPosition(value.length);
+              setShowSlashCommand(true);
+              setSearchQuery('');
+            }
           }
         }
+      }
+    } else {
+      // 値が減った場合（削除された）
+      if (showSlashCommand && value.length < slashPosition) {
+        // スラッシュ自体が削除された
+        setShowSlashCommand(false);
+        setSearchQuery('');
       }
     }
     
     previousValueRef.current = value;
-  }, [value]);
+  }, [value, showSlashCommand, slashPosition]);
 
   const handleCommandSelect = (insertText: string) => {
-    // スラッシュを削除して挿入テキストに置き換え
+    // スラッシュとその後の検索クエリを削除して挿入テキストに置き換え
     const beforeSlash = value.substring(0, slashPosition - 1);
-    const afterSlash = value.substring(slashPosition);
+    const afterCommand = value.substring(slashPosition + searchQuery.length);
     
-    const newValue = beforeSlash + insertText + afterSlash;
+    const newValue = beforeSlash + insertText + afterCommand;
     onChange(newValue);
     setShowSlashCommand(false);
+    setSearchQuery('');
   };
 
   return (
@@ -116,7 +143,7 @@ export function ArticleBodyEditor({
           <ReactMarkdown>{value}</ReactMarkdown>
         </div>
       ) : (
-        <div data-color-mode="light">
+        <div data-color-mode="light" ref={editorContainerRef} className="relative">
           <MDEditor
             value={value}
             onChange={(val) => onChange(val || '')}
@@ -125,14 +152,21 @@ export function ArticleBodyEditor({
             hideToolbar={false}
             visibleDragbar={false}
           />
+          {showSlashCommand && (
+            <div className="absolute" style={{ top: '60px', left: '20px' }}>
+              <SlashCommandMenu
+                open={showSlashCommand}
+                onClose={() => {
+                  setShowSlashCommand(false);
+                  setSearchQuery('');
+                }}
+                onSelect={handleCommandSelect}
+                searchQuery={searchQuery}
+              />
+            </div>
+          )}
         </div>
       )}
-
-      <SlashCommandMenu
-        open={showSlashCommand}
-        onClose={() => setShowSlashCommand(false)}
-        onSelect={handleCommandSelect}
-      />
     </div>
   );
 }
