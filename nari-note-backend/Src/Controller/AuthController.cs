@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Service;
-using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Controller;
@@ -13,16 +12,13 @@ public class AuthController : ApplicationController
 {
     readonly SignUpService signUpService;
     readonly SignInService signInService;
-    readonly ICookieOptionsHelper cookieOptionsHelper;
     
     public AuthController(
         SignUpService signUpService,
-        SignInService signInService,
-        ICookieOptionsHelper cookieOptionsHelper)
+        SignInService signInService)
     {
         this.signUpService = signUpService;
         this.signInService = signInService;
-        this.cookieOptionsHelper = cookieOptionsHelper;
     }
     
     [HttpPost("signup")]
@@ -60,8 +56,11 @@ public class AuthController : ApplicationController
     [OptionalAuth]
     public ActionResult Logout()
     {
-        // Cookieを削除
-        Response.Cookies.Delete("authToken");
+        // Cookieを削除（path指定で確実に削除）
+        Response.Cookies.Delete("authToken", new CookieOptions
+        {
+            Path = "/"
+        });
         
         return NoContent();
     }
