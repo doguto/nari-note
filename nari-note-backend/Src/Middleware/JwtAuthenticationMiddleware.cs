@@ -7,10 +7,6 @@ using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Middleware;
 
-/// <summary>
-/// JWT認証ミドルウェア
-/// CookieからJWTトークンを取得し、検証後にUserIdをHttpContext.Itemsに設定する
-/// </summary>
 public class JwtAuthenticationMiddleware
 {
     readonly ILogger<JwtAuthenticationMiddleware> logger;
@@ -25,13 +21,6 @@ public class JwtAuthenticationMiddleware
     public async Task InvokeAsync(HttpContext context, IJwtHelper jwtHelper)
     {
         var endpoint = context.GetEndpoint();
-        
-        // OPTIONSリクエストは常に許可
-        if (context.Request.Method == "OPTIONS")
-        {
-            await next(context);
-            return;
-        }
 
         // エンドポイントの属性を確認
         var allowAnonymous = endpoint?.Metadata.GetMetadata<AllowAnonymousAttribute>() != null;
