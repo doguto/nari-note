@@ -44,31 +44,37 @@ export function ArticleBodyEditor({
   const [showSlashCommand, setShowSlashCommand] = useState(false);
   const [slashPosition, setSlashPosition] = useState<number>(0);
   const editorRef = useRef<HTMLDivElement>(null);
+  const previousValueRef = useRef<string>('');
 
-  // エディター内のテキストエリアを監視してスラッシュコマンドを検知
+  // 値の変更を監視してスラッシュコマンドを検知
   useEffect(() => {
-    const handleInput = (e: Event) => {
-      const target = e.target as HTMLTextAreaElement;
-      if (target.tagName === 'TEXTAREA') {
-        const cursorPosition = target.selectionStart;
-        const textBeforeCursor = value.substring(0, cursorPosition);
+    const prevValue = previousValueRef.current;
+    
+    // 値が増えた場合（何か入力された）
+    if (value.length > prevValue.length) {
+      const diff = value.length - prevValue.length;
+      
+      // 1文字だけ追加された場合
+      if (diff === 1) {
+        const addedChar = value.charAt(value.length - 1);
         
-        // 行の先頭または空白の後に「/」が入力された場合
-        const lastNewlineIndex = textBeforeCursor.lastIndexOf('\n');
-        const currentLine = textBeforeCursor.substring(lastNewlineIndex + 1);
-        
-        if (currentLine === '/' || currentLine.match(/^\s+\/$/)) {
-          setSlashPosition(cursorPosition);
-          setShowSlashCommand(true);
+        // 「/」が入力された場合
+        if (addedChar === '/') {
+          // 行の先頭かどうかをチェック
+          const textBeforeCursor = value.substring(0, value.length);
+          const lastNewlineIndex = textBeforeCursor.lastIndexOf('\n');
+          const currentLine = textBeforeCursor.substring(lastNewlineIndex + 1);
+          
+          // 行の先頭または空白のみの後に「/」が入力された場合
+          if (currentLine === '/' || currentLine.match(/^\s+\/$/)) {
+            setSlashPosition(value.length);
+            setShowSlashCommand(true);
+          }
         }
       }
-    };
-
-    const editorContainer = document.querySelector('.w-md-editor-text-pre');
-    if (editorContainer) {
-      editorContainer.addEventListener('input', handleInput);
-      return () => editorContainer.removeEventListener('input', handleInput);
     }
+    
+    previousValueRef.current = value;
   }, [value]);
 
   const handleCommandSelect = (insertText: string) => {
