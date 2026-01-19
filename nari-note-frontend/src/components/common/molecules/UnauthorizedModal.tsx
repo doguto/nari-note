@@ -46,7 +46,7 @@ export function UnauthorizedModal({
             キャンセル
           </Button>
           <Button onClick={onNavigateToSignIn}>
-            サインイン画面へ
+            サインイン
           </Button>
         </DialogFooter>
       </DialogContent>

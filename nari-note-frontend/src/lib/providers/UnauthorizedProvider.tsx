@@ -29,7 +29,9 @@ export function UnauthorizedProvider({ children }: { children: ReactNode }) {
 
   const handleNavigateToSignIn = useCallback(() => {
     setIsModalOpen(false);
-    router.push('/login');
+    // 現在のパスを保存してログイン後に戻れるようにする
+    const currentPath = window.location.pathname + window.location.search;
+    router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
   }, [router]);
 
   const handleCancel = useCallback(() => {
