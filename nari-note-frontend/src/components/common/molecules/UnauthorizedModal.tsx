@@ -26,8 +26,14 @@ export function UnauthorizedModal({
   onNavigateToSignIn,
   onCancel,
 }: UnauthorizedModalProps) {
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      onCancel();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>認証が必要です</DialogTitle>

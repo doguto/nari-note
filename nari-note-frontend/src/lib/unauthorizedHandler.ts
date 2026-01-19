@@ -8,6 +8,9 @@ class UnauthorizedHandler {
   private callback: (() => void) | null = null;
 
   register(callback: () => void) {
+    if (this.callback !== null) {
+      console.warn('[UnauthorizedHandler] Callback is already registered. Overwriting with new callback.');
+    }
     this.callback = callback;
   }
 
@@ -18,6 +21,8 @@ class UnauthorizedHandler {
   trigger() {
     if (this.callback) {
       this.callback();
+    } else {
+      console.warn('[UnauthorizedHandler] Trigger called but no callback is registered.');
     }
   }
 }
