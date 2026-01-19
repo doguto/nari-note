@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
+import { UnauthorizedProvider } from "@/lib/providers/UnauthorizedProvider";
 
 export const metadata: Metadata = {
   title: "将棋ブログ投稿サイト ～なりノート～",
@@ -18,7 +19,9 @@ export default function RootLayout({
       <body className="antialiased">
         <QueryProvider>
           <AuthProvider>
-            {children}
+            <UnauthorizedProvider>
+              {children}
+            </UnauthorizedProvider>
           </AuthProvider>
         </QueryProvider>
       </body>
