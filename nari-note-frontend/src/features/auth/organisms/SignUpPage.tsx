@@ -18,7 +18,7 @@ import { useAuth } from '@/lib/providers/AuthProvider';
  */
 export function SignUpPage() {
   const router = useRouter();
-  const { login, refetch } = useAuth();
+  const { refetch } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +28,6 @@ export function SignUpPage() {
   const signUpMutation = useSignUp({
     onSuccess: (data) => {
       if (data.userId) {
-        login(data.userId);
         refetch();
       }
       router.push('/');

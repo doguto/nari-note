@@ -19,10 +19,9 @@ import { User, FileText } from 'lucide-react';
  * ロゴ、ナビゲーション、ユーザーメニューを表示します。
  */
 export function Header() {
-  const { userId, isLoggedIn, isLoading, logout: logoutContext, refetch } = useAuth();
+  const { userId, isLoggedIn, isLoading, refetch } = useAuth();
   const logoutMutation = useLogout({
     onSuccess: () => {
-      logoutContext();
       refetch();
     },
   });
