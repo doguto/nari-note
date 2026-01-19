@@ -61,7 +61,6 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost]
-    [RequireAuth]
     [ValidateModelState]
     public async Task<ActionResult> CreateArticle([FromBody] CreateArticleRequest request)
     {
@@ -80,7 +79,6 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPut("{id}")]
-    [RequireAuth]
     [ValidateModelState]
     public async Task<ActionResult> UpdateArticle(ArticleId id, [FromBody] UpdateArticleRequest request)
     {
@@ -108,7 +106,6 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpDelete("{id}")]
-    [RequireAuth]
     public async Task<ActionResult> DeleteArticle(ArticleId id)
     {
         var request = new DeleteArticleRequest { Id = id };
@@ -117,7 +114,6 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost("{id}/like")]
-    [RequireAuth]
     public async Task<ActionResult> ToggleLike(ArticleId id)
     {
         var request = new ToggleLikeRequest
@@ -129,7 +125,6 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet("drafts")]
-    [RequireAuth]
     public async Task<ActionResult<GetDraftArticlesResponse>> GetDraftArticles()
     {
         var response = await getDraftArticlesService.ExecuteAsync(UserId);
@@ -145,7 +140,6 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost("{id}/comments")]
-    [RequireAuth]
     [ValidateModelState]
     public async Task<ActionResult> CreateComment(ArticleId id, [FromBody] CreateCommentRequest request)
     {

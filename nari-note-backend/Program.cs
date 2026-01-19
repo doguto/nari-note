@@ -1,10 +1,8 @@
 using System.Text.Json;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Infrastructure;
-using NariNoteBackend.Infrastructure.Authentication;
 using NariNoteBackend.Infrastructure.Database;
 using NariNoteBackend.Middleware;
 
@@ -34,12 +32,6 @@ builder.Services.AddControllers(options =>
 // builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
 
-// ASP.NET Core認証の設定
-builder.Services.AddAuthentication("Bearer")
-    .AddScheme<AuthenticationSchemeOptions, JwtAuthenticationHandler>("Bearer", null);
-
-builder.Services.AddAuthorization();
-
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
@@ -65,12 +57,8 @@ app.UseCors();
 // グローバル例外ハンドラーを最初に登録（重要）
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
-// ASP.NET Core認証ミドルウェアを使用
-app.UseAuthentication();
-app.UseAuthorization();
-
-// ユーザーコンテキストミドルウェアを登録（認証後にUserIdをHttpContext.Itemsに設定）
-app.UseMiddleware<UserContextMiddleware>();
+// JWT認証ミドルウェアを登録
+app.UseMiddleware<JwtAuthenticationMiddleware>();
 
 app.UseHttpsRedirection();
 

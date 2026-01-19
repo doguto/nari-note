@@ -46,7 +46,6 @@ public class UsersController : ApplicationController
     }
 
     [HttpPut]
-    [RequireAuth]
     [ValidateModelState]
     public async Task<ActionResult> UpdateUserProfile([FromBody] UpdateUserProfileRequest request)
     {
@@ -55,7 +54,6 @@ public class UsersController : ApplicationController
     }
 
     [HttpPost("{id}/follow")]
-    [RequireAuth]
     public async Task<ActionResult> ToggleFollow(UserId id)
     {
         var request = new ToggleFollowRequest
