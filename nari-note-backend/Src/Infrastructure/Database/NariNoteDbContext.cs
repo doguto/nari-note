@@ -12,7 +12,6 @@ public class NariNoteDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Article> Articles { get; set; }
-    public DbSet<Session> Sessions { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<ArticleTag> ArticleTags { get; set; }
     public DbSet<Like> Likes { get; set; }
@@ -58,11 +57,6 @@ public class NariNoteDbContext : DbContext
              .HasForeignKey(a => a.AuthorId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            x.HasMany(u => u.Sessions)
-             .WithOne(s => s.User)
-             .HasForeignKey(s => s.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
-
             x.HasMany(u => u.Likes)
              .WithOne(l => l.User)
              .HasForeignKey(l => l.UserId)
@@ -92,23 +86,6 @@ public class NariNoteDbContext : DbContext
              .HasValueGenerator<UserIdValueGenerator>();
 
             x.Property(u => u.Id)
-             .HasVogenConversion();
-        });
-
-        modelBuilder.Entity<Session>(x =>
-        {
-            x.HasOne(s => s.User)
-             .WithMany(u => u.Sessions)
-             .HasForeignKey(s => s.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.Property(s => s.Id)
-             .HasValueGenerator<SessionIdValueGenerator>();
-
-            x.Property(s => s.Id)
-             .HasVogenConversion();
-
-            x.Property(s => s.UserId)
              .HasVogenConversion();
         });
 

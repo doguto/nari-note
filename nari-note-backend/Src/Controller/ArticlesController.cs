@@ -51,6 +51,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<GetArticlesResponse>> GetArticles(
         [FromQuery] int limit = 20, [FromQuery] int offset = 0
     )
@@ -61,33 +62,36 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost]
+    [RequireAuth]
     [ValidateModelState]
     public async Task<ActionResult> CreateArticle([FromBody] CreateArticleRequest request)
     {
-        request.AuthorId = UserId;
+        request.AuthorId = UserId!.Value;
         var response = await createArticleService.ExecuteAsync(request);
         return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
     }
 
     [HttpGet("{id}")]
+    [OptionalAuth]
     public async Task<ActionResult> GetArticle(ArticleId id)
     {
         var request = new GetArticleRequest { Id = id };
-        UserId? userId = HasUserId ? UserId : null;
-        var response = await getArticleService.ExecuteAsync(request, userId);
+        var response = await getArticleService.ExecuteAsync(request, UserId);
         return Ok(response);
     }
 
     [HttpPut("{id}")]
+    [RequireAuth]
     [ValidateModelState]
     public async Task<ActionResult> UpdateArticle(ArticleId id, [FromBody] UpdateArticleRequest request)
     {
         request.Id = id;
-        var response = await updateArticleService.ExecuteAsync(UserId, request);
+        var response = await updateArticleService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
     [HttpGet("author/{authorId}")]
+    [AllowAnonymous]
     public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(UserId authorId)
     {
         var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
@@ -96,6 +100,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet("tag/{tagName}")]
+    [AllowAnonymous]
     public async Task<ActionResult<GetArticlesByTagResponse>> GetArticlesByTag(string tagName)
     {
         if (string.IsNullOrWhiteSpace(tagName)) return BadRequest(new { message = "Tag name cannot be empty" });
@@ -106,32 +111,36 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpDelete("{id}")]
+    [RequireAuth]
     public async Task<ActionResult> DeleteArticle(ArticleId id)
     {
         var request = new DeleteArticleRequest { Id = id };
-        await deleteArticleService.ExecuteAsync(UserId, request);
+        await deleteArticleService.ExecuteAsync(UserId!.Value, request);
         return NoContent();
     }
 
     [HttpPost("{id}/like")]
+    [RequireAuth]
     public async Task<ActionResult> ToggleLike(ArticleId id)
     {
         var request = new ToggleLikeRequest
         {
             ArticleId = id
         };
-        var response = await toggleLikeService.ExecuteAsync(UserId, request);
+        var response = await toggleLikeService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
     [HttpGet("drafts")]
+    [RequireAuth]
     public async Task<ActionResult<GetDraftArticlesResponse>> GetDraftArticles()
     {
-        var response = await getDraftArticlesService.ExecuteAsync(UserId);
+        var response = await getDraftArticlesService.ExecuteAsync(UserId!.Value);
         return Ok(response);
     }
 
     [HttpGet("search")]
+    [AllowAnonymous]
     [ValidateModelState]
     public async Task<ActionResult<SearchArticlesResponse>> SearchArticles([FromQuery] SearchArticlesRequest request)
     {
@@ -140,11 +149,12 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost("{id}/comments")]
+    [RequireAuth]
     [ValidateModelState]
     public async Task<ActionResult> CreateComment(ArticleId id, [FromBody] CreateCommentRequest request)
     {
         request.ArticleId = id;
-        var response = await createCommentService.ExecuteAsync(UserId, request);
+        var response = await createCommentService.ExecuteAsync(UserId!.Value, request);
         return Created($"/api/articles/{id}/comments/{response.Id}", response);
     }
 }

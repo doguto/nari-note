@@ -30,7 +30,6 @@ public class User : EntityBase
 
     // Navigation Properties
     public List<Article> Articles { get; set; } = new();
-    public List<Session> Sessions { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
     public List<Comment> Comments { get; set; } = new();
     public List<Follow> Followings { get; set; } = new();  // 自分がフォローしているユーザーとの関係

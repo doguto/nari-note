@@ -21,9 +21,6 @@ public partial struct LikeId;
 public partial struct NotificationId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
-public partial struct SessionId;
-
-[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct TagId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
