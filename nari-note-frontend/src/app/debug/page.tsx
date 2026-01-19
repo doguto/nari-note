@@ -18,11 +18,13 @@ import {
   type UpdateUserProfileRequest,
 } from '@/lib/api';
 import { AxiosError } from 'axios';
+import { useUnauthorized } from '@/lib/providers/UnauthorizedProvider';
 
 export default function DebugPage() {
   const [response, setResponse] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { showUnauthorizedModal } = useUnauthorized();
   
   // Auth
   const [signUpEmail, setSignUpEmail] = useState('test@example.com');
@@ -279,6 +281,20 @@ export default function DebugPage() {
             disabled={loading}
           >
             Health Check
+          </button>
+        </div>
+
+        {/* 401エラーモーダルテスト */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-bold mb-4">401エラーモーダルテスト</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            このボタンをクリックすると、401エラー時に表示されるモーダルをテストできます。
+          </p>
+          <button
+            onClick={showUnauthorizedModal}
+            className="px-6 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+          >
+            401モーダルを表示
           </button>
         </div>
 
