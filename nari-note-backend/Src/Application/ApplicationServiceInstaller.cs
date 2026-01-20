@@ -18,6 +18,8 @@ public static class ApplicationServiceInstaller
         services.AddScoped<UpdateUserProfileService>();
         services.AddScoped<SignUpService>();
         services.AddScoped<SignInService>();
+        services.AddScoped<GetCurrentUserService>();
+        services.AddScoped<LogoutService>();
         services.AddScoped<HealthCheckService>();
         services.AddScoped<ToggleLikeService>();
         services.AddScoped<GetDraftArticlesService>();

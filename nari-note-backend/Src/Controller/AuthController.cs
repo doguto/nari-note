@@ -12,13 +12,19 @@ public class AuthController : ApplicationController
 {
     readonly SignUpService signUpService;
     readonly SignInService signInService;
+    readonly GetCurrentUserService getCurrentUserService;
+    readonly LogoutService logoutService;
     
     public AuthController(
         SignUpService signUpService,
-        SignInService signInService)
+        SignInService signInService,
+        GetCurrentUserService getCurrentUserService,
+        LogoutService logoutService)
     {
         this.signUpService = signUpService;
         this.signInService = signInService;
+        this.getCurrentUserService = getCurrentUserService;
+        this.logoutService = logoutService;
     }
     
     [HttpPost("signup")]
@@ -41,27 +47,19 @@ public class AuthController : ApplicationController
     
     [HttpGet("me")]
     [OptionalAuth]
-    public ActionResult<AuthResponse> GetCurrentUser()
+    public async Task<ActionResult<AuthResponse>> GetCurrentUser()
     {
-        var userId = this.UserId;
-        if (userId == null)
-        {
-            return Ok(new AuthResponse { UserId = null });
-        }
-        
-        return Ok(new AuthResponse { UserId = userId });
+        var request = new GetCurrentUserRequest();
+        var response = await getCurrentUserService.ExecuteAsync(request, UserId);
+        return Ok(response);
     }
     
     [HttpPost("logout")]
     [OptionalAuth]
-    public ActionResult Logout()
+    public async Task<ActionResult> Logout()
     {
-        // Cookieを削除（path指定で確実に削除）
-        Response.Cookies.Delete("authToken", new CookieOptions
-        {
-            Path = "/"
-        });
-        
+        var request = new LogoutRequest();
+        await logoutService.ExecuteAsync(request, Response);
         return NoContent();
     }
 }
