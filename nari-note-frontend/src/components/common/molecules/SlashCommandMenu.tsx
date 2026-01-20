@@ -157,6 +157,7 @@ export function SlashCommandMenu({
     }
   }, [open, searchQuery]);
 
+  // Handle keyboard navigation
   useEffect(() => {
     if (!open) return;
 
@@ -185,6 +186,27 @@ export function SlashCommandMenu({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, selectedIndex, filteredItems, onSelect, onClose, onCancel]);
+
+  // Handle click outside to cancel
+  useEffect(() => {
+    if (!open) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        onCancel();
+      }
+    };
+
+    // Add a small delay to avoid immediate closing when the menu opens
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [open, onCancel]);
 
   const handleSelect = (insertText: string) => {
     onSelect(insertText);
