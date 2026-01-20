@@ -43,7 +43,7 @@ export function Header() {
             ホーム
           </Link>
           <Link 
-            href="/articles" 
+            href="/articles/search" 
             className="text-white hover:text-brand-primary transition-colors"
             style={{ fontFamily: 'serif' }}
           >
