@@ -1,5 +1,5 @@
-import { ArticleSearchPage } from '@/features/article/organisms';
+import { ArticleSearchPage as ArticleSearchPageComponent } from '@/features/article/organisms';
 
-export default function ArticlesPage() {
-  return <ArticleSearchPage />;
+export default function ArticleSearchPage() {
+  return <ArticleSearchPageComponent />;
 }
