@@ -124,6 +124,7 @@ const COMMAND_ITEMS: CommandItem[] = [
 interface SlashCommandMenuProps {
   open: boolean;
   onClose: () => void;
+  onCancel: () => void;
   onSelect: (insertText: string) => void;
   searchQuery: string;
 }
@@ -137,6 +138,7 @@ interface SlashCommandMenuProps {
 export function SlashCommandMenu({
   open,
   onClose,
+  onCancel,
   onSelect,
   searchQuery,
 }: SlashCommandMenuProps) {
@@ -176,13 +178,13 @@ export function SlashCommandMenu({
         }
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        onClose();
+        onCancel();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, selectedIndex, filteredItems, onSelect, onClose]);
+  }, [open, selectedIndex, filteredItems, onSelect, onClose, onCancel]);
 
   const handleSelect = (insertText: string) => {
     onSelect(insertText);
