@@ -73,19 +73,11 @@ export function ArticleBodyEditor({
         if (diff === 1) {
           const addedChar = value.charAt(value.length - 1);
           
-          // 「/」が入力された場合
+          // 「/」が入力された場合は常にメニューを開く
           if (addedChar === '/') {
-            // 行の先頭かどうかをチェック
-            const currentText = value.substring(0, value.length);
-            const lastNewlineIndex = currentText.lastIndexOf('\n');
-            const currentLine = currentText.substring(lastNewlineIndex + 1);
-            
-            // 行の先頭または空白のみの後に「/」が入力された場合
-            if (currentLine === '/' || currentLine.match(/^\s+\/$/)) {
-              setSlashPosition(value.length);
-              setShowSlashCommand(true);
-              setSearchQuery('');
-            }
+            setSlashPosition(value.length);
+            setShowSlashCommand(true);
+            setSearchQuery('');
           }
         }
       }
@@ -156,6 +148,11 @@ export function ArticleBodyEditor({
               <SlashCommandMenu
                 open={showSlashCommand}
                 onClose={() => {
+                  setShowSlashCommand(false);
+                  setSearchQuery('');
+                }}
+                onCancel={() => {
+                  // Escapeでキャンセル時は"/"をそのまま残す
                   setShowSlashCommand(false);
                   setSearchQuery('');
                 }}
