@@ -36,6 +36,7 @@ export function ArticleBodyEditor({
   maxCharacters = 65535,
 }: ArticleBodyEditorProps) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: {
@@ -57,6 +58,9 @@ export function ArticleBodyEditor({
             item.id.toLowerCase().includes(query.toLowerCase()) ||
             item.description.toLowerCase().includes(query.toLowerCase())
           );
+        },
+        command: ({ editor, range, props }) => {
+          props.command({ editor, range });
         },
         render: () => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
