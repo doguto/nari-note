@@ -13,13 +13,9 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-// リクエストインターセプター（認証トークンの追加）
+// リクエストインターセプター
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     return config;
   },
   (error) => {
@@ -35,10 +31,6 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // 認証エラーの場合、トークンをクリア
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('authToken');
-      }
       // モーダルを表示
       unauthorizedHandler.trigger();
     }

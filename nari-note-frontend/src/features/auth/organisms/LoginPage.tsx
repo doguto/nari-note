@@ -19,7 +19,7 @@ import { useAuth } from '@/lib/providers/AuthProvider';
 export function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { refetch } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string>();
@@ -27,7 +27,7 @@ export function LoginPage() {
   const signInMutation = useSignIn({
     onSuccess: (data) => {
       if (data.userId) {
-        login(data.userId);
+        refetch();
       }
       // redirectパラメータがあれば、そのページに遷移
       const redirectPath = searchParams.get('redirect');

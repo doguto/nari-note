@@ -12,13 +12,19 @@ public class AuthController : ApplicationController
 {
     readonly SignUpService signUpService;
     readonly SignInService signInService;
+    readonly GetCurrentUserService getCurrentUserService;
+    readonly LogoutService logoutService;
     
     public AuthController(
         SignUpService signUpService,
-        SignInService signInService)
+        SignInService signInService,
+        GetCurrentUserService getCurrentUserService,
+        LogoutService logoutService)
     {
         this.signUpService = signUpService;
         this.signInService = signInService;
+        this.getCurrentUserService = getCurrentUserService;
+        this.logoutService = logoutService;
     }
     
     [HttpPost("signup")]
@@ -37,5 +43,23 @@ public class AuthController : ApplicationController
     {
         var response = await signInService.ExecuteAsync(request, Response);
         return Ok(response);
+    }
+    
+    [HttpGet("me")]
+    [OptionalAuth]
+    public async Task<ActionResult<AuthResponse>> GetCurrentUser()
+    {
+        var request = new GetCurrentUserRequest();
+        var response = await getCurrentUserService.ExecuteAsync(request, UserId);
+        return Ok(response);
+    }
+    
+    [HttpPost("logout")]
+    [OptionalAuth]
+    public async Task<ActionResult> Logout()
+    {
+        var request = new LogoutRequest();
+        await logoutService.ExecuteAsync(request, Response);
+        return NoContent();
     }
 }

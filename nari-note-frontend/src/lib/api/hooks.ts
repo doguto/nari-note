@@ -54,6 +54,7 @@ export const queryKeys = {
     searchArticles: ['articles', 'searchArticles'] as const,
   },
   auth: {
+    me: ['auth', 'me'] as const,
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
@@ -196,6 +197,26 @@ export function useSignIn(options?: UseMutationOptions<AuthResponse, Error, Sign
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
     },
+    ...options,
+  });
+}
+
+export function useLogout(options?: UseMutationOptions<void, Error, void>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, void>({
+    mutationFn: () => authApi.logout(),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useMe(options?: Omit<UseQueryOptions<AuthResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<AuthResponse>({
+    queryKey: queryKeys.auth.me,
+    queryFn: () => authApi.me(),
     ...options,
   });
 }

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useLogout } from '@/lib/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +19,16 @@ import { User, FileText } from 'lucide-react';
  * ロゴ、ナビゲーション、ユーザーメニューを表示します。
  */
 export function Header() {
-  const { userId, isLoggedIn, isLoading, logout } = useAuth();
+  const { userId, isLoggedIn, isLoading, refetch } = useAuth();
+  const logoutMutation = useLogout({
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   return (
     <header className="bg-brand-text border-b border-brand-text-dark shadow-sm">
@@ -113,11 +123,12 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
               <button
-                onClick={logout}
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
                 className="text-white hover:text-brand-primary transition-colors"
                 style={{ fontFamily: 'serif' }}
               >
-                ログアウト
+                {logoutMutation.isPending ? 'ログアウト中...' : 'ログアウト'}
               </button>
             </>
           ) : (
