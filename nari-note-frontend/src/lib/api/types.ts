@@ -118,6 +118,10 @@ export interface GetArticlesResponse {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface GetCurrentUserRequest {
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface GetDraftArticlesRequest {
 }
 
@@ -174,6 +178,10 @@ export interface GetUserProfileResponse {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface HealthCheckRequest {
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface LogoutRequest {
 }
 
 export interface SearchArticlesRequest {

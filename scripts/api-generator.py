@@ -308,15 +308,23 @@ def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpC
                         # プロパティ名（キャメルケース）を探す
                         prop_names = [prop.name[0].lower() + prop.name[1:] for prop in req_class.properties]
                         
-                        # {id} の場合、articleId や id などのプロパティを探す
+                        # {id} の場合のより堅牢な推測:
+                        # 1) 同名プロパティがあればそれを使う
+                        # 2) requestに "*Id" がちょうど1つならそれを使う
+                        # 3) それ以外は既存のヒューリスティクスにフォールバック
                         if camel_param == 'id':
-                            # コントローラー名に基づいた候補を探す
-                            candidates = [f'{ep.controller_name}Id', 'articleId', 'userId', 'id']
-                            for candidate in candidates:
-                                if candidate in prop_names:
-                                    camel_param = candidate
-                                    break
-                        
+                            if 'id' in prop_names:
+                                camel_param = 'id'
+                            else:
+                                id_like = [p for p in prop_names if p.endswith('Id')]
+                                if len(id_like) == 1:
+                                    camel_param = id_like[0]
+                                else:
+                                    candidates = ['articleId', 'userId', 'authorId', 'followingId', 'followerId']
+                                    for candidate in candidates:
+                                        if candidate in prop_names:
+                                            camel_param = candidate
+                                            break
                     url_path = url_path.replace(f'{{{param}}}', f'${{data.{camel_param}}}')
                 url_expression = f"`{url_path}`"
             else:
@@ -454,45 +462,42 @@ def main():
     
     # 出力ディレクトリを作成
     FRONTEND_API_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # 既存ファイルの確認
+
+    # 出力先（既存ファイルを上書き）
     types_file = FRONTEND_API_DIR / "types.ts"
     endpoints_file = FRONTEND_API_DIR / "endpoints.ts"
     hooks_file = FRONTEND_API_DIR / "hooks.ts"
-    
-    existing_files = [f for f in [types_file, endpoints_file, hooks_file] if f.exists()]
-    
-    if existing_files:
-        print("\n⚠️  警告: 以下のファイルが既に存在します:")
-        for f in existing_files:
-            print(f"   - {f}")
-        print("\n生成を続行すると、これらのファイルが上書きされます。")
-        response = input("続行しますか？ (y/N): ").strip().lower()
-        if response not in ['y', 'yes']:
-            print("生成を中止しました。")
-            return
-    
-    # types.tsを生成
-    print("\n✏️  Generating types.ts...")
-    types_content = generate_types_file(classes, value_object_types)
-    types_file.write_text(types_content, encoding='utf-8')
-    print(f"  ✓ {types_file}")
-    
-    # endpoints.tsを生成
-    print("\n✏️  Generating endpoints.ts...")
-    endpoints_content = generate_endpoints_file(all_endpoints, classes)
-    endpoints_file.write_text(endpoints_content, encoding='utf-8')
-    print(f"  ✓ {endpoints_file}")
-    
-    # hooks.tsを生成（骨組みのみ）
-    print("\n✏️  Generating hooks.ts template...")
-    hooks_content = generate_hooks_file(all_endpoints)
-    hooks_file.write_text(hooks_content, encoding='utf-8')
-    print(f"  ✓ {hooks_file}")
-    
+
+    # 何も検出できない場合は上書きを避ける（空ファイル化の防止）
+    if len(classes) == 0 and len(all_endpoints) == 0:
+        print("\n❌ No DTO classes or endpoints detected. Aborting to avoid overwriting with empty content.")
+        return
+
+    # types.ts を生成（クラスがある場合のみ）
+    if len(classes) > 0:
+        print("\n✏️  Generating types.ts (overwrite)...")
+        types_content = generate_types_file(classes, value_object_types)
+        types_file.write_text(types_content, encoding='utf-8')
+        print(f"  ✓ {types_file}")
+    else:
+        print("\n↷  Skip types.ts (no classes found)")
+
+    # endpoints.ts を生成（エンドポイントがある場合のみ）
+    if len(all_endpoints) > 0:
+        print("\n✏️  Generating endpoints.ts (overwrite)...")
+        endpoints_content = generate_endpoints_file(all_endpoints, classes)
+        endpoints_file.write_text(endpoints_content, encoding='utf-8')
+        print(f"  ✓ {endpoints_file}")
+
+        # hooks.ts を生成
+        print("\n✏️  Generating hooks.ts (overwrite)...")
+        hooks_content = generate_hooks_file(all_endpoints)
+        hooks_file.write_text(hooks_content, encoding='utf-8')
+        print(f"  ✓ {hooks_file}")
+    else:
+        print("\n↷  Skip endpoints.ts/hooks.ts (no endpoints found)")
+
     print("\n✅ API generation completed!")
-    print("\n📝 Note: Generated files are committed to git.")
-    print("   Review and customize them as needed for your project.")
     print(f"\n📊 Summary:")
     print(f"   - {len(classes)} types generated")
     print(f"   - {len(all_endpoints)} endpoints found")
