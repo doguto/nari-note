@@ -6,6 +6,8 @@ using NariNoteBackend.Domain.ValueObject;
 namespace NariNoteBackend.Domain.Entity;
 
 [Index(nameof(UserId), nameof(ArticleId), IsUnique = true)]
+[Index(nameof(ArticleId))]
+[Index(nameof(UserId), nameof(CreatedAt))]
 public class Like : EntityBase
 {
     [Key]

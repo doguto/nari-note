@@ -6,6 +6,8 @@ using NariNoteBackend.Domain.ValueObject;
 namespace NariNoteBackend.Domain.Entity;
 
 [Index(nameof(FollowerId), nameof(FollowingId), IsUnique = true)]
+[Index(nameof(FollowerId))]
+[Index(nameof(FollowingId))]
 public class Follow : EntityBase
 {
     [Key]

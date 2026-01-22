@@ -1,9 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
+[Index(nameof(AuthorId))]
+[Index(nameof(CreatedAt))]
+[Index(nameof(IsPublished), nameof(PublishedAt), nameof(CreatedAt))]
 public class Article : EntityBase
 {
     [Key]
