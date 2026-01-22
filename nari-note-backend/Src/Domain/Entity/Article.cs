@@ -25,8 +25,6 @@ public class Article : EntityBase
     [MaxLength(10000)]
     public required string Body { get; set; }
 
-    public bool IsPublished { get; set; } = false;
-    
     public DateTime? PublishedAt { get; set; }
 
     // Navigation Properties
@@ -34,8 +32,13 @@ public class Article : EntityBase
     public List<ArticleTag> ArticleTags { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
     public List<Comment> Comments { get; set; } = new();
+    public int LikeCount => Likes.Count;
+
+    public bool IsPublished => PublishedAt.HasValue;
 
     // Domain Logic
-    public bool IsLikedBy(UserId userId) => Likes.Any(l => l.UserId == userId);
-    public int LikeCount => Likes.Count;
+    public bool IsLikedBy(UserId userId)
+    {
+        return Likes.Any(l => l.UserId == userId);
+    }
 }
