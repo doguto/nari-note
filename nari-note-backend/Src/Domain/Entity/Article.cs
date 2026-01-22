@@ -7,7 +7,7 @@ namespace NariNoteBackend.Domain.Entity;
 
 [Index(nameof(AuthorId))]
 [Index(nameof(CreatedAt))]
-[Index(nameof(IsPublished), nameof(PublishedAt), nameof(CreatedAt))]
+[Index(nameof(PublishedAt))]
 public class Article : EntityBase
 {
     [Key]

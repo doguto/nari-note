@@ -55,7 +55,7 @@ namespace NariNoteBackend.Migrations
 
                     b.HasIndex("CreatedAt");
 
-                    b.HasIndex("IsPublished", "PublishedAt", "CreatedAt");
+                    b.HasIndex("PublishedAt");
 
                     b.ToTable("Articles");
                 });
