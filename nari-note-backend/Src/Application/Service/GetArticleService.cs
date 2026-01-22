@@ -3,6 +3,7 @@ using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -13,7 +14,9 @@ public class GetArticleService
     readonly ILikeRepository likeRepository;
 
     public GetArticleService(
-        IArticleRepository articleRepository, ICommentRepository commentRepository, ILikeRepository likeRepository
+        IArticleRepository articleRepository,
+        ICommentRepository commentRepository,
+        ILikeRepository likeRepository
     )
     {
         this.articleRepository = articleRepository;
@@ -41,7 +44,7 @@ public class GetArticleService
             AuthorId = article.AuthorId,
             AuthorName = article.Author?.Name ?? "",
             Tags = article.ArticleTags.Select(at => at.Tag?.Name ?? string.Empty)
-                          .Where(name => !string.IsNullOrEmpty(name)).ToList(),
+                          .Where(name => !name.IsNullOrEmpty()).ToList(),
             LikeCount = article.LikeCount,
             IsLiked = isLiked,
             IsPublished = article.IsPublished,

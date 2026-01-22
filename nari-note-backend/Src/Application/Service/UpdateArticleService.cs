@@ -31,9 +31,9 @@ public class UpdateArticleService
         // （既に公開済みの記事を更新する場合は自動設定しない）
         if (request.PublishedAt.HasValue)
         {
-            article.PublishedAt = request.PublishedAt.Value;
+            article.PublishedAt = request.PublishedAt!;
         }
-        else if (!wasPublished && !article.IsPublished)
+        else if (!wasPublished && request.IsPublished.HasValue && request.IsPublished.Value)
         {
             article.PublishedAt = DateTime.UtcNow;
         }
