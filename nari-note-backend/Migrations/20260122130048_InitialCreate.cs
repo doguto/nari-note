@@ -209,6 +209,16 @@ namespace NariNoteBackend.Migrations
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Articles_CreatedAt",
+                table: "Articles",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Articles_PublishedAt",
+                table: "Articles",
+                column: "PublishedAt");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ArticleTags_ArticleId_TagId",
                 table: "ArticleTags",
                 columns: new[] { "ArticleId", "TagId" },
@@ -225,9 +235,19 @@ namespace NariNoteBackend.Migrations
                 column: "ArticleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Comments_ArticleId_CreatedAt",
+                table: "Comments",
+                columns: new[] { "ArticleId", "CreatedAt" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Comments_UserId",
                 table: "Comments",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Follows_FollowerId",
+                table: "Follows",
+                column: "FollowerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Follows_FollowerId_FollowingId",
@@ -252,6 +272,11 @@ namespace NariNoteBackend.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Likes_UserId_CreatedAt",
+                table: "Likes",
+                columns: new[] { "UserId", "CreatedAt" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Notifications_ArticleId",
                 table: "Notifications",
                 column: "ArticleId");
@@ -260,6 +285,11 @@ namespace NariNoteBackend.Migrations
                 name: "IX_Notifications_UserId",
                 table: "Notifications",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId_IsRead_CreatedAt",
+                table: "Notifications",
+                columns: new[] { "UserId", "IsRead", "CreatedAt" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tags_Name",

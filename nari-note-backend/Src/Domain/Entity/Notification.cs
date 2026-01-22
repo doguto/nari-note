@@ -1,9 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
+[Index(nameof(UserId))]
+[Index(nameof(UserId), nameof(IsRead), nameof(CreatedAt))]
 public class Notification : EntityBase
 {
     [Key]

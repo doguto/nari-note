@@ -53,6 +53,10 @@ namespace NariNoteBackend.Migrations
 
                     b.HasIndex("AuthorId");
 
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("PublishedAt");
+
                     b.ToTable("Articles");
                 });
 
@@ -111,6 +115,8 @@ namespace NariNoteBackend.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("ArticleId", "CreatedAt");
+
                     b.ToTable("Comments");
                 });
 
@@ -132,6 +138,8 @@ namespace NariNoteBackend.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FollowerId");
 
                     b.HasIndex("FollowingId");
 
@@ -165,6 +173,8 @@ namespace NariNoteBackend.Migrations
                     b.HasIndex("UserId", "ArticleId")
                         .IsUnique();
 
+                    b.HasIndex("UserId", "CreatedAt");
+
                     b.ToTable("Likes");
                 });
 
@@ -193,6 +203,8 @@ namespace NariNoteBackend.Migrations
                     b.HasIndex("ArticleId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "IsRead", "CreatedAt");
 
                     b.ToTable("Notifications");
                 });
