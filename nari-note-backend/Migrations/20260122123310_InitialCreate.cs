@@ -51,7 +51,6 @@ namespace NariNoteBackend.Migrations
                     AuthorId = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Body = table.Column<string>(type: "character varying(10000)", maxLength: 10000, nullable: false),
-                    IsPublished = table.Column<bool>(type: "boolean", nullable: false),
                     PublishedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)

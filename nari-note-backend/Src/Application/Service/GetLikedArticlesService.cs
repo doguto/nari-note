@@ -8,12 +8,12 @@ namespace NariNoteBackend.Application.Service;
 public class GetLikedArticlesService
 {
     readonly ILikeRepository likeRepository;
-    
+
     public GetLikedArticlesService(ILikeRepository likeRepository)
     {
         this.likeRepository = likeRepository;
     }
-    
+
     public async Task<GetLikedArticlesResponse> ExecuteAsync(GetLikedArticlesRequest request)
     {
         var articles = await likeRepository.FindLikedArticlesByUserAsync(request.UserId);

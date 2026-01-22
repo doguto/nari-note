@@ -8,12 +8,12 @@ namespace NariNoteBackend.Application.Service;
 public class SearchArticlesService
 {
     readonly IArticleRepository articleRepository;
-    
+
     public SearchArticlesService(IArticleRepository articleRepository)
     {
         this.articleRepository = articleRepository;
     }
-    
+
     public async Task<SearchArticlesResponse> ExecuteAsync(SearchArticlesRequest request)
     {
         var articles = await articleRepository.SearchAsync(request.Keyword, request.Limit, request.Offset);
