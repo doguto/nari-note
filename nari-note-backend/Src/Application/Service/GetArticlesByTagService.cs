@@ -8,20 +8,20 @@ namespace NariNoteBackend.Application.Service;
 public class GetArticlesByTagService
 {
     readonly IArticleRepository articleRepository;
-    
+
     public GetArticlesByTagService(IArticleRepository articleRepository)
     {
         this.articleRepository = articleRepository;
     }
-    
+
     public async Task<GetArticlesByTagResponse> ExecuteAsync(GetArticlesByTagRequest request)
     {
         var articles = await articleRepository.FindByTagAsync(request.TagName);
 
         return new GetArticlesByTagResponse
         {
-            Articles = articles.Select(a => new ArticleDto 
-            { 
+            Articles = articles.Select(a => new ArticleDto
+            {
                 Id = a.Id,
                 Title = a.Title,
                 Body = a.Body,

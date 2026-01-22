@@ -22,7 +22,6 @@ public class CreateArticleService
             Title = request.Title,
             Body = request.Body,
             AuthorId = request.AuthorId,
-            IsPublished = request.IsPublished,
             PublishedAt = request.PublishedAt ?? (request.IsPublished ? DateTime.UtcNow : null)
         };
 

@@ -206,7 +206,7 @@ public class ArticleRepository : IArticleRepository
     /// <returns>公開記事のフィルタ条件</returns>
     static Expression<Func<Article, bool>> IsPubliclyVisible(DateTime now)
     {
-        return a => a.IsPublished && a.PublishedAt.HasValue && a.PublishedAt.Value <= now;
+        return a => a.IsPublished && a.PublishedAt!.Value <= now;
     }
 
     /// <summary>

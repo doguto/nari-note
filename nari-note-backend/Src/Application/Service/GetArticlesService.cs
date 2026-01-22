@@ -8,12 +8,12 @@ namespace NariNoteBackend.Application.Service;
 public class GetArticlesService
 {
     readonly IArticleRepository articleRepository;
-    
+
     public GetArticlesService(IArticleRepository articleRepository)
     {
         this.articleRepository = articleRepository;
     }
-    
+
     public async Task<GetArticlesResponse> ExecuteAsync(GetArticlesRequest request)
     {
         var (articles, totalCount) = await articleRepository.FindLatestAsync(request.Limit, request.Offset);
