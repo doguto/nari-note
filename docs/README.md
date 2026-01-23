@@ -1,122 +1,118 @@
-# ドキュメント一覧
+# nari-note プロジェクトドキュメント
 
-このディレクトリにはnari-noteプロジェクトの設計ドキュメントが格納されています。
+このディレクトリには、nari-noteプロジェクト全体の概要ドキュメントが格納されています。
 
-## アーキテクチャ関連
+## ドキュメント構成
 
-### [architecture.md](./architecture.md)
-バックエンドの基本アーキテクチャ設計
-- レイヤー構成（Controller、Application、Domain、Infrastructure）
-- Entity Framework Coreとの統合
-- Service粒度の設計方針（API一個につきService一個）
+nari-noteプロジェクトのドキュメントは、以下のように整理されています：
 
-### [backend-implementation-guide.md](./backend-implementation-guide.md) ⭐ 重要
-**バックエンド実装の包括的ガイド**
+### 📂 バックエンドドキュメント
+**場所**: [`nari-note-backend/docs/`](../nari-note-backend/docs/)
 
-このドキュメントは、AI（GitHub Copilot等）が一貫した実装を行えるように設計されています。
+バックエンド（ASP.NET Core Web API）に関する全てのドキュメント
 
-**内容:**
-- コーディング規約
-  - 命名規則（private修飾子の省略）
-  - アクセス修飾子の規約
-  - 日付時刻の扱い
-- レイヤー別実装パターン
-  - Controller層の実装パターンとルール
-  - Service層の実装パターンとルール（API一個につきService一個）
-  - Repository層の実装パターンとルール
-  - Domain層（Entity）の実装パターン
-- DTO設計パターン
-  - Request DTO設計
-  - Response DTO設計
+- 実装ガイド
+- アーキテクチャ設計
+- エラーハンドリング戦略
 - 開発ワークフロー
-  - 新規機能追加の手順
+- データベース設計（ER図）
+- 認証戦略
 
-**新機能を実装する際は、まずこのドキュメントを参照してください。**
+詳細は [バックエンドドキュメントREADME](../nari-note-backend/docs/README.md) を参照してください。
 
-### [development-workflow.md](./development-workflow.md)
-**開発ワークフローと実践的なタスクガイド**
+### 📂 フロントエンドドキュメント
+**場所**: [`nari-note-frontend/docs/`](../nari-note-frontend/docs/)
 
-**内容:**
-- 環境セットアップ手順
-- 新規APIエンドポイントの追加方法（実例付き）
-- データベーススキーマの変更手順
-- マイグレーション管理
-- デバッグとトラブルシューティング
-- よくあるエラーと解決方法
-- 便利なコマンド集
+フロントエンド（Next.js）に関する全てのドキュメント
 
-**実際の開発作業を行う際は、このドキュメントを参照してください。**
+- 実装ガイド（Atomic Design）
+- アーキテクチャ設計
+- API使用方法
+- コンポーネント生成パターン
+- クイックリファレンス
 
-### [er-diagram.md](./er-diagram.md)
-データベースのER図とエンティティ設計
+詳細は [フロントエンドドキュメントREADME](../nari-note-frontend/docs/README.md) を参照してください。
 
-## エラーハンドリング
+### 📂 共通ドキュメント
+**場所**: このディレクトリ（`docs/`）
 
-### [error-handling-strategy.md](./error-handling-strategy.md) ⭐ 重要
-**エラーハンドリングの包括的な戦略ドキュメント**
+プロジェクト全体に関わる共通のドキュメント
 
-このドキュメントは、AI（GitHub Copilot等）が自動参照し、実装に反映できるように設計されています。
+- プロジェクト概要
+- 技術スタック
+- 環境構築（Docker）
 
-**内容:**
-- エラーハンドリングの基本方針
-- カスタム例外クラスの設計
-  - ApplicationException基底クラス
-  - NotFoundException (404)
-  - ValidationException (400)
-  - ConflictException (409)
-  - UnauthorizedException (401)
-  - ForbiddenException (403)
-  - InfrastructureException (500)
-- グローバル例外ハンドラーミドルウェア
-- エラーレスポンス形式
-- レイヤー別の実装ガイドライン
-- Sentry連携方法
-- ベストプラクティス
+## プロジェクト概要
 
-**新機能を実装する際は、このドキュメントに従ってエラーハンドリングを実装してください。**
+### 技術スタック
 
-### [error-handling-examples.md](./error-handling-examples.md)
-**エラーハンドリングの実装例とクイックリファレンス**
+#### バックエンド
+- **フレームワーク**: ASP.NET Core 9.0
+- **言語**: C# (.NET 9.0)
+- **データベース**: PostgreSQL 16
+- **ORM**: Entity Framework Core 9.0
 
-**内容:**
-- 実装済みファイルの一覧
-- Service、Repository、Controllerでの使用例
-- エラーレスポンス例
-- テスト方法
+#### フロントエンド
+- **フレームワーク**: Next.js 15
+- **言語**: TypeScript
+- **UIライブラリ**: React 19
+- **データフェッチング**: TanStack Query (React Query)
+- **スタイリング**: Tailwind CSS 4
 
-**簡単な実装例を確認したい場合は、このドキュメントを参照してください。**
+### プロジェクト構成
 
-## ドキュメントの使い方
+```
+nari-note/
+├── nari-note-backend/          # バックエンド（ASP.NET Core）
+│   ├── docs/                   # バックエンドドキュメント
+│   ├── Src/                    # ソースコード
+│   ├── Migrations/             # EF Core マイグレーション
+│   └── Program.cs              # エントリーポイント
+├── nari-note-frontend/         # フロントエンド（Next.js）
+│   ├── docs/                   # フロントエンドドキュメント
+│   ├── src/                    # ソースコード
+│   └── public/                 # 静的ファイル
+├── docs/                       # 共通ドキュメント
+├── docker-compose.yml          # Docker構成
+└── README.md                   # プロジェクトREADME
+```
 
-### 新規機能を実装する場合
-1. `backend-implementation-guide.md` で実装パターンとコーディング規約を確認 ⭐
-2. `development-workflow.md` で具体的な開発手順を確認 ⭐
-3. `architecture.md` でアーキテクチャの全体像を確認
-4. `error-handling-strategy.md` でエラーハンドリング方針を確認
-5. `error-handling-examples.md` で具体的な実装例を参照
+## クイックスタート
 
-### エラーハンドリングを実装する場合
-1. `error-handling-strategy.md` で詳細な戦略を確認
-2. `error-handling-examples.md` でクイックリファレンスを参照
+### バックエンドの開発を始める
 
-### データベース設計を確認する場合
-1. `er-diagram.md` でエンティティ関係を確認
+1. [バックエンドドキュメント](../nari-note-backend/docs/README.md) を読む
+2. [backend-implementation-guide.md](../nari-note-backend/docs/backend-implementation-guide.md) で実装パターンを確認
+3. [development-workflow.md](../nari-note-backend/docs/development-workflow.md) で開発手順を確認
 
-### コーディング規約を確認する場合
-1. `backend-implementation-guide.md` のコーディング規約セクションを確認
+### フロントエンドの開発を始める
+
+1. [フロントエンドドキュメント](../nari-note-frontend/docs/README.md) を読む
+2. [frontend-implementation-guide.md](../nari-note-frontend/docs/frontend-implementation-guide.md) でAtomic Designパターンを確認
+3. [frontend-api-usage.md](../nari-note-frontend/docs/frontend-api-usage.md) でAPI使用方法を確認
+
+## 重要なドキュメント
+
+### バックエンド開発者向け
+- ⭐ [backend-implementation-guide.md](../nari-note-backend/docs/backend-implementation-guide.md) - 実装パターンとコーディング規約
+- ⭐ [development-workflow.md](../nari-note-backend/docs/development-workflow.md) - 開発ワークフロー
+- [error-handling-strategy.md](../nari-note-backend/docs/error-handling-strategy.md) - エラーハンドリング戦略
+
+### フロントエンド開発者向け
+- ⭐ [frontend-implementation-guide.md](../nari-note-frontend/docs/frontend-implementation-guide.md) - Atomic Designとコンポーネント生成
+- ⭐ [frontend-api-usage.md](../nari-note-frontend/docs/frontend-api-usage.md) - API使用方法
+- [frontend-architecture.md](../nari-note-frontend/docs/frontend-architecture.md) - アーキテクチャガイド
 
 ## AI（GitHub Copilot）向けの情報
 
-これらのドキュメントは、AI開発支援ツールが自動的に参照し、コード生成やレビューに活用できるように構造化されています。
+このプロジェクトのドキュメントは、AI開発支援ツールが自動的に参照し、コード生成やレビューに活用できるように構造化されています。
 
-**特に重要なドキュメント:**
-- `backend-implementation-guide.md` - 実装パターンとコーディング規約の完全なガイド ⭐
-- `development-workflow.md` - 開発ワークフローと実践的タスクガイド ⭐
-- `error-handling-strategy.md` - エラーハンドリングの完全なガイド
-- `architecture.md` - アーキテクチャの基本方針
+### バックエンド実装時
+1. [backend-implementation-guide.md](../nari-note-backend/docs/backend-implementation-guide.md) で全体像を把握
+2. [development-workflow.md](../nari-note-backend/docs/development-workflow.md) で開発手順を理解
+3. [error-handling-strategy.md](../nari-note-backend/docs/error-handling-strategy.md) でエラーハンドリングを確認
 
-**実装の優先順位:**
-1. まず `backend-implementation-guide.md` で全体像とコーディング規約を把握
-2. 次に `development-workflow.md` で具体的な開発手順を理解
-3. `error-handling-strategy.md` でエラーハンドリングを理解
-4. 必要に応じて `architecture.md` で設計思想を確認
+### フロントエンド実装時
+1. [frontend-implementation-guide.md](../nari-note-frontend/docs/frontend-implementation-guide.md) でAtomic Designパターンを把握
+2. [frontend-api-usage.md](../nari-note-frontend/docs/frontend-api-usage.md) でAPI使用方法を理解
+3. [frontend-architecture.md](../nari-note-frontend/docs/frontend-architecture.md) でアーキテクチャを確認
