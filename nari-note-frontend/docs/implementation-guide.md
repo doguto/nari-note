@@ -744,5 +744,5 @@ return <ArticleDetailPage article={data} />;
 
 ## 関連ドキュメント
 
-- [フロントエンドアーキテクチャガイド](./frontend-architecture.md)
-- [API使用方法](./frontend-api-usage.md)
+- [フロントエンドアーキテクチャガイド](./architecture.md)
+- [API使用方法](./api-usage.md)

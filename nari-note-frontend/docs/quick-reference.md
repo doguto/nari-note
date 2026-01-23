@@ -343,6 +343,6 @@ className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
 
 ## 詳細ドキュメント
 
-- [フロントエンドアーキテクチャガイド](/docs/frontend-architecture.md) - 完全なアーキテクチャ説明
-- [フロントエンド実装ガイド](/docs/frontend-implementation-guide.md) - 詳細な実装パターン
-- [API使用方法](/docs/frontend-api-usage.md) - API使用の詳細
+- [フロントエンドアーキテクチャガイド](/docs/architecture.md) - 完全なアーキテクチャ説明
+- [フロントエンド実装ガイド](/docs/implementation-guide.md) - 詳細な実装パターン
+- [API使用方法](/docs/api-usage.md) - API使用の詳細

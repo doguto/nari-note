@@ -88,8 +88,8 @@ nari-note/
 ### フロントエンドの開発を始める
 
 1. [フロントエンドドキュメント](../nari-note-frontend/docs/README.md) を読む
-2. [frontend-implementation-guide.md](../nari-note-frontend/docs/frontend-implementation-guide.md) でAtomic Designパターンを確認
-3. [frontend-api-usage.md](../nari-note-frontend/docs/frontend-api-usage.md) でAPI使用方法を確認
+2. [implementation-guide.md](../nari-note-frontend/docs/implementation-guide.md) でAtomic Designパターンを確認
+3. [api-usage.md](../nari-note-frontend/docs/api-usage.md) でAPI使用方法を確認
 
 ## 重要なドキュメント
 
@@ -99,9 +99,9 @@ nari-note/
 - [error-handling-strategy.md](../nari-note-backend/Documents/error-handling-strategy.md) - エラーハンドリング戦略
 
 ### フロントエンド開発者向け
-- ⭐ [frontend-implementation-guide.md](../nari-note-frontend/docs/frontend-implementation-guide.md) - Atomic Designとコンポーネント生成
-- ⭐ [frontend-api-usage.md](../nari-note-frontend/docs/frontend-api-usage.md) - API使用方法
-- [frontend-architecture.md](../nari-note-frontend/docs/frontend-architecture.md) - アーキテクチャガイド
+- ⭐ [implementation-guide.md](../nari-note-frontend/docs/implementation-guide.md) - Atomic Designとコンポーネント生成
+- ⭐ [api-usage.md](../nari-note-frontend/docs/api-usage.md) - API使用方法
+- [architecture.md](../nari-note-frontend/docs/architecture.md) - アーキテクチャガイド
 
 ## AI（GitHub Copilot）向けの情報
 
@@ -113,6 +113,6 @@ nari-note/
 3. [error-handling-strategy.md](../nari-note-backend/Documents/error-handling-strategy.md) でエラーハンドリングを確認
 
 ### フロントエンド実装時
-1. [frontend-implementation-guide.md](../nari-note-frontend/docs/frontend-implementation-guide.md) でAtomic Designパターンを把握
-2. [frontend-api-usage.md](../nari-note-frontend/docs/frontend-api-usage.md) でAPI使用方法を理解
-3. [frontend-architecture.md](../nari-note-frontend/docs/frontend-architecture.md) でアーキテクチャを確認
+1. [implementation-guide.md](../nari-note-frontend/docs/implementation-guide.md) でAtomic Designパターンを把握
+2. [api-usage.md](../nari-note-frontend/docs/api-usage.md) でAPI使用方法を理解
+3. [architecture.md](../nari-note-frontend/docs/architecture.md) でアーキテクチャを確認

@@ -15,8 +15,8 @@
 ### フロントエンド（Next.js）
 - **場所**: `nari-note-frontend/docs/`
 - **主要ドキュメント**:
-  - [frontend-implementation-guide.md](../nari-note-frontend/docs/frontend-implementation-guide.md) - Atomic Design実装ガイド（最重要）
-  - [frontend-architecture.md](../nari-note-frontend/docs/frontend-architecture.md) - アーキテクチャ設計
+  - [implementation-guide.md](../nari-note-frontend/docs/implementation-guide.md) - Atomic Design実装ガイド（最重要）
+  - [architecture.md](../nari-note-frontend/docs/architecture.md) - アーキテクチャ設計
   - [frontend-api-usage.md](../nari-note-frontend/docs/frontend-api-usage.md) - API使用方法
 
 ### プロジェクト共通

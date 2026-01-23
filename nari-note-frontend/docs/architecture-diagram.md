@@ -4,7 +4,7 @@ nari-note-frontendのアーキテクチャを図解で説明します。
 
 **このドキュメントは現在のAtomic Designパターンに基づいています。**
 
-詳細なアーキテクチャについては [frontend-architecture.md](./frontend-architecture.md) を参照してください。
+詳細なアーキテクチャについては [architecture.md](./architecture.md) を参照してください。
 
 ## 全体構造（Atomic Design）
 
@@ -266,7 +266,7 @@ nari-note-frontendは**Atomic Designパターン**を採用し、以下の利点
 - ✅ **テスタビリティ**: 小さな単位でテスト可能
 - ✅ **スケーラビリティ**: 新機能追加が容易
 
-詳細な実装ガイドは [frontend-implementation-guide.md](./frontend-implementation-guide.md) を参照してください。
+詳細な実装ガイドは [implementation-guide.md](./implementation-guide.md) を参照してください。
 
 ```mermaid
 graph TB
@@ -428,6 +428,6 @@ graph TB
 
 ## 参考ドキュメント
 
-- [フロントエンドアーキテクチャガイド](./frontend-architecture.md)
-- [フロントエンド実装ガイド](./frontend-implementation-guide.md)
-- [クイックリファレンス](./frontend-quick-reference.md)
+- [フロントエンドアーキテクチャガイド](./architecture.md)
+- [フロントエンド実装ガイド](./implementation-guide.md)
+- [クイックリファレンス](./quick-reference.md)

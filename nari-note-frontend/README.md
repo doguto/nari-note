@@ -84,7 +84,7 @@ function CreateArticleForm() {
 }
 ```
 
-詳細な使い方は[API使用ガイド](./docs/frontend-api-usage.md)を参照してください。
+詳細な使い方は[API使用ガイド](./docs/api-usage.md)を参照してください。
 
 ## ディレクトリ構造
 
@@ -132,10 +132,10 @@ NEXT_PUBLIC_API_URL=http://localhost:5243
 
 ## ドキュメント
 
-- [API使用ガイド](./docs/frontend-api-usage.md) - API関数の詳細な使い方
-- [フロントエンド実装ガイド](./docs/frontend-implementation-guide.md) - Atomic Designとコンポーネント生成パターン
-- [フロントエンドアーキテクチャ](./docs/frontend-architecture.md) - アーキテクチャの詳細ガイド
-- [クイックリファレンス](./docs/frontend-quick-reference.md) - よく使うパターン集
+- [API使用ガイド](./docs/api-usage.md) - API関数の詳細な使い方
+- [フロントエンド実装ガイド](./docs/implementation-guide.md) - Atomic Designとコンポーネント生成パターン
+- [フロントエンドアーキテクチャ](./docs/architecture.md) - アーキテクチャの詳細ガイド
+- [クイックリファレンス](./docs/quick-reference.md) - よく使うパターン集
 
 ## Learn More
 

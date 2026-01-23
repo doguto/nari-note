@@ -132,4 +132,4 @@ export interface Article extends BaseEntity {
 
 ## 詳細
 
-詳しくは [フロントエンドアーキテクチャガイド](/docs/frontend-architecture.md) を参照してください。
+詳しくは [フロントエンドアーキテクチャガイド](/docs/architecture.md) を参照してください。
