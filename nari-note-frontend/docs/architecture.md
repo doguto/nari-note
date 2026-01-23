@@ -4,9 +4,8 @@
 
 ## 概要
 
-nari-note-frontendは、**Container/Presentationalパターン**と**Atomic Designパターン**を組み合わせたNext.jsアプリケーションです。
+nari-note-frontendは、**Atomic Designパターン**を採用したNext.jsアプリケーションです。
 
-- **Container/Presentationalパターン**: ビジネスロジック（データ取得、状態管理）とUI表示を明確に分離
 - **Atomic Designパターン**: UIコンポーネントを小さな単位（Atoms → Molecules → Organisms）で階層的に構成
 
 ## 技術スタック
@@ -875,6 +874,6 @@ const MarkdownEditor = dynamic(() => import('@/components/ui/MarkdownEditor'), {
 
 ## 関連ドキュメント
 
-- [API使用方法](./frontend-api-usage.md)
+- [API使用方法](./api-usage.md)
 - [認証戦略](./authentication-strategy.md)
 - [アーキテクチャ概要](./architecture-overview.md)

@@ -905,8 +905,8 @@ public class CreateArticleResponse
 実装時は以下のドキュメントを参照してください：
 
 1. **このガイド（backend-implementation-guide.md）** - 基本的な実装パターン
-2. **[エラーハンドリング戦略](/docs/error-handling-strategy.md)** - 例外処理の詳細
-3. **[アーキテクチャ](/docs/architecture.md)** - 設計思想とレイヤー構成
+2. **[エラーハンドリング戦略](./error-handling-strategy.md)** - 例外処理の詳細
+3. **[アーキテクチャ](./architecture.md)** - 設計思想とレイヤー構成
 4. **既存のコード** - 同様の機能を参考にする
 
 AI（GitHub Copilot等）は本ドキュメントを参照することで、適切な実装を自動生成できます。

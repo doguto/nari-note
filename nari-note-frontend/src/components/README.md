@@ -59,7 +59,7 @@ featuresディレクトリ内で定義されます。
 - `LoginPage.tsx` - ログインフォーム
 - `ArticleFormPage.tsx` - 記事作成フォーム
 
-詳細は [フロントエンドアーキテクチャガイド](/docs/frontend-architecture.md) の Atomic Design セクションを参照してください。
+詳細は [フロントエンドアーキテクチャガイド](/docs/architecture.md) の Atomic Design セクションを参照してください。
 
 ## UI Components（`ui/`）
 
@@ -168,4 +168,4 @@ const variantClasses = {
 
 ## 詳細
 
-詳しくは [フロントエンドアーキテクチャガイド](/docs/frontend-architecture.md) を参照してください。
+詳しくは [フロントエンドアーキテクチャガイド](/docs/architecture.md) を参照してください。

@@ -22,7 +22,7 @@ APIクライアントとTanStack Query フックが配置されています。
 - `hooks.ts` - TanStack Query フック
 - `types.ts` - API型定義
 
-詳細は [API使用方法ドキュメント](/docs/frontend-api-usage.md) を参照してください。
+詳細は [API使用方法ドキュメント](/docs/api-usage.md) を参照してください。
 
 ## Providers（`providers/`）
 
@@ -114,4 +114,4 @@ import { COLORS, ROUTES } from '@/lib/constants';
 
 ## 詳細
 
-詳しくは [フロントエンドアーキテクチャガイド](/docs/frontend-architecture.md) を参照してください。
+詳しくは [フロントエンドアーキテクチャガイド](/docs/architecture.md) を参照してください。

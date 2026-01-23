@@ -438,4 +438,4 @@ docker-compose exec postgres psql -U postgres -d nari_note
 - ✅ スムーズなデバッグ
 - ✅ 効率的な開発
 
-新規機能を追加する際は、このドキュメントと[実装ガイド](/docs/backend-implementation-guide.md)を参照してください。
+新規機能を追加する際は、このドキュメントと[実装ガイド](./backend-implementation-guide.md)を参照してください。

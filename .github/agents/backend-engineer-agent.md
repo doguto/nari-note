@@ -62,19 +62,19 @@ nari-note-backend/
 
 ### 必読ドキュメント
 
-1. **[バックエンド実装ガイド](/docs/backend-implementation-guide.md)**
+1. **[バックエンド実装ガイド](/nari-note-backend/Documents/backend-implementation-guide.md)**
    - コーディング規約（命名規則、アクセス修飾子等）
    - レイヤー別実装パターン（Controller、Service、Repository、Domain）
    - DTO設計パターン
    - 具体的なコード例
 
-2. **[エラーハンドリング戦略](/docs/error-handling-strategy.md)**
+2. **[エラーハンドリング戦略](/nari-note-backend/Documents/error-handling-strategy.md)**
    - GlobalExceptionHandlerMiddlewareの実装
    - 例外とHTTPステータスコードのマッピング
    - エラーレスポンス形式
    - 実装例
 
-3. **[アーキテクチャ概要](/docs/architecture-overview.md)**
+3. **[アーキテクチャ概要](/nari-note-backend/Documents/architecture-overview.md)**
    - レイヤー構成と各層の責務
    - ディレクトリ構成
    - 重要な設計原則
@@ -82,9 +82,10 @@ nari-note-backend/
 
 ### 補足ドキュメント
 
-- **[アーキテクチャ（設計思想）](/docs/architecture.md)** - アーキテクチャ選定の経緯と設計思想
-- **[認証戦略](/docs/authentication-strategy.md)** - 認証機能実装時に参照
-- **[ER図](/docs/er-diagram.md)** - データベース設計時に参照
+- **[アーキテクチャ（設計思想）](/nari-note-backend/Documents/architecture.md)** - アーキテクチャ選定の経緯と設計思想
+- **[開発ワークフロー](/nari-note-backend/Documents/development-workflow.md)** - 開発手順と実践的なタスクガイド
+- **[認証戦略](/nari-note-backend/Documents/authentication-strategy.md)** - 認証機能実装時に参照
+- **[ER図](/nari-note-backend/Documents/er-diagram.md)** - データベース設計時に参照
 
 ## 重要な実装規約
 

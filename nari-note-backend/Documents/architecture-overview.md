@@ -1,7 +1,7 @@
 # アーキテクチャ概要（実装用）
 
 このドキュメントは、nari-note-backendの実装時に参照するアーキテクチャの概要です。
-設計思想や選定過程については [architecture.md](/docs/architecture.md) を参照してください。
+設計思想や選定過程については [architecture.md](./architecture.md) を参照してください。
 
 ## レイヤー構成
 
@@ -132,6 +132,6 @@ nari-note-backend/
 
 ## 関連ドキュメント
 
-- **[architecture.md](/docs/architecture.md)** - 設計思想と選定過程
-- **[backend-implementation-guide.md](/docs/backend-implementation-guide.md)** - 実装パターンとコーディング規約
-- **[error-handling-strategy.md](/docs/error-handling-strategy.md)** - エラーハンドリングの詳細
+- **[architecture-overview.md](./architecture-overview.md)** - 設計思想と選定過程
+- **[backend-implementation-guide.md](./backend-implementation-guide.md)** - 実装パターンとコーディング規約
+- **[error-handling-strategy.md](./error-handling-strategy.md)** - エラーハンドリングの詳細
