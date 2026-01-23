@@ -108,7 +108,7 @@ nari-note-backend/
 - `POST /api/auth/signup` - ユーザー登録
 - `POST /api/auth/signin` - ログイン
 
-**詳細:** [認証戦略ドキュメント](/docs/authentication-strategy.md#apiエンドポイント)
+**詳細:** [認証戦略ドキュメント](./docs/authentication-strategy.md#apiエンドポイント)
 
 ### 記事（Articles）
 
@@ -125,7 +125,7 @@ nari-note-backend/
 
 ### コーディング規約
 
-**詳細は [実装ガイド](/docs/backend-implementation-guide.md) を参照してください**
+**詳細は [実装ガイド](./docs/backend-implementation-guide.md) を参照してください**
 
 主要な規約：
 - private変数: アンダースコア無し、キャメルケース、`this.`でアクセス
@@ -145,9 +145,9 @@ Controller → Service → Repository Interface
 ```
 
 **詳細は以下のドキュメントを参照:**
-- [アーキテクチャ設計](/docs/architecture.md)
-- [実装ガイド](/docs/backend-implementation-guide.md)
-- [エラーハンドリング戦略](/docs/error-handling-strategy.md)
+- [アーキテクチャ設計](./docs/architecture.md)
+- [実装ガイド](./docs/backend-implementation-guide.md)
+- [エラーハンドリング戦略](./docs/error-handling-strategy.md)
 
 ### 新規機能の実装手順
 
@@ -211,7 +211,7 @@ dotnet test
 - Controllerでtry-catchは不要
 - 統一されたエラーレスポンス形式
 
-**詳細:** [エラーハンドリング戦略](/docs/error-handling-strategy.md)
+**詳細:** [エラーハンドリング戦略](./docs/error-handling-strategy.md)
 
 ### データベース設計
 
@@ -219,16 +219,16 @@ dotnet test
 - マイグレーションベースのスキーマ管理
 - リレーションシップ定義（Article-User, Article-Tag, Like, Follow等）
 
-**詳細:** [ER図](/docs/er-diagram.md)
+**詳細:** [ER図](./docs/er-diagram.md)
 
 ## 関連ドキュメント
 
-- [実装ガイド](/docs/backend-implementation-guide.md) - コーディング規約と実装パターン
-- [アーキテクチャ](/docs/architecture.md) - システムアーキテクチャの設計思想
-- [エラーハンドリング戦略](/docs/error-handling-strategy.md) - エラーハンドリングの包括的ガイド
-- [エラーハンドリング実装例](/docs/error-handling-examples.md) - 実装例とクイックリファレンス
-- [認証戦略](/docs/authentication-strategy.md) - 認証システムの設計と実装（API使用方法を含む）
-- [ER図](/docs/er-diagram.md) - データベース設計
+- [実装ガイド](./docs/backend-implementation-guide.md) - コーディング規約と実装パターン
+- [アーキテクチャ](./docs/architecture.md) - システムアーキテクチャの設計思想
+- [エラーハンドリング戦略](./docs/error-handling-strategy.md) - エラーハンドリングの包括的ガイド
+- [認証戦略](./docs/authentication-strategy.md) - 認証システムの設計と実装（API使用方法を含む）
+- [ER図](./docs/er-diagram.md) - データベース設計
+- [開発ワークフロー](./docs/development-workflow.md) - 開発手順とタスクガイド
 
 ## その他
 
