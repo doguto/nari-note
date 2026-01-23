@@ -8,7 +8,7 @@ nari-noteは、将棋記事の投稿・共有プラットフォームです。
 
 - **nari-note-backend** - ASP.NET Core Web API（バックエンド）
   - [バックエンドREADME](./nari-note-backend/README.md)
-  - [バックエンドドキュメント](./nari-note-backend/docs/README.md)
+  - [バックエンドドキュメント](./nari-note-backend/Documents/README.md)
 - **nari-note-frontend** - Next.js（フロントエンド）
   - [フロントエンドREADME](./nari-note-frontend/README.md)
   - [フロントエンドドキュメント](./nari-note-frontend/docs/README.md)
@@ -43,9 +43,9 @@ nari-noteは、将棋記事の投稿・共有プラットフォームです。
 ### クイックスタート
 
 #### バックエンド開発を始める
-1. [バックエンドドキュメント](./nari-note-backend/docs/README.md) を読む
-2. [backend-implementation-guide.md](./nari-note-backend/docs/backend-implementation-guide.md) で実装パターンを確認
-3. [development-workflow.md](./nari-note-backend/docs/development-workflow.md) で開発手順を確認
+1. [バックエンドドキュメント](./nari-note-backend/Documents/README.md) を読む
+2. [backend-implementation-guide.md](./nari-note-backend/Documents/backend-implementation-guide.md) で実装パターンを確認
+3. [development-workflow.md](./nari-note-backend/Documents/development-workflow.md) で開発手順を確認
 
 #### フロントエンド開発を始める
 1. [フロントエンドドキュメント](./nari-note-frontend/docs/README.md) を読む

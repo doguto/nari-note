@@ -163,5 +163,5 @@ Pages（ページ）
 
 ## 関連リンク
 
-- [バックエンドドキュメント](../../nari-note-backend/docs/README.md)
+- [バックエンドドキュメント](../../nari-note-backend/Documents/README.md)
 - [プロジェクトルートREADME](../../README.md)

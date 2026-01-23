@@ -7,7 +7,7 @@
 nari-noteプロジェクトのドキュメントは、以下のように整理されています：
 
 ### 📂 バックエンドドキュメント
-**場所**: [`nari-note-backend/docs/`](../nari-note-backend/docs/)
+**場所**: [`nari-note-backend/Documents/`](../nari-note-backend/Documents/)
 
 バックエンド（ASP.NET Core Web API）に関する全てのドキュメント
 
@@ -18,7 +18,7 @@ nari-noteプロジェクトのドキュメントは、以下のように整理�
 - データベース設計（ER図）
 - 認証戦略
 
-詳細は [バックエンドドキュメントREADME](../nari-note-backend/docs/README.md) を参照してください。
+詳細は [バックエンドドキュメントREADME](../nari-note-backend/Documents/README.md) を参照してください。
 
 ### 📂 フロントエンドドキュメント
 **場所**: [`nari-note-frontend/docs/`](../nari-note-frontend/docs/)
@@ -94,9 +94,9 @@ nari-note/
 ## 重要なドキュメント
 
 ### バックエンド開発者向け
-- ⭐ [backend-implementation-guide.md](../nari-note-backend/docs/backend-implementation-guide.md) - 実装パターンとコーディング規約
-- ⭐ [development-workflow.md](../nari-note-backend/docs/development-workflow.md) - 開発ワークフロー
-- [error-handling-strategy.md](../nari-note-backend/docs/error-handling-strategy.md) - エラーハンドリング戦略
+- ⭐ [backend-implementation-guide.md](../nari-note-backend/Documents/backend-implementation-guide.md) - 実装パターンとコーディング規約
+- ⭐ [development-workflow.md](../nari-note-backend/Documents/development-workflow.md) - 開発ワークフロー
+- [error-handling-strategy.md](../nari-note-backend/Documents/error-handling-strategy.md) - エラーハンドリング戦略
 
 ### フロントエンド開発者向け
 - ⭐ [frontend-implementation-guide.md](../nari-note-frontend/docs/frontend-implementation-guide.md) - Atomic Designとコンポーネント生成
@@ -108,9 +108,9 @@ nari-note/
 このプロジェクトのドキュメントは、AI開発支援ツールが自動的に参照し、コード生成やレビューに活用できるように構造化されています。
 
 ### バックエンド実装時
-1. [backend-implementation-guide.md](../nari-note-backend/docs/backend-implementation-guide.md) で全体像を把握
-2. [development-workflow.md](../nari-note-backend/docs/development-workflow.md) で開発手順を理解
-3. [error-handling-strategy.md](../nari-note-backend/docs/error-handling-strategy.md) でエラーハンドリングを確認
+1. [backend-implementation-guide.md](../nari-note-backend/Documents/backend-implementation-guide.md) で全体像を把握
+2. [development-workflow.md](../nari-note-backend/Documents/development-workflow.md) で開発手順を理解
+3. [error-handling-strategy.md](../nari-note-backend/Documents/error-handling-strategy.md) でエラーハンドリングを確認
 
 ### フロントエンド実装時
 1. [frontend-implementation-guide.md](../nari-note-frontend/docs/frontend-implementation-guide.md) でAtomic Designパターンを把握
