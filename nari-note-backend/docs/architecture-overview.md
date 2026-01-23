@@ -1,7 +1,7 @@
 # アーキテクチャ概要（実装用）
 
 このドキュメントは、nari-note-backendの実装時に参照するアーキテクチャの概要です。
-設計思想や選定過程については [architecture.md](/docs/architecture.md) を参照してください。
+設計思想や選定過程については [architecture.md](./architecture.md) を参照してください。
 
 ## レイヤー構成
 
