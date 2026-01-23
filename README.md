@@ -40,18 +40,6 @@ nari-noteは、将棋記事の投稿・共有プラットフォームです。
 - **[フロントエンドドキュメント](./nari-note-frontend/docs/README.md)** - フロントエンド（Next.js）に関する全てのドキュメント
 - **[プロジェクトドキュメント](./docs/README.md)** - プロジェクト全体に関わる共通のドキュメント
 
-### クイックスタート
-
-#### バックエンド開発を始める
-1. [バックエンドドキュメント](./nari-note-backend/Documents/README.md) を読む
-2. [backend-implementation-guide.md](./nari-note-backend/Documents/backend-implementation-guide.md) で実装パターンを確認
-3. [development-workflow.md](./nari-note-backend/Documents/development-workflow.md) で開発手順を確認
-
-#### フロントエンド開発を始める
-1. [フロントエンドドキュメント](./nari-note-frontend/docs/README.md) を読む
-2. [frontend-implementation-guide.md](./nari-note-frontend/docs/frontend-implementation-guide.md) でAtomic Designパターンを確認
-3. [frontend-api-usage.md](./nari-note-frontend/docs/frontend-api-usage.md) でAPI使用方法を確認
-
 ## 環境構築
 
 ### Docker Compose を使用（推奨）

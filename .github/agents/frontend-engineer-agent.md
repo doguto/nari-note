@@ -22,7 +22,6 @@ description: フロントエンドの実装を行う
    - 具体的なコード例
 
 2. **[フロントエンドアーキテクチャ](/nari-note-frontend/docs/frontend-architecture.md)**
-   - Container/Presentationalパターン
    - Atomic Designパターンの詳細
    - 技術スタック（Next.js, React, TypeScript, TanStack Query）
    - データフェッチング戦略
