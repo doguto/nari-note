@@ -31,7 +31,6 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [tags, setTags] = useState<string[]>([]);
-  const [showPreview, setShowPreview] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(true);
@@ -219,10 +218,6 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     setShowPublishDialog(true);
   };
 
-  const togglePreview = () => {
-    setShowPreview(!showPreview);
-  };
-
   // 編集モード時は初期化完了まで待つ
   const isFormDisabled = (isEditMode && !isInitialized) || !title || tags.length === 0 || isOverLimit;
   const isLoading = createArticle.isPending || updateArticle.isPending;
@@ -236,8 +231,6 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
       <ArticleBodyEditor
         value={body}
         onChange={setBody}
-        showPreview={showPreview}
-        onTogglePreview={togglePreview}
         maxCharacters={maxCharacters}
       />
 
