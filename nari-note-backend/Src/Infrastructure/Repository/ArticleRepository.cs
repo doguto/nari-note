@@ -168,7 +168,7 @@ public class ArticleRepository : IArticleRepository
                             .Include(a => a.Author)
                             .Include(a => a.ArticleTags)
                             .ThenInclude(at => at.Tag)
-                            .Where(a => a.AuthorId == authorId && !a.IsPublished)
+                            .Where(a => a.AuthorId == authorId && !a.PublishedAt.HasValue)
                             .OrderByDescending(a => a.UpdatedAt)
                             .ToListAsync();
     }
@@ -195,18 +195,15 @@ public class ArticleRepository : IArticleRepository
     public async Task<int> CountByAuthorAsync(UserId authorId)
     {
         return await context.Articles
-                            .Where(a => a.AuthorId == authorId && a.IsPublished)
+                            .Where(a => a.AuthorId == authorId && a.PublishedAt.HasValue)
                             .CountAsync();
     }
 
-    /// <summary>
-    ///     公開記事のフィルタ条件を生成します。
-    /// </summary>
-    /// <param name="now">現在時刻（UTC）。この時刻以前に公開された記事のみを返します。</param>
-    /// <returns>公開記事のフィルタ条件</returns>
+
     static Expression<Func<Article, bool>> IsPubliclyVisible(DateTime now)
     {
-        return a => a.IsPublished && a.PublishedAt!.Value <= now;
+        // a.IsPublished は DB に登録されたカラムではなく Property なため、Where 句では PublishedAt.HasValue
+        return a => a.PublishedAt.HasValue && a.PublishedAt!.Value <= now;
     }
 
     /// <summary>
@@ -217,7 +214,7 @@ public class ArticleRepository : IArticleRepository
     /// <returns>フィルタ条件</returns>
     static Expression<Func<Article, bool>> IsPubliclyVisibleAndContainsKeyword(DateTime now, string keyword)
     {
-        return a => a.IsPublished && a.PublishedAt.HasValue && a.PublishedAt.Value <= now &&
+        return a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now &&
                     (a.Title.Contains(keyword) || a.Body.Contains(keyword));
     }
 }
