@@ -112,12 +112,12 @@ export function Header() {
                   <DropdownMenuSeparator className="bg-brand-text-dark" />
                   <DropdownMenuItem asChild>
                     <Link
-                      href="/articles/drafts"
+                      href="/articles/my-articles"
                       className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2"
                       style={{ fontFamily: 'serif' }}
                     >
                       <FileText className="w-4 h-4" />
-                      <span>下書き一覧</span>
+                      <span>マイ記事一覧</span>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>

@@ -8,6 +8,9 @@ import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';
 import { Comment } from '@/types/comment';
 import { LikeButton } from '@/components/common/atoms';
+import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 interface ArticleDetailPageProps {
   articleId: number;
@@ -21,6 +24,7 @@ interface ArticleDetailPageProps {
  * ビジネスロジックと UI を統合
  */
 export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
+  const { userId } = useAuth();
   const { data: article, isLoading, error, refetch } = useGetArticle({ id: articleId });
   const { mutate: toggleLike, isPending: isLikePending } = useToggleLike({
     onSuccess: () => {
@@ -65,11 +69,27 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
     createdAt: c.createdAt || '',
   }));
 
+  // 自分の記事かどうかを判定
+  const isOwnArticle = userId === article.authorId;
+
   return (
     <article className="bg-white rounded-lg shadow-lg p-8">
-      <h1 className="text-4xl font-bold text-brand-text mb-6">
-        {article.title}
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-4xl font-bold text-brand-text">
+          {article.title}
+        </h1>
+        {isOwnArticle && (
+          <Link href={`/articles/${articleId}/edit`}>
+            <Button
+              variant="outline"
+              className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-bg-light)]"
+            >
+              <Pencil className="w-4 h-4 mr-2" />
+              編集
+            </Button>
+          </Link>
+        )}
+      </div>
       
       <div className="flex items-center gap-6 mb-8 pb-6 border-b border-gray-200">
         <Link href={`/users/${article.authorId}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
