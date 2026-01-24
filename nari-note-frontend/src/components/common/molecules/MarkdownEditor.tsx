@@ -47,6 +47,7 @@ export function MarkdownEditor({
   const [showCommands, setShowCommands] = useState(false);
   const [commandFilter, setCommandFilter] = useState('');
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
+  const [commandMenuPosition, setCommandMenuPosition] = useState({ top: 0, left: 0 });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const commandsRef = useRef<HTMLDivElement>(null);
 
@@ -59,6 +60,38 @@ export function MarkdownEditor({
     cmd.label.toLowerCase().includes(commandFilter.toLowerCase()) ||
     cmd.description.toLowerCase().includes(commandFilter.toLowerCase())
   );
+
+  // Calculate cursor position in pixels
+  const getCursorPosition = (textarea: HTMLTextAreaElement, cursorPos: number) => {
+    const textBeforeCursor = textarea.value.substring(0, cursorPos);
+    const lines = textBeforeCursor.split('\n');
+    const currentLineIndex = lines.length - 1;
+    const currentLineText = lines[currentLineIndex];
+    
+    // Create a temporary element to measure text width
+    const tempSpan = document.createElement('span');
+    tempSpan.style.font = window.getComputedStyle(textarea).font;
+    tempSpan.style.whiteSpace = 'pre';
+    tempSpan.style.visibility = 'hidden';
+    tempSpan.style.position = 'absolute';
+    tempSpan.textContent = currentLineText;
+    document.body.appendChild(tempSpan);
+    
+    const textWidth = tempSpan.offsetWidth;
+    document.body.removeChild(tempSpan);
+    
+    // Calculate line height
+    const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
+    
+    // Get textarea padding
+    const paddingLeft = parseInt(window.getComputedStyle(textarea).paddingLeft) || 0;
+    const paddingTop = parseInt(window.getComputedStyle(textarea).paddingTop) || 0;
+    
+    return {
+      top: paddingTop + currentLineIndex * lineHeight + lineHeight,
+      left: paddingLeft + textWidth,
+    };
+  };
 
   // Handle text change
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -76,6 +109,11 @@ export function MarkdownEditor({
       const hasSpace = textAfterSlash.includes(' ') || textAfterSlash.includes('\n');
       
       if (!hasSpace && (lastSlashIndex === 0 || newValue[lastSlashIndex - 1] === '\n' || newValue[lastSlashIndex - 1] === ' ')) {
+        // Calculate the position of the slash character
+        if (textareaRef.current) {
+          const position = getCursorPosition(textareaRef.current, lastSlashIndex);
+          setCommandMenuPosition(position);
+        }
         setShowCommands(true);
         setCommandFilter(textAfterSlash);
         setSelectedCommandIndex(0);
@@ -208,10 +246,12 @@ export function MarkdownEditor({
           {showCommands && filteredCommands.length > 0 && (
             <div
               ref={commandsRef}
-              className="absolute z-50 mt-1 w-80 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+              className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto"
               style={{
-                top: 'auto',
-                left: '0',
+                top: `${commandMenuPosition.top}px`,
+                left: `${commandMenuPosition.left}px`,
+                width: '80%',
+                maxWidth: '600px',
               }}
             >
               {filteredCommands.map((cmd, index) => (
