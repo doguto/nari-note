@@ -5,8 +5,6 @@ import { MarkdownEditor } from '@/components/common/molecules/MarkdownEditor';
 interface ArticleBodyEditorProps {
   value: string;
   onChange: (value: string) => void;
-  showPreview?: boolean;
-  onTogglePreview?: () => void;
   maxCharacters?: number;
 }
 

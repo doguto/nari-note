@@ -5,6 +5,8 @@ import ReactMarkdown from 'react-markdown';
 import { Label } from '@/components/ui/label';
 import { CharacterCounter } from '@/components/common/molecules';
 
+const PREVIEW_PLACEHOLDER = '*プレビューがここに表示されます*';
+
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -108,9 +110,10 @@ export function MarkdownEditor({
     // Set cursor position after inserted text
     setTimeout(() => {
       const newCursorPos = beforeSlash.length + command.insert.length;
-      // For code blocks, position cursor in the middle
+      // For code blocks, position cursor between the opening and closing fences
       if (command.trigger === 'code') {
-        textarea.setSelectionRange(beforeSlash.length + 4, beforeSlash.length + 4);
+        const cursorPosInsideCodeBlock = beforeSlash.length + command.insert.indexOf('\n') + 1;
+        textarea.setSelectionRange(cursorPosInsideCodeBlock, cursorPosInsideCodeBlock);
       } else {
         textarea.setSelectionRange(newCursorPos, newCursorPos);
       }
@@ -257,7 +260,7 @@ export function MarkdownEditor({
                 hr: ({ ...props }) => <hr className="my-6 border-t-2 border-gray-300" {...props} />,
               }}
             >
-              {value || '*プレビューがここに表示されます*'}
+              {value || PREVIEW_PLACEHOLDER}
             </ReactMarkdown>
           </div>
         </div>
