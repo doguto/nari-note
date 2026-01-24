@@ -127,7 +127,7 @@ export const usersApi = {
     return response;
   },
   toggleFollow: async (data: ToggleFollowRequest): Promise<ToggleFollowResponse> => {
-    const response = await apiClient.post<ToggleFollowResponse>(`/api/users/${data.id}/follow`);
+    const response = await apiClient.post<ToggleFollowResponse>(`/api/users/${data.followingId}/follow`);
     return response;
   },
   getFollowers: async (data: GetFollowersRequest): Promise<GetFollowersResponse> => {

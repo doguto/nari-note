@@ -84,14 +84,14 @@ export function ArticleSearchPage() {
           {/* 検索結果件数 */}
           <div className="mb-4">
             <p className="text-gray-600">
-              {data.articles.filter((article) => article.id != null).length}件の記事が見つかりました
+              {(data.articles || []).filter((article) => article.id != null).length}件の記事が見つかりました
             </p>
           </div>
 
           {/* 検索結果一覧 */}
           {/* APIレスポンスの型定義上、IDが存在しない可能性があるためフィルタリング */}
           <div className="space-y-4">
-            {data.articles
+            {(data.articles || [])
               .filter((article) => article.id != null)
               .map((article) => (
                 <ArticleCard

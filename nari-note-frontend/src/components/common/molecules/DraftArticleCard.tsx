@@ -12,7 +12,7 @@ interface DraftArticleCardProps {
 }
 
 /**
- * DraftArticleCard - Organism Component
+ * DraftArticleCard - Molecule Component
  * 
  * 下書き記事のカード表示コンポーネント
  * タイトル、最終更新日時、編集・削除ボタンを表示
