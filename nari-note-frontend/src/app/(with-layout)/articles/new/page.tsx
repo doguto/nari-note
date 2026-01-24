@@ -2,7 +2,7 @@ import { ArticleFormPage } from '@/features/article/organisms';
 
 export default function NewArticlePage() {
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 w-full">
+    <div className="mx-auto px-4 py-8 w-4/5">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[var(--brand-text)] mb-2">
           新規記事作成
