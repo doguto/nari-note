@@ -23,7 +23,7 @@ public class CreateArticleService
         }
         else if (request.IsPublished)
         {
-            publishedAt = DateTime.Now;
+            publishedAt = DateTime.UtcNow;
         }
 
         var article = new Article
