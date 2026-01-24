@@ -306,7 +306,7 @@ nari-note-frontend/src/
 **フロントエンド:**
 - `nari-note-frontend/docs/implementation-guide.md` - Atomic Design実装ガイド（最重要）
 - `nari-note-frontend/docs/architecture.md` - アーキテクチャ設計
-- `nari-note-frontend/docs/frontend-api-usage.md` - API使用方法
+- `nari-note-frontend/docs/api-usage.md` - API使用方法
 
 **共通:**
 - `.github/copilot-instructions.md` - GitHub Copilot向けの指示（コミットメッセージ規約等）
