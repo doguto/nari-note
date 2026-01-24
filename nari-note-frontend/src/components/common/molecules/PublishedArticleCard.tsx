@@ -12,7 +12,7 @@ interface PublishedArticleCardProps {
 }
 
 /**
- * PublishedArticleCard - Organism Component
+ * PublishedArticleCard - Molecule Component
  * 
  * 公開済み記事のカード表示コンポーネント
  * タイトル、公開日時、いいね数、表示・編集ボタンを表示
