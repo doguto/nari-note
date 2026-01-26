@@ -67,16 +67,16 @@ public class LikeRepository : ILikeRepository
             .Where(l => l.UserId == userId)
             .Include(l => l.Article)
                 .ThenInclude(a => a.Author)
-            .Include(l => l.Article)
-                .ThenInclude(a => a.ArticleTags)
-                    .ThenInclude(at => at.Tag)
-            .Include(l => l.Article)
-                .ThenInclude(a => a.Likes)
+            .Include(l => l.Article.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(l => l.Article.Likes)
             .OrderByDescending(l => l.CreatedAt)
             .AsSplitQuery()
             .ToListAsync();
 
-        return likes.Select(l => l.Article).ToList();
+        return likes.Where(l => l.Article != null)
+                    .Select(l => l.Article)
+                    .ToList()!;
     }
 
     public async Task<int> CountLikedArticlesByUserAsync(UserId userId)
