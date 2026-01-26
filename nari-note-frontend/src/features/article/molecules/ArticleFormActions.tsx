@@ -19,7 +19,7 @@ export function ArticleFormActions({
   isDisabled,
 }: ArticleFormActionsProps) {
   return (
-    <div className="flex gap-4 pt-4">
+    <div className="flex gap-4">
       <Button
         type="button"
         onClick={onSave}
@@ -33,7 +33,7 @@ export function ArticleFormActions({
         type="button"
         onClick={onOpenPublishSettings}
         disabled={isDisabled || isLoading}
-        className="flex-1 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
+        className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
       >
         投稿設定
       </Button>

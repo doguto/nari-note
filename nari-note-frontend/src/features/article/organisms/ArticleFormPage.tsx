@@ -33,7 +33,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const [tags, setTags] = useState<string[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [showPublishDialog, setShowPublishDialog] = useState(true);
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false); // 公開中かどうかを追跡
   
   const router = useRouter();
@@ -224,6 +224,13 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <ArticleFormActions
+        onSave={handleSave}
+        onOpenPublishSettings={handleOpenPublishSettings}
+        isLoading={isLoading}
+        isDisabled={isFormDisabled}
+      />
+
       <ArticleTitleInput value={title} onChange={setTitle} />
 
       <TagInput tags={tags} onTagsChange={setTags} />
@@ -232,13 +239,6 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         value={body}
         onChange={setBody}
         maxCharacters={maxCharacters}
-      />
-
-      <ArticleFormActions
-        onSave={handleSave}
-        onOpenPublishSettings={handleOpenPublishSettings}
-        isLoading={isLoading}
-        isDisabled={isFormDisabled}
       />
 
       <PublishSettingsDialog
