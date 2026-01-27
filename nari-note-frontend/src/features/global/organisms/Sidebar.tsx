@@ -32,6 +32,9 @@ export function Sidebar() {
           {isLoading && (
             <div className="text-sm text-gray-300">読み込み中...</div>
           )}
+          {isError && (
+            <div className="text-sm text-gray-300">タグの取得に失敗しました</div>
+          )}
           {!isLoading && !isError && topTags.length === 0 && (
             <div className="text-sm text-gray-300">タグがありません</div>
           )}
