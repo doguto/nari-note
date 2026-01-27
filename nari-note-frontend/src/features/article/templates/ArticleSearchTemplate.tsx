@@ -76,7 +76,7 @@ export function ArticleSearchTemplate({
             {articles.map((article) => (
               <ArticleCard
                 key={article.id}
-                id={article.id as number}
+                id={article.id!}
                 title={article.title ?? ''}
                 author={article.authorName ?? ''}
                 authorId={article.authorId ?? 0}

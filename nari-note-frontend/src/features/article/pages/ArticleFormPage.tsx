@@ -196,7 +196,13 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     setShowPublishDialog(true);
   };
 
-  const isFormDisabled = (isEditMode && !isInitialized) || !title || tags.length === 0 || body.length > maxCharacters;
+  // フォームの有効性判定
+  const hasValidTitle = !!title;
+  const hasValidTags = tags.length > 0;
+  const isWithinLimit = body.length <= maxCharacters;
+  const isInitializationComplete = !isEditMode || isInitialized;
+  
+  const isFormDisabled = !isInitializationComplete || !hasValidTitle || !hasValidTags || !isWithinLimit;
   const isLoading = createArticle.isPending || updateArticle.isPending;
 
   return (

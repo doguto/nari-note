@@ -33,7 +33,7 @@ export function ArticleSearchPage() {
   const hasResults = !!(data?.articles && data.articles.length > 0);
 
   // IDが存在しない記事をフィルタリング
-  const articlesWithId = (data?.articles || []).filter((article) => article.id != null);
+  const articlesWithId = (data?.articles || []).filter((article) => article.id !== null && article.id !== undefined);
 
   if (hasSearched && isLoading) {
     return <LoadingSpinner text="検索中..." />;

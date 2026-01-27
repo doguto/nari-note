@@ -31,7 +31,7 @@ export function HomeArticleListPage() {
   }
 
   // IDが存在しない記事をフィルタリング
-  const articlesWithId = data.articles.filter((article) => article.id != null);
+  const articlesWithId = data.articles.filter((article) => article.id !== null && article.id !== undefined);
 
   if (articlesWithId.length === 0) {
     return <p className="text-gray-500 text-center py-8">有効な記事がありません</p>;
