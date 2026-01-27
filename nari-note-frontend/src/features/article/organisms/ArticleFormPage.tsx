@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { TagInput } from '@/components/common/molecules';
+import { TagInput } from '@/components/molecules';
 import { useCreateArticle, useUpdateArticle, useGetArticle } from '@/lib/api';
-import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
+import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PublishSettingsDialog } from './PublishSettingsDialog';
 import {
   ArticleTitleInput,
   ArticleBodyEditor,
   ArticleFormActions,
-} from '../molecules';
+} from './';
 
 interface ArticleFormPageProps {
   articleId?: number;

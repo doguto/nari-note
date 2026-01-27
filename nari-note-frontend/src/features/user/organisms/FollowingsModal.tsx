@@ -1,8 +1,8 @@
 'use client';
 
 import { useGetFollowings } from '@/lib/api';
-import { UserListItem } from '@/components/common/molecules';
-import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
+import { UserListItem } from '@/components/molecules';
+import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import {
   Dialog,
   DialogContent,

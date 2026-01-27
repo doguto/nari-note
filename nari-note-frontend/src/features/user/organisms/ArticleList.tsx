@@ -1,7 +1,7 @@
 'use client';
 
-import { ArticleCard } from '@/components/common/molecules';
-import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
+import { ArticleCard } from '@/components/molecules';
+import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import type { ArticleDto } from '@/lib/api';
 
 interface ArticleListProps {

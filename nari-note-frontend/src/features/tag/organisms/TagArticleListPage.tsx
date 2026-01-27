@@ -1,8 +1,8 @@
 'use client';
 
 import { useGetArticlesByTag } from '@/lib/api';
-import { ArticleCard } from '@/components/common/molecules';
-import { EmptyState, LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
+import { ArticleCard } from '@/components/molecules';
+import { EmptyState, LoadingSpinner, ErrorMessage } from '@/components/ui';
 
 interface TagArticleListPageProps {
   tag: string;

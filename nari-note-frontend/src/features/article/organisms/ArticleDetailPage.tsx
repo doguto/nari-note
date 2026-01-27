@@ -3,11 +3,10 @@
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { useGetArticle, useToggleLike } from '@/lib/api';
-import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
+import { LoadingSpinner, ErrorMessage, LikeButton } from '@/components/ui';
 import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';
 import { Comment } from '@/types/comment';
-import { LikeButton } from '@/components/common/atoms';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { useAuth } from '@/lib/providers/AuthProvider';

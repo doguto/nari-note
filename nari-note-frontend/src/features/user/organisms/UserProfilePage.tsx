@@ -3,12 +3,10 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetUserProfile, useToggleFollow, useGetFollowers, useGetFollowings, useGetArticlesByAuthor, useGetLikedArticles } from '@/lib/api';
-import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
+import { LoadingSpinner, ErrorMessage, FollowButton, FollowStats } from '@/components/ui';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
-import { FollowButton } from '@/components/common/atoms';
-import { FollowStats } from '@/components/common/atoms';
-import { UserListItem } from '@/components/common/molecules';
+import { UserListItem } from '@/components/molecules';
 import { ArticleList } from './ArticleList';
 
 interface UserProfilePageProps {

@@ -1,8 +1,8 @@
 'use client';
 
 import { useGetArticles } from '@/lib/api';
-import { ArticleCard } from '@/components/common/molecules';
-import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
+import { ArticleCard } from '@/components/molecules';
+import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 
 /**
  * HomeArticleList - Organism Component

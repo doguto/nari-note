@@ -3,14 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { FormTitle, ErrorAlert } from '@/components/common/atoms';
+import { FormTitle, ErrorAlert, LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { 
   UsernameField, 
   BioField, 
   ProfileImageUpload 
-} from '@/components/common/molecules';
+} from '@/components/molecules';
 import { useGetUserProfile, useUpdateUserProfile } from '@/lib/api';
-import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import type { GetUserProfileResponse } from '@/lib/api/types';
 

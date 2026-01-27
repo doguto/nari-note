@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/layout/Sidebar";
+import { Sidebar } from "@/features/global/organisms/Sidebar";
 import { HomeArticleList } from "@/features/article/organisms";
 
 export default function Home() {

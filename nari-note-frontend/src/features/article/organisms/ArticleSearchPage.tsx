@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useSearchArticles } from '@/lib/api';
-import { SearchBar } from '@/components/common/molecules';
-import { ArticleCard } from '@/components/common/molecules';
-import { LoadingSpinner, ErrorMessage, EmptyState } from '@/components/common/atoms';
+import { SearchBar } from '@/components/molecules';
+import { ArticleCard } from '@/components/molecules';
+import { LoadingSpinner, ErrorMessage, EmptyState } from '@/components/ui';
 import { Search } from 'lucide-react';
 
 /**

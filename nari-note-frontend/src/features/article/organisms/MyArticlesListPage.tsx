@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useGetArticlesByAuthor, useDeleteArticle } from '@/lib/api';
-import { DraftArticleCard } from '@/components/common/molecules/DraftArticleCard';
-import { PublishedArticleCard } from '@/components/common/molecules/PublishedArticleCard';
-import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
+import { DraftArticleCard } from '@/components/molecules/DraftArticleCard';
+import { PublishedArticleCard } from '@/components/molecules/PublishedArticleCard';
+import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 

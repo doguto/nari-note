@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetDraftArticles, useDeleteArticle } from '@/lib/api';
-import { DraftArticleCard } from '@/components/common/molecules/DraftArticleCard';
-import { LoadingSpinner, ErrorMessage } from '@/components/common/atoms';
+import { DraftArticleCard } from '@/components/molecules/DraftArticleCard';
+import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 

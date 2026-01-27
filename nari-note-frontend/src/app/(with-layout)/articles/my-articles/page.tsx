@@ -3,9 +3,9 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { Sidebar } from '@/features/global/organisms/Sidebar';
 import { MyArticlesListPage } from '@/features/article/organisms';
-import { LoadingSpinner } from '@/components/common/atoms';
+import { LoadingSpinner } from '@/components/ui';
 
 /**
  * マイ記事一覧ページ
