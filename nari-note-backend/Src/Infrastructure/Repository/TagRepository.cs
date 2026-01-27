@@ -59,7 +59,7 @@ public class TagRepository : ITagRepository
         return await context.Tags
                             .Include(t => t.ArticleTags)
                             .Where(t => t.ArticleTags.Any())
-                            .OrderByDescending(t => t.CreatedAt)
+                            .OrderByDescending(t => t.ArticleTags.Count)
                             .ToListAsync();
     }
 }

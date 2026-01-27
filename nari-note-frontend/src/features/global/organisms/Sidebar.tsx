@@ -39,9 +39,9 @@ export function Sidebar() {
           {!isLoading && !isError && topTags.length === 0 && (
             <div className="text-sm text-gray-300">タグがありません</div>
           )}
-          {!isLoading && !isError && topTags.map((tag) => (
+          {!isLoading && !isError && topTags.map((tag, index) => (
             <Link 
-              key={tag.name}
+              key={`${tag.name}-${index}`}
               href={`/tags/${tag.name}`}
               className="block text-sm hover:text-brand-primary cursor-pointer transition-colors"
             >
