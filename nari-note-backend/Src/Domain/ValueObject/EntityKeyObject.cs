@@ -12,6 +12,12 @@ public partial struct ArticleTagId;
 public partial struct CommentId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct CourseId;
+
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct CourseLikeId;
+
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct FollowId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
@@ -25,3 +31,4 @@ public partial struct TagId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct UserId;
+

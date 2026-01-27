@@ -17,6 +17,9 @@ public class Article : EntityBase
     [ForeignKey("Author")]
     public UserId AuthorId { get; set; }
 
+    [ForeignKey("Course")]
+    public CourseId? CourseId { get; set; }
+
     [Required]
     [MaxLength(50)]
     public required string Title { get; set; }
@@ -29,6 +32,7 @@ public class Article : EntityBase
 
     // Navigation Properties
     public User Author { get; set; }
+    public Course? Course { get; set; }
     public List<ArticleTag> ArticleTags { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
     public List<Comment> Comments { get; set; } = new();

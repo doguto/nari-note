@@ -12,9 +12,11 @@ public class NariNoteDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Article> Articles { get; set; }
+    public DbSet<Course> Courses { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<ArticleTag> ArticleTags { get; set; }
     public DbSet<Like> Likes { get; set; }
+    public DbSet<CourseLike> CourseLikes { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Follow> Follows { get; set; }
     public DbSet<Notification> Notifications { get; set; }
@@ -39,6 +41,11 @@ public class NariNoteDbContext : DbContext
              .WithOne(c => c.Article)
              .HasForeignKey(c => c.ArticleId)
              .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasOne(a => a.Course)
+             .WithMany(c => c.Articles)
+             .HasForeignKey(a => a.CourseId)
+             .OnDelete(DeleteBehavior.SetNull);
 
             x.Property(a => a.Id)
              .HasValueGenerator<ArticleIdValueGenerator>();
@@ -80,6 +87,16 @@ public class NariNoteDbContext : DbContext
             x.HasMany(u => u.Notifications)
              .WithOne(n => n.User)
              .HasForeignKey(n => n.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasMany(u => u.Courses)
+             .WithOne(c => c.User)
+             .HasForeignKey(c => c.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasMany(u => u.CourseLikes)
+             .WithOne(cl => cl.User)
+             .HasForeignKey(cl => cl.UserId)
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(u => u.Id)
@@ -225,6 +242,58 @@ public class NariNoteDbContext : DbContext
              .HasVogenConversion();
 
             x.Property(n => n.ArticleId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<Course>(x =>
+        {
+            x.HasOne(c => c.User)
+             .WithMany(u => u.Courses)
+             .HasForeignKey(c => c.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasMany(c => c.CourseLikes)
+             .WithOne(cl => cl.Course)
+             .HasForeignKey(cl => cl.CourseId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasMany(c => c.Articles)
+             .WithOne(a => a.Course)
+             .HasForeignKey(a => a.CourseId)
+             .OnDelete(DeleteBehavior.SetNull);
+
+            x.Property(c => c.Id)
+             .HasValueGenerator<CourseIdValueGenerator>();
+
+            x.Property(c => c.Id)
+             .HasVogenConversion();
+
+            x.Property(c => c.UserId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<CourseLike>(x =>
+        {
+            x.HasOne(cl => cl.User)
+             .WithMany(u => u.CourseLikes)
+             .HasForeignKey(cl => cl.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasOne(cl => cl.Course)
+             .WithMany(c => c.CourseLikes)
+             .HasForeignKey(cl => cl.CourseId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(cl => cl.Id)
+             .HasValueGenerator<CourseLikeIdValueGenerator>();
+
+            x.Property(cl => cl.Id)
+             .HasVogenConversion();
+
+            x.Property(cl => cl.UserId)
+             .HasVogenConversion();
+
+            x.Property(cl => cl.CourseId)
              .HasVogenConversion();
         });
     }
