@@ -56,33 +56,18 @@ public class TagRepository : ITagRepository
 
     public async Task<List<Tag>> GetPopularTagsAsync(DateTime sinceDate, int limit)
     {
-        var popularTags = await context.Tags
-            .AsNoTracking()
-            .Select(t => new
-            {
-                TagId = t.Id,
-                RecentArticleCount = t.ArticleTags.Count(at => 
-                    at.Article.PublishedAt.HasValue && 
-                    at.Article.PublishedAt.Value >= sinceDate)
-            })
-            .Where(x => x.RecentArticleCount > 0)
-            .OrderByDescending(x => x.RecentArticleCount)
-            .Take(limit)
-            .ToListAsync();
-
-        var tagIds = popularTags.Select(x => x.TagId).ToList();
-        var indexMap = popularTags
-            .Select((item, index) => new { item.TagId, Index = index })
-            .ToDictionary(x => x.TagId, x => x.Index);
-
-        var tags = await context.Tags
+        return await context.Tags
             .AsNoTracking()
             .Include(t => t.ArticleTags.Where(at => 
                 at.Article.PublishedAt.HasValue && 
                 at.Article.PublishedAt.Value >= sinceDate))
-            .Where(t => tagIds.Contains(t.Id))
+            .Where(t => t.ArticleTags.Any(at => 
+                at.Article.PublishedAt.HasValue && 
+                at.Article.PublishedAt.Value >= sinceDate))
+            .OrderByDescending(t => t.ArticleTags.Count(at => 
+                at.Article.PublishedAt.HasValue && 
+                at.Article.PublishedAt.Value >= sinceDate))
+            .Take(limit)
             .ToListAsync();
-
-        return tags.OrderBy(t => indexMap[t.Id]).ToList();
     }
 }
