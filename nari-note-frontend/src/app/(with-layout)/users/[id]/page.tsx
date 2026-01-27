@@ -1,8 +1,8 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { UserProfilePage } from '@/features/user/organisms';
+import { Sidebar } from '@/features/global/organisms/Sidebar';
+import { UserProfilePage } from '@/features/user/pages';
 
 export default function UserProfilePageRoute() {
   const params = useParams();

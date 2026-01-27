@@ -2,132 +2,101 @@
 
 このディレクトリには、アプリケーション全体で再利用される共通コンポーネントが配置されます。
 
-**重要**: nari-noteではAtomic Designパターンを採用しています。
+**重要**: nari-noteでは5層のAtomic Designパターン（Page → Template → Organism → Molecule → Atom）を採用しています。
 
 ## ディレクトリ構造
 
 ```
 components/
-├── ui/         # 基本UIコンポーネント（shadcn/ui等）
-├── layout/     # レイアウトコンポーネント（ヘッダー、フッターなど）
-└── common/     # Atomic Design構造 + ユーティリティコンポーネント
-    ├── atoms/       # 最小単位のコンポーネント
-    ├── molecules/   # Atomsを組み合わせた機能コンポーネント
-    ├── Loading.tsx
-    ├── ErrorMessage.tsx
-    └── EmptyState.tsx
+├── ui/                # Atom層（汎用的な最小単位のUIコンポーネント）
+└── molecules/         # Molecule層（汎用的な複合コンポーネント）
 ```
 
-## Atomic Design階層
+## 5層のAtomic Design階層
 
-### Atoms（`common/atoms/`）
+### Atom（`ui/`）
 
-最小単位の再利用可能なUIコンポーネント。これ以上分割できない基本要素。
+汎用的な最小単位のUIコンポーネント。これ以上分割できない基本要素。
+Shadcn等のUIコンポーネントもここに配置。
 
 **例:**
+- `button.tsx` - ボタン
+- `input.tsx` - 入力フィールド
+- `label.tsx` - ラベル
 - `FormField.tsx` - ラベル + 入力フィールド
 - `ErrorAlert.tsx` - エラー表示
-- `FormTitle.tsx` - フォームタイトル
 - `TagChip.tsx` - タグチップ
 
 **使用例:**
 ```tsx
-import { FormField, ErrorAlert } from '@/components/common/atoms';
+import { Button, Input, FormField, ErrorAlert } from '@/components/ui';
 ```
 
-### Molecules（`common/molecules/`）
+### Molecule（`molecules/`）
 
-複数のAtomsを組み合わせた機能コンポーネント。
+複数のAtomsを組み合わせた汎用的な複合コンポーネント。
 
 **例:**
-- `EmailField.tsx` - メールアドレス入力（FormFieldを使用）
-- `PasswordField.tsx` - パスワード入力（FormFieldを使用）
-- `TagInput.tsx` - タグ入力（Input + Button + TagChipを使用）
-- `CharacterCounter.tsx` - 文字数カウンター
+- `ArticleCard.tsx` - 記事カード
+- `UserIcon.tsx` - ユーザーアイコン
+- `EmailField.tsx` - メールアドレス入力
+- `PasswordField.tsx` - パスワード入力
+- `TagInput.tsx` - タグ入力
 
 **使用例:**
 ```tsx
-import { EmailField, PasswordField } from '@/components/common/molecules';
+import { ArticleCard, EmailField, PasswordField } from '@/components/molecules';
 ```
 
-### Organisms（`features/{feature}/organisms/`）
+### Organism（`features/{feature}/organisms/`）
 
-Atoms/Moleculesを組み合わせた完全な機能ブロック。
-featuresディレクトリ内で定義されます。
-
-**例:**
-- `LoginPage.tsx` - ログインフォーム
-- `ArticleFormPage.tsx` - 記事作成フォーム
-
-詳細は [フロントエンドアーキテクチャガイド](/docs/architecture.md) の Atomic Design セクションを参照してください。
-
-## UI Components（`ui/`）
-
-基本的なUIコンポーネント。機能に依存しない汎用的なコンポーネント（主にshadcn/ui）。
+各Template特有のUI単位。featuresディレクトリ内で定義されます。
 
 **例:**
-- `Button.tsx` - ボタン
-- `Input.tsx` - 入力フィールド
-- `Card.tsx` - カード
-- `Modal.tsx` - モーダル
+- `TitleForm.tsx` - タイトル入力フォーム
+- `BodyForm.tsx` - 本文入力フォーム
 
-**使用例:**
-```tsx
-import { Button } from '@/components/ui/Button';
+### Template（`features/{feature}/templates/`）
 
-<Button variant="primary" onClick={handleClick}>
-  クリック
-</Button>
-```
-
-## Layout Components（`layout/`）
-
-ページのレイアウト構造を提供するコンポーネント。
+各ページのUI構成に責任を持つ。featuresディレクトリ内で定義されます。
 
 **例:**
-- `Header.tsx` - ヘッダー
-- `Footer.tsx` - フッター
-- `Sidebar.tsx` - サイドバー
+- `ArticleFormTemplate.tsx` - 記事フォームのUI構成
 
-**使用例:**
-```tsx
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+### Page（`features/{feature}/pages/`）
 
-export default function RootLayout({ children }) {
-  return (
-    <>
-      <Header />
-      <main>{children}</main>
-      <Footer />
-    </>
-  );
-}
-```
+ページのロジックに責任を持つ（UIなし）。featuresディレクトリ内で定義されます。
 
-## Common Components（`common/`）
+**例:**
+- `ArticleEditPage.tsx` - 記事編集ロジック
 
-Atomic Design構造の共通コンポーネントとユーティリティコンポーネント。
-
-詳細は `common/README.md` および `common/ATOMIC_DESIGN.md` を参照してください。
+詳細は [フロントエンドアーキテクチャガイド](/docs/architecture.md) を参照してください。
 
 ## コンポーネント作成ガイドライン
 
-### 1. Atomic Designを意識する
+### 1. 5層のAtomic Designを意識する
 
 新しいコンポーネントを作成する前に：
 
-1. **既存のAtomsで対応できないか確認**
-2. **既存のMoleculesで対応できないか確認**
-3. **適切な粒度（Atoms/Molecules）で分割**
+1. **既存のAtomsで対応できないか確認**（`components/ui/`）
+2. **既存のMoleculesで対応できないか確認**（`components/molecules/`）
+3. **適切な層（Atom/Molecule/Organism/Template/Page）で分割**
 
-### 2. 再利用性を考慮
+### 2. 配置場所の判断基準
+
+- **Atom**: 汎用的な最小単位（極力サイズ等は上位レイヤーで調整）→ `components/ui/`
+- **Molecule**: 汎用的な複合コンポーネント（極力サイズ等は上位レイヤーで調整）→ `components/molecules/`
+- **Organism**: Template特有のUI単位 → `features/{feature}/organisms/`
+- **Template**: UI構成とレスポンシブ対応 → `features/{feature}/templates/`
+- **Page**: ロジックのみ（UIなし）→ `features/{feature}/pages/`
+
+### 3. 再利用性を考慮
 
 - 特定の機能に依存しない
 - propsで柔軟にカスタマイズ可能
 - 適切なデフォルト値を設定
 
-### 3. 型定義を明確に
+### 4. 型定義を明確に
 
 ```tsx
 interface ButtonProps {
@@ -149,7 +118,7 @@ export function Button({
 }
 ```
 
-### 4. Tailwind CSSでスタイリング
+### 5. Tailwind CSSでスタイリング
 
 ```tsx
 const variantClasses = {
@@ -159,12 +128,12 @@ const variantClasses = {
 };
 ```
 
-## 機能固有のコンポーネント（Organisms）との違い
+## 機能固有のコンポーネント（Organism以上）との違い
 
-- **共通コンポーネント（このディレクトリ）**: 複数の機能で再利用される小さな単位（Atoms/Molecules）
-- **機能固有コンポーネント（`features/{feature}/organisms/`）**: 特定の機能に特化した完全な機能ブロック
+- **共通コンポーネント（このディレクトリ）**: 複数の機能で再利用される小さな単位（Atom/Molecule）
+- **機能固有コンポーネント（`features/{feature}/`）**: 特定の機能に特化したOrganism/Template/Page
 
-迷った場合は、まず機能固有のOrganismとして作成し、後で共通化（Atoms/Moleculesへの分解）を検討してください。
+迷った場合は、まず機能固有のOrganismとして作成し、後で共通化（Atom/Moleculeへの分解）を検討してください。
 
 ## 詳細
 

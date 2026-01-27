@@ -1,8 +1,8 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { TagArticleListPage } from '@/features/tag/organisms';
+import { Sidebar } from '@/features/global/organisms/Sidebar';
+import { TagArticleListPage } from '@/features/tag/pages';
 
 export default function TagPage() {
   const params = useParams();

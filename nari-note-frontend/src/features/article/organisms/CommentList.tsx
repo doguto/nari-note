@@ -1,8 +1,8 @@
 'use client';
 
 import { Comment } from '@/types/comment';
-import { CommentItem } from '@/components/common/molecules/CommentItem';
-import { EmptyState } from '@/components/common/atoms';
+import { CommentItem } from './CommentItem';
+import { EmptyState } from '@/components/ui';
 
 interface CommentListProps {
   comments: Comment[];

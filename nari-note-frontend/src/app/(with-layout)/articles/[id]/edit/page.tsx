@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import { ArticleFormPage } from '@/features/article/organisms';
+import { ArticleFormPage } from '@/features/article/pages';
 
 /**
  * 記事編集ページ

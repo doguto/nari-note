@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { UnauthorizedModal } from '@/components/common/molecules';
+import { UnauthorizedModal } from '@/components/molecules';
 import { unauthorizedHandler } from '@/lib/unauthorizedHandler';
 
 interface UnauthorizedContextType {

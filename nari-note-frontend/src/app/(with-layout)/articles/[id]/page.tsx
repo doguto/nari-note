@@ -1,8 +1,8 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { ArticleDetailPage } from '@/features/article/organisms';
+import { Sidebar } from '@/features/global/organisms/Sidebar';
+import { ArticleDetailPage } from '@/features/article/pages';
 
 export default function ArticleDetailPageRoute() {
   const params = useParams();

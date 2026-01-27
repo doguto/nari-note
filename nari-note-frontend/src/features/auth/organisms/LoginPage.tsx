@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { FormTitle, ErrorAlert } from '@/components/common/atoms';
-import { EmailField, PasswordField } from '@/components/common/molecules';
+import { FormTitle, ErrorAlert } from '@/components/ui';
+import { EmailField, PasswordField } from '@/components/molecules';
 import { useSignIn } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
 

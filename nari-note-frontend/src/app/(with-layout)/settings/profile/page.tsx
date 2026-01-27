@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import { ProfileEditPage } from '@/features/user/organisms';
+import { ProfileEditPage } from '@/features/user/pages';
 
 /**
  * プロフィール編集ページ

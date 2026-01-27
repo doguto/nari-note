@@ -4,9 +4,9 @@
 
 ## 概要
 
-nari-note-frontendは、**Atomic Designパターン**を採用したNext.jsアプリケーションです。
+nari-note-frontendは、**Atomic Designパターン（5層構造）**を採用したNext.jsアプリケーションです。
 
-- **Atomic Designパターン**: UIコンポーネントを小さな単位（Atoms → Molecules → Organisms）で階層的に構成
+- **5層構造**: Page（ロジック層）→ Template（UI構成層）→ Organism（特化UI層）→ Molecule（汎用複合層）→ Atom（汎用最小層）
 
 ## 技術スタック
 
@@ -53,48 +53,68 @@ nari-note-frontend/
 │   │   └── globals.css               # グローバルスタイル
 │   ├── features/                     # 機能ごとのモジュール
 │   │   ├── article/                  # 記事機能
-│   │   │   ├── organisms/            # Organisms（完全な機能ブロック）
-│   │   │   │   ├── ArticleFormPage.tsx      # 記事作成・編集フォーム
-│   │   │   │   ├── ArticleDetailPage.tsx    # 記事詳細表示
-│   │   │   │   └── HomeArticleList.tsx      # 記事一覧表示
+│   │   │   ├── pages/                # Page層（ロジック）
+│   │   │   │   ├── ArticleFormPage.tsx      # 記事作成・編集ページ
+│   │   │   │   ├── ArticleDetailPage.tsx    # 記事詳細ページ
+│   │   │   │   └── HomeArticleListPage.tsx  # 記事一覧ページ
+│   │   │   ├── templates/            # Template層（UI構成）
+│   │   │   │   ├── ArticleFormTemplate.tsx
+│   │   │   │   ├── ArticleDetailTemplate.tsx
+│   │   │   │   └── HomeArticleListTemplate.tsx
+│   │   │   ├── organisms/            # Organism層（Template特有のUI）
+│   │   │   │   ├── ArticleForm.tsx
+│   │   │   │   ├── ArticleDetail.tsx
+│   │   │   │   └── ArticleList.tsx
 │   │   │   └── types.ts              # 記事機能の型定義
 │   │   ├── auth/                     # 認証機能
+│   │   │   ├── pages/
+│   │   │   │   ├── LoginPage.tsx
+│   │   │   │   └── SignUpPage.tsx
+│   │   │   ├── templates/
+│   │   │   │   ├── LoginTemplate.tsx
+│   │   │   │   └── SignUpTemplate.tsx
 │   │   │   ├── organisms/
-│   │   │   │   ├── LoginPage.tsx            # ログインフォーム
-│   │   │   │   └── SignUpPage.tsx           # 新規登録フォーム
+│   │   │   │   ├── LoginForm.tsx
+│   │   │   │   └── SignUpForm.tsx
 │   │   │   └── types.ts
 │   │   ├── user/                     # ユーザー機能
+│   │   │   ├── pages/
+│   │   │   │   └── UserProfilePage.tsx
+│   │   │   ├── templates/
+│   │   │   │   └── UserProfileTemplate.tsx
 │   │   │   ├── organisms/
-│   │   │   │   └── UserProfilePage.tsx      # ユーザープロフィール
+│   │   │   │   └── UserProfile.tsx
 │   │   │   └── types.ts
-│   │   └── tag/                      # タグ機能
+│   │   ├── tag/                      # タグ機能
+│   │   │   ├── pages/
+│   │   │   │   └── TagArticleListPage.tsx
+│   │   │   ├── templates/
+│   │   │   │   └── TagArticleListTemplate.tsx
+│   │   │   └── organisms/
+│   │   │       └── TagArticleList.tsx
+│   │   └── global/                   # グローバル機能
 │   │       └── organisms/
-│   │           └── TagArticleListPage.tsx   # タグ別記事一覧
+│   │           ├── Header.tsx
+│   │           ├── Footer.tsx
+│   │           └── Sidebar.tsx
 │   ├── components/                   # 共通UIコンポーネント
-│   │   ├── ui/                       # 基本UIコンポーネント（shadcn/ui等）
+│   │   ├── ui/                       # Atom層（汎用最小単位、shadcn/ui等）
 │   │   │   ├── Button.tsx
 │   │   │   ├── Input.tsx
 │   │   │   ├── Card.tsx
-│   │   │   └── Modal.tsx
-│   │   ├── layout/                   # レイアウトコンポーネント
-│   │   │   ├── Header.tsx
-│   │   │   ├── Footer.tsx
-│   │   │   └── Sidebar.tsx
-│   │   └── common/                   # Atomic Design構造の共通コンポーネント
-│   │       ├── atoms/                # 最小単位のコンポーネント
-│   │       │   ├── FormField.tsx     # ラベル + 入力フィールド
-│   │       │   ├── ErrorAlert.tsx    # エラー表示
-│   │       │   ├── FormTitle.tsx     # フォームタイトル
-│   │       │   └── TagChip.tsx       # タグチップ
-│   │       ├── molecules/            # Atomsを組み合わせたコンポーネント
-│   │       │   ├── EmailField.tsx    # メール入力フィールド
-│   │       │   ├── PasswordField.tsx # パスワード入力フィールド
-│   │       │   ├── NameField.tsx     # 名前入力フィールド
-│   │       │   ├── TagInput.tsx      # タグ入力
-│   │       │   └── CharacterCounter.tsx # 文字数カウンター
-│   │       ├── Loading.tsx           # ローディング表示
-│   │       ├── ErrorMessage.tsx      # エラーメッセージ
-│   │       └── EmptyState.tsx        # 空状態表示
+│   │   │   ├── FormField.tsx         # ラベル + 入力フィールド
+│   │   │   ├── ErrorAlert.tsx        # エラー表示
+│   │   │   ├── FormTitle.tsx         # フォームタイトル
+│   │   │   └── TagChip.tsx           # タグチップ
+│   │   ├── molecules/                # Molecule層（汎用複合コンポーネント）
+│   │   │   ├── EmailField.tsx        # メール入力フィールド
+│   │   │   ├── PasswordField.tsx     # パスワード入力フィールド
+│   │   │   ├── NameField.tsx         # 名前入力フィールド
+│   │   │   ├── TagInput.tsx          # タグ入力
+│   │   │   └── CharacterCounter.tsx  # 文字数カウンター
+│   │   ├── Loading.tsx               # ローディング表示
+│   │   ├── ErrorMessage.tsx          # エラーメッセージ
+│   │   └── EmptyState.tsx            # 空状態表示
 │   ├── lib/                          # 共通ロジック・ユーティリティ
 │   │   ├── api/                      # API関連
 │   │   │   ├── client.ts             # Axiosクライアント設定
@@ -126,42 +146,55 @@ nari-note-frontend/
 └── package.json                      # パッケージ定義
 ```
 
-## Container/Presentationalパターン
+## 5層構造のAtomic Designパターン
 
 ### 概要
 
-このパターンは、コンポーネントを**Container（データ管理）**と**Presentational（表示）**の2つの役割に分離します。
+この設計では、UIコンポーネントを5つの層（Page、Template、Organism、Molecule、Atom）で階層的に構成します。各層は明確な責務を持ち、上位層は下位層に依存しますが、逆方向の依存はありません。
 
-**注意**: Atomic Designパターンの導入により、featuresディレクトリ内では主に**Organisms（生体）**として完全な機能ブロックを実装します。細かいコンポーネントはAtomsやMoleculesとして`components/common/`に配置します。
+```
+Page（ロジック層）
+    ↓ 依存
+Template（UI構成層）
+    ↓ 依存
+Organism（特化UI層）
+    ↓ 依存
+Molecule（汎用複合層）
+    ↓ 依存
+Atom（汎用最小層）
+```
 
-### Container Component（コンテナコンポーネント）
+### 1. Page層（ロジック層）
+
+**配置:** `src/features/{feature}/pages/`
 
 **責務:**
+- ページのロジックに責任を持つ
+- UIには一切責任を持たない
+- バックエンドとの通信等の非UIロジックを持つ
 - データフェッチング（TanStack Query フックの使用）
 - ビジネスロジックの実行
 - 状態管理
 - イベントハンドラの実装
-- Presentational Componentへのprops渡し
+- Templateへのprops渡し
 
-**配置場所:** `src/features/{feature}/containers/`
-
-**命名規則:** `{ComponentName}Container.tsx`
+**命名規則:** `{ComponentName}Page.tsx`
 
 **例:**
 ```tsx
-// src/features/article/containers/ArticleDetailContainer.tsx
+// src/features/article/pages/ArticleDetailPage.tsx
 'use client';
 
 import { useGetArticle } from '@/lib/api';
-import { ArticleDetail } from '../components/ArticleDetail';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ArticleDetailTemplate } from '../templates/ArticleDetailTemplate';
+import { Loading } from '@/components/Loading';
+import { ErrorMessage } from '@/components/ErrorMessage';
 
-interface ArticleDetailContainerProps {
+interface ArticleDetailPageProps {
   articleId: number;
 }
 
-export function ArticleDetailContainer({ articleId }: ArticleDetailContainerProps) {
+export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const { data, isLoading, error } = useGetArticle({ id: articleId });
 
   if (isLoading) {
@@ -176,42 +209,94 @@ export function ArticleDetailContainer({ articleId }: ArticleDetailContainerProp
     return <ErrorMessage message="記事が見つかりません" />;
   }
 
-  return <ArticleDetail article={data} />;
+  return <ArticleDetailTemplate article={data} />;
 }
 ```
 
-### Presentational Component（表示コンポーネント）
+### 2. Template層（UI構成層）
+
+**配置:** `src/features/{feature}/templates/`
 
 **責務:**
-- UIの表示のみ
-- propsを受け取って表示
-- DOMイベントをpropsのコールバック関数に渡す
-- スタイリング
+- 各ページのUI構成に責任を持つ
+- レスポンシブ対応によりレイアウトが大きく変わる場合の切り替えを担当
+- 他のレスポンシブデザインも基本的にこのレイヤーで担当
+- OrganismsやMoleculesを配置・レイアウト
+- スタイリング（Tailwind CSS）
 
-**配置場所:** `src/features/{feature}/organisms/` (Organisms) または `src/components/common/atoms/`, `src/components/common/molecules/` (Atoms/Molecules)
-
-**命名規則:** `{ComponentName}.tsx` または `{ComponentName}Page.tsx` (Organisms)
+**命名規則:** `{ComponentName}Template.tsx`
 
 **特徴:**
 - `'use client'` ディレクティブは不要（親がClient Componentなら不要）
-- APIフックを使用しない（ただしOrganismsは例外）
-- 状態を持たない（または表示のみの状態のみ）
+- APIフックを使用しない
+- 表示のみの状態は持っても良い（例: タブの開閉状態）
 
-**例（Organism - Presentational）:**
+**例:**
 ```tsx
-// src/features/article/organisms/ArticleDetailPage.tsx
+// src/features/article/templates/ArticleDetailTemplate.tsx
 import { GetArticleResponse } from '@/lib/api/types';
-import { TagChip } from '@/components/common/atoms';
+import { ArticleDetail } from '../organisms/ArticleDetail';
+import { Container } from '@/components/ui/Container';
 
-interface ArticleDetailPageProps {
+interface ArticleDetailTemplateProps {
   article: GetArticleResponse;
 }
 
-export function ArticleDetailPage({ article }: ArticleDetailPageProps) {
+export function ArticleDetailTemplate({ article }: ArticleDetailTemplateProps) {
   return (
-    <article className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
-      <div className="flex items-center gap-4 mb-6">
+    <Container className="py-8">
+      <div className="max-w-4xl mx-auto">
+        {/* デスクトップレイアウト */}
+        <div className="hidden md:block">
+          <ArticleDetail article={article} layout="wide" />
+        </div>
+        
+        {/* モバイルレイアウト */}
+        <div className="block md:hidden">
+          <ArticleDetail article={article} layout="compact" />
+        </div>
+      </div>
+    </Container>
+  );
+}
+```
+
+### 3. Organism層（特化UI層）
+
+**配置:** `src/features/{feature}/organisms/`
+
+**責務:**
+- 各Template特有のUI単位
+- MoleculesやAtomsを組み合わせた機能ブロック
+- 特定の機能に特化したコンポーネント
+- どうしてもこのレイヤーで調整しないといけないもののみ特例でレスポンシブデザインの調整を行っても良い
+
+**命名規則:** `{ComponentName}.tsx`
+
+**特徴:**
+- propsで柔軟にカスタマイズ可能
+- 機能固有のロジック（表示ロジックのみ）を持つことがある
+- データフェッチングは行わない（Pageから受け取る）
+
+**例:**
+```tsx
+// src/features/article/organisms/ArticleDetail.tsx
+import { GetArticleResponse } from '@/lib/api/types';
+import { TagChip } from '@/components/ui/TagChip';
+import { Card } from '@/components/ui/Card';
+
+interface ArticleDetailProps {
+  article: GetArticleResponse;
+  layout?: 'wide' | 'compact';
+}
+
+export function ArticleDetail({ article, layout = 'wide' }: ArticleDetailProps) {
+  const isWide = layout === 'wide';
+  
+  return (
+    <Card className={isWide ? 'p-8' : 'p-4'}>
+      <h1 className={isWide ? 'text-4xl' : 'text-2xl'}>{article.title}</h1>
+      <div className="flex items-center gap-4 my-4">
         <span className="text-gray-600">著者: {article.authorName}</span>
         <span className="text-gray-600">いいね: {article.likeCount}</span>
       </div>
@@ -225,28 +310,77 @@ export function ArticleDetailPage({ article }: ArticleDetailPageProps) {
           ))}
         </div>
       )}
-    </article>
+    </Card>
   );
 }
 ```
 
-## Atomic Designパターン
+### 4. Molecule層（汎用複合層）
 
-### 概要
+**配置:** `src/components/molecules/`
 
-Atomic Designは、UIコンポーネントを化学の原子・分子・生体の概念で階層的に構成する設計手法です。小さく再利用可能なコンポーネントを組み合わせて、複雑なUIを構築します。
+**責務:**
+- 汎用的な複合コンポーネント
+- Atomが組み合わさって構成される
+- 複数のAtomsを組み合わせて特定の機能を実装
+- 独自のビジネスロジックは持たない
+- 極力サイズ等は上位レイヤーのCSSで調整出来るように
 
-### Atoms（原子）- 最小単位のコンポーネント
-
-**配置:** `src/components/common/atoms/`
-
-**特徴:**
-- これ以上分割できない最小単位の基本要素
-- shadcn UIコンポーネントまたは基本的なHTML要素で構築
-- 他のコンポーネントに依存しない
-- 単一責任の原則に従う
+**命名規則:** `{ComponentName}.tsx`
 
 **例:**
+- **EmailField.tsx** - メールアドレス入力（FormFieldを使用）
+- **PasswordField.tsx** - パスワード入力（FormFieldを使用）
+- **NameField.tsx** - ユーザー名入力（FormFieldを使用）
+- **TagInput.tsx** - タグ入力（Input + Button + TagChipを使用）
+- **CharacterCounter.tsx** - 文字数カウンター
+
+**実装例:**
+```tsx
+// src/components/molecules/EmailField.tsx
+import { FormField } from '@/components/ui/FormField';
+
+interface EmailFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  className?: string;
+}
+
+export function EmailField({ value, onChange, error, className }: EmailFieldProps) {
+  return (
+    <FormField
+      id="email"
+      label="メールアドレス"
+      type="email"
+      value={value}
+      onChange={onChange}
+      placeholder="example@example.com"
+      error={error}
+      className={className}
+    />
+  );
+}
+```
+
+### 5. Atom層（汎用最小層）
+
+**配置:** `src/components/ui/`
+
+**責務:**
+- 汎用的な最小単位のUIコンポーネント
+- Shadcn等のUIコンポーネントもここに置く
+- これ以上分割できない最小単位の基本要素
+- 他のコンポーネントに依存しない
+- 単一責任の原則に従う
+- 極力サイズ等は上位レイヤーのCSSで調整出来るように
+
+**命名規則:** `{ComponentName}.tsx`
+
+**例:**
+- **Button.tsx** - ボタン（shadcn/ui）
+- **Input.tsx** - 入力フィールド（shadcn/ui）
+- **Card.tsx** - カード（shadcn/ui）
 - **FormField.tsx** - ラベル + 入力フィールドのセット
 - **ErrorAlert.tsx** - エラーメッセージ表示
 - **FormTitle.tsx** - フォームタイトル
@@ -254,7 +388,7 @@ Atomic Designは、UIコンポーネントを化学の原子・分子・生体�
 
 **実装例:**
 ```tsx
-// src/components/common/atoms/FormField.tsx
+// src/components/ui/FormField.tsx
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -266,6 +400,7 @@ interface FormFieldProps {
   onChange: (value: string) => void;
   placeholder?: string;
   error?: string;
+  className?: string;
 }
 
 export function FormField({
@@ -276,9 +411,10 @@ export function FormField({
   onChange,
   placeholder,
   error,
+  className,
 }: FormFieldProps) {
   return (
-    <div className="space-y-2">
+    <div className={className}>
       <Label htmlFor={id}>{label}</Label>
       <Input
         id={id}
@@ -286,114 +422,10 @@ export function FormField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        className="mt-2"
       />
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
     </div>
-  );
-}
-```
-
-### Molecules（分子）- Atomsを組み合わせたコンポーネント
-
-**配置:** `src/components/common/molecules/`
-
-**特徴:**
-- 複数のAtomsを組み合わせて特定の機能を実装
-- 再利用可能な機能単位
-- 独自のビジネスロジックは持たない
-- propsで柔軟にカスタマイズ可能
-
-**例:**
-- **EmailField.tsx** - メールアドレス入力（FormFieldを使用）
-- **PasswordField.tsx** - パスワード入力（FormFieldを使用）
-- **NameField.tsx** - ユーザー名入力（FormFieldを使用）
-- **TagInput.tsx** - タグ入力（Input + Button + TagChipを使用）
-- **CharacterCounter.tsx** - 文字数カウンター
-
-**実装例:**
-```tsx
-// src/components/common/molecules/EmailField.tsx
-import { FormField } from '@/components/common/atoms/FormField';
-
-interface EmailFieldProps {
-  value: string;
-  onChange: (value: string) => void;
-  error?: string;
-}
-
-export function EmailField({ value, onChange, error }: EmailFieldProps) {
-  return (
-    <FormField
-      id="email"
-      label="メールアドレス"
-      type="email"
-      value={value}
-      onChange={onChange}
-      placeholder="example@example.com"
-      error={error}
-    />
-  );
-}
-```
-
-### Organisms（生体）- 完全な機能を持つコンポーネント
-
-**配置:** `src/features/{feature}/organisms/`
-
-**特徴:**
-- Atoms/Moleculesを組み合わせた完全な機能ブロック
-- ビジネスロジックやデータフェッチングを含む
-- Container/Presentationalパターンと組み合わせて使用可能
-- 特定の機能に特化
-
-**例:**
-- **LoginPage.tsx** - ログインフォーム（EmailField + PasswordField + Buttonを使用）
-- **SignUpPage.tsx** - 新規登録フォーム（NameField + EmailField + PasswordFieldを使用）
-- **ArticleFormPage.tsx** - 記事作成・編集フォーム（複数のMoleculesを組み合わせ）
-
-**実装例:**
-```tsx
-// src/features/auth/organisms/LoginPage.tsx
-'use client';
-
-import { useState } from 'react';
-import { EmailField } from '@/components/common/molecules/EmailField';
-import { PasswordField } from '@/components/common/molecules/PasswordField';
-import { Button } from '@/components/ui/button';
-import { useLogin } from '@/lib/api';
-
-export function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  
-  const login = useLogin({
-    onSuccess: () => {
-      // ログイン成功時の処理
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    login.mutate({ email, password });
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <EmailField 
-        value={email} 
-        onChange={setEmail} 
-        error={errors.email}
-      />
-      <PasswordField 
-        value={password} 
-        onChange={setPassword}
-        error={errors.password}
-      />
-      <Button type="submit" disabled={login.isPending}>
-        {login.isPending ? 'ログイン中...' : 'ログイン'}
-      </Button>
-    </form>
   );
 }
 ```
@@ -402,56 +434,91 @@ export function LoginPage() {
 
 **Atomsのインポート:**
 ```tsx
-import { FormField, ErrorAlert, FormTitle, TagChip } from '@/components/common/atoms';
+import { FormField, ErrorAlert, FormTitle, TagChip } from '@/components/ui';
 ```
 
 **Moleculesのインポート:**
 ```tsx
-import { EmailField, PasswordField, TagInput } from '@/components/common/molecules';
+import { EmailField, PasswordField, TagInput } from '@/components/molecules';
 ```
 
 **Organismsのインポート:**
 ```tsx
-import { LoginPage } from '@/features/auth/organisms/LoginPage';
+import { ArticleDetail } from '@/features/article/organisms/ArticleDetail';
 ```
 
-### Atomic Designのメリット
+**Templatesのインポート:**
+```tsx
+import { ArticleDetailTemplate } from '@/features/article/templates/ArticleDetailTemplate';
+```
 
-1. **再利用性**: 小さなコンポーネントを組み合わせて複雑なUIを構築
-2. **保守性**: 各コンポーネントが独立しているため、変更の影響範囲が明確
-3. **テスト容易性**: 小さな単位でテストが可能
-4. **一貫性**: 同じコンポーネントを使用することでUIの一貫性を保つ
-5. **レビュー容易性**: ファイルが細かく分かれているため、レビューがしやすい
-6. **開発効率**: AIエージェントが小さな粒度で実装できる
+**Pagesのインポート:**
+```tsx
+import { ArticleDetailPage } from '@/features/article/pages/ArticleDetailPage';
+```
+
+### 5層構造のメリット
+
+1. **責任の明確化**: 各層の責務が明確で、コードの保守性が向上
+2. **再利用性**: Molecule/Atom層は汎用的で、様々な画面で再利用可能
+3. **テスト容易性**: 各層が独立しているため、単体テストが容易
+4. **レスポンシブ対応の一元化**: Template層でレスポンシブ対応を集中管理
+5. **開発効率**: 各層の役割が明確で、実装に迷わない
+6. **スケーラビリティ**: 機能追加時に既存のMolecule/Atomを活用できる
 
 ### 実装ガイドライン
 
-1. **Atoms**: 最小単位で、他のコンポーネントに依存しない
-2. **Molecules**: Atomsを組み合わせて特定の機能を実装
-3. **Organisms**: featuresディレクトリ内でAtoms/Moleculesを組み合わせて完全な機能を実装
-4. **各コンポーネントは単一責任の原則に従う**
-5. **propsの型定義を明確にする**
-6. **新しいコンポーネントを作る前に、既存のAtoms/Moleculesで対応できないか確認する**
+1. **Page層**: ロジックに集中し、UIは一切持たない
+2. **Template層**: レイアウトとレスポンシブ対応に専念
+3. **Organism層**: 機能固有のUI表現に専念
+4. **Molecule層**: 汎用的な複合コンポーネントとして実装
+5. **Atom層**: 最小単位で、他に依存しない
+6. **各コンポーネントは単一責任の原則に従う**
+7. **propsの型定義を明確にする**
+8. **新しいコンポーネントを作る前に、既存のMolecule/Atomで対応できないか確認する**
 
 ## コンポーネント分類
 
-### 1. Atoms（原子）- 最小単位
+### 1. Page層（ロジック層）
 
-**配置:** `src/components/common/atoms/`
+**配置:** `src/features/{feature}/pages/`
 
-基本的なUI要素。これ以上分割できない最小単位。
+ページのロジックに責任を持つコンポーネント。UIには一切責任を持たない。
 
 **例:**
-- `FormField.tsx` - フォームフィールド
-- `ErrorAlert.tsx` - エラーアラート
-- `FormTitle.tsx` - フォームタイトル
-- `TagChip.tsx` - タグチップ
+- `ArticleDetailPage.tsx` - 記事詳細ページのロジック
+- `ArticleFormPage.tsx` - 記事作成・編集ページのロジック
+- `LoginPage.tsx` - ログインページのロジック
 
-### 2. Molecules（分子）- 機能単位
+### 2. Template層（UI構成層）
 
-**配置:** `src/components/common/molecules/`
+**配置:** `src/features/{feature}/templates/`
 
-Atomsを組み合わせた機能コンポーネント。
+各ページのUI構成とレスポンシブ対応に責任を持つコンポーネント。
+
+**例:**
+- `ArticleDetailTemplate.tsx` - 記事詳細のUI構成
+- `ArticleFormTemplate.tsx` - 記事作成・編集のUI構成
+- `LoginTemplate.tsx` - ログインのUI構成
+
+### 3. Organism層（特化UI層）
+
+**配置:** `src/features/{feature}/organisms/`
+
+各Template特有のUI単位。機能に特化したコンポーネント。
+
+**例:**
+- `ArticleDetail.tsx` - 記事詳細表示
+- `ArticleForm.tsx` - 記事フォーム
+- `ArticleList.tsx` - 記事一覧
+- `Header.tsx` (features/global) - ヘッダー
+- `Footer.tsx` (features/global) - フッター
+
+### 4. Molecule層（汎用複合層）
+
+**配置:** `src/components/molecules/`
+
+汎用的な複合コンポーネント。Atomsを組み合わせた機能単位。
 
 **例:**
 - `EmailField.tsx` - メールアドレス入力
@@ -459,46 +526,36 @@ Atomsを組み合わせた機能コンポーネント。
 - `TagInput.tsx` - タグ入力
 - `CharacterCounter.tsx` - 文字数カウンター
 
-### 3. Organisms（生体）- 完全な機能ブロック
-
-**配置:** `src/features/{feature}/organisms/`
-
-特定の機能に紐づく完全なコンポーネント。Atoms/Moleculesを組み合わせて実装。
-
-**例:**
-- `LoginPage.tsx` - ログインフォーム
-- `ArticleFormPage.tsx` - 記事作成・編集フォーム
-- `UserProfilePage.tsx` - ユーザープロフィール
-
-### 4. UI Components（基本UIコンポーネント）
+### 5. Atom層（汎用最小層）
 
 **配置:** `src/components/ui/`
 
-アプリケーション全体で再利用される基本的なUIコンポーネント。
-機能に依存しない汎用的なコンポーネント。
+汎用的な最小単位のUIコンポーネント。アプリケーション全体で再利用される。
 
 **例:**
-- `Button.tsx` - ボタン
-- `Input.tsx` - 入力フィールド
-- `Card.tsx` - カード
-- `Modal.tsx` - モーダル
+- `Button.tsx` - ボタン（shadcn/ui）
+- `Input.tsx` - 入力フィールド（shadcn/ui）
+- `Card.tsx` - カード（shadcn/ui）
+- `FormField.tsx` - フォームフィールド
+- `ErrorAlert.tsx` - エラーアラート
+- `TagChip.tsx` - タグチップ
 
-### 3. Layout Components（レイアウトコンポーネント）
+### 6. グローバル機能のOrganism
 
-**配置:** `src/components/layout/`
+**配置:** `src/features/global/organisms/`
 
-ページのレイアウト構造を提供するコンポーネント。
+アプリケーション全体で使用されるレイアウトコンポーネント。
 
 **例:**
 - `Header.tsx` - ヘッダー
 - `Footer.tsx` - フッター
 - `Sidebar.tsx` - サイドバー
 
-### 4. Common Components（その他共通コンポーネント）
+### 7. その他共通コンポーネント
 
-**配置:** `src/components/common/`
+**配置:** `src/components/`
 
-アプリケーション全体で使用される共通のコンポーネント。
+特定の層に属さない、アプリケーション全体で使用される共通のコンポーネント。
 
 **例:**
 - `Loading.tsx` - ローディング表示
@@ -592,7 +649,7 @@ const article = await articlesApi.getArticle({ id: 1 });
 
 ## カスタムフックの作成
 
-複雑なロジックや複数のAPIフックを組み合わせる場合は、カスタムフックを作成します。
+複雑なロジックや複数のAPIフックを組み合わせる場合は、カスタムフックを作成し、Page層で使用します。
 
 **配置:** `src/features/{feature}/hooks/`
 
@@ -662,42 +719,156 @@ export function useArticleForm({ articleId, onSuccess }: UseArticleFormOptions =
 }
 ```
 
+**Page層での使用:**
+```tsx
+// src/features/article/pages/ArticleFormPage.tsx
+'use client';
+
+import { useArticleForm } from '../hooks/useArticleForm';
+import { ArticleFormTemplate } from '../templates/ArticleFormTemplate';
+
+interface ArticleFormPageProps {
+  articleId?: number;
+}
+
+export function ArticleFormPage({ articleId }: ArticleFormPageProps) {
+  const formState = useArticleForm({
+    articleId,
+    onSuccess: () => {
+      // 成功時の処理
+    },
+  });
+
+  return <ArticleFormTemplate {...formState} />;
+}
+```
+
 ## ページの実装パターン
 
-### 1. Server Component（デフォルト）
+### 1. Next.js App Router ページ（Server Component）
 
-データフェッチングが不要、または初期データのみ必要な場合。
+App Routerのページファイルは、基本的にfeaturesディレクトリのPageコンポーネントを呼び出すだけのシンプルな実装にします。
 
 ```tsx
-// src/app/page.tsx
-import { ArticleListContainer } from '@/features/article/containers/ArticleListContainer';
+// src/app/articles/[id]/page.tsx
+import { ArticleDetailPage } from '@/features/article/pages/ArticleDetailPage';
 
-export default function HomePage() {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function Page({ params }: PageProps) {
+  const { id } = await params;
+  const articleId = Number(id);
+
+  return <ArticleDetailPage articleId={articleId} />;
+}
+```
+
+### 2. Page層の実装（Client Component）
+
+データフェッチングとビジネスロジックを担当します。
+
+```tsx
+// src/features/article/pages/ArticleDetailPage.tsx
+'use client';
+
+import { useGetArticle } from '@/lib/api';
+import { ArticleDetailTemplate } from '../templates/ArticleDetailTemplate';
+import { Loading } from '@/components/Loading';
+import { ErrorMessage } from '@/components/ErrorMessage';
+
+interface ArticleDetailPageProps {
+  articleId: number;
+}
+
+export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
+  const { data, isLoading, error } = useGetArticle({ id: articleId });
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return <ErrorMessage message="記事の取得に失敗しました" />;
+  }
+
+  if (!data) {
+    return <ErrorMessage message="記事が見つかりません" />;
+  }
+
+  return <ArticleDetailTemplate article={data} />;
+}
+```
+
+### 3. Template層の実装
+
+UIの構成とレスポンシブ対応を担当します。
+
+```tsx
+// src/features/article/templates/ArticleDetailTemplate.tsx
+import { GetArticleResponse } from '@/lib/api/types';
+import { ArticleDetail } from '../organisms/ArticleDetail';
+import { Container } from '@/components/ui/Container';
+
+interface ArticleDetailTemplateProps {
+  article: GetArticleResponse;
+}
+
+export function ArticleDetailTemplate({ article }: ArticleDetailTemplateProps) {
   return (
-    <div>
-      <h1>記事一覧</h1>
-      <ArticleListContainer />
-    </div>
+    <Container className="py-8">
+      <div className="max-w-4xl mx-auto">
+        {/* デスクトップレイアウト */}
+        <div className="hidden md:block">
+          <ArticleDetail article={article} layout="wide" />
+        </div>
+        
+        {/* モバイルレイアウト */}
+        <div className="block md:hidden">
+          <ArticleDetail article={article} layout="compact" />
+        </div>
+      </div>
+    </Container>
   );
 }
 ```
 
-### 2. Client Component
+### 4. Organism層の実装
 
-インタラクティブな機能が必要な場合。
+機能固有のUI表現を担当します。
 
 ```tsx
-// src/app/articles/[id]/page.tsx
-'use client';
+// src/features/article/organisms/ArticleDetail.tsx
+import { GetArticleResponse } from '@/lib/api/types';
+import { TagChip } from '@/components/ui/TagChip';
+import { Card } from '@/components/ui/Card';
 
-import { useParams } from 'next/navigation';
-import { ArticleDetailContainer } from '@/features/article/containers/ArticleDetailContainer';
+interface ArticleDetailProps {
+  article: GetArticleResponse;
+  layout?: 'wide' | 'compact';
+}
 
-export default function ArticleDetailPage() {
-  const params = useParams();
-  const articleId = Number(params.id);
-
-  return <ArticleDetailContainer articleId={articleId} />;
+export function ArticleDetail({ article, layout = 'wide' }: ArticleDetailProps) {
+  const isWide = layout === 'wide';
+  
+  return (
+    <Card className={isWide ? 'p-8' : 'p-4'}>
+      <h1 className={isWide ? 'text-4xl' : 'text-2xl'}>{article.title}</h1>
+      <div className="flex items-center gap-4 my-4">
+        <span className="text-gray-600">著者: {article.authorName}</span>
+        <span className="text-gray-600">いいね: {article.likeCount}</span>
+      </div>
+      <div className="prose max-w-none">{article.body}</div>
+      {article.tags && article.tags.length > 0 && (
+        <div className="flex gap-2 mt-6">
+          {article.tags.map((tag, index) => (
+            <TagChip key={index} tag={tag} />
+          ))}
+        </div>
+      )}
+    </Card>
+  );
 }
 ```
 
@@ -768,9 +939,10 @@ export interface ArticleFormState {
 
 ### APIエラー
 
-TanStack Queryの `error` を使用します。
+TanStack Queryの `error` を使用し、Page層でハンドリングします。
 
 ```tsx
+// Page層でのエラーハンドリング
 const { data, error } = useGetArticle({ id: articleId });
 
 if (error) {
@@ -780,9 +952,10 @@ if (error) {
 
 ### フォームバリデーション
 
-Container Componentで実装します。
+Page層またはカスタムフックで実装します。
 
 ```tsx
+// Page層でのバリデーション
 const [errors, setErrors] = useState<{ title?: string; body?: string }>({});
 
 const validate = () => {
@@ -799,25 +972,31 @@ const validate = () => {
   setErrors(newErrors);
   return Object.keys(newErrors).length === 0;
 };
+
+const handleSubmit = () => {
+  if (validate()) {
+    // 送信処理
+  }
+};
 ```
 
 ## パフォーマンス最適化
 
 ### 1. React.memo
 
-Presentational Componentで使用します。
+Template、Organism、Molecule層で使用します。
 
 ```tsx
 import { memo } from 'react';
 
-export const ArticleCard = memo(function ArticleCard({ article }: ArticleCardProps) {
+export const ArticleDetail = memo(function ArticleDetail({ article }: ArticleDetailProps) {
   // ...
 });
 ```
 
 ### 2. useCallback
 
-Container Componentのコールバック関数で使用します。
+Page層のコールバック関数で使用します。
 
 ```tsx
 const handleLike = useCallback(() => {
@@ -848,29 +1027,65 @@ const MarkdownEditor = dynamic(() => import('@/components/ui/MarkdownEditor'), {
 
 ### 開発者が覚えるべきこと
 
-1. **Atomic Designパターン**を理解する
-   - Atoms: 最小単位のコンポーネント
-   - Molecules: Atomsを組み合わせた機能コンポーネント
-   - Organisms: 完全な機能ブロック
-2. **Container/Presentationalパターン**を理解する（必要に応じて適用）
-3. **components/common/atoms, molecules**に共通コンポーネントを配置
-4. **features/{feature}/organisms**に機能固有のOrganismsを配置
-5. **TanStack Query フック**でデータフェッチング
-6. **型定義**を活用して型安全に開発
+1. **5層構造のAtomic Designパターン**を理解する
+   - Page: ロジック層（UIに責任を持たない）
+   - Template: UI構成層（レスポンシブ対応）
+   - Organism: 特化UI層（機能固有のUI）
+   - Molecule: 汎用複合層（再利用可能な複合コンポーネント）
+   - Atom: 汎用最小層（最小単位のUIコンポーネント）
+2. **各層の責任範囲**を明確に理解する
+3. **components/ui**にAtomを配置
+4. **components/molecules**にMoleculeを配置
+5. **features/{feature}/organisms**に機能固有のOrganismを配置
+6. **features/{feature}/templates**にTemplateを配置
+7. **features/{feature}/pages**にPageを配置
+8. **TanStack Query フック**でデータフェッチング（Page層）
+9. **型定義**を活用して型安全に開発
 
 ### AIエージェントが生成すべきコード
 
-1. **Atoms**: `src/components/common/atoms/`
-2. **Molecules**: `src/components/common/molecules/`
+1. **Atoms**: `src/components/ui/`
+2. **Molecules**: `src/components/molecules/`
 3. **Organisms**: `src/features/{feature}/organisms/`
-4. **Page Component**: `src/app/{route}/page.tsx`
+4. **Templates**: `src/features/{feature}/templates/`
+5. **Pages**: `src/features/{feature}/pages/`
+6. **App Router Page**: `src/app/{route}/page.tsx`
 
 ### 実装の順序
 
 1. まず必要なAtomsが存在するか確認・作成
 2. 次にAtomsを組み合わせてMoleculesを作成
-3. 最後にMoleculesを組み合わせてOrganismsを実装
-4. PageコンポーネントからOrganismsを呼び出す
+3. MoleculesとAtomsを組み合わせてOrganismsを実装
+4. OrganismsをレイアウトしてTemplatesを実装
+5. データフェッチングとロジックを含むPagesを実装
+6. App RouterのPageコンポーネントからPagesを呼び出す
+
+### 各層の依存関係
+
+```
+App Router Page (src/app/)
+    ↓ 呼び出し
+Page (features/{feature}/pages/)
+    ↓ 呼び出し
+Template (features/{feature}/templates/)
+    ↓ 呼び出し
+Organism (features/{feature}/organisms/)
+    ↓ 呼び出し
+Molecule (components/molecules/)
+    ↓ 呼び出し
+Atom (components/ui/)
+```
+
+### 実装時のチェックリスト
+
+- [ ] 新しいコンポーネントを作る前に、既存のAtom/Moleculeで対応できないか確認
+- [ ] ロジックはPage層に集約されているか
+- [ ] UI構成とレスポンシブ対応はTemplate層で行われているか
+- [ ] Organismは機能固有のUIに専念しているか
+- [ ] MoleculeとAtomは汎用的で再利用可能か
+- [ ] 各層の責任範囲を超えていないか
+- [ ] propsの型定義は明確か
+- [ ] 適切なインポートパスを使用しているか
 
 ## 関連ドキュメント
 

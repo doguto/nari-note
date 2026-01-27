@@ -1,4 +1,4 @@
-import { MainLayout } from '@/components/layout/MainLayout';
+import { MainLayout } from '@/features/global/organisms/MainLayout';
 
 /**
  * Header/Footerを含む共通レイアウト

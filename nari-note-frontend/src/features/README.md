@@ -2,82 +2,105 @@
 
 このディレクトリには、機能ごとにモジュール化されたコンポーネントが配置されます。
 
-**重要**: nari-noteではAtomic Designパターンを採用しています。featuresディレクトリでは主に**Organisms（生体）**として完全な機能ブロックを実装します。
+**重要**: nari-noteでは5層のAtomic Designパターン（Page → Template → Organism → Molecule → Atom）を採用しています。
 
 ## ディレクトリ構造
 
-各機能（feature）は以下の構造を持ちます：
+各機能（feature）は以下の3層構造を持ちます：
 
 ```
 {feature}/
-├── organisms/      # Organisms（完全な機能ブロック）
+├── pages/          # Page層（ロジックのみ、UIなし）
+├── templates/      # Template層（UI構成とレスポンシブ対応）
+├── organisms/      # Organism層（Template特有のUI単位）
 └── types.ts        # 型定義（機能固有の型）
 ```
 
-**注意**: 以前のcontainers/components/hooks構造から、Atomic Design準拠のorganisms構造に移行しました。既存のコードは段階的に移行中です。新規実装は必ずorganisms構造を使用してください。
+## 5層のAtomic Designにおける配置
 
-## Atomic Designにおける配置
+### Atom（原子）
+`src/components/ui/`
+- Button, Input, Labelなど
+- 汎用的な最小単位のUIコンポーネント
+- Shadcn等のUIコンポーネントもここに配置
 
-### Atoms（原子）
-`src/components/common/atoms/`
-- FormField, ErrorAlert, FormTitle, TagChipなど
-- 最小単位の基本要素
+### Molecule（分子）
+`src/components/molecules/`
+- ArticleCard, UserIconなど
+- 汎用的な複合コンポーネント
+- Atomが組み合わさって構成される
 
-### Molecules（分子）
-`src/components/common/molecules/`
-- EmailField, PasswordField, TagInputなど
-- Atomsを組み合わせた機能コンポーネント
-
-### Organisms（生体）
+### Organism（生体）
 `src/features/{feature}/organisms/`
-- LoginPage, ArticleFormPage, UserProfilePageなど
-- Atoms/Moleculesを組み合わせた完全な機能ブロック
-- データフェッチングやビジネスロジックを含む
+- TitleForm, BodyFormなど
+- 各Template特有のUI単位
+- Atoms/Moleculesを組み合わせて実装
+
+### Template（テンプレート）
+`src/features/{feature}/templates/`
+- ArticleFormTemplateなど
+- 各ページのUI構成に責任を持つ
+- レスポンシブ対応とレイアウト切り替えを担当
+
+### Page（ページ）
+`src/features/{feature}/pages/`
+- ArticleEditPageなど
+- ページのロジックに責任を持つ（UIなし）
+- バックエンドとの通信等の非UIロジックを持つ
 
 ## 機能一覧
 
 ### article/
 記事に関する機能
-- **ArticleFormPage.tsx** - 記事作成・編集
-- **ArticleDetailPage.tsx** - 記事詳細表示
-- **HomeArticleList.tsx** - 記事一覧表示
+- pages/ - 記事機能のロジック
+- templates/ - 記事ページのUI構成
+- organisms/ - 記事フォームなどのUI単位
 
 ### auth/
 認証に関する機能
-- **LoginPage.tsx** - ログイン
-- **SignUpPage.tsx** - 新規登録
+- pages/ - 認証ロジック
+- templates/ - 認証ページのUI構成
+- organisms/ - ログインフォームなどのUI単位
 
 ### user/
 ユーザーに関する機能
-- **UserProfilePage.tsx** - プロフィール表示・編集
+- pages/ - ユーザー機能のロジック
+- templates/ - ユーザーページのUI構成
+- organisms/ - プロフィール関連のUI単位
 
 ### tag/
 タグに関する機能
-- **TagArticleListPage.tsx** - タグ別記事一覧
+- pages/ - タグ機能のロジック
+- templates/ - タグページのUI構成
+- organisms/ - タグ表示などのUI単位
+
+### global/
+グローバル共通コンポーネント
+- organisms/ - Header, Footer, Sidebarなど
 
 ## 新しい機能を追加する場合
 
 1. 機能名のディレクトリを作成（例: `comment/`）
-2. `organisms/` ディレクトリを作成
-3. Organisms（完全な機能ブロック）を実装
-   - まず必要なAtomsが存在するか確認
-   - 次に必要なMoleculesが存在するか確認
-   - 最後にOrganismsとして完全な機能を実装
+2. `pages/`, `templates/`, `organisms/` ディレクトリを作成
+3. 5層構造に従って実装
+   - まず必要なAtomsが存在するか確認（`components/ui/`）
+   - 次に必要なMoleculesが存在するか確認（`components/molecules/`）
+   - Organismsとして特有のUI単位を実装
+   - TemplatesでUI構成を実装
+   - PagesでロジックとTemplateの連携を実装
 4. `types.ts` を作成（機能固有の型定義が必要な場合）
 
-## Organismsの実装パターン
+## 実装パターン
 
-### パターン1: シンプルなフォーム
+### パターン1: Page（ロジック層）
 
 ```tsx
-// src/features/auth/organisms/LoginPage.tsx
+// src/features/auth/pages/LoginPage.tsx
 'use client';
 
 import { useState } from 'react';
-import { EmailField, PasswordField } from '@/components/common/molecules';
-import { ErrorAlert } from '@/components/common/atoms';
-import { Button } from '@/components/ui/button';
 import { useLogin } from '@/lib/api';
+import { LoginTemplate } from '../templates/LoginTemplate';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -90,69 +113,84 @@ export function LoginPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {login.error && <ErrorAlert message="ログインに失敗しました" />}
-      <EmailField value={email} onChange={setEmail} />
-      <PasswordField value={password} onChange={setPassword} />
-      <Button type="submit" disabled={login.isPending}>
-        {login.isPending ? 'ログイン中...' : 'ログイン'}
-      </Button>
-    </form>
+    <LoginTemplate
+      email={email}
+      password={password}
+      onEmailChange={setEmail}
+      onPasswordChange={setPassword}
+      onSubmit={handleSubmit}
+      isLoading={login.isPending}
+      error={login.error}
+    />
   );
 }
 ```
 
-### パターン2: データ取得を伴うOrganism（Container/Presentational分離）
+### パターン2: Template（UI構成層）
 
-データフェッチングが複雑な場合は、Container/Presentationalパターンを併用できます。
-
-**Container:**
 ```tsx
-// src/features/article/organisms/ArticleDetailContainer.tsx
+// src/features/auth/templates/LoginTemplate.tsx
+import { EmailField, PasswordField } from '@/components/molecules';
+import { ErrorAlert } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+
+interface LoginTemplateProps {
+  email: string;
+  password: string;
+  onEmailChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  isLoading: boolean;
+  error?: Error;
+}
+
+export function LoginTemplate({
+  email,
+  password,
+  onEmailChange,
+  onPasswordChange,
+  onSubmit,
+  isLoading,
+  error,
+}: LoginTemplateProps) {
+  return (
+    <div className="max-w-md mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">ログイン</h1>
+      {error && <ErrorAlert message="ログインに失敗しました" />}
+      <form onSubmit={onSubmit} className="space-y-4">
+        <EmailField value={email} onChange={onEmailChange} />
+        <PasswordField value={password} onChange={onPasswordChange} />
+        <Button type="submit" disabled={isLoading} className="w-full">
+          {isLoading ? 'ログイン中...' : 'ログイン'}
+        </Button>
+      </form>
+    </div>
+  );
+}
+```
+
+### パターン3: データ取得を伴うPage
+
+```tsx
+// src/features/article/pages/ArticleDetailPage.tsx
 'use client';
 
 import { useGetArticle } from '@/lib/api';
-import { ArticleDetailPage } from './ArticleDetailPage';
-import { Loading } from '@/components/common/Loading';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ArticleDetailTemplate } from '../templates/ArticleDetailTemplate';
+import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 
-interface ArticleDetailContainerProps {
+interface ArticleDetailPageProps {
   articleId: number;
 }
 
-export function ArticleDetailContainer({ articleId }: ArticleDetailContainerProps) {
+export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const { data, isLoading, error, refetch } = useGetArticle({ id: articleId });
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message="エラー" onRetry={refetch} />;
   if (!data) return null;
 
-  return <ArticleDetailPage article={data} />;
-}
-```
-
-**Presentational Organism:**
-```tsx
-// src/features/article/organisms/ArticleDetailPage.tsx
-import type { GetArticleResponse } from '@/lib/api/types';
-import { TagChip } from '@/components/common/atoms';
-
-interface ArticleDetailPageProps {
-  article: GetArticleResponse;
-}
-
-export function ArticleDetailPage({ article }: ArticleDetailPageProps) {
-  return (
-    <article className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold">{article.title}</h1>
-      <div className="prose">{article.body}</div>
-      <div className="flex gap-2">
-        {article.tags?.map((tag, index) => (
-          <TagChip key={index} tag={tag} />
-        ))}
-      </div>
-    </article>
-  );
+  return <ArticleDetailTemplate article={data} />;
 }
 ```
 
