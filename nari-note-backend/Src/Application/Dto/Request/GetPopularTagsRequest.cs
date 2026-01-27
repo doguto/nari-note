@@ -1,5 +1,5 @@
 namespace NariNoteBackend.Application.Dto.Request;
 
-public class GetTagsRequest
+public class GetPopularTagsRequest
 {
 }

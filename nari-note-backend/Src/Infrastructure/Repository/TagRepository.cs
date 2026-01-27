@@ -54,12 +54,39 @@ public class TagRepository : ITagRepository
         }
     }
 
-    public async Task<List<Tag>> GetAllWithArticleCountAsync()
+    public async Task<List<Tag>> GetPopularTagsAsync(DateTime sinceDate, int limit)
     {
-        return await context.Tags
-                            .Include(t => t.ArticleTags)
-                            .Where(t => t.ArticleTags.Any())
-                            .OrderByDescending(t => t.ArticleTags.Count)
-                            .ToListAsync();
+        var popularTags = await context.Tags
+            .AsNoTracking()
+            .Select(t => new
+            {
+                TagId = t.Id,
+                RecentArticleCount = t.ArticleTags.Count(at => 
+                    at.Article.PublishedAt.HasValue && 
+                    at.Article.PublishedAt.Value >= sinceDate)
+            })
+            .Where(x => x.RecentArticleCount > 0)
+            .OrderByDescending(x => x.RecentArticleCount)
+            .Take(limit)
+            .ToListAsync();
+
+        var indexMap = popularTags
+            .Select((item, index) => new { item.TagId, Index = index })
+            .ToDictionary(x => x.TagId, x => x.Index);
+
+        var tags = await context.Tags
+            .AsNoTracking()
+            .Include(t => t.ArticleTags)
+            .Where(t => indexMap.Keys.Contains(t.Id))
+            .ToListAsync();
+
+        tags.ForEach(tag =>
+        {
+            tag.ArticleTags = tag.ArticleTags
+                .Where(at => at.Article.PublishedAt.HasValue && at.Article.PublishedAt.Value >= sinceDate)
+                .ToList();
+        });
+
+        return tags.OrderBy(t => indexMap[t.Id]).ToList();
     }
 }

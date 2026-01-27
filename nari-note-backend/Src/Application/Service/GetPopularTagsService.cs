@@ -5,20 +5,22 @@ using NariNoteBackend.Domain.Repository;
 
 namespace NariNoteBackend.Application.Service;
 
-public class GetTagsService
+public class GetPopularTagsService
 {
     readonly ITagRepository tagRepository;
 
-    public GetTagsService(ITagRepository tagRepository)
+    public GetPopularTagsService(ITagRepository tagRepository)
     {
         this.tagRepository = tagRepository;
     }
 
-    public async Task<GetTagsResponse> ExecuteAsync(GetTagsRequest request)
+    public async Task<GetPopularTagsResponse> ExecuteAsync(GetPopularTagsRequest request)
     {
-        var tags = await tagRepository.GetAllWithArticleCountAsync();
-
-        return new GetTagsResponse
+        var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
+        
+        var tags = await tagRepository.GetPopularTagsAsync(oneMonthAgo, 5);
+        
+        return new GetPopularTagsResponse
         {
             Tags = tags.Select(t => new TagDto
             {

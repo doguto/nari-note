@@ -10,19 +10,19 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class TagsController : ControllerBase
 {
-    readonly GetTagsService getTagsService;
+    readonly GetPopularTagsService getPopularTagsService;
 
-    public TagsController(GetTagsService getTagsService)
+    public TagsController(GetPopularTagsService getPopularTagsService)
     {
-        this.getTagsService = getTagsService;
+        this.getPopularTagsService = getPopularTagsService;
     }
 
-    [HttpGet]
+    [HttpGet("popular")]
     [AllowAnonymous]
-    public async Task<ActionResult<GetTagsResponse>> GetTags()
+    public async Task<ActionResult<GetPopularTagsResponse>> GetPopularTags()
     {
-        var request = new GetTagsRequest();
-        var response = await getTagsService.ExecuteAsync(request);
+        var request = new GetPopularTagsRequest();
+        var response = await getPopularTagsService.ExecuteAsync(request);
         return Ok(response);
     }
 }
