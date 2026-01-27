@@ -70,22 +70,18 @@ public class TagRepository : ITagRepository
             .Take(limit)
             .ToListAsync();
 
+        var tagIds = popularTags.Select(x => x.TagId).ToList();
         var indexMap = popularTags
             .Select((item, index) => new { item.TagId, Index = index })
             .ToDictionary(x => x.TagId, x => x.Index);
 
         var tags = await context.Tags
             .AsNoTracking()
-            .Include(t => t.ArticleTags)
-            .Where(t => indexMap.Keys.Contains(t.Id))
+            .Include(t => t.ArticleTags.Where(at => 
+                at.Article.PublishedAt.HasValue && 
+                at.Article.PublishedAt.Value >= sinceDate))
+            .Where(t => tagIds.Contains(t.Id))
             .ToListAsync();
-
-        tags.ForEach(tag =>
-        {
-            tag.ArticleTags = tag.ArticleTags
-                .Where(at => at.Article.PublishedAt.HasValue && at.Article.PublishedAt.Value >= sinceDate)
-                .ToList();
-        });
 
         return tags.OrderBy(t => indexMap[t.Id]).ToList();
     }

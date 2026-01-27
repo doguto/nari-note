@@ -26,7 +26,7 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
-  GetTagsResponse,
+  GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
   SearchArticlesRequest,
@@ -119,8 +119,8 @@ export const healthApi = {
 
 // Tags API
 export const tagsApi = {
-  getTags: async (): Promise<GetTagsResponse> => {
-    const response = await apiClient.get<GetTagsResponse>('/api/tags');
+  getPopularTags: async (): Promise<GetPopularTagsResponse> => {
+    const response = await apiClient.get<GetPopularTagsResponse>('/api/tags/popular');
     return response;
   },
 };

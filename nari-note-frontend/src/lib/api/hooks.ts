@@ -27,7 +27,7 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
-  GetTagsResponse,
+  GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
   SearchArticlesRequest,
@@ -61,7 +61,7 @@ export const queryKeys = {
     getHealth: ['health', 'getHealth'] as const,
   },
   tags: {
-    getTags: ['tags', 'getTags'] as const,
+    getPopularTags: ['tags', 'popular'] as const,
   },
   users: {
     getUserProfile: ['users', 'getUserProfile'] as const,
@@ -235,10 +235,10 @@ export function useGetHealth(options?: Omit<UseQueryOptions<GetHealthResponse>, 
 }
 
 // Tags Hooks
-export function useGetTags(options?: Omit<UseQueryOptions<GetTagsResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<GetTagsResponse>({
-    queryKey: queryKeys.tags.getTags,
-    queryFn: () => tagsApi.getTags(),
+export function useGetPopularTags(options?: Omit<UseQueryOptions<GetPopularTagsResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetPopularTagsResponse>({
+    queryKey: queryKeys.tags.getPopularTags,
+    queryFn: () => tagsApi.getPopularTags(),
     ...options,
   });
 }

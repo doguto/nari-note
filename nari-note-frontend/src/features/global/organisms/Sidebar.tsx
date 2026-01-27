@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
-import { useGetTags } from '@/lib/api/hooks';
+import { useGetPopularTags } from '@/lib/api/hooks';
 
 /**
  * サイドバーコンポーネント
@@ -10,17 +9,7 @@ import { useGetTags } from '@/lib/api/hooks';
  * トレンドタグと注目の記事を表示します。
  */
 export function Sidebar() {
-  const { data: tagsData, isLoading, isError } = useGetTags();
-
-  // タグをarticleCountの降順でソートして上位5個を取得
-  const topTags = useMemo(() => {
-    return tagsData?.tags
-      ? [...tagsData.tags]
-          .filter((tag) => tag.name) // nameが存在するタグのみをフィルタ
-          .sort((a, b) => (b.articleCount || 0) - (a.articleCount || 0))
-          .slice(0, 5)
-      : [];
-  }, [tagsData]);
+  const { data: tagsData, isLoading, isError } = useGetPopularTags();
 
   return (
     <aside className="w-80 hidden lg:block">
@@ -39,10 +28,10 @@ export function Sidebar() {
           {isError && (
             <div className="text-sm text-gray-300">タグの取得に失敗しました</div>
           )}
-          {!isLoading && !isError && topTags.length === 0 && (
+          {!isLoading && !isError && tagsData?.tags?.length === 0 && (
             <div className="text-sm text-gray-300">タグがありません</div>
           )}
-          {!isLoading && !isError && topTags.map((tag) => (
+          {!isLoading && !isError && tagsData?.tags?.map((tag) => (
             <Link 
               key={tag.name}
               href={`/tags/${tag.name}`}
