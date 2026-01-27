@@ -26,7 +26,6 @@ public class CommentRepository : ICommentRepository
     {
         return await context.Comments
             .Include(c => c.User)
-            .Include(c => c.Article)
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 

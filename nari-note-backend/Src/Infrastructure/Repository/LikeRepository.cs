@@ -63,34 +63,20 @@ public class LikeRepository : ILikeRepository
 
     public async Task<List<Article>> FindLikedArticlesByUserAsync(UserId userId)
     {
-        var likedArticles = await context.Likes
+        var articles = await context.Likes
             .Where(l => l.UserId == userId)
-            .OrderByDescending(l => l.CreatedAt)
-            .Select(l => new { l.ArticleId, l.CreatedAt })
-            .ToListAsync();
-
-        if (!likedArticles.Any())
-        {
-            return new List<Article>();
-        }
-
-        var articleIds = likedArticles.Select(la => la.ArticleId).ToList();
-
-        var articles = await context.Articles
-            .Where(a => articleIds.Contains(a.Id))
-            .Include(a => a.Author)
-            .Include(a => a.ArticleTags)
+            .Where(l => l.Article != null)
+            .Include(l => l.Article)
+                .ThenInclude(a => a.Author)
+            .Include(l => l.Article.ArticleTags)
                 .ThenInclude(at => at.Tag)
-            .Include(a => a.Likes)
+            .Include(l => l.Article.Likes)
+            .OrderByDescending(l => l.CreatedAt)
+            .AsSplitQuery()
+            .Select(l => l.Article)
             .ToListAsync();
 
-        // Preserve the original liked order
-        var orderedArticles = likedArticles
-            .Select(la => articles.FirstOrDefault(a => a.Id == la.ArticleId))
-            .Where(a => a != null)
-            .ToList();
-
-        return orderedArticles!;
+        return articles!;
     }
 
     public async Task<int> CountLikedArticlesByUserAsync(UserId userId)
