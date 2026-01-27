@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Controller;
 
@@ -17,6 +18,7 @@ public class TagsController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<GetTagsResponse>> GetTags()
     {
         var request = new GetTagsRequest();
