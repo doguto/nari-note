@@ -14,6 +14,7 @@ export function Sidebar() {
   // タグをarticleCountの降順でソートして上位5個を取得
   const topTags = tagsData?.tags
     ? [...tagsData.tags]
+        .filter((tag) => tag.name) // nameが存在するタグのみをフィルタ
         .sort((a, b) => (b.articleCount || 0) - (a.articleCount || 0))
         .slice(0, 5)
     : [];
