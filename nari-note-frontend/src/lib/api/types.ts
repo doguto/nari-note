@@ -150,6 +150,13 @@ export interface GetHealthResponse {
   message?: string;
 }
 
+export interface GetTagsRequest {
+}
+
+export interface GetTagsResponse {
+  tags?: TagDto[];
+}
+
 export interface GetLikedArticlesRequest {
   userId?: number;
 }
@@ -197,6 +204,11 @@ export interface SearchArticlesResponse {
 export interface SignInRequest {
   usernameOrEmail?: string;
   password?: string;
+}
+
+export interface TagDto {
+  name?: string;
+  articleCount?: number;
 }
 
 export interface SignUpRequest {

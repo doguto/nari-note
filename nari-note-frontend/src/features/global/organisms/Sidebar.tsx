@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useGetTags } from '@/lib/api/hooks';
 
 /**
  * サイドバーコンポーネント
@@ -6,6 +9,15 @@ import Link from 'next/link';
  * トレンドタグと注目の記事を表示します。
  */
 export function Sidebar() {
+  const { data: tagsData, isLoading, isError } = useGetTags();
+
+  // タグをarticleCountの降順でソートして上位5個を取得
+  const topTags = tagsData?.tags
+    ? [...tagsData.tags]
+        .sort((a, b) => (b.articleCount || 0) - (a.articleCount || 0))
+        .slice(0, 5)
+    : [];
+
   return (
     <aside className="w-80 hidden lg:block">
       {/* トレンドセクション */}
@@ -17,36 +29,21 @@ export function Sidebar() {
           <span className="text-2xl">🔥</span>
         </div>
         <div className="space-y-2">
-          <Link 
-            href="/tags/React" 
-            className="block text-sm hover:text-brand-primary cursor-pointer transition-colors"
-          >
-            #React
-          </Link>
-          <Link 
-            href="/tags/TypeScript" 
-            className="block text-sm hover:text-brand-primary cursor-pointer transition-colors"
-          >
-            #TypeScript
-          </Link>
-          <Link 
-            href="/tags/NextJS" 
-            className="block text-sm hover:text-brand-primary cursor-pointer transition-colors"
-          >
-            #Next.js
-          </Link>
-          <Link 
-            href="/tags/Python" 
-            className="block text-sm hover:text-brand-primary cursor-pointer transition-colors"
-          >
-            #Python
-          </Link>
-          <Link 
-            href="/tags/AI" 
-            className="block text-sm hover:text-brand-primary cursor-pointer transition-colors"
-          >
-            #AI
-          </Link>
+          {isLoading && (
+            <div className="text-sm text-gray-300">読み込み中...</div>
+          )}
+          {!isLoading && !isError && topTags.length === 0 && (
+            <div className="text-sm text-gray-300">タグがありません</div>
+          )}
+          {!isLoading && !isError && topTags.map((tag) => (
+            <Link 
+              key={tag.name}
+              href={`/tags/${tag.name}`}
+              className="block text-sm hover:text-brand-primary cursor-pointer transition-colors"
+            >
+              #{tag.name}
+            </Link>
+          ))}
         </div>
       </div>
 

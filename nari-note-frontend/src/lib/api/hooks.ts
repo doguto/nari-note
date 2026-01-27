@@ -2,7 +2,7 @@
 // Do not edit manually
 
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type UseQueryOptions } from '@tanstack/react-query';
-import { articlesApi, authApi, healthApi, usersApi } from './endpoints';
+import { articlesApi, authApi, healthApi, tagsApi, usersApi } from './endpoints';
 import type {
   AuthResponse,
   CreateArticleRequest,
@@ -27,6 +27,7 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
+  GetTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
   SearchArticlesRequest,
@@ -58,6 +59,9 @@ export const queryKeys = {
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
+  },
+  tags: {
+    getTags: ['tags', 'getTags'] as const,
   },
   users: {
     getUserProfile: ['users', 'getUserProfile'] as const,
@@ -226,6 +230,15 @@ export function useGetHealth(options?: Omit<UseQueryOptions<GetHealthResponse>, 
   return useQuery<GetHealthResponse>({
     queryKey: queryKeys.health.getHealth,
     queryFn: () => healthApi.getHealth(),
+    ...options,
+  });
+}
+
+// Tags Hooks
+export function useGetTags(options?: Omit<UseQueryOptions<GetTagsResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetTagsResponse>({
+    queryKey: queryKeys.tags.getTags,
+    queryFn: () => tagsApi.getTags(),
     ...options,
   });
 }
