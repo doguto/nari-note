@@ -160,6 +160,14 @@ export interface GetLikedArticlesResponse {
   totalCount?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface GetPopularTagsRequest {
+}
+
+export interface GetPopularTagsResponse {
+  tags?: TagDto[];
+}
+
 export interface GetUserProfileRequest {
   id?: number;
 }
@@ -203,6 +211,11 @@ export interface SignUpRequest {
   name?: string;
   email?: string;
   password?: string;
+}
+
+export interface TagDto {
+  name?: string;
+  articleCount?: number;
 }
 
 export interface ToggleFollowRequest {
