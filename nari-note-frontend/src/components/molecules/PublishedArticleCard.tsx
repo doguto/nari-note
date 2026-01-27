@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Pencil, Eye } from 'lucide-react';
+import { Pencil, Eye, Heart } from 'lucide-react';
 
 interface PublishedArticleCardProps {
   id: number;
@@ -51,7 +51,10 @@ export function PublishedArticleCard({
           </h3>
           <div className="flex items-center gap-4 text-sm text-gray-500">
             <span>公開日: {formattedDate}</span>
-            <span>いいね: {likeCount}</span>
+            <span className="flex items-center gap-1">
+              <Heart className="w-4 h-4" />
+              {likeCount}
+            </span>
           </div>
         </div>
         <div className="flex gap-2 flex-shrink-0">
