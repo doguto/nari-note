@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { Sidebar } from '@/features/global/organisms/Sidebar';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { UserProfilePage } from '@/features/user/pages';
 
 export default function UserProfilePageRoute() {
@@ -9,14 +9,8 @@ export default function UserProfilePageRoute() {
   const userId = Number(params.id);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 w-full">
-      <div className="flex gap-8">
-        <div className="flex-1">
-          <UserProfilePage userId={userId} />
-        </div>
-        
-        <Sidebar />
-      </div>
-    </div>
+    <PageWithSidebar>
+      <UserProfilePage userId={userId} />
+    </PageWithSidebar>
   );
 }

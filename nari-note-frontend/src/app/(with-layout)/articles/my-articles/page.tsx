@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import { Sidebar } from '@/features/global/organisms/Sidebar';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { MyArticlesListPage } from '@/features/article/pages';
 import { LoadingSpinner } from '@/components/ui';
 
@@ -36,13 +36,8 @@ export default function MyArticlesPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 w-full">
-      <div className="flex gap-8">
-        <main className="flex-1">
-          <MyArticlesListPage />
-        </main>
-        <Sidebar />
-      </div>
-    </div>
+    <PageWithSidebar>
+      <MyArticlesListPage />
+    </PageWithSidebar>
   );
 }

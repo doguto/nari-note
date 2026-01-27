@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { Sidebar } from '@/features/global/organisms/Sidebar';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { ArticleDetailPage } from '@/features/article/pages';
 
 export default function ArticleDetailPageRoute() {
@@ -9,14 +9,8 @@ export default function ArticleDetailPageRoute() {
   const articleId = Number(params.id);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 w-full">
-      <div className="flex gap-8">
-        <div className="flex-1">
-          <ArticleDetailPage articleId={articleId} />
-        </div>
-        
-        <Sidebar />
-      </div>
-    </div>
+    <PageWithSidebar>
+      <ArticleDetailPage articleId={articleId} />
+    </PageWithSidebar>
   );
 }

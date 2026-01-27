@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { LoadingSpinner } from '@/components/ui';
+import { FormPageLayout } from '@/components/molecules';
 import { ProfileEditPage } from '@/features/user/pages';
 
 /**
@@ -23,7 +25,7 @@ export default function SettingsProfilePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-gray-500">読み込み中...</div>
+        <LoadingSpinner text="読み込み中..." />
       </div>
     );
   }
@@ -33,19 +35,12 @@ export default function SettingsProfilePage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 w-full">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[var(--brand-text)] mb-2">
-          プロフィール編集
-        </h1>
-        <p className="text-gray-600">
-          ユーザー名、自己紹介、プロフィール画像を編集できます。変更内容は保存ボタンを押すまで反映されません。
-        </p>
-      </div>
-      
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <ProfileEditPage />
-      </div>
-    </div>
+    <FormPageLayout 
+      title="プロフィール編集"
+      description="ユーザー名、自己紹介、プロフィール画像を編集できます。変更内容は保存ボタンを押すまで反映されません。"
+      maxWidth="medium"
+    >
+      <ProfileEditPage />
+    </FormPageLayout>
   );
 }
