@@ -25,7 +25,8 @@ export function ArticleCard({
   stats,
   date,
 }: ArticleCardProps) {
-  // statsから数値を抽出（例: "いいね 5" -> 5）
+  // statsから数値を抽出（例: "いいね 5" -> "5", "いいね" -> "0"）
+  // 既存のテンプレートとの後方互換性のため、文字列から抽出
   const likeCount = stats.match(/\d+/)?.[0] ?? '0';
 
   return (
