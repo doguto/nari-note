@@ -18,7 +18,7 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 pb-16">
         <div className="flex gap-8">
           {/* 記事一覧 */}
-          <div className="flex-1">
+          <div className="flex-1 mr-2">
             <h2 className="text-2xl font-bold text-brand-text mb-6">新着記事</h2>
             <HomeArticleListPage />
           </div>
