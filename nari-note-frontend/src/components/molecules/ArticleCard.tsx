@@ -6,9 +6,8 @@ interface ArticleCardProps {
   title: string;
   author: string;
   authorId: number;
-  stats: string;
+  likeCount: number;
   date: string;
-  image: string; // 後方互換性のため残すが使用しない
 }
 
 /**
@@ -22,13 +21,9 @@ export function ArticleCard({
   title,
   author,
   authorId,
-  stats,
+  likeCount,
   date,
 }: ArticleCardProps) {
-  // statsから数値を抽出（例: "いいね 5" -> "5", "いいね" -> "0"）
-  // 既存のテンプレートとの後方互換性のため、文字列から抽出
-  const likeCount = stats.match(/\d+/)?.[0] ?? '0';
-
   return (
     <Link
       href={`/articles/${id}`}

@@ -80,14 +80,13 @@ export function ArticleSearchTemplate({
                 title={article.title ?? ''}
                 author={article.authorName ?? ''}
                 authorId={article.authorId ?? 0}
-                stats={`いいね ${article.likeCount ?? 0}`}
+                likeCount={article.likeCount ?? 0}
                 date={article.publishedAt 
                   ? new Date(article.publishedAt).toLocaleDateString('ja-JP') 
                   : article.createdAt 
                     ? new Date(article.createdAt).toLocaleDateString('ja-JP') 
                     : ''
                 }
-                image="📝"
               />
             ))}
           </div>

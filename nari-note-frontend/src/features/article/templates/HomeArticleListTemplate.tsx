@@ -23,9 +23,8 @@ export function HomeArticleListTemplate({ articles }: HomeArticleListTemplatePro
           title={article.title ?? ''}
           author={article.authorName ?? ''}
           authorId={article.authorId ?? 0}
-          stats={`いいね ${article.likeCount ?? 0}`}
+          likeCount={article.likeCount ?? 0}
           date={article.createdAt ? new Date(article.createdAt).toLocaleDateString('ja-JP') : ''}
-          image="📝"
         />
       ))}
     </div>
