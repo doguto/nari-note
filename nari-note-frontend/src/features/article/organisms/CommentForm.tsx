@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CommentField } from '@/components/molecules/CommentField';
+import { CommentField } from './CommentField';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { Button } from '@/components/ui/button';
 import { useCreateComment } from '@/lib/api';

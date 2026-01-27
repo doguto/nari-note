@@ -6,7 +6,7 @@ import {
   UsernameField, 
   BioField, 
   ProfileImageUpload 
-} from '@/components/molecules';
+} from '../organisms';
 
 interface ProfileEditTemplateProps {
   // フォーム値

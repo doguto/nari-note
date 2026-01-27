@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { FollowButton, FollowStats, LoadingSpinner, ErrorMessage } from '@/components/ui';
-import { UserListItem } from '@/components/molecules';
-import { ArticleList } from '../organisms/ArticleList';
+import { UserListItem, ArticleList } from '@/components/molecules';
 import type { GetUserProfileResponse, GetArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
 interface UserProfileTemplateProps {
