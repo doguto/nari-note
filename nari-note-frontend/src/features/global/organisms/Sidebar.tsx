@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useMemo } from 'react';
 import { useGetTags } from '@/lib/api/hooks';
 
 /**
@@ -12,12 +13,14 @@ export function Sidebar() {
   const { data: tagsData, isLoading, isError } = useGetTags();
 
   // タグをarticleCountの降順でソートして上位5個を取得
-  const topTags = tagsData?.tags
-    ? [...tagsData.tags]
-        .filter((tag) => tag.name) // nameが存在するタグのみをフィルタ
-        .sort((a, b) => (b.articleCount || 0) - (a.articleCount || 0))
-        .slice(0, 5)
-    : [];
+  const topTags = useMemo(() => {
+    return tagsData?.tags
+      ? [...tagsData.tags]
+          .filter((tag) => tag.name) // nameが存在するタグのみをフィルタ
+          .sort((a, b) => (b.articleCount || 0) - (a.articleCount || 0))
+          .slice(0, 5)
+      : [];
+  }, [tagsData]);
 
   return (
     <aside className="w-80 hidden lg:block">
@@ -39,9 +42,9 @@ export function Sidebar() {
           {!isLoading && !isError && topTags.length === 0 && (
             <div className="text-sm text-gray-300">タグがありません</div>
           )}
-          {!isLoading && !isError && topTags.map((tag, index) => (
+          {!isLoading && !isError && topTags.map((tag) => (
             <Link 
-              key={`${tag.name}-${index}`}
+              key={tag.name}
               href={`/tags/${tag.name}`}
               className="block text-sm hover:text-brand-primary cursor-pointer transition-colors"
             >
