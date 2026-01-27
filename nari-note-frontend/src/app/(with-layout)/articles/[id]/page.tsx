@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { Sidebar } from '@/features/global/organisms/Sidebar';
-import { ArticleDetailPage } from '@/features/article/organisms';
+import { ArticleDetailPage } from '@/features/article/pages';
 
 export default function ArticleDetailPageRoute() {
   const params = useParams();

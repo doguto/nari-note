@@ -2,27 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { FormTitle, ErrorAlert, LoadingSpinner, ErrorMessage } from '@/components/ui';
-import { 
-  UsernameField, 
-  BioField, 
-  ProfileImageUpload 
-} from '@/components/molecules';
+import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { useGetUserProfile, useUpdateUserProfile } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import type { GetUserProfileResponse } from '@/lib/api/types';
+import { ProfileEditTemplate } from '../templates/ProfileEditTemplate';
 
 interface ProfileEditPageProps {
   initialUserData?: GetUserProfileResponse;
 }
 
 /**
- * ProfileEditPage - Organism Component
+ * ProfileEditPage - Page Component
  * 
- * プロフィール編集ページの完全な機能を持つコンポーネント
- * Atomic Designパターンにおける Organism として、
- * ビジネスロジックと UI を統合
+ * プロフィール編集ページのビジネスロジックを担当するページコンポーネント
+ * データフェッチング、状態管理、バリデーション、イベントハンドリングを行い、Templateにpropsを渡す
  * 
  * @param initialUserData - Optional pre-fetched user data to avoid redundant API calls
  */
@@ -157,78 +151,22 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
   }
 
   return (
-    <div>
-      <FormTitle>プロフィール編集</FormTitle>
-
-      {generalError && <ErrorAlert message={generalError} />}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <ProfileImageUpload
-          onImageSelect={handleImageSelect}
-          onImageRemove={handleImageRemove}
-          error={errors.profileImage}
-        />
-
-        <UsernameField
-          value={username}
-          onChange={setUsername}
-          error={errors.username}
-        />
-
-        <BioField
-          value={bio}
-          onChange={setBio}
-          error={errors.bio}
-        />
-
-        <div className="flex gap-4 pt-4">
-          <Button
-            type="submit"
-            disabled={updateProfile.isPending || !hasChanges}
-            className="flex-1 bg-brand-primary hover:bg-brand-primary-hover"
-          >
-            {updateProfile.isPending ? '保存中...' : '保存'}
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={updateProfile.isPending}
-            className="flex-1"
-          >
-            キャンセル
-          </Button>
-        </div>
-      </form>
-
-      {/* キャンセル確認モーダル */}
-      {showCancelConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-bold mb-4">変更を破棄しますか？</h3>
-            <p className="text-gray-600 mb-6">
-              保存していない変更は失われます。
-            </p>
-            <div className="flex gap-4">
-              <Button
-                onClick={handleConfirmCancel}
-                variant="destructive"
-                className="flex-1"
-              >
-                破棄する
-              </Button>
-              <Button
-                onClick={() => setShowCancelConfirm(false)}
-                variant="outline"
-                className="flex-1"
-              >
-                キャンセル
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <ProfileEditTemplate
+      username={username}
+      bio={bio}
+      errors={errors}
+      generalError={generalError}
+      hasChanges={hasChanges}
+      isSubmitting={updateProfile.isPending}
+      showCancelConfirm={showCancelConfirm}
+      onUsernameChange={setUsername}
+      onBioChange={setBio}
+      onImageSelect={handleImageSelect}
+      onImageRemove={handleImageRemove}
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      onConfirmCancel={handleConfirmCancel}
+      onCancelConfirmClose={() => setShowCancelConfirm(false)}
+    />
   );
 }

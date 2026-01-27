@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { Sidebar } from '@/features/global/organisms/Sidebar';
-import { UserProfilePage } from '@/features/user/organisms';
+import { UserProfilePage } from '@/features/user/pages';
 
 export default function UserProfilePageRoute() {
   const params = useParams();

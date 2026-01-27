@@ -1,17 +1,16 @@
 'use client';
 
 import { useGetArticles } from '@/lib/api';
-import { ArticleCard } from '@/components/molecules';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { HomeArticleListTemplate } from '../templates/HomeArticleListTemplate';
 
 /**
- * HomeArticleList - Organism Component
+ * HomeArticleListPage - Page Component
  * 
- * ホーム画面の記事一覧の完全な機能を持つコンポーネント
- * Atomic Designパターンにおける Organism として、
- * ビジネスロジックと UI を統合
+ * ホーム画面の記事一覧のロジックを管理するコンポーネント
+ * データフェッチング、状態管理、ビジネスロジックを担当
  */
-export function HomeArticleList() {
+export function HomeArticleListPage() {
   const { data, isLoading, error, refetch } = useGetArticles({ limit: 20, offset: 0 });
 
   if (isLoading) {
@@ -38,20 +37,5 @@ export function HomeArticleList() {
     return <p className="text-gray-500 text-center py-8">有効な記事がありません</p>;
   }
 
-  return (
-    <div className="space-y-4">
-      {articlesWithId.map((article) => (
-        <ArticleCard
-          key={article.id}
-          id={article.id!}
-          title={article.title ?? ''}
-          author={article.authorName ?? ''}
-          authorId={article.authorId ?? 0}
-          stats={`いいね ${article.likeCount ?? 0}`}
-          date={article.createdAt ? new Date(article.createdAt).toLocaleDateString('ja-JP') : ''}
-          image="📝"
-        />
-      ))}
-    </div>
-  );
+  return <HomeArticleListTemplate articles={articlesWithId} />;
 }

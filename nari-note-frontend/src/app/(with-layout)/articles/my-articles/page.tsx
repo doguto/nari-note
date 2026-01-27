@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { Sidebar } from '@/features/global/organisms/Sidebar';
-import { MyArticlesListPage } from '@/features/article/organisms';
+import { MyArticlesListPage } from '@/features/article/pages';
 import { LoadingSpinner } from '@/components/ui';
 
 /**

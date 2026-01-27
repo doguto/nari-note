@@ -1,38 +1,21 @@
 'use client';
 
-import { useGetArticlesByTag } from '@/lib/api';
 import { ArticleCard } from '@/components/molecules';
-import { EmptyState, LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { EmptyState } from '@/components/ui';
+import type { GetArticlesResponse } from '@/lib/api/types';
 
-interface TagArticleListPageProps {
+interface TagArticleListTemplateProps {
   tag: string;
+  articles: NonNullable<GetArticlesResponse['articles']>;
 }
 
 /**
- * TagArticleListPage - Organism Component
+ * TagArticleListTemplate - Template Component
  * 
- * タグ別記事一覧ページの完全な機能を持つコンポーネント
- * Atomic Designパターンにおける Organism として、
- * ビジネスロジックと UI を統合
+ * タグ別記事一覧ページのUI構成を担当するテンプレートコンポーネント
+ * レイアウトとコンポーネント配置を定義
  */
-export function TagArticleListPage({ tag }: TagArticleListPageProps) {
-  const { data, isLoading, error, refetch } = useGetArticlesByTag({ tagName: tag });
-
-  if (isLoading) {
-    return <LoadingSpinner text="記事を読み込み中..." />;
-  }
-
-  if (error) {
-    return (
-      <ErrorMessage 
-        message="記事の取得に失敗しました" 
-        onRetry={refetch}
-      />
-    );
-  }
-
-  const articles = data?.articles ?? [];
-
+export function TagArticleListTemplate({ tag, articles }: TagArticleListTemplateProps) {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">

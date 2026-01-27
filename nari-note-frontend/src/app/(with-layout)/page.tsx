@@ -1,5 +1,5 @@
 import { Sidebar } from "@/features/global/organisms/Sidebar";
-import { HomeArticleList } from "@/features/article/organisms";
+import { HomeArticleListPage } from "@/features/article/pages";
 
 export default function Home() {
   return (
@@ -20,7 +20,7 @@ export default function Home() {
           {/* 記事一覧 */}
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-brand-text mb-6">新着記事</h2>
-            <HomeArticleList />
+            <HomeArticleListPage />
           </div>
 
           <Sidebar />

@@ -1,74 +1,37 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/providers/AuthProvider';
-import { useGetArticlesByAuthor, useDeleteArticle } from '@/lib/api';
 import { DraftArticleCard } from '@/components/molecules/DraftArticleCard';
 import { PublishedArticleCard } from '@/components/molecules/PublishedArticleCard';
-import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { LoadingSpinner } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { ArticleDto } from '@/lib/api/types';
+
+interface MyArticlesListTemplateProps {
+  activeTab: 'published' | 'drafts';
+  publishedArticles: ArticleDto[];
+  draftArticles: ArticleDto[];
+  deletingId: number | null;
+  onTabChange: (tab: 'published' | 'drafts') => void;
+  onNewArticle: () => void;
+  onDelete: (id: number, title: string) => void;
+}
 
 /**
- * MyArticlesListPage - Organism Component
+ * MyArticlesListTemplate - Template Component
  * 
- * マイ記事一覧ページの完全な機能を持つコンポーネント
- * 下書き記事と公開済み記事をタブで切り替えて表示
- * Atomic Designパターンにおける Organism として、
- * ビジネスロジックと UI を統合
+ * マイ記事一覧ページのUI構成とレイアウトを担当
+ * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
  */
-export function MyArticlesListPage() {
-  const router = useRouter();
-  const { userId } = useAuth();
-  const [activeTab, setActiveTab] = useState<'published' | 'drafts'>('published');
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-  
-  const { data, isLoading, error, refetch } = useGetArticlesByAuthor(
-    { authorId: userId || 0 },
-    { enabled: !!userId }
-  );
-  
-  const deleteArticle = useDeleteArticle({
-    onSuccess: () => {
-      setDeletingId(null);
-      refetch();
-    },
-    onError: (error) => {
-      console.error('記事の削除に失敗しました:', error);
-      alert('記事の削除に失敗しました。もう一度お試しください。');
-      setDeletingId(null);
-    },
-  });
-
-  const handleDelete = (id: number, title: string) => {
-    if (window.confirm(`「${title}」を削除してもよろしいですか？`)) {
-      setDeletingId(id);
-      deleteArticle.mutate({ id });
-    }
-  };
-
-  const handleNewArticle = () => {
-    router.push('/articles/new');
-  };
-
-  if (isLoading) {
-    return <LoadingSpinner text="記事を読み込み中..." />;
-  }
-
-  if (error) {
-    return (
-      <ErrorMessage 
-        message="記事の取得に失敗しました" 
-        onRetry={refetch}
-      />
-    );
-  }
-
-  const allArticles = data?.articles || [];
-  const publishedArticles = allArticles.filter(article => article.isPublished);
-  const draftArticles = allArticles.filter(article => !article.isPublished);
-
+export function MyArticlesListTemplate({
+  activeTab,
+  publishedArticles,
+  draftArticles,
+  deletingId,
+  onTabChange,
+  onNewArticle,
+  onDelete,
+}: MyArticlesListTemplateProps) {
   const displayArticles = activeTab === 'published' ? publishedArticles : draftArticles;
   const emptyMessage = activeTab === 'published' 
     ? '公開済みの記事がありません' 
@@ -79,7 +42,7 @@ export function MyArticlesListPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">マイ記事一覧</h1>
         <Button
-          onClick={handleNewArticle}
+          onClick={onNewArticle}
           className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -92,7 +55,7 @@ export function MyArticlesListPage() {
         <div className="border-b border-gray-200">
           <nav className="flex gap-8 px-6">
             <button
-              onClick={() => setActiveTab('published')}
+              onClick={() => onTabChange('published')}
               className={`py-4 border-b-2 ${
                 activeTab === 'published'
                   ? 'border-[var(--brand-primary)] text-[var(--brand-text)] font-medium'
@@ -102,7 +65,7 @@ export function MyArticlesListPage() {
               公開済み ({publishedArticles.length})
             </button>
             <button
-              onClick={() => setActiveTab('drafts')}
+              onClick={() => onTabChange('drafts')}
               className={`py-4 border-b-2 ${
                 activeTab === 'drafts'
                   ? 'border-[var(--brand-primary)] text-[var(--brand-text)] font-medium'
@@ -120,7 +83,7 @@ export function MyArticlesListPage() {
             <div className="text-center py-16">
               <p className="text-gray-500 text-lg mb-6">{emptyMessage}</p>
               <Button
-                onClick={handleNewArticle}
+                onClick={onNewArticle}
                 className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -146,7 +109,7 @@ export function MyArticlesListPage() {
                     id={article.id!}
                     title={article.title ?? '無題'}
                     updatedAt={article.updatedAt ?? ''}
-                    onDelete={() => handleDelete(article.id!, article.title ?? '無題')}
+                    onDelete={() => onDelete(article.id!, article.title ?? '無題')}
                   />
                 ))
               )}

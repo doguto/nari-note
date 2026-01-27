@@ -2,75 +2,37 @@
 
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
-import { useGetArticle, useToggleLike } from '@/lib/api';
-import { LoadingSpinner, ErrorMessage, LikeButton } from '@/components/ui';
-import { CommentForm } from './CommentForm';
-import { CommentList } from './CommentList';
+import { LikeButton } from '@/components/ui';
+import { CommentForm } from '../organisms/CommentForm';
+import { CommentList } from '../organisms/CommentList';
 import { Comment } from '@/types/comment';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
-import { useAuth } from '@/lib/providers/AuthProvider';
+import { GetArticleResponse } from '@/lib/api/types';
 
-interface ArticleDetailPageProps {
-  articleId: number;
+interface ArticleDetailTemplateProps {
+  article: GetArticleResponse;
+  comments: Comment[];
+  isOwnArticle: boolean;
+  isLikePending: boolean;
+  onLikeClick: () => void;
+  onCommentSuccess: () => void;
 }
 
 /**
- * ArticleDetailPage - Organism Component
+ * ArticleDetailTemplate - Template Component
  * 
- * 記事詳細ページの完全な機能を持つコンポーネント
- * Atomic Designパターンにおける Organism として、
- * ビジネスロジックと UI を統合
+ * 記事詳細ページのUI構成とレイアウトを担当
+ * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
  */
-export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
-  const { userId } = useAuth();
-  const { data: article, isLoading, error, refetch } = useGetArticle({ id: articleId });
-  const { mutate: toggleLike, isPending: isLikePending } = useToggleLike({
-    onSuccess: () => {
-      // いいね成功時、記事データを再取得
-      refetch();
-    },
-  });
-
-  const handleCommentSuccess = () => {
-    // コメント投稿後、記事データを再取得してコメント一覧を更新
-    refetch();
-  };
-
-  const handleLikeClick = () => {
-    if (isLikePending) return;
-    toggleLike({ articleId: articleId });
-  };
-
-  if (isLoading) {
-    return <LoadingSpinner text="記事を読み込み中..." />;
-  }
-
-  if (error) {
-    return (
-      <ErrorMessage 
-        message="記事の取得に失敗しました" 
-        onRetry={refetch}
-      />
-    );
-  }
-
-  if (!article) {
-    return <ErrorMessage message="記事が見つかりません" />;
-  }
-
-  // APIから取得したコメントをComment型に変換
-  const comments: Comment[] = (article.comments || []).map(c => ({
-    id: c.id || 0,
-    userId: c.userId || 0,
-    userName: c.userName || '',
-    message: c.message || '',
-    createdAt: c.createdAt || '',
-  }));
-
-  // 自分の記事かどうかを判定
-  const isOwnArticle = userId === article.authorId;
-
+export function ArticleDetailTemplate({
+  article,
+  comments,
+  isOwnArticle,
+  isLikePending,
+  onLikeClick,
+  onCommentSuccess,
+}: ArticleDetailTemplateProps) {
   return (
     <article className="bg-white rounded-lg shadow-lg p-8">
       <div className="flex items-center justify-between mb-6">
@@ -78,7 +40,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
           {article.title}
         </h1>
         {isOwnArticle && (
-          <Link href={`/articles/${articleId}/edit`}>
+          <Link href={`/articles/${article.id}/edit`}>
             <Button
               variant="outline"
               className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-bg-light)]"
@@ -109,7 +71,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
           <LikeButton
             isLiked={article.isLiked || false}
             likeCount={article.likeCount || 0}
-            onClick={handleLikeClick}
+            onClick={onLikeClick}
             disabled={isLikePending}
           />
           <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
@@ -169,7 +131,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
 
       {/* コメント投稿フォーム */}
       <div className="mt-8">
-        <CommentForm articleId={articleId} onSuccess={handleCommentSuccess} />
+        <CommentForm articleId={article.id!} onSuccess={onCommentSuccess} />
       </div>
     </article>
   );

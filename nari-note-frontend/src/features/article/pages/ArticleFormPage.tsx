@@ -2,15 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { TagInput } from '@/components/molecules';
 import { useCreateArticle, useUpdateArticle, useGetArticle } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
-import { PublishSettingsDialog } from './PublishSettingsDialog';
-import {
-  ArticleTitleInput,
-  ArticleBodyEditor,
-  ArticleFormActions,
-} from './';
+import { ArticleFormTemplate } from '../templates/ArticleFormTemplate';
 
 interface ArticleFormPageProps {
   articleId?: number;
@@ -18,11 +12,10 @@ interface ArticleFormPageProps {
 }
 
 /**
- * ArticleFormPage - Organism Component
+ * ArticleFormPage - Page Component
  * 
- * 記事作成・編集ページの完全な機能を持つコンポーネント
- * Atomic Designパターンにおける Organism として、
- * ビジネスロジックと UI を統合
+ * 記事作成・編集ページのロジックを管理するコンポーネント
+ * データフェッチング、状態管理、ビジネスロジックを担当
  * 
  * @param articleId - 編集モード時の記事ID
  * @param mode - 'create' または 'edit' (デフォルト: 'create')
@@ -34,7 +27,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false); // 公開中かどうかを追跡
+  const [isPublishing, setIsPublishing] = useState(false);
   
   const router = useRouter();
   const isEditMode = mode === 'edit' && articleId;
@@ -48,7 +41,6 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const createArticle = useCreateArticle({
     onSuccess: (data) => {
       setHasUnsavedChanges(false);
-      // 公開中フラグで判定
       if (isPublishing) {
         router.push(`/articles/${data.id}`);
       } else {
@@ -66,7 +58,6 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const updateArticle = useUpdateArticle({
     onSuccess: () => {
       setHasUnsavedChanges(false);
-      // 更新後は記事ページへ遷移
       router.push(`/articles/${articleId}`);
       setIsPublishing(false);
     },
@@ -87,9 +78,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     }
   }, [isEditMode, article, isInitialized]);
 
-  const characterCount = body.length;
   const maxCharacters = 65535;
-  const isOverLimit = characterCount > maxCharacters;
 
   // フォームの変更を追跡
   useEffect(() => {
@@ -150,15 +139,9 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     return true;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // フォーム送信は使用しない（ボタンで個別に処理）
-  };
-
   const handlePublish = (publishedAt?: string) => {
-    setIsPublishing(true); // 公開中フラグを設定
+    setIsPublishing(true);
     if (isEditMode) {
-      // 編集モード: 記事を更新
       updateArticle.mutate({
         id: articleId,
         title: title.trim(),
@@ -168,7 +151,6 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         publishedAt: publishedAt,
       });
     } else {
-      // 作成モード: 新規記事を作成
       createArticle.mutate({
         title: title.trim(),
         body: body,
@@ -178,7 +160,6 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
       });
     }
     
-    // ダイアログを閉じる
     setShowPublishDialog(false);
   };
 
@@ -188,17 +169,15 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     }
 
     if (isEditMode) {
-      // 編集モード: 記事を更新（公開状態を保持）
       updateArticle.mutate({
         id: articleId,
         title: title.trim(),
         body: body,
         tags: tags,
         isPublished: article?.isPublished || false,
-        publishedAt: article?.publishedAt, // 既存のpublishedAtを保持
+        publishedAt: article?.publishedAt,
       });
     } else {
-      // 作成モード: 下書きとして保存（publishedAtなし）
       createArticle.mutate({
         title: title.trim(),
         body: body,
@@ -214,39 +193,28 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
       return;
     }
 
-    // バリデーションが通ったら、投稿設定ダイアログを開く
     setShowPublishDialog(true);
   };
 
-  // 編集モード時は初期化完了まで待つ
-  const isFormDisabled = (isEditMode && !isInitialized) || !title || tags.length === 0 || isOverLimit;
+  const isFormDisabled = (isEditMode && !isInitialized) || !title || tags.length === 0 || body.length > maxCharacters;
   const isLoading = createArticle.isPending || updateArticle.isPending;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <ArticleFormActions
-        onSave={handleSave}
-        onOpenPublishSettings={handleOpenPublishSettings}
-        isLoading={isLoading}
-        isDisabled={isFormDisabled}
-      />
-
-      <ArticleTitleInput value={title} onChange={setTitle} />
-
-      <TagInput tags={tags} onTagsChange={setTags} />
-
-      <ArticleBodyEditor
-        value={body}
-        onChange={setBody}
-        maxCharacters={maxCharacters}
-      />
-
-      <PublishSettingsDialog
-        open={showPublishDialog}
-        onOpenChange={setShowPublishDialog}
-        onPublish={handlePublish}
-        isLoading={createArticle.isPending || updateArticle.isPending}
-      />
-    </form>
+    <ArticleFormTemplate
+      title={title}
+      body={body}
+      tags={tags}
+      maxCharacters={maxCharacters}
+      showPublishDialog={showPublishDialog}
+      isLoading={isLoading}
+      isFormDisabled={isFormDisabled}
+      onTitleChange={setTitle}
+      onBodyChange={setBody}
+      onTagsChange={setTags}
+      onSave={handleSave}
+      onOpenPublishSettings={handleOpenPublishSettings}
+      onPublish={handlePublish}
+      onPublishDialogChange={setShowPublishDialog}
+    />
   );
 }

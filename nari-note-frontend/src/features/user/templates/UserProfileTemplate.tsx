@@ -1,103 +1,86 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useGetUserProfile, useToggleFollow, useGetFollowers, useGetFollowings, useGetArticlesByAuthor, useGetLikedArticles } from '@/lib/api';
-import { LoadingSpinner, ErrorMessage, FollowButton, FollowStats } from '@/components/ui';
-import { useAuth } from '@/lib/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
+import { FollowButton, FollowStats, LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { UserListItem } from '@/components/molecules';
-import { ArticleList } from './ArticleList';
+import { ArticleList } from '../organisms/ArticleList';
+import type { GetUserProfileResponse, GetArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
-interface UserProfilePageProps {
-  userId: number;
+interface UserProfileTemplateProps {
+  // ユーザー情報
+  user: GetUserProfileResponse;
+  isOwnProfile: boolean;
+  
+  // タブ状態
+  activeTab: string;
+  tabContext: 'content' | 'follow';
+  
+  // コンテンツデータ
+  articlesData?: GetArticlesResponse;
+  likedArticlesData?: GetArticlesResponse;
+  followersData?: GetFollowersResponse;
+  followingsData?: GetFollowingsResponse;
+  
+  // ローディング・エラー状態
+  isArticlesLoading: boolean;
+  isLikedArticlesLoading: boolean;
+  isFollowersLoading: boolean;
+  isFollowingsLoading: boolean;
+  
+  articlesError: Error | null;
+  likedArticlesError: Error | null;
+  followersError: Error | null;
+  followingsError: Error | null;
+  
+  // フォローボタン状態
+  isFollowPending: boolean;
+  
+  // イベントハンドラ
+  onTabChange: (tab: string) => void;
+  onArticlesClick: () => void;
+  onFollowClick: () => void;
+  onArticlesRetry: () => void;
+  onLikedArticlesRetry: () => void;
+  onFollowersRetry: () => void;
+  onFollowingsRetry: () => void;
 }
 
 /**
- * UserProfilePage - Organism Component
+ * UserProfileTemplate - Template Component
  * 
- * ユーザープロフィールページの完全な機能を持つコンポーネント
- * Atomic Designパターンにおける Organism として、
- * ビジネスロジックと UI を統合
+ * ユーザープロフィールページのUI構成を担当するテンプレートコンポーネント
+ * レイアウトとコンポーネント配置を定義
  */
-export function UserProfilePage({ userId }: UserProfilePageProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'articles';
-  
-  // タブコンテキストを判定（content系 or follow系）
-  const tabContext = ['followers', 'followings'].includes(activeTab) ? 'follow' : 'content';
-  
-  const { data: user, isLoading, error, refetch } = useGetUserProfile({ id: userId });
-  const { userId: currentUserId } = useAuth();
-  const { mutate: toggleFollow, isPending: isFollowPending } = useToggleFollow({
-    onSuccess: () => {
-      // フォロー/フォロー解除成功時にプロフィールを再取得
-      refetch();
-    },
-  });
-  
-  // フォロワー一覧取得（タブがfollowersの場合のみ）
-  const { data: followersData, isLoading: isFollowersLoading, error: followersError, refetch: refetchFollowers } = useGetFollowers(
-    { userId: userId },
-    { enabled: activeTab === 'followers' }
-  );
-  
-  // フォロー中一覧取得（タブがfollowingsの場合のみ）
-  const { data: followingsData, isLoading: isFollowingsLoading, error: followingsError, refetch: refetchFollowings } = useGetFollowings(
-    { userId: userId },
-    { enabled: activeTab === 'followings' }
-  );
-  
-  // ユーザーの記事取得（タブがarticlesの場合のみ）
-  const { data: articlesData, isLoading: isArticlesLoading, error: articlesError, refetch: refetchArticles } = useGetArticlesByAuthor(
-    { authorId: userId },
-    { enabled: activeTab === 'articles' }
-  );
-  
-  // いいねした記事取得（タブがlikesの場合のみ）
-  const { data: likedArticlesData, isLoading: isLikedArticlesLoading, error: likedArticlesError, refetch: refetchLikedArticles } = useGetLikedArticles(
-    { userId: userId },
-    { enabled: activeTab === 'likes' }
-  );
-  
-  const isOwnProfile = currentUserId === userId;
-
-  // フォローボタンクリックハンドラ
-  const handleFollowClick = () => {
-    if (isFollowPending) return;
-    toggleFollow({ followingId: userId });
-  };
-  
-  // タブ切り替えハンドラ
-  const handleTabChange = (tab: string) => {
-    router.push(`/users/${userId}?tab=${tab}`);
-  };
-  
-  // 記事数クリックハンドラ（contentタブに切り替え）
-  const handleArticlesClick = () => {
-    router.push(`/users/${userId}?tab=articles`);
-  };
-
-  if (isLoading) {
-    return <LoadingSpinner text="ユーザー情報を読み込み中..." />;
-  }
-
-  if (error) {
-    return (
-      <ErrorMessage 
-        message="ユーザー情報の取得に失敗しました" 
-        onRetry={refetch}
-      />
-    );
-  }
-
-  if (!user) {
-    return <ErrorMessage message="ユーザーが見つかりません" />;
-  }
-
+export function UserProfileTemplate({
+  user,
+  isOwnProfile,
+  activeTab,
+  tabContext,
+  articlesData,
+  likedArticlesData,
+  followersData,
+  followingsData,
+  isArticlesLoading,
+  isLikedArticlesLoading,
+  isFollowersLoading,
+  isFollowingsLoading,
+  articlesError,
+  likedArticlesError,
+  followersError,
+  followingsError,
+  isFollowPending,
+  onTabChange,
+  onArticlesClick,
+  onFollowClick,
+  onArticlesRetry,
+  onLikedArticlesRetry,
+  onFollowersRetry,
+  onFollowingsRetry,
+}: UserProfileTemplateProps) {
   return (
     <div className="space-y-6">
+      {/* プロフィールカード */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-start gap-6">
           <div className="w-24 h-24 bg-brand-primary rounded-full flex items-center justify-center text-white text-4xl font-bold flex-shrink-0">
@@ -120,7 +103,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
             
             <div className="flex gap-6 text-sm text-gray-600">
               <button
-                onClick={handleArticlesClick}
+                onClick={onArticlesClick}
                 className="hover:opacity-70 transition-opacity cursor-pointer"
               >
                 <span className="font-bold text-brand-text">{user.articleCount ?? 0}</span>
@@ -129,12 +112,12 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
               <FollowStats
                 label="フォロワー"
                 count={user.followerCount || 0}
-                onClick={() => handleTabChange('followers')}
+                onClick={() => onTabChange('followers')}
               />
               <FollowStats
                 label="フォロー中"
                 count={user.followingCount || 0}
-                onClick={() => handleTabChange('followings')}
+                onClick={() => onTabChange('followings')}
               />
             </div>
           </div>
@@ -148,7 +131,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
           ) : (
             <FollowButton
               isFollowing={user.isFollowing || false}
-              onClick={handleFollowClick}
+              onClick={onFollowClick}
               disabled={isFollowPending}
             />
           )}
@@ -163,7 +146,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
               <>
                 {/* コンテンツタブ（記事/いいね/フォロー中のタグ） */}
                 <button
-                  onClick={() => handleTabChange('articles')}
+                  onClick={() => onTabChange('articles')}
                   className={`py-4 border-b-2 ${
                     activeTab === 'articles'
                       ? 'border-brand-primary text-brand-text font-medium'
@@ -173,7 +156,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
                   記事
                 </button>
                 <button
-                  onClick={() => handleTabChange('likes')}
+                  onClick={() => onTabChange('likes')}
                   className={`py-4 border-b-2 ${
                     activeTab === 'likes'
                       ? 'border-brand-primary text-brand-text font-medium'
@@ -183,7 +166,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
                   いいね
                 </button>
                 <button
-                  onClick={() => handleTabChange('following-tags')}
+                  onClick={() => onTabChange('following-tags')}
                   className={`py-4 border-b-2 ${
                     activeTab === 'following-tags'
                       ? 'border-brand-primary text-brand-text font-medium'
@@ -197,7 +180,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
               <>
                 {/* フォロータブ（フォロワー/フォロー中） */}
                 <button
-                  onClick={() => handleTabChange('followers')}
+                  onClick={() => onTabChange('followers')}
                   className={`py-4 border-b-2 ${
                     activeTab === 'followers'
                       ? 'border-brand-primary text-brand-text font-medium'
@@ -207,7 +190,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
                   フォロワー
                 </button>
                 <button
-                  onClick={() => handleTabChange('followings')}
+                  onClick={() => onTabChange('followings')}
                   className={`py-4 border-b-2 ${
                     activeTab === 'followings'
                       ? 'border-brand-primary text-brand-text font-medium'
@@ -228,7 +211,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
               articles={articlesData?.articles}
               isLoading={isArticlesLoading}
               error={articlesError}
-              onRetry={refetchArticles}
+              onRetry={onArticlesRetry}
               emptyMessage="まだ記事がありません"
             />
           )}
@@ -238,7 +221,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
               articles={likedArticlesData?.articles}
               isLoading={isLikedArticlesLoading}
               error={likedArticlesError}
-              onRetry={refetchLikedArticles}
+              onRetry={onLikedArticlesRetry}
               emptyMessage="いいねした記事がありません"
             />
           )}
@@ -261,7 +244,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
                 <div className="py-4">
                   <ErrorMessage 
                     message="フォロワーの取得に失敗しました" 
-                    onRetry={refetchFollowers}
+                    onRetry={onFollowersRetry}
                   />
                 </div>
               )}
@@ -301,7 +284,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
                 <div className="py-4">
                   <ErrorMessage 
                     message="フォロー中のユーザーの取得に失敗しました" 
-                    onRetry={refetchFollowings}
+                    onRetry={onFollowingsRetry}
                   />
                 </div>
               )}

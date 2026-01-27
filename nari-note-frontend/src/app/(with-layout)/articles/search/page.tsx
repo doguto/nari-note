@@ -1,4 +1,4 @@
-import { ArticleSearchPage as ArticleSearchPageComponent } from '@/features/article/organisms';
+import { ArticleSearchPage as ArticleSearchPageComponent } from '@/features/article/pages';
 
 export default function ArticleSearchPage() {
   return <ArticleSearchPageComponent />;
