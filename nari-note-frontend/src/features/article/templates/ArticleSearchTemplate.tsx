@@ -80,6 +80,7 @@ export function ArticleSearchTemplate({
                 title={article.title ?? ''}
                 author={article.authorName ?? ''}
                 authorId={article.authorId ?? 0}
+                tags={article.tags ?? []}
                 likeCount={article.likeCount ?? 0}
                 date={article.publishedAt 
                   ? new Date(article.publishedAt).toLocaleDateString('ja-JP') 
