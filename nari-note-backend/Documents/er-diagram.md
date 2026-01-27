@@ -78,6 +78,7 @@ Course {
     id integer PK
     user_id integer FK
     name varchar(100)
+    course_order integer
     created_at datetime
     updated_at datetime
 }

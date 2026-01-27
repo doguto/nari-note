@@ -20,6 +20,8 @@ public class Course : EntityBase
     [MaxLength(100)]
     public required string Name { get; set; }
 
+    public int CourseOrder { get; set; }
+
     // Navigation Properties
     public User User { get; set; }
     public List<CourseLike> CourseLikes { get; set; } = new();
