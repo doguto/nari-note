@@ -44,10 +44,8 @@ public class CourseLikeRepository : ICourseLikeRepository
 
     public async Task DeleteAsync(CourseLikeId id)
     {
-        var courseLike = await context.CourseLikes.FindAsync(id);
-        if (courseLike == null) return;
-
-        context.CourseLikes.Remove(courseLike);
-        await context.SaveChangesAsync();
+        await context.CourseLikes
+            .Where(cl => cl.Id == id)
+            .ExecuteDeleteAsync();
     }
 }

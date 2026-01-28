@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NariNoteBackend.Migrations
 {
     [DbContext(typeof(NariNoteDbContext))]
-    [Migration("20260127170925_AddCourseOrderColumn")]
-    partial class AddCourseOrderColumn
+    [Migration("20260128044836_AddArticleOrderColumn")]
+    partial class AddArticleOrderColumn
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,6 +28,9 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
                 {
                     b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ArticleOrder")
                         .HasColumnType("integer");
 
                     b.Property<int>("AuthorId")
@@ -131,9 +134,6 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Course", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CourseOrder")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")

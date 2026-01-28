@@ -52,6 +52,7 @@ Article {
     id integer PK
     author_id integer FK
     course_id integer FK "nullable"
+    article_order integer "nullable"
     title varchar(50)
     body varchar(10000)
     is_published boolean
@@ -78,7 +79,6 @@ Course {
     id integer PK
     user_id integer FK
     name varchar(100)
-    course_order integer
     created_at datetime
     updated_at datetime
 }

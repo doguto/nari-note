@@ -44,10 +44,8 @@ public class CourseRepository : ICourseRepository
 
     public async Task DeleteAsync(CourseId id)
     {
-        var course = await context.Courses.FindAsync(id);
-        if (course == null) return;
-
-        context.Courses.Remove(course);
-        await context.SaveChangesAsync();
+        await context.Courses
+            .Where(c => c.Id == id)
+            .ExecuteDeleteAsync();
     }
 }

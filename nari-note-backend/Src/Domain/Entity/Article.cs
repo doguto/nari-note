@@ -20,6 +20,8 @@ public class Article : EntityBase
     [ForeignKey("Course")]
     public CourseId? CourseId { get; set; }
 
+    public int? ArticleOrder { get; set; }
+
     [Required]
     [MaxLength(50)]
     public required string Title { get; set; }

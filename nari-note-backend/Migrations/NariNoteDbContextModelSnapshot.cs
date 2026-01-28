@@ -27,6 +27,9 @@ namespace NariNoteBackend.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ArticleOrder")
+                        .HasColumnType("integer");
+
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer");
 
@@ -128,9 +131,6 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Course", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CourseOrder")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
