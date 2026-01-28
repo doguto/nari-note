@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCreateArticle, useUpdateArticle, useGetArticle } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { FormPageLayout } from '@/components/molecules';
 import { ArticleFormTemplate } from '../templates/ArticleFormTemplate';
 
 interface ArticleFormPageProps {
@@ -205,22 +206,27 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const isFormDisabled = !isInitializationComplete || !hasValidTitle || !hasValidTags || !isWithinLimit;
   const isLoading = createArticle.isPending || updateArticle.isPending;
 
+  const pageTitle = isEditMode ? '記事を編集' : '新規記事作成';
+  const pageDescription = 'マークダウン形式で記事を作成できます。プレビュー機能を使用して、公開前に記事の見た目を確認できます。';
+
   return (
-    <ArticleFormTemplate
-      title={title}
-      body={body}
-      tags={tags}
-      maxCharacters={maxCharacters}
-      showPublishDialog={showPublishDialog}
-      isLoading={isLoading}
-      isFormDisabled={isFormDisabled}
-      onTitleChange={setTitle}
-      onBodyChange={setBody}
-      onTagsChange={setTags}
-      onSave={handleSave}
-      onOpenPublishSettings={handleOpenPublishSettings}
-      onPublish={handlePublish}
-      onPublishDialogChange={setShowPublishDialog}
-    />
+    <FormPageLayout title={pageTitle} description={pageDescription}>
+      <ArticleFormTemplate
+        title={title}
+        body={body}
+        tags={tags}
+        maxCharacters={maxCharacters}
+        showPublishDialog={showPublishDialog}
+        isLoading={isLoading}
+        isFormDisabled={isFormDisabled}
+        onTitleChange={setTitle}
+        onBodyChange={setBody}
+        onTagsChange={setTags}
+        onSave={handleSave}
+        onOpenPublishSettings={handleOpenPublishSettings}
+        onPublish={handlePublish}
+        onPublishDialogChange={setShowPublishDialog}
+      />
+    </FormPageLayout>
   );
 }

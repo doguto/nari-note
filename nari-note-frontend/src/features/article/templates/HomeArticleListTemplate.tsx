@@ -1,6 +1,7 @@
 'use client';
 
 import { ArticleCard } from '@/components/molecules';
+import { EmptyState } from '@/components/ui';
 import { ArticleDto } from '@/lib/api/types';
 
 interface HomeArticleListTemplateProps {
@@ -14,6 +15,10 @@ interface HomeArticleListTemplateProps {
  * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
  */
 export function HomeArticleListTemplate({ articles }: HomeArticleListTemplateProps) {
+  if (articles.length === 0) {
+    return <EmptyState title="まだ記事がありません" />;
+  }
+
   return (
     <div className="space-y-4">
       {articles.map((article) => (

@@ -2,6 +2,7 @@
 
 import { useGetArticles } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { HeroSection, MainContentSection } from '@/features/global/organisms';
 import { HomeArticleListTemplate } from '../templates/HomeArticleListTemplate';
 
 /**
@@ -26,16 +27,15 @@ export function HomeArticleListPage() {
     );
   }
 
-  if (!data?.articles || data.articles.length === 0) {
-    return <p className="text-gray-500 text-center py-8">まだ記事がありません</p>;
-  }
-
   // IDが存在しない記事をフィルタリング
-  const articlesWithId = data.articles.filter((article) => article.id !== null && article.id !== undefined);
+  const articlesWithId = data?.articles?.filter((article) => article.id !== null && article.id !== undefined) || [];
 
-  if (articlesWithId.length === 0) {
-    return <p className="text-gray-500 text-center py-8">有効な記事がありません</p>;
-  }
-
-  return <HomeArticleListTemplate articles={articlesWithId} />;
+  return (
+    <>
+      <HeroSection />
+      <MainContentSection title="新着記事">
+        <HomeArticleListTemplate articles={articlesWithId} />
+      </MainContentSection>
+    </>
+  );
 }
