@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useGetArticlesByAuthor, useDeleteArticle } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { MyArticlesListTemplate } from '../templates/MyArticlesListTemplate';
 
 /**
@@ -65,14 +66,16 @@ export function MyArticlesListPage() {
   const draftArticles = allArticles.filter(article => !article.isPublished);
 
   return (
-    <MyArticlesListTemplate
-      activeTab={activeTab}
-      publishedArticles={publishedArticles}
-      draftArticles={draftArticles}
-      deletingId={deletingId}
-      onTabChange={setActiveTab}
-      onNewArticle={handleNewArticle}
-      onDelete={handleDelete}
-    />
+    <PageWithSidebar>
+      <MyArticlesListTemplate
+        activeTab={activeTab}
+        publishedArticles={publishedArticles}
+        draftArticles={draftArticles}
+        deletingId={deletingId}
+        onTabChange={setActiveTab}
+        onNewArticle={handleNewArticle}
+        onDelete={handleDelete}
+      />
+    </PageWithSidebar>
   );
 }

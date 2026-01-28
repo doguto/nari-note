@@ -2,6 +2,7 @@
 
 import { useGetArticlesByTag } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { TagArticleListTemplate } from '../templates/TagArticleListTemplate';
 
 interface TagArticleListPageProps {
@@ -32,5 +33,9 @@ export function TagArticleListPage({ tag }: TagArticleListPageProps) {
 
   const articles = data?.articles ?? [];
 
-  return <TagArticleListTemplate tag={tag} articles={articles} />;
+  return (
+    <PageWithSidebar>
+      <TagArticleListTemplate tag={tag} articles={articles} />
+    </PageWithSidebar>
+  );
 }

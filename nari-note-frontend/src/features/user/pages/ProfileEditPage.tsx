@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { FormPageLayout } from '@/components/molecules';
 import { useGetUserProfile, useUpdateUserProfile } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import type { GetUserProfileResponse } from '@/lib/api/types';
@@ -151,22 +152,28 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
   }
 
   return (
-    <ProfileEditTemplate
-      username={username}
-      bio={bio}
-      errors={errors}
-      generalError={generalError}
-      hasChanges={hasChanges}
-      isSubmitting={updateProfile.isPending}
-      showCancelConfirm={showCancelConfirm}
-      onUsernameChange={setUsername}
-      onBioChange={setBio}
-      onImageSelect={handleImageSelect}
-      onImageRemove={handleImageRemove}
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
-      onConfirmCancel={handleConfirmCancel}
-      onCancelConfirmClose={() => setShowCancelConfirm(false)}
-    />
+    <FormPageLayout 
+      title="プロフィール編集"
+      description="ユーザー名、自己紹介、プロフィール画像を編集できます。変更内容は保存ボタンを押すまで反映されません。"
+      maxWidth="medium"
+    >
+      <ProfileEditTemplate
+        username={username}
+        bio={bio}
+        errors={errors}
+        generalError={generalError}
+        hasChanges={hasChanges}
+        isSubmitting={updateProfile.isPending}
+        showCancelConfirm={showCancelConfirm}
+        onUsernameChange={setUsername}
+        onBioChange={setBio}
+        onImageSelect={handleImageSelect}
+        onImageRemove={handleImageRemove}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        onConfirmCancel={handleConfirmCancel}
+        onCancelConfirmClose={() => setShowCancelConfirm(false)}
+      />
+    </FormPageLayout>
   );
 }

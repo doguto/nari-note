@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSignUp } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { AuthPageLayout } from '@/components/molecules';
 import { SignUpTemplate } from '../templates/SignUpTemplate';
 
 /**
@@ -70,18 +71,20 @@ export function SignUpPage() {
   };
 
   return (
-    <SignUpTemplate
-      name={name}
-      email={email}
-      password={password}
-      passwordConfirm={passwordConfirm}
-      error={error}
-      isLoading={signUpMutation.isPending}
-      onNameChange={setName}
-      onEmailChange={setEmail}
-      onPasswordChange={setPassword}
-      onPasswordConfirmChange={setPasswordConfirm}
-      onSubmit={handleSubmit}
-    />
+    <AuthPageLayout>
+      <SignUpTemplate
+        name={name}
+        email={email}
+        password={password}
+        passwordConfirm={passwordConfirm}
+        error={error}
+        isLoading={signUpMutation.isPending}
+        onNameChange={setName}
+        onEmailChange={setEmail}
+        onPasswordChange={setPassword}
+        onPasswordConfirmChange={setPasswordConfirm}
+        onSubmit={handleSubmit}
+      />
+    </AuthPageLayout>
   );
 }

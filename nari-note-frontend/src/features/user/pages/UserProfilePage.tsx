@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetUserProfile, useToggleFollow, useGetFollowers, useGetFollowings, useGetArticlesByAuthor, useGetLikedArticles } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { UserProfileTemplate } from '../templates/UserProfileTemplate';
 
 interface UserProfilePageProps {
@@ -93,31 +94,33 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
   }
 
   return (
-    <UserProfileTemplate
-      user={user}
-      isOwnProfile={isOwnProfile}
-      activeTab={activeTab}
-      tabContext={tabContext}
-      articlesData={articlesData}
-      likedArticlesData={likedArticlesData}
-      followersData={followersData}
-      followingsData={followingsData}
-      isArticlesLoading={isArticlesLoading}
-      isLikedArticlesLoading={isLikedArticlesLoading}
-      isFollowersLoading={isFollowersLoading}
-      isFollowingsLoading={isFollowingsLoading}
-      articlesError={articlesError}
-      likedArticlesError={likedArticlesError}
-      followersError={followersError}
-      followingsError={followingsError}
-      isFollowPending={isFollowPending}
-      onTabChange={handleTabChange}
-      onArticlesClick={handleArticlesClick}
-      onFollowClick={handleFollowClick}
-      onArticlesRetry={refetchArticles}
-      onLikedArticlesRetry={refetchLikedArticles}
-      onFollowersRetry={refetchFollowers}
-      onFollowingsRetry={refetchFollowings}
-    />
+    <PageWithSidebar>
+      <UserProfileTemplate
+        user={user}
+        isOwnProfile={isOwnProfile}
+        activeTab={activeTab}
+        tabContext={tabContext}
+        articlesData={articlesData}
+        likedArticlesData={likedArticlesData}
+        followersData={followersData}
+        followingsData={followingsData}
+        isArticlesLoading={isArticlesLoading}
+        isLikedArticlesLoading={isLikedArticlesLoading}
+        isFollowersLoading={isFollowersLoading}
+        isFollowingsLoading={isFollowingsLoading}
+        articlesError={articlesError}
+        likedArticlesError={likedArticlesError}
+        followersError={followersError}
+        followingsError={followingsError}
+        isFollowPending={isFollowPending}
+        onTabChange={handleTabChange}
+        onArticlesClick={handleArticlesClick}
+        onFollowClick={handleFollowClick}
+        onArticlesRetry={refetchArticles}
+        onLikedArticlesRetry={refetchLikedArticles}
+        onFollowersRetry={refetchFollowers}
+        onFollowingsRetry={refetchFollowings}
+      />
+    </PageWithSidebar>
   );
 }

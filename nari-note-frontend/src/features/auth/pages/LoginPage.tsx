@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSignIn } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { AuthPageLayout } from '@/components/molecules';
 import { LoginTemplate } from '../templates/LoginTemplate';
 
 /**
@@ -72,14 +73,16 @@ export function LoginPage() {
   };
 
   return (
-    <LoginTemplate
-      email={email}
-      password={password}
-      error={error}
-      isLoading={signInMutation.isPending}
-      onEmailChange={setEmail}
-      onPasswordChange={setPassword}
-      onSubmit={handleSubmit}
-    />
+    <AuthPageLayout>
+      <LoginTemplate
+        email={email}
+        password={password}
+        error={error}
+        isLoading={signInMutation.isPending}
+        onEmailChange={setEmail}
+        onPasswordChange={setPassword}
+        onSubmit={handleSubmit}
+      />
+    </AuthPageLayout>
   );
 }

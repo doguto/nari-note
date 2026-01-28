@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetDraftArticles, useDeleteArticle } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { DraftArticleListTemplate } from '../templates/DraftArticleListTemplate';
 
 /**
@@ -57,11 +58,13 @@ export function DraftArticleListPage() {
   const articles = data?.articles || [];
 
   return (
-    <DraftArticleListTemplate
-      articles={articles}
-      deletingId={deletingId}
-      onNewArticle={handleNewArticle}
-      onDelete={handleDelete}
-    />
+    <PageWithSidebar>
+      <DraftArticleListTemplate
+        articles={articles}
+        deletingId={deletingId}
+        onNewArticle={handleNewArticle}
+        onDelete={handleDelete}
+      />
+    </PageWithSidebar>
   );
 }

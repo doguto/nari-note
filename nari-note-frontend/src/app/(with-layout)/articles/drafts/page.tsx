@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import { PageWithSidebar } from '@/features/global/organisms';
 import { DraftArticleListPage } from '@/features/article/pages';
 import { LoadingSpinner } from '@/components/ui';
 
@@ -35,9 +34,5 @@ export default function DraftsPage() {
     return null;
   }
 
-  return (
-    <PageWithSidebar>
-      <DraftArticleListPage />
-    </PageWithSidebar>
-  );
+  return <DraftArticleListPage />;
 }

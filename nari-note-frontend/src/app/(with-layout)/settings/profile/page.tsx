@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { LoadingSpinner } from '@/components/ui';
-import { FormPageLayout } from '@/components/molecules';
 import { ProfileEditPage } from '@/features/user/pages';
 
 /**
@@ -34,13 +33,5 @@ export default function SettingsProfilePage() {
     return null;
   }
 
-  return (
-    <FormPageLayout 
-      title="プロフィール編集"
-      description="ユーザー名、自己紹介、プロフィール画像を編集できます。変更内容は保存ボタンを押すまで反映されません。"
-      maxWidth="medium"
-    >
-      <ProfileEditPage />
-    </FormPageLayout>
-  );
+  return <ProfileEditPage />;
 }

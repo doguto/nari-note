@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import { PageWithSidebar } from '@/features/global/organisms';
 import { MyArticlesListPage } from '@/features/article/pages';
 import { LoadingSpinner } from '@/components/ui';
 
@@ -35,9 +34,5 @@ export default function MyArticlesPage() {
     return null;
   }
 
-  return (
-    <PageWithSidebar>
-      <MyArticlesListPage />
-    </PageWithSidebar>
-  );
+  return <MyArticlesListPage />;
 }

@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import { FormPageLayout } from '@/components/molecules';
 import { LoadingSpinner } from '@/components/ui';
 import { ArticleFormPage } from '@/features/article/pages';
 
@@ -36,12 +35,5 @@ export default function EditArticlePage() {
     return null;
   }
 
-  return (
-    <FormPageLayout 
-      title="記事を編集"
-      description="マークダウン形式で記事を編集できます。プレビュー機能を使用して、公開前に記事の見た目を確認できます。"
-    >
-      <ArticleFormPage articleId={articleId} mode="edit" />
-    </FormPageLayout>
-  );
+  return <ArticleFormPage articleId={articleId} mode="edit" />;
 }
