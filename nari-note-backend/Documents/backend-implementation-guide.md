@@ -192,7 +192,7 @@ public class ArticlesController : ApplicationController
     public async Task<ActionResult> GetArticle(int id)
     {
         var request = new GetArticleRequest { Id = id };
-        var response = await getArticleService.ExecuteAsync(request);
+        var response = await getArticleContentService.ExecuteAsync(request);
         return Ok(response);
     }
     
