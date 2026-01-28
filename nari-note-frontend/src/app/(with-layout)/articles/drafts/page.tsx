@@ -1,7 +1,6 @@
 'use client';
 
-import { useRequireAuth } from '@/lib/hooks';
-import { LoadingSpinner } from '@/components/ui';
+import { AuthGuard } from '@/components/molecules';
 import { DraftArticleListPage } from '@/features/article/pages';
 
 /**
@@ -10,19 +9,9 @@ import { DraftArticleListPage } from '@/features/article/pages';
  * ログインユーザーの下書き記事一覧を表示
  */
 export default function DraftsPage() {
-  const { isLoggedIn, isLoading } = useRequireAuth('/articles/drafts');
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <LoadingSpinner text="読み込み中..." />
-      </div>
-    );
-  }
-
-  if (!isLoggedIn) {
-    return null;
-  }
-
-  return <DraftArticleListPage />;
+  return (
+    <AuthGuard redirectPath="/articles/drafts">
+      <DraftArticleListPage />
+    </AuthGuard>
+  );
 }

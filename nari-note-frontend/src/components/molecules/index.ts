@@ -15,4 +15,5 @@ export { PageHeader } from './PageHeader';
 export { PageContainer } from './PageContainer';
 export { FormPageLayout } from './FormPageLayout';
 export { AuthPageLayout } from './AuthPageLayout';
+export { AuthGuard } from './AuthGuard';
 

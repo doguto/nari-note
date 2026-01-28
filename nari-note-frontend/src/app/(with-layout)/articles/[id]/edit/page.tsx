@@ -1,8 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useRequireAuth } from '@/lib/hooks';
-import { LoadingSpinner } from '@/components/ui';
+import { AuthGuard } from '@/components/molecules';
 import { ArticleFormPage } from '@/features/article/pages';
 
 /**
@@ -12,20 +11,11 @@ import { ArticleFormPage } from '@/features/article/pages';
  */
 export default function EditArticlePage() {
   const params = useParams();
-  const { isLoggedIn, isLoading } = useRequireAuth(`/articles/${params.id}/edit`);
   const articleId = Number(params.id);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <LoadingSpinner text="読み込み中..." />
-      </div>
-    );
-  }
-
-  if (!isLoggedIn) {
-    return null;
-  }
-
-  return <ArticleFormPage articleId={articleId} mode="edit" />;
+  return (
+    <AuthGuard redirectPath={`/articles/${params.id}/edit`}>
+      <ArticleFormPage articleId={articleId} mode="edit" />
+    </AuthGuard>
+  );
 }
