@@ -166,16 +166,16 @@ namespace NariNoteBackend.Controller;
 public class ArticlesController : ApplicationController
 {
     readonly CreateArticleService createArticleService;
-    readonly GetArticleService getArticleService;
+    readonly GetArticleContentService getArticleContentService;
     readonly DeleteArticleService deleteArticleService;
     
     public ArticlesController(
         CreateArticleService createArticleService,
-        GetArticleService getArticleService,
+        GetArticleContentService getArticleContentService,
         DeleteArticleService deleteArticleService)
     {
         this.createArticleService = createArticleService;
-        this.getArticleService = getArticleService;
+        this.getArticleContentService = getArticleContentService;
         this.deleteArticleService = deleteArticleService;
     }
     
@@ -192,7 +192,7 @@ public class ArticlesController : ApplicationController
     public async Task<ActionResult> GetArticle(int id)
     {
         var request = new GetArticleRequest { Id = id };
-        var response = await getArticleService.ExecuteAsync(request);
+        var response = await getArticleContentService.ExecuteAsync(request);
         return Ok(response);
     }
     
@@ -389,7 +389,7 @@ public class UpdateArticleService
 #### Service実装のルール
 
 1. **API一個につきService一個の粒度**
-   - `GET /api/articles/{id}` → `GetArticleService`
+   - `GET /api/articles/{id}` → `GetArticleContentService`
    - `POST /api/articles` → `CreateArticleService`
    - `DELETE /api/articles/{id}` → `DeleteArticleService`
 
