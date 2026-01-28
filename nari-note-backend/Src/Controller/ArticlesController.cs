@@ -16,7 +16,7 @@ public class ArticlesController : ApplicationController
     readonly DeleteArticleService deleteArticleService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticlesByTagService getArticlesByTagService;
-    readonly GetArticleService getArticleService;
+    readonly GetArticleContentService getArticleContentService;
     readonly GetArticlesService getArticlesService;
     readonly GetDraftArticlesService getDraftArticlesService;
     readonly SearchArticlesService searchArticlesService;
@@ -29,7 +29,7 @@ public class ArticlesController : ApplicationController
         GetArticlesService getArticlesService,
         GetArticlesByAuthorService getArticlesByAuthorService,
         GetArticlesByTagService getArticlesByTagService,
-        GetArticleService getArticleService,
+        GetArticleContentService getArticleContentService,
         DeleteArticleService deleteArticleService,
         ToggleLikeService toggleLikeService,
         GetDraftArticlesService getDraftArticlesService,
@@ -42,7 +42,7 @@ public class ArticlesController : ApplicationController
         this.getArticlesService = getArticlesService;
         this.getArticlesByAuthorService = getArticlesByAuthorService;
         this.getArticlesByTagService = getArticlesByTagService;
-        this.getArticleService = getArticleService;
+        this.getArticleContentService = getArticleContentService;
         this.deleteArticleService = deleteArticleService;
         this.toggleLikeService = toggleLikeService;
         this.getDraftArticlesService = getDraftArticlesService;
@@ -76,7 +76,7 @@ public class ArticlesController : ApplicationController
     public async Task<ActionResult> GetArticle(ArticleId id)
     {
         var request = new GetArticleRequest { Id = id };
-        var response = await getArticleService.ExecuteAsync(request, UserId);
+        var response = await getArticleContentService.ExecuteAsync(request, UserId);
         return Ok(response);
     }
 

@@ -90,7 +90,7 @@ nari-note-backend/
 │   └── TagsController.cs
 ├── Application/              # Business Logic層
 │   ├── Service/
-│   │   ├── GetArticleService.cs
+│   │   ├── GetArticleContentService.cs
 │   │   ├── CreateArticleService.cs
 │   │   ├── UpdateArticleService.cs
 │   │   ├── DeleteArticleService.cs
@@ -251,12 +251,12 @@ public class ArticleRepository : IArticleRepository
 **API一個につきService一個**の粒度でビジネスロジックを実装。
 
 ```csharp
-// Application/Services/GetArticleService.cs
-public class GetArticleService
+// Application/Services/GetArticleContentService.cs
+public class GetArticleContentService
 {
     private readonly IArticleRepository _articleRepository;
     
-    public GetArticleService(IArticleRepository articleRepository)
+    public GetArticleContentService(IArticleRepository articleRepository)
     {
         _articleRepository = articleRepository;
     }
@@ -277,16 +277,16 @@ Serviceを呼び出してHTTPリクエストを処理。
 [Route("api/[controller]")]
 public class ArticlesController : ControllerBase
 {
-    private readonly GetArticleService _getArticleService;
+    private readonly GetArticleContentService _getArticleContentService;
     private readonly CreateArticleService _createArticleService;
     private readonly ToggleLikeService _toggleLikeService;
     
     public ArticlesController(
-        GetArticleService getArticleService,
+        GetArticleContentService getArticleContentService,
         CreateArticleService createArticleService,
         ToggleLikeService toggleLikeService)
     {
-        _getArticleService = getArticleService;
+        _getArticleContentService = getArticleContentService;
         _createArticleService = createArticleService;
         _toggleLikeService = toggleLikeService;
     }
@@ -322,7 +322,7 @@ builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Service登録（API一個につき一個）
-builder.Services.AddScoped<GetArticleService>();
+builder.Services.AddScoped<GetArticleContentService>();
 
 builder.Services.AddControllers();
 

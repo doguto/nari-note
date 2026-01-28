@@ -7,13 +7,13 @@ using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Application.Service;
 
-public class GetArticleService
+public class GetArticleContentService
 {
     readonly IArticleRepository articleRepository;
     readonly ICommentRepository commentRepository;
     readonly ILikeRepository likeRepository;
 
-    public GetArticleService(
+    public GetArticleContentService(
         IArticleRepository articleRepository,
         ICommentRepository commentRepository,
         ILikeRepository likeRepository
