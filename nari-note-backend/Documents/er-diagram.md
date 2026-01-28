@@ -11,11 +11,17 @@ User ||--o{ Article: "has many"
 Article ||--o{ ArticleTag: "has many"
 Tag ||--o{ ArticleTag: "1:n"
 
+User ||--o{ Course: "has many"
+Course ||--o{ Article: "has many"
+
 User ||--o{ Follow: "following"
 User ||--o{ Follow: "followed"
 
 User ||--o{ Like: "has many"
 Article ||--o{ Like: "has many"
+
+User ||--o{ CourseLike: "has many"
+Course ||--o{ CourseLike: "has many"
 
 User ||--o{ Comment: "has many"
 Article ||--o{ Comment: "has many"
@@ -45,6 +51,8 @@ Session {
 Article {
     id integer PK
     author_id integer FK
+    course_id integer FK "nullable"
+    article_order integer "nullable"
     title varchar(50)
     body varchar(10000)
     is_published boolean
@@ -63,6 +71,22 @@ ArticleTag {
     id integer PK
     article_id integer FK
     tag_id integer FK
+    created_at datetime
+    updated_at datetime
+}
+
+Course {
+    id integer PK
+    user_id integer FK
+    name varchar(100)
+    created_at datetime
+    updated_at datetime
+}
+
+CourseLike {
+    id integer PK
+    user_id integer FK
+    course_id integer FK
     created_at datetime
     updated_at datetime
 }
@@ -112,12 +136,22 @@ Notification {
 
 ### Article
 - INDEX: `author_id` (外部キー制約により自動生成)
+- INDEX: `course_id` (外部キー制約により自動生成)
 - INDEX: `created_at` (時系列ソート用)
 - INDEX: `(is_published, published_at, created_at)` (公開記事の検索最適化用)
 
 ### ArticleTag
 - UNIQUE INDEX: `(article_id, tag_id)`
 - INDEX: `tag_id` (外部キー制約により自動生成)
+
+### Course
+- INDEX: `user_id` (外部キー制約により自動生成)
+- INDEX: `created_at` (時系列ソート用)
+
+### CourseLike
+- UNIQUE INDEX: `(user_id, course_id)`
+- INDEX: `course_id` (外部キー制約により自動生成)
+- INDEX: `(user_id, created_at)` (ユーザーの講座いいね一覧取得用)
 
 ### Like
 - UNIQUE INDEX: `(user_id, article_id)`

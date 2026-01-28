@@ -11,6 +11,8 @@ public class ValueObjectJsonConverterFactory : JsonConverterFactory
         return typeToConvert == typeof(ArticleId) ||
                typeToConvert == typeof(ArticleTagId) ||
                typeToConvert == typeof(CommentId) ||
+               typeToConvert == typeof(CourseId) ||
+               typeToConvert == typeof(CourseLikeId) ||
                typeToConvert == typeof(FollowId) ||
                typeToConvert == typeof(LikeId) ||
                typeToConvert == typeof(NotificationId) ||
@@ -26,6 +28,10 @@ public class ValueObjectJsonConverterFactory : JsonConverterFactory
             return new ValueObjectJsonConverter<ArticleTagId>();
         if (typeToConvert == typeof(CommentId))
             return new ValueObjectJsonConverter<CommentId>();
+        if (typeToConvert == typeof(CourseId))
+            return new ValueObjectJsonConverter<CourseId>();
+        if (typeToConvert == typeof(CourseLikeId))
+            return new ValueObjectJsonConverter<CourseLikeId>();
         if (typeToConvert == typeof(FollowId))
             return new ValueObjectJsonConverter<FollowId>();
         if (typeToConvert == typeof(LikeId))
