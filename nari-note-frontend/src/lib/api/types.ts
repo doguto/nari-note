@@ -28,6 +28,15 @@ export interface CommentDto {
   createdAt?: string;
 }
 
+export interface CourseDto {
+  id?: number;
+  userId?: number;
+  name?: string;
+  articleIds?: number[];
+  articleNames?: string[];
+  likeCount?: number;
+}
+
 export interface CreateArticleRequest {
   title?: string;
   body?: string;
@@ -50,6 +59,14 @@ export interface CreateCommentRequest {
 export interface CreateCommentResponse {
   id?: number;
   createdAt?: string;
+}
+
+export interface CreateCourseRequest {
+  name?: string;
+}
+
+export interface CreateCourseResponse {
+  course?: CourseDto;
 }
 
 export interface DeleteArticleRequest {

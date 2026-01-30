@@ -157,13 +157,6 @@ def parse_csharp_class(file_path: Path) -> Optional[CSharpClass]:
 
 
 def parse_controller(file_path: Path, all_request_types: set, all_response_types: set) -> List[EndpointInfo]:
-    """コントローラーファイルをパースしてエンドポイント情報を抽出
-    
-    Args:
-        file_path: コントローラーファイルのパス
-        all_request_types: 利用可能なRequest型の集合
-        all_response_types: 利用可能なResponse型の集合
-    """
     try:
         content = file_path.read_text(encoding='utf-8')
     except Exception as e:
@@ -180,7 +173,8 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
     
     # エンドポイントを抽出（改良版）
     # [HttpGet], [HttpPost]などのアトリビュートとメソッド、パラメータを見つける
-    method_pattern = r'\[Http(Get|Post|Put|Delete)(?:\("([^"]+)"\))?\]\s+(?:\[ValidateModelState\]\s+)?public\s+async\s+Task<ActionResult(?:<(\w+)>)?>\s+(\w+)\s*\(([^)]*)\)'
+    # 複数の属性（[RequireAuth]、[AllowAnonymous]、[OptionalAuth]、[ValidateModelState]など）に対応
+    method_pattern = r'\[Http(Get|Post|Put|Delete)(?:\("([^"]+)"\))?\](?:\s*\[\w+\])*\s+public\s+async\s+Task<ActionResult(?:<(\w+)>)?>\s+(\w+)\s*\(([^)]*)\)'
 
     for match in re.finditer(method_pattern, content):
         http_method = match.group(1).upper()

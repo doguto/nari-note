@@ -8,6 +8,8 @@ import type {
   CreateArticleResponse,
   CreateCommentRequest,
   CreateCommentResponse,
+  CreateCourseRequest,
+  CreateCourseResponse,
   DeleteArticleRequest,
   GetArticleRequest,
   GetArticleResponse,
@@ -17,6 +19,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetCurrentUserRequest,
   GetDraftArticlesRequest,
   GetDraftArticlesResponse,
   GetFollowersRequest,
@@ -26,9 +29,11 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
+  GetPopularTagsRequest,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  LogoutRequest,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SignInRequest,
@@ -100,11 +105,20 @@ export const authApi = {
     const response = await apiClient.post<AuthResponse>('/api/auth/signin', data);
     return response;
   },
-  logout: async (): Promise<void> => {
-    await apiClient.post('/api/auth/logout');
+  getCurrentUser: async (data: GetCurrentUserRequest): Promise<AuthResponse> => {
+    const response = await apiClient.get<AuthResponse>('/api/auth/me', { params: data });
+    return response;
   },
-  me: async (): Promise<AuthResponse> => {
-    const response = await apiClient.get<AuthResponse>('/api/auth/me');
+  logout: async (data: LogoutRequest): Promise<void> => {
+    const response = await apiClient.post<void>('/api/auth/logout', data);
+    return response;
+  },
+};
+
+// Courses API
+export const coursesApi = {
+  createCourse: async (data: CreateCourseRequest): Promise<CreateCourseResponse> => {
+    const response = await apiClient.post<CreateCourseResponse>('/api/courses', data);
     return response;
   },
 };
@@ -119,8 +133,8 @@ export const healthApi = {
 
 // Tags API
 export const tagsApi = {
-  getPopularTags: async (): Promise<GetPopularTagsResponse> => {
-    const response = await apiClient.get<GetPopularTagsResponse>('/api/tags/popular');
+  getPopularTags: async (data: GetPopularTagsRequest): Promise<GetPopularTagsResponse> => {
+    const response = await apiClient.get<GetPopularTagsResponse>('/api/tags/popular', { params: data });
     return response;
   },
 };
