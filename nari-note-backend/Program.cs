@@ -5,6 +5,7 @@ using NariNoteBackend.Application.Service;
 using NariNoteBackend.Infrastructure;
 using NariNoteBackend.Infrastructure.Database;
 using NariNoteBackend.Middleware;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,9 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
+
+// Serilogの設定をsettings.jsonから取り込み
+builder.Host.UseSerilog((context, configuration) => { configuration.ReadFrom.Configuration(context.Configuration); });
 
 builder.Services.AddControllers(options => { options.ModelBinderProviders.Insert(0, new ValueObjectModelBinderProvider()); })
        .AddJsonOptions(options =>
@@ -45,6 +49,9 @@ if (app.Environment.IsDevelopment())
 
 // CORSミドルウェアを最初に登録（preflightリクエスト対応のため）
 app.UseCors();
+
+// SerilogによるAPIリクエストのログ出力を設定
+app.UseSerilogRequestLogging();
 
 // グローバル例外ハンドラーを最初に登録（重要）
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
