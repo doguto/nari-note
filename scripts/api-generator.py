@@ -23,7 +23,6 @@ VALUE_OBJECT_FILE = BACKEND_ROOT / "Domain/ValueObject/EntityKeyObject.cs"
 
 @dataclass
 class CSharpProperty:
-    """C#のプロパティ情報"""
     name: str
     type: str
     is_optional: bool = False
@@ -32,7 +31,6 @@ class CSharpProperty:
 
 @dataclass
 class CSharpClass:
-    """C#のクラス情報"""
     name: str
     properties: List[CSharpProperty]
     namespace: str
@@ -40,7 +38,6 @@ class CSharpClass:
 
 @dataclass
 class EndpointInfo:
-    """エンドポイント情報"""
     method: str  # GET, POST, PUT, DELETE
     path: str
     function_name: str
@@ -51,7 +48,6 @@ class EndpointInfo:
 
 
 def load_value_object_types() -> set[str]:
-    """EntityKeyObject.csからValueObject型を読み込む"""
     value_object_types = set()
     
     if not VALUE_OBJECT_FILE.exists():
@@ -75,7 +71,6 @@ def load_value_object_types() -> set[str]:
 
 
 def csharp_type_to_typescript(csharp_type: str, value_object_types: set[str]) -> tuple[str, bool]:
-    """C#の型をTypeScriptの型に変換（型とnullable情報を返す）"""
     type_mapping = {
         'string': 'string',
         'int': 'number',
@@ -171,7 +166,7 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
 
     endpoints = []
     
-    # エンドポイントを抽出（改良版）
+    # エンドポイントを抽出
     # [HttpGet], [HttpPost]などのアトリビュートとメソッド、パラメータを見つける
     # 複数の属性（[RequireAuth]、[AllowAnonymous]、[OptionalAuth]、[ValidateModelState]など）に対応
     method_pattern = r'\[Http(Get|Post|Put|Delete)(?:\("([^"]+)"\))?\](?:\s*\[\w+\])*\s+public\s+async\s+Task<ActionResult(?:<(\w+)>)?>\s+(\w+)\s*\(([^)]*)\)'
@@ -228,7 +223,6 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
 
 
 def generate_types_file(classes: List[CSharpClass], value_object_types: set[str]) -> str:
-    """types.tsファイルを生成"""
     lines = [TYPES_HEADER, ""]
     
     for cls in sorted(classes, key=lambda x: x.name):
@@ -244,12 +238,6 @@ def generate_types_file(classes: List[CSharpClass], value_object_types: set[str]
 
 
 def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpClass]) -> str:
-    """endpoints.tsファイルを生成
-    
-    Args:
-        endpoints: エンドポイント情報のリスト
-        classes: C#クラス情報のリスト（リクエスト型のプロパティを調べるため）
-    """
     lines = [ENDPOINTS_HEADER]
     
     # クラス情報を名前でマッピング
@@ -339,7 +327,6 @@ def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpC
 
 
 def generate_hooks_file(endpoints: List[EndpointInfo]) -> str:
-    """hooks.tsファイルを生成"""
     lines = [HOOKS_HEADER]
     
     # コントローラーごとにグループ化
@@ -407,7 +394,6 @@ def generate_hooks_file(endpoints: List[EndpointInfo]) -> str:
 
 
 def main():
-    """メイン処理"""
     print("🚀 API Generator - Starting...")
     
     # ディレクトリの存在確認
