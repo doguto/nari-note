@@ -20,16 +20,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers(options =>
-       {
-           options.ModelBinderProviders.Insert(0, new ValueObjectModelBinderProvider());
-       })
+builder.Services.AddControllers(options => { options.ModelBinderProviders.Insert(0, new ValueObjectModelBinderProvider()); })
        .AddJsonOptions(options =>
        {
            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
            options.JsonSerializerOptions.Converters.Add(new ValueObjectJsonConverterFactory());
        });
-// builder.Services.AddOpenApi();
+
 builder.Services.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -45,11 +42,6 @@ if (app.Environment.IsDevelopment())
     await context.Database.MigrateAsync();
     await DataSeeder.SeedAsync(context);
 }
-
-// if (app.Environment.IsDevelopment())
-// {
-//     app.MapOpenApi();
-// }
 
 // CORSミドルウェアを最初に登録（preflightリクエスト対応のため）
 app.UseCors();
