@@ -2,13 +2,15 @@
 // Do not edit manually
 
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type UseQueryOptions } from '@tanstack/react-query';
-import { articlesApi, authApi, healthApi, tagsApi, usersApi } from './endpoints';
+import { articlesApi, authApi, coursesApi, healthApi, tagsApi, usersApi } from './endpoints';
 import type {
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
   CreateCommentRequest,
   CreateCommentResponse,
+  CreateCourseRequest,
+  CreateCourseResponse,
   DeleteArticleRequest,
   GetArticleRequest,
   GetArticleResponse,
@@ -18,6 +20,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetCurrentUserRequest,
   GetDraftArticlesRequest,
   GetDraftArticlesResponse,
   GetFollowersRequest,
@@ -27,9 +30,11 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
+  GetPopularTagsRequest,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  LogoutRequest,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SignInRequest,
@@ -55,13 +60,15 @@ export const queryKeys = {
     searchArticles: ['articles', 'searchArticles'] as const,
   },
   auth: {
-    me: ['auth', 'me'] as const,
+    getCurrentUser: ['auth', 'getCurrentUser'] as const,
+  },
+  courses: {
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
   },
   tags: {
-    getPopularTags: ['tags', 'popular'] as const,
+    getPopularTags: ['tags', 'getPopularTags'] as const,
   },
   users: {
     getUserProfile: ['users', 'getUserProfile'] as const,
@@ -205,10 +212,18 @@ export function useSignIn(options?: UseMutationOptions<AuthResponse, Error, Sign
   });
 }
 
-export function useLogout(options?: UseMutationOptions<void, Error, void>) {
+export function useGetCurrentUser(params: GetCurrentUserRequest, options?: Omit<UseQueryOptions<AuthResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<AuthResponse>({
+    queryKey: [...queryKeys.auth.getCurrentUser, params],
+    queryFn: () => authApi.getCurrentUser(params),
+    ...options,
+  });
+}
+
+export function useLogout(options?: UseMutationOptions<void, Error, LogoutRequest>) {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, void>({
-    mutationFn: () => authApi.logout(),
+  return useMutation<void, Error, LogoutRequest>({
+    mutationFn: (data) => authApi.logout(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
@@ -217,10 +232,15 @@ export function useLogout(options?: UseMutationOptions<void, Error, void>) {
   });
 }
 
-export function useMe(options?: Omit<UseQueryOptions<AuthResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<AuthResponse>({
-    queryKey: queryKeys.auth.me,
-    queryFn: () => authApi.me(),
+// Courses Hooks
+export function useCreateCourse(options?: UseMutationOptions<CreateCourseResponse, Error, CreateCourseRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<CreateCourseResponse, Error, CreateCourseRequest>({
+    mutationFn: (data) => coursesApi.createCourse(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      options?.onSuccess?.(...args);
+    },
     ...options,
   });
 }
@@ -235,10 +255,10 @@ export function useGetHealth(options?: Omit<UseQueryOptions<GetHealthResponse>, 
 }
 
 // Tags Hooks
-export function useGetPopularTags(options?: Omit<UseQueryOptions<GetPopularTagsResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetPopularTags(params: GetPopularTagsRequest, options?: Omit<UseQueryOptions<GetPopularTagsResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetPopularTagsResponse>({
-    queryKey: queryKeys.tags.getPopularTags,
-    queryFn: () => tagsApi.getPopularTags(),
+    queryKey: [...queryKeys.tags.getPopularTags, params],
+    queryFn: () => tagsApi.getPopularTags(params),
     ...options,
   });
 }
