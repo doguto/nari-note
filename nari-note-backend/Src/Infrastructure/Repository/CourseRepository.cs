@@ -48,4 +48,28 @@ public class CourseRepository : ICourseRepository
             .Where(c => c.Id == id)
             .ExecuteDeleteAsync();
     }
+
+    public async Task<Course> UpdateWithArticlesAsync(Course course)
+    {
+        context.Courses.Update(course);
+
+        if (course.IsPublished)
+        {
+            var articles = await context.Articles
+                .Where(a => a.CourseId == course.Id)
+                .ToListAsync();
+            
+            foreach (var article in articles)
+            {
+                if (!article.PublishedAt.HasValue)
+                {
+                    article.PublishedAt = course.PublishedAt ?? DateTime.UtcNow;
+                    article.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+        }
+
+        await context.SaveChangesAsync();
+        return course;
+    }
 }
