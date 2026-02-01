@@ -295,7 +295,6 @@ public class ArticlesController : ControllerBase
     public async Task<IActionResult> GetArticle(int id)
     {
         var article = await getArticleContentService.ExecuteAsync(id);
-        if (article == null) return NotFound();
         return Ok(article);
     }
 }
