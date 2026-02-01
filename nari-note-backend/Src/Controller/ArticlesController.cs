@@ -75,7 +75,7 @@ public class ArticlesController : ApplicationController
     [OptionalAuth]
     public async Task<ActionResult> GetArticle(ArticleId id)
     {
-        var request = new GetArticleRequest { Id = id };
+        var request = new GetArticleContentRequest { Id = id };
         var response = await getArticleContentService.ExecuteAsync(request, UserId);
         return Ok(response);
     }

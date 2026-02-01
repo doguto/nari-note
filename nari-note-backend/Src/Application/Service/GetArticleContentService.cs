@@ -24,7 +24,7 @@ public class GetArticleContentService
         this.likeRepository = likeRepository;
     }
 
-    public async Task<GetArticleResponse> ExecuteAsync(GetArticleRequest request, UserId? userId = null)
+    public async Task<GetArticleContentResponse> ExecuteAsync(GetArticleContentRequest request, UserId? userId = null)
     {
         var article = await articleRepository.FindForceByIdAsync(request.Id);
         var comments = await commentRepository.FindByArticleAsync(request.Id);
@@ -36,7 +36,7 @@ public class GetArticleContentService
             isLiked = like != null;
         }
 
-        return new GetArticleResponse
+        return new GetArticleContentResponse
         {
             Id = article.Id,
             Title = article.Title,

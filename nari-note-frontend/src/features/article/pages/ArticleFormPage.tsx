@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCreateArticle, useUpdateArticle, useGetArticle } from '@/lib/api';
+import { useCreateArticle, useUpdateArticle, useGetArticleContent } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { FormPageLayout } from '@/components/molecules';
 import { ArticleFormTemplate } from '../templates/ArticleFormTemplate';
@@ -34,7 +34,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const isEditMode = mode === 'edit' && articleId;
   
   // 編集モード時の記事データ取得
-  const { data: article, isLoading: isLoadingArticle, error: articleError, refetch } = useGetArticle(
+  const { data: article, isLoading: isLoadingArticle, error: articleError, refetch } = useGetArticleContent(
     { id: articleId || 0 },
     { enabled: !!isEditMode }
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useGetArticle, useToggleLike } from '@/lib/api';
+import { useGetArticleContent, useToggleLike } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { PageWithSidebar } from '@/features/global/organisms';
@@ -19,7 +19,7 @@ interface ArticleDetailPageProps {
  */
 export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const { userId } = useAuth();
-  const { data: article, isLoading, error, refetch } = useGetArticle({ id: articleId });
+  const { data: article, isLoading, error, refetch } = useGetArticleContent({ id: articleId });
   const { mutate: toggleLike, isPending: isLikePending } = useToggleLike({
     onSuccess: () => {
       refetch();

@@ -9,8 +9,8 @@ import type {
   CreateCommentRequest,
   CreateCommentResponse,
   DeleteArticleRequest,
-  GetArticleRequest,
-  GetArticleResponse,
+  GetArticleContentRequest,
+  GetArticleContentResponse,
   GetArticlesByAuthorRequest,
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
@@ -53,8 +53,8 @@ export const articlesApi = {
     const response = await apiClient.post<CreateArticleResponse>('/api/articles', data);
     return response;
   },
-  getArticle: async (data: GetArticleRequest): Promise<GetArticleResponse> => {
-    const response = await apiClient.get<GetArticleResponse>(`/api/articles/${data.id}`);
+  getArticleContent: async (data: GetArticleContentRequest): Promise<GetArticleContentResponse> => {
+    const response = await apiClient.get<GetArticleContentResponse>(`/api/articles/${data.id}`);
     return response;
   },
   updateArticle: async (data: UpdateArticleRequest): Promise<UpdateArticleResponse> => {
