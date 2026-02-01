@@ -38,6 +38,10 @@ public class UpdateArticleService
         // ArticleOrderの更新（講座記事の順序変更）
         if (request.ArticleOrder.HasValue)
         {
+            if (!article.CourseId.HasValue)
+            {
+                throw new InvalidOperationException("講座に所属していない記事の順序は変更できません");
+            }
             article.ArticleOrder = request.ArticleOrder.Value;
         }
 
