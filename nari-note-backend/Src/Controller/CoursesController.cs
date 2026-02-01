@@ -2,6 +2,7 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Controller;
@@ -11,10 +12,14 @@ namespace NariNoteBackend.Controller;
 public class CoursesController : ApplicationController
 {
     readonly CreateCourseService createCourseService;
+    readonly DeleteCourseService deleteCourseService;
 
-    public CoursesController(CreateCourseService createCourseService)
+    public CoursesController(
+        CreateCourseService createCourseService,
+        DeleteCourseService deleteCourseService)
     {
         this.createCourseService = createCourseService;
+        this.deleteCourseService = deleteCourseService;
     }
 
     [HttpPost]
@@ -24,5 +29,14 @@ public class CoursesController : ApplicationController
     {
         var response = await createCourseService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
+    }
+
+    [HttpDelete("{id}")]
+    [RequireAuth]
+    public async Task<ActionResult> DeleteCourse(CourseId id)
+    {
+        var request = new DeleteCourseRequest { Id = id };
+        await deleteCourseService.ExecuteAsync(UserId!.Value, request);
+        return NoContent();
     }
 }

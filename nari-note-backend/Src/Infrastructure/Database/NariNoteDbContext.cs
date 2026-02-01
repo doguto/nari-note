@@ -45,7 +45,7 @@ public class NariNoteDbContext : DbContext
             x.HasOne(a => a.Course)
              .WithMany(c => c.Articles)
              .HasForeignKey(a => a.CourseId)
-             .OnDelete(DeleteBehavior.SetNull);
+             .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(a => a.Id)
              .HasValueGenerator<ArticleIdValueGenerator>();
@@ -260,7 +260,7 @@ public class NariNoteDbContext : DbContext
             x.HasMany(c => c.Articles)
              .WithOne(a => a.Course)
              .HasForeignKey(a => a.CourseId)
-             .OnDelete(DeleteBehavior.SetNull);
+             .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(c => c.Id)
              .HasValueGenerator<CourseIdValueGenerator>();
