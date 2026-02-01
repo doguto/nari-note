@@ -24,11 +24,10 @@ public class UpdateArticleService
         var article = await articleRepository.FindForceByIdAsync(request.Id);
         if (article.AuthorId != userId) throw new UnauthorizedAccessException("この記事を更新する権限がありません");
 
-        // 既存の講座記事または新しく講座に追加する場合、講座の所有権を検証
-        var courseIdToValidate = request.CourseId ?? article.CourseId;
-        if (courseIdToValidate.HasValue)
+        // 講座記事の場合、講座の所有権を検証
+        if (article.CourseId.HasValue)
         {
-            var course = await courseRepository.FindForceByIdAsync(courseIdToValidate.Value);
+            var course = await courseRepository.FindForceByIdAsync(article.CourseId.Value);
             if (course.UserId != userId) throw new UnauthorizedAccessException("この講座の記事を更新する権限がありません");
         }
 
@@ -36,11 +35,7 @@ public class UpdateArticleService
         if (!request.Title.IsNullOrEmpty()) article.Title = request.Title!;
         if (!request.Body.IsNullOrEmpty()) article.Body = request.Body!;
 
-        // 講座関連フィールドの更新（明示的に指定された場合のみ）
-        if (request.CourseId.HasValue)
-        {
-            article.CourseId = request.CourseId.Value;
-        }
+        // ArticleOrderの更新（講座記事の順序変更）
         if (request.ArticleOrder.HasValue)
         {
             article.ArticleOrder = request.ArticleOrder.Value;

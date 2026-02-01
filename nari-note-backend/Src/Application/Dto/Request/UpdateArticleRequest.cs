@@ -15,6 +15,5 @@ public class UpdateArticleRequest
     public List<string>? Tags { get; set; }
     public bool? IsPublished { get; set; }
     public DateTime? PublishedAt { get; set; }
-    public CourseId? CourseId { get; set; }
     public int? ArticleOrder { get; set; }
 }
