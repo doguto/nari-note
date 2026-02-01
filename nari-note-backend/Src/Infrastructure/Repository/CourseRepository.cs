@@ -56,16 +56,13 @@ public class CourseRepository : ICourseRepository
         if (course.IsPublished)
         {
             var articles = await context.Articles
-                .Where(a => a.CourseId == course.Id)
+                .Where(a => a.CourseId == course.Id && !a.PublishedAt.HasValue)
                 .ToListAsync();
             
             foreach (var article in articles)
             {
-                if (!article.PublishedAt.HasValue)
-                {
-                    article.PublishedAt = course.PublishedAt ?? DateTime.UtcNow;
-                    article.UpdatedAt = DateTime.UtcNow;
-                }
+                article.PublishedAt = course.PublishedAt ?? DateTime.UtcNow;
+                article.UpdatedAt = DateTime.UtcNow;
             }
         }
 

@@ -26,7 +26,7 @@ public class UpdateCourseService
 
         if (request.PublishedAt.HasValue)
         {
-            course.PublishedAt = request.PublishedAt!;
+            course.PublishedAt = request.PublishedAt.Value;
         }
         else if (!wasPublished && request.IsPublished.HasValue && request.IsPublished.Value)
         {
