@@ -20,12 +20,15 @@ public class Course : EntityBase
     [MaxLength(100)]
     public required string Name { get; set; }
 
+    public DateTime? PublishedAt { get; set; }
+
     // Navigation Properties
     public User User { get; set; }
     public List<CourseLike> CourseLikes { get; set; } = new();
     public List<Article> Articles { get; set; } = new();
     
     public int LikeCount => CourseLikes.Count;
+    public bool IsPublished => PublishedAt.HasValue;
 
     // Domain Logic
     public bool IsLikedBy(UserId userId)
