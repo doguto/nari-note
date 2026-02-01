@@ -9,10 +9,14 @@ namespace NariNoteBackend.Application.Service;
 public class UpdateArticleService
 {
     readonly IArticleRepository articleRepository;
+    readonly ICourseRepository courseRepository;
 
-    public UpdateArticleService(IArticleRepository articleRepository)
+    public UpdateArticleService(
+        IArticleRepository articleRepository,
+        ICourseRepository courseRepository)
     {
         this.articleRepository = articleRepository;
+        this.courseRepository = courseRepository;
     }
 
     public async Task<UpdateArticleResponse> ExecuteAsync(UserId userId, UpdateArticleRequest request)
@@ -20,9 +24,23 @@ public class UpdateArticleService
         var article = await articleRepository.FindForceByIdAsync(request.Id);
         if (article.AuthorId != userId) throw new UnauthorizedAccessException("この記事を更新する権限がありません");
 
+        // 講座記事の場合、講座の所有権を検証
+        if (request.CourseId.HasValue)
+        {
+            var course = await courseRepository.FindForceByIdAsync(request.CourseId.Value);
+            if (course.UserId != userId) throw new UnauthorizedAccessException("この講座の記事を更新する権限がありません");
+        }
+
         // nullでない値のみ更新
         if (!request.Title.IsNullOrEmpty()) article.Title = request.Title!;
         if (!request.Body.IsNullOrEmpty()) article.Body = request.Body!;
+
+        // 講座関連フィールドの更新
+        if (request.CourseId.HasValue)
+        {
+            article.CourseId = request.CourseId.Value;
+            article.ArticleOrder = request.ArticleOrder;
+        }
 
         var wasPublished = article.IsPublished;
 
