@@ -8,14 +8,29 @@ namespace NariNoteBackend.Application.Service;
 public class CreateArticleService
 {
     readonly IArticleRepository articleRepository;
+    readonly ICourseRepository courseRepository;
 
-    public CreateArticleService(IArticleRepository articleRepository)
+    public CreateArticleService(
+        IArticleRepository articleRepository,
+        ICourseRepository courseRepository)
     {
         this.articleRepository = articleRepository;
+        this.courseRepository = courseRepository;
     }
 
     public async Task<CreateArticleResponse> ExecuteAsync(CreateArticleRequest request)
     {
+        // 講座に記事を追加する場合、講座の所有者であることを検証
+        if (request.CourseId.HasValue)
+        {
+            var course = await courseRepository.FindForceByIdAsync(request.CourseId.Value);
+            
+            if (course.UserId != request.AuthorId)
+            {
+                throw new UnauthorizedAccessException("この講座に記事を追加する権限がありません");
+            }
+        }
+
         DateTime? publishedAt = null;
         if (request.PublishedAt.HasValue)
         {
@@ -31,6 +46,8 @@ public class CreateArticleService
             Title = request.Title,
             Body = request.Body,
             AuthorId = request.AuthorId,
+            CourseId = request.CourseId,
+            ArticleOrder = request.ArticleOrder,
             PublishedAt = publishedAt
         };
 
