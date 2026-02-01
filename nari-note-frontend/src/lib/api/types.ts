@@ -85,11 +85,11 @@ export interface FollowerUserDto {
   profileImage?: string;
 }
 
-export interface GetArticleRequest {
+export interface GetArticleContentRequest {
   id?: number;
 }
 
-export interface GetArticleResponse {
+export interface GetArticleContentResponse {
   id?: number;
   title?: string;
   body?: string;

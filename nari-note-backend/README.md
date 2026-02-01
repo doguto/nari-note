@@ -63,7 +63,7 @@ nari-note-backend/
 │   ├── Application/           # アプリケーション層
 │   │   ├── Service/          # ビジネスロジック（API一個につきService一個）
 │   │   │   ├── CreateArticleService.cs
-│   │   │   ├── GetArticleService.cs
+│   │   │   ├── GetArticleContentService.cs
 │   │   │   └── DeleteArticleService.cs
 │   │   ├── Repository/       # Repository抽象化（インターフェース）
 │   │   │   ├── IArticleRepository.cs

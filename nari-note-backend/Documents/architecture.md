@@ -90,7 +90,7 @@ nari-note-backend/
 │   └── TagsController.cs
 ├── Application/              # Business Logic層
 │   ├── Service/
-│   │   ├── GetArticleService.cs
+│   │   ├── GetArticleContentService.cs
 │   │   ├── CreateArticleService.cs
 │   │   ├── UpdateArticleService.cs
 │   │   ├── DeleteArticleService.cs
@@ -251,19 +251,19 @@ public class ArticleRepository : IArticleRepository
 **API一個につきService一個**の粒度でビジネスロジックを実装。
 
 ```csharp
-// Application/Services/GetArticleService.cs
-public class GetArticleService
+// Application/Services/GetArticleContentService.cs
+public class GetArticleContentService
 {
-    private readonly IArticleRepository _articleRepository;
+    readonly IArticleRepository articleRepository;
     
-    public GetArticleService(IArticleRepository articleRepository)
+    public GetArticleContentService(IArticleRepository articleRepository)
     {
-        _articleRepository = articleRepository;
+        this.articleRepository = articleRepository;
     }
     
     public async Task<Article?> ExecuteAsync(int id)
     {
-        return await _articleRepository.FindByIdAsync(id);
+        return await articleRepository.FindByIdAsync(id);
     }
 }
 ```
@@ -277,25 +277,24 @@ Serviceを呼び出してHTTPリクエストを処理。
 [Route("api/[controller]")]
 public class ArticlesController : ControllerBase
 {
-    private readonly GetArticleService _getArticleService;
-    private readonly CreateArticleService _createArticleService;
-    private readonly ToggleLikeService _toggleLikeService;
+    readonly GetArticleContentService getArticleContentService;
+    readonly CreateArticleService createArticleService;
+    readonly ToggleLikeService toggleLikeService;
     
     public ArticlesController(
-        GetArticleService getArticleService,
+        GetArticleContentService getArticleContentService,
         CreateArticleService createArticleService,
         ToggleLikeService toggleLikeService)
     {
-        _getArticleService = getArticleService;
-        _createArticleService = createArticleService;
-        _toggleLikeService = toggleLikeService;
+        this.getArticleContentService = getArticleContentService;
+        this.createArticleService = createArticleService;
+        this.toggleLikeService = toggleLikeService;
     }
     
     [HttpGet("{id}")]
     public async Task<IActionResult> GetArticle(int id)
     {
-        var article = await _getArticleService.ExecuteAsync(id);
-        if (article == null) return NotFound();
+        var article = await getArticleContentService.ExecuteAsync(id);
         return Ok(article);
     }
 }
@@ -322,7 +321,7 @@ builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Service登録（API一個につき一個）
-builder.Services.AddScoped<GetArticleService>();
+builder.Services.AddScoped<GetArticleContentService>();
 
 builder.Services.AddControllers();
 

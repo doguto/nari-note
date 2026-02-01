@@ -12,8 +12,8 @@ import type {
   CreateCourseRequest,
   CreateCourseResponse,
   DeleteArticleRequest,
-  GetArticleRequest,
-  GetArticleResponse,
+  GetArticleContentRequest,
+  GetArticleContentResponse,
   GetArticlesByAuthorRequest,
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
@@ -53,7 +53,7 @@ import type {
 export const queryKeys = {
   articles: {
     getArticles: ['articles', 'getArticles'] as const,
-    getArticle: ['articles', 'getArticle'] as const,
+    getArticleContent: ['articles', 'getArticleContent'] as const,
     getArticlesByAuthor: ['articles', 'getArticlesByAuthor'] as const,
     getArticlesByTag: ['articles', 'getArticlesByTag'] as const,
     getDraftArticles: ['articles', 'getDraftArticles'] as const,
@@ -99,10 +99,10 @@ export function useCreateArticle(options?: UseMutationOptions<CreateArticleRespo
   });
 }
 
-export function useGetArticle(params: GetArticleRequest, options?: Omit<UseQueryOptions<GetArticleResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<GetArticleResponse>({
-    queryKey: [...queryKeys.articles.getArticle, params],
-    queryFn: () => articlesApi.getArticle(params),
+export function useGetArticleContent(params: GetArticleContentRequest, options?: Omit<UseQueryOptions<GetArticleContentResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticleContentResponse>({
+    queryKey: [...queryKeys.articles.getArticleContent, params],
+    queryFn: () => articlesApi.getArticleContent(params),
     ...options,
   });
 }

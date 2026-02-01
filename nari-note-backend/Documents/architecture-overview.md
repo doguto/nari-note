@@ -29,7 +29,7 @@ nari-note-backend/
 │   ├── Application/           # アプリケーション層
 │   │   ├── Service/          # ビジネスロジック（API一個につきService一個）
 │   │   │   ├── CreateArticleService.cs
-│   │   │   ├── GetArticleService.cs
+│   │   │   ├── GetArticleContentService.cs
 │   │   │   └── UpdateArticleService.cs
 │   │   ├── Dto/              # Data Transfer Objects
 │   │   │   ├── Request/      # リクエストDTO
@@ -91,7 +91,7 @@ nari-note-backend/
 ## 重要な設計原則
 
 1. **API一個につきService一個**
-   - `GET /api/articles/{id}` → `GetArticleService`
+   - `GET /api/articles/{id}` → `GetArticleContentService`
    - `POST /api/articles` → `CreateArticleService`
    - 各Serviceが単一責任を持つ
 
