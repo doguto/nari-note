@@ -1,6 +1,7 @@
 ---
 name: Frontend-Engineer-Agent
 description: フロントエンドの実装を行う
+tools: ["*"] # デフォルトで全tool使用可だが、明示的に定義
 ---
 
 # Frontend-Engineer-Agent
