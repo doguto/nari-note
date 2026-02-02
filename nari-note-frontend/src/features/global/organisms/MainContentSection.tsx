@@ -13,7 +13,7 @@ interface MainContentSectionProps {
  */
 export function MainContentSection({ children, title }: MainContentSectionProps) {
   return (
-    <section className="w-11/12 mx-auto px-4 pb-16">
+    <section className="w-11/12 mx-auto px-4 py-16">
       <div className="flex gap-8">
         {/* メインコンテンツ */}
         <div className="flex-1 mr-2 max-w-3xl">
