@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useGetArticles, useGetCourses } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -31,15 +31,21 @@ export function HomeListPage() {
     refetch: refetchCourses 
   } = useGetCourses({ limit: 20, offset: 0 });
 
-  // IDが存在しない記事をフィルタリング
-  const articlesWithId = articlesData?.articles?.filter(
-    (article) => article.id !== null && article.id !== undefined
-  ) || [];
+  // IDが存在しない記事をフィルタリング（メモ化して不要な再計算を防ぐ）
+  const articlesWithId = useMemo(
+    () => articlesData?.articles?.filter(
+      (article) => article.id !== null && article.id !== undefined
+    ) || [],
+    [articlesData?.articles]
+  );
   
-  // IDが存在しない講座をフィルタリング
-  const coursesWithId = coursesData?.courses?.filter(
-    (course) => course.id !== null && course.id !== undefined
-  ) || [];
+  // IDが存在しない講座をフィルタリング（メモ化して不要な再計算を防ぐ）
+  const coursesWithId = useMemo(
+    () => coursesData?.courses?.filter(
+      (course) => course.id !== null && course.id !== undefined
+    ) || [],
+    [coursesData?.courses]
+  );
 
   return (
     <MainContentSection title="">
