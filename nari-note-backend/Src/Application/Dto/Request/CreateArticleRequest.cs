@@ -14,6 +14,10 @@ public class CreateArticleRequest
     
     public UserId AuthorId { get; set; }
     
+    public CourseId? CourseId { get; set; }
+    
+    public int? ArticleOrder { get; set; }
+    
     public List<string> Tags { get; set; } = new();
     public bool IsPublished { get; set; } = false;
     public DateTime? PublishedAt { get; set; }

@@ -140,6 +140,7 @@ nari-note-backend/
 4. **Repository 実装** - `Src/Infrastructure/Repository/`（必要に応じて新規メソッドを実装）
 5. **Controller実装** - `Src/Controller/`
 6. **DI登録** - `Program.cs` または `*ServiceInstaller.cs`
+7. **フロントコードの生成** - `scripts/api-generator.py` を使用し、フロントエンドの型やhooksを生成
 
 ## 実装時の注意事項
 

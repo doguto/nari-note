@@ -13,13 +13,17 @@ public class CoursesController : ApplicationController
 {
     readonly CreateCourseService createCourseService;
     readonly DeleteCourseService deleteCourseService;
+    readonly UpdateCourseService updateCourseService;
 
     public CoursesController(
         CreateCourseService createCourseService,
-        DeleteCourseService deleteCourseService)
+        DeleteCourseService deleteCourseService,
+        UpdateCourseService updateCourseService
+    )
     {
         this.createCourseService = createCourseService;
         this.deleteCourseService = deleteCourseService;
+        this.updateCourseService = updateCourseService;
     }
 
     [HttpPost]
@@ -38,5 +42,15 @@ public class CoursesController : ApplicationController
         var request = new DeleteCourseRequest { Id = id };
         await deleteCourseService.ExecuteAsync(UserId!.Value, request);
         return NoContent();
+    }
+
+    [HttpPut("{id}")]
+    [RequireAuth]
+    [ValidateModelState]
+    public async Task<ActionResult<UpdateCourseResponse>> UpdateCourse(CourseId id, [FromBody] UpdateCourseRequest request)
+    {
+        request.Id = id;
+        var response = await updateCourseService.ExecuteAsync(UserId!.Value, request);
+        return Ok(response);
     }
 }
