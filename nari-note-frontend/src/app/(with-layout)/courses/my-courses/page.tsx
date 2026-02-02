@@ -1,5 +1,3 @@
-'use client';
-
 import { AuthGuard } from '@/components/molecules';
 import { MyCoursesListPage } from '@/features/course/pages';
 

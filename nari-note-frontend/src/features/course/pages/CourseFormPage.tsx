@@ -17,7 +17,7 @@ type CourseFormPageProps =
  * 講座作成・編集ページのロジックを管理するコンポーネント
  * データフェッチング、状態管理、ビジネスロジックを担当
  */
-export function CourseFormPage(props: CourseFormPageProps = { mode: 'create' }) {
+export function CourseFormPage(props: CourseFormPageProps) {
   const [name, setName] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -37,10 +37,8 @@ export function CourseFormPage(props: CourseFormPageProps = { mode: 'create' }) 
   const createCourse = useCreateCourse({
     onSuccess: (data) => {
       setHasUnsavedChanges(false);
-      if (isPublishing && data.course?.id) {
+      if (data.course?.id) {
         router.push(`/courses/${data.course.id}`);
-      } else {
-        router.push('/courses');
       }
       setIsPublishing(false);
     },
