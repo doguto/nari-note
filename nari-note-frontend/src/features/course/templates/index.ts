@@ -1,0 +1,1 @@
+export { CourseFormTemplate } from './CourseFormTemplate';

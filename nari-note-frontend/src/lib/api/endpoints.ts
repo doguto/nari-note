@@ -130,7 +130,7 @@ export const coursesApi = {
     const response = await apiClient.post<CreateCourseResponse>('/api/courses', data);
     return response;
   },
-  getCourse: async (): Promise<GetCourseContentResponse> => {
+  getCourse: async (data: { id: number }): Promise<GetCourseContentResponse> => {
     const response = await apiClient.get<GetCourseContentResponse>(`/api/courses/${data.id}`);
     return response;
   },
