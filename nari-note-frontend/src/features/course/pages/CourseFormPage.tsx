@@ -39,6 +39,9 @@ export function CourseFormPage(props: CourseFormPageProps) {
       setHasUnsavedChanges(false);
       if (data.course?.id) {
         router.push(`/courses/${data.course.id}`);
+      } else {
+        // Fallback: redirect to my courses list if ID is not available
+        router.push('/courses/my-courses');
       }
       setIsPublishing(false);
     },
