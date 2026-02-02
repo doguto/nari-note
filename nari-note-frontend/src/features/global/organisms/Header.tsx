@@ -49,7 +49,7 @@ export function Header() {
       {/* Bottom row: Navigation menu with dark background */}
       <div className="bg-brand-text border-b border-brand-text-dark shadow-sm">
         <div className="w-11/12 mx-auto px-4 py-1 flex items-center justify-center relative">
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-12">
             <Link 
               href="/" 
               className="text-white hover:text-brand-primary font-medium transition-colors text-sm"
