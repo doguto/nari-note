@@ -69,4 +69,17 @@ public class CourseRepository : ICourseRepository
         await context.SaveChangesAsync();
         return course;
     }
+
+    public async Task<Course> FindByIdWithArticlesAsync(CourseId id)
+    {
+        var course = await context.Courses
+            .Include(c => c.User)
+            .Include(c => c.Articles.OrderBy(a => a.ArticleOrder))
+            .Include(c => c.CourseLikes)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (course == null) throw new KeyNotFoundException($"ID: {id} の講座が見つかりません");
+
+        return course;
+    }
 }
