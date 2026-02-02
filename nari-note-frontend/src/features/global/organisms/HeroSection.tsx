@@ -6,7 +6,7 @@
  */
 export function HeroSection() {
   return (
-    <section className="max-w-7xl mx-auto px-4 py-16 text-center">
+    <section className="w-11/12 mx-auto px-4 py-16 text-center">
       <h1 
         className="text-4xl md:text-5xl font-bold text-brand-text mb-4" 
         style={{ fontFamily: 'serif' }}

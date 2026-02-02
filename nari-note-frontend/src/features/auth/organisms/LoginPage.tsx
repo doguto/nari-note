@@ -75,7 +75,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="max-w-2xl w-full mx-auto bg-white rounded-lg shadow-lg px-10 py-12">
+    <div className="w-3/4 w-full mx-auto bg-white rounded-lg shadow-lg px-10 py-12">
       <FormTitle>ログイン</FormTitle>
       
       {error && <ErrorAlert message={error} />}
