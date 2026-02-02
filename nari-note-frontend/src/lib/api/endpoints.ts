@@ -12,6 +12,8 @@ import type {
   CreateCourseResponse,
   DeleteArticleRequest,
   DeleteCourseRequest,
+  GetArticleContentRequest,
+  GetArticleContentResponse,
   GetArticlesByAuthorRequest,
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
@@ -35,7 +37,6 @@ import type {
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
-  LogoutRequest,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SignInRequest,
@@ -62,8 +63,8 @@ export const articlesApi = {
     const response = await apiClient.post<CreateArticleResponse>('/api/articles', data);
     return response;
   },
-  getArticle: async (): Promise<void> => {
-    const response = await apiClient.get<void>(`/api/articles/${data.id}`);
+  getArticleContent: async (data: GetArticleContentRequest): Promise<GetArticleContentResponse> => {
+    const response = await apiClient.get<GetArticleContentResponse>(`/api/articles/${data.id}`);
     return response;
   },
   updateArticle: async (data: UpdateArticleRequest): Promise<UpdateArticleResponse> => {
@@ -113,8 +114,8 @@ export const authApi = {
     const response = await apiClient.get<AuthResponse>('/api/auth/me', { params: data });
     return response;
   },
-  logout: async (data: LogoutRequest): Promise<void> => {
-    const response = await apiClient.post<void>('/api/auth/logout', data);
+  logout: async (): Promise<void> => {
+    const response = await apiClient.post<void>('/api/auth/logout');
     return response;
   },
 };

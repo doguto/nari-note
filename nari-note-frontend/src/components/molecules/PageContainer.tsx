@@ -13,10 +13,10 @@ interface PageContainerProps {
  */
 export function PageContainer({ children, maxWidth = 'wide' }: PageContainerProps) {
   const widthClasses = {
-    narrow: 'max-w-3xl',
-    medium: 'max-w-5xl',
-    wide: 'w-4/5',
-    full: 'max-w-7xl w-full'
+    narrow: 'w-3/5',
+    medium: 'w-4/5',
+    wide: 'w-11/12',
+    full: 'w-full'
   };
 
   return (

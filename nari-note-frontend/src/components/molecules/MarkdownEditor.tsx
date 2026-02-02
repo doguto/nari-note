@@ -239,7 +239,7 @@ export function MarkdownEditor({
               handleTab(e);
             }}
             placeholder={placeholder}
-            className="w-full min-h-[500px] p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono text-sm resize-y"
+            className="w-full min-h-[50vh] p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono text-sm resize-y"
           />
 
           {/* Command Menu */}
@@ -251,7 +251,6 @@ export function MarkdownEditor({
                 top: `${commandMenuPosition.top}px`,
                 left: `${commandMenuPosition.left}px`,
                 width: '80%',
-                maxWidth: '600px',
               }}
             >
               {filteredCommands.map((cmd, index) => (
@@ -272,7 +271,7 @@ export function MarkdownEditor({
         </div>
 
         {/* Live Preview */}
-        <div className="border border-gray-300 rounded-lg p-4 bg-white overflow-y-auto min-h-[500px]">
+        <div className="border border-gray-300 rounded-lg p-4 bg-white overflow-y-auto min-h-[50vh]">
           <div className="prose prose-sm max-w-none">
             <ReactMarkdown
               components={{

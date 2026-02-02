@@ -124,7 +124,7 @@ export function PublishSettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:w-1/2">
         <DialogHeader>
           <DialogTitle>投稿設定</DialogTitle>
           <DialogDescription>

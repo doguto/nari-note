@@ -14,9 +14,9 @@ public class ArticlesController : ApplicationController
     readonly CreateArticleService createArticleService;
     readonly CreateCommentService createCommentService;
     readonly DeleteArticleService deleteArticleService;
+    readonly GetArticleContentService getArticleContentService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticlesByTagService getArticlesByTagService;
-    readonly GetArticleContentService getArticleContentService;
     readonly GetArticlesService getArticlesService;
     readonly GetDraftArticlesService getDraftArticlesService;
     readonly SearchArticlesService searchArticlesService;
@@ -68,12 +68,12 @@ public class ArticlesController : ApplicationController
     {
         request.AuthorId = UserId!.Value;
         var response = await createArticleService.ExecuteAsync(request);
-        return CreatedAtAction(nameof(GetArticle), new { id = response.Id }, response);
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
     [OptionalAuth]
-    public async Task<ActionResult> GetArticle(ArticleId id)
+    public async Task<ActionResult<GetArticleContentResponse>> GetArticleContent(ArticleId id)
     {
         var request = new GetArticleContentRequest { Id = id };
         var response = await getArticleContentService.ExecuteAsync(request, UserId);
@@ -83,7 +83,7 @@ public class ArticlesController : ApplicationController
     [HttpPut("{id}")]
     [RequireAuth]
     [ValidateModelState]
-    public async Task<ActionResult> UpdateArticle(ArticleId id, [FromBody] UpdateArticleRequest request)
+    public async Task<ActionResult<UpdateArticleResponse>> UpdateArticle(ArticleId id, [FromBody] UpdateArticleRequest request)
     {
         request.Id = id;
         var response = await updateArticleService.ExecuteAsync(UserId!.Value, request);
@@ -121,7 +121,7 @@ public class ArticlesController : ApplicationController
 
     [HttpPost("{id}/like")]
     [RequireAuth]
-    public async Task<ActionResult> ToggleLike(ArticleId id)
+    public async Task<ActionResult<ToggleLikeResponse>> ToggleLike(ArticleId id)
     {
         var request = new ToggleLikeRequest
         {
@@ -151,7 +151,7 @@ public class ArticlesController : ApplicationController
     [HttpPost("{id}/comments")]
     [RequireAuth]
     [ValidateModelState]
-    public async Task<ActionResult> CreateComment(ArticleId id, [FromBody] CreateCommentRequest request)
+    public async Task<ActionResult<CreateCommentResponse>> CreateComment(ArticleId id, [FromBody] CreateCommentRequest request)
     {
         request.ArticleId = id;
         var response = await createCommentService.ExecuteAsync(UserId!.Value, request);

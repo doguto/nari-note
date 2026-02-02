@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode } from 'react';
-import { useMe } from '@/lib/api';
+import { useGetCurrentUser } from '@/lib/api';
 
 interface AuthContextType {
   userId: number | null;
@@ -13,7 +13,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data, isLoading, refetch } = useMe({
+  const { data, isLoading, refetch } = useGetCurrentUser({}, {
     retry: false,
     refetchOnWindowFocus: false,
   });

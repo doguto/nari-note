@@ -99,18 +99,36 @@ def generate_query_hook(hook_name: str, func_name: str, controller: str,
 
 def generate_mutation_hook(hook_name: str, func_name: str, controller: str,
                            request_type: str, response_type: str) -> list:
-    """Mutation hookを生成"""
-    lines = [
-        f"export function {hook_name}(options?: UseMutationOptions<{response_type}, Error, {request_type}>) {{",
-        "  const queryClient = useQueryClient();",
-        f"  return useMutation<{response_type}, Error, {request_type}>({{",
-        f"    mutationFn: (data) => {controller}Api.{func_name}(data),",
-        "    onSuccess: (...args) => {",
-        f"      queryClient.invalidateQueries({{ queryKey: ['{controller}'] }});",
-        "      options?.onSuccess?.(...args);",
-        "    },",
-        "    ...options,",
-        "  });",
-        "}",
-    ]
+    """ミューテーションフックを生成"""
+    lines = []
+    
+    if request_type == "void":
+        # request_type が void の場合は引数なし
+        lines = [
+            f"export function {hook_name}(options?: UseMutationOptions<{response_type}, Error, {request_type}>) {{",
+            "  const queryClient = useQueryClient();",
+            f"  return useMutation<{response_type}, Error, {request_type}>({{",
+            f"    mutationFn: () => {controller}Api.{func_name}(),",
+            "    onSuccess: (...args) => {",
+            f"      queryClient.invalidateQueries({{ queryKey: ['{controller}'] }});",
+            "      options?.onSuccess?.(...args);",
+            "    },",
+            "    ...options,",
+            "  });",
+            "}",
+        ]
+    else:
+        lines = [
+            f"export function {hook_name}(options?: UseMutationOptions<{response_type}, Error, {request_type}>) {{",
+            "  const queryClient = useQueryClient();",
+            f"  return useMutation<{response_type}, Error, {request_type}>({{",
+            f"    mutationFn: (data) => {controller}Api.{func_name}(data),",
+            "    onSuccess: (...args) => {",
+            f"      queryClient.invalidateQueries({{ queryKey: ['{controller}'] }});",
+            "      options?.onSuccess?.(...args);",
+            "    },",
+            "    ...options,",
+            "  });",
+            "}",
+        ]
     return lines

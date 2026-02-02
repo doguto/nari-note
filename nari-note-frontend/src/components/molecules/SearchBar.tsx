@@ -29,7 +29,7 @@ export function SearchBar({
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mb-8">
+    <div className="w-full w-3/4 mx-auto mb-8">
       <div className="flex gap-2">
         <div className="flex-1">
           <SearchInput

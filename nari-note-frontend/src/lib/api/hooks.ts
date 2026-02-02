@@ -13,6 +13,8 @@ import type {
   CreateCourseResponse,
   DeleteArticleRequest,
   DeleteCourseRequest,
+  GetArticleContentRequest,
+  GetArticleContentResponse,
   GetArticlesByAuthorRequest,
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
@@ -36,7 +38,6 @@ import type {
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
-  LogoutRequest,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SignInRequest,
@@ -57,7 +58,7 @@ import type {
 export const queryKeys = {
   articles: {
     getArticles: ['articles', 'getArticles'] as const,
-    getArticle: ['articles', 'getArticle'] as const,
+    getArticleContent: ['articles', 'getArticleContent'] as const,
     getArticlesByAuthor: ['articles', 'getArticlesByAuthor'] as const,
     getArticlesByTag: ['articles', 'getArticlesByTag'] as const,
     getDraftArticles: ['articles', 'getDraftArticles'] as const,
@@ -105,10 +106,10 @@ export function useCreateArticle(options?: UseMutationOptions<CreateArticleRespo
   });
 }
 
-export function useGetArticle(options?: Omit<UseQueryOptions<void>, 'queryKey' | 'queryFn'>) {
-  return useQuery<void>({
-    queryKey: queryKeys.articles.getArticle,
-    queryFn: () => articlesApi.getArticle(),
+export function useGetArticleContent(params: GetArticleContentRequest, options?: Omit<UseQueryOptions<GetArticleContentResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticleContentResponse>({
+    queryKey: [...queryKeys.articles.getArticleContent, params],
+    queryFn: () => articlesApi.getArticleContent(params),
     ...options,
   });
 }
@@ -226,10 +227,10 @@ export function useGetCurrentUser(params: GetCurrentUserRequest, options?: Omit<
   });
 }
 
-export function useLogout(options?: UseMutationOptions<void, Error, LogoutRequest>) {
+export function useLogout(options?: UseMutationOptions<void, Error, void>) {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, LogoutRequest>({
-    mutationFn: (data) => authApi.logout(data),
+  return useMutation<void, Error, void>({
+    mutationFn: () => authApi.logout(),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
