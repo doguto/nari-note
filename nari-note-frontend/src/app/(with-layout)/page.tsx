@@ -1,5 +1,5 @@
-import { HomeArticleListPage } from "@/features/article/pages";
+import { HomeListPage } from "@/features/article/pages";
 
 export default function Home() {
-  return <HomeArticleListPage />;
+  return <HomeListPage />;
 }
