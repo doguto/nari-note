@@ -12,7 +12,7 @@ export function Sidebar() {
   const { data: tagsData, isLoading, isError } = useGetPopularTags();
 
   return (
-    <aside className="w-full lg:w-80 lg:max-w-xs hidden lg:block">
+    <aside className="lg:w-80 lg:max-w-xs hidden lg:block">
       {/* トレンドセクション */}
       <div className="bg-brand-text rounded-lg p-4 text-white mb-6">
         <div className="flex items-center justify-between mb-4">

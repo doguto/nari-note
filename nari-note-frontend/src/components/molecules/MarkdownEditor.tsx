@@ -246,11 +246,10 @@ export function MarkdownEditor({
           {showCommands && filteredCommands.length > 0 && (
             <div
               ref={commandsRef}
-              className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg max-h-[clamp(12rem,50vh,24rem)] overflow-y-auto"
+              className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg max-h-[clamp(12rem,50vh,24rem)] overflow-y-auto w-[clamp(16rem,80%,37.5rem)]"
               style={{
                 top: `${commandMenuPosition.top}px`,
                 left: `${commandMenuPosition.left}px`,
-                width: 'clamp(16rem, 80%, 37.5rem)',
               }}
             >
               {filteredCommands.map((cmd, index) => (
