@@ -2,16 +2,12 @@
 
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
-import { LikeButton } from '@/components/ui';
+import { LikeButton, UserAvatar } from '@/components/ui';
 import { CommentForm } from '../organisms/CommentForm';
 import { CommentList } from '../organisms/CommentList';
 import { Comment } from '@/types/comment';
 import { Button } from '@/components/ui/button';
-<<<<<<< HEAD
-import { Pencil } from 'lucide-react';
-=======
 import { Pencil, BookOpen, ChevronRight } from 'lucide-react';
->>>>>>> 6295498e9d945624c7feac83fa134d07af2b57ac
 import { GetArticleContentResponse } from '@/lib/api/types';
 
 interface ArticleDetailTemplateProps {
@@ -73,9 +69,7 @@ export function ArticleDetailTemplate({
       
       <div className="flex items-center gap-6 mb-8 pb-6 border-b border-gray-200">
         <Link href={`/users/${article.authorId}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center text-white font-bold">
-            {article.authorName?.charAt(0).toUpperCase() || 'A'}
-          </div>
+          <UserAvatar username={article.authorName || 'Unknown Author'} size="md" />
           <div>
             <div className="font-medium text-brand-text">
               {article.authorName || 'Unknown Author'}

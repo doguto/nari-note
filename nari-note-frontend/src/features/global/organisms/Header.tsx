@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { UserAvatar } from '@/components/ui';
 import { User, FileText, BookOpen } from 'lucide-react';
 
 /**
@@ -93,9 +94,7 @@ export function Header() {
                       className="flex items-center gap-2 text-white hover:text-brand-primary transition-colors text-sm"
                       style={{ fontFamily: 'serif' }}
                     >
-                      <div className="w-6 h-6 bg-brand-primary rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        👤
-                      </div>
+                      <UserAvatar username="User" size="sm" />
                       <span>マイページ</span>
                       <svg
                         className="w-3 h-3"
