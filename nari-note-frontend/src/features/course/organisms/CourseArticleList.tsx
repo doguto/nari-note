@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { BookOpen, Check } from 'lucide-react';
 import { CourseArticleDto } from '@/lib/api/types';

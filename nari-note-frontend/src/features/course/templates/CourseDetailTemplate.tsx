@@ -1,5 +1,3 @@
-'use client';
-
 import { GetCourseContentResponse } from '@/lib/api/types';
 import { CourseDetailHeader, CourseArticleList } from '../organisms';
 
