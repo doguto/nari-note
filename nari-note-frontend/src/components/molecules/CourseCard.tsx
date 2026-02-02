@@ -4,7 +4,6 @@ import { Heart, BookOpen } from 'lucide-react';
 interface CourseCardProps {
   id: number;
   name: string;
-  userId: number;
   articleCount: number;
   likeCount: number;
 }
@@ -18,7 +17,6 @@ interface CourseCardProps {
 export function CourseCard({
   id,
   name,
-  userId,
   articleCount,
   likeCount,
 }: CourseCardProps) {

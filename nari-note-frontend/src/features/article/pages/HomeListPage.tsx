@@ -31,10 +31,6 @@ export function HomeListPage() {
     refetch: refetchCourses 
   } = useGetCourses({ limit: 20, offset: 0 });
 
-  const isLoading = activeTab === 'articles' ? isLoadingArticles : isLoadingCourses;
-  const error = activeTab === 'articles' ? articlesError : coursesError;
-  const refetch = activeTab === 'articles' ? refetchArticles : refetchCourses;
-
   // IDが存在しない記事をフィルタリング
   const articlesWithId = articlesData?.articles?.filter(
     (article) => article.id !== null && article.id !== undefined

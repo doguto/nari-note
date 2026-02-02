@@ -59,7 +59,6 @@ export function HomeCourseListTemplate({ courses }: HomeCourseListTemplateProps)
           key={course.id}
           id={course.id!}
           name={course.name ?? ''}
-          userId={course.userId ?? 0}
           articleCount={course.articleIds?.length ?? 0}
           likeCount={course.likeCount ?? 0}
         />
