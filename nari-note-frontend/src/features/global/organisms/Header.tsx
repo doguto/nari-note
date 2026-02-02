@@ -35,7 +35,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">
+            <div className="w-[2.5rem] h-[2.5rem] bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">
               将
             </div>
             <span className="text-xl font-bold text-white" style={{ fontFamily: 'serif' }}>
@@ -81,7 +81,7 @@ export function Header() {
                     className="flex items-center gap-2 text-white hover:text-brand-primary transition-colors"
                     style={{ fontFamily: 'serif' }}
                   >
-                    <div className="w-8 h-8 bg-brand-primary rounded-full flex items-center justify-center text-white text-sm font-bold">
+                    <div className="w-[2rem] h-[2rem] bg-brand-primary rounded-full flex items-center justify-center text-white text-sm font-bold">
                       👤
                     </div>
                     <span>マイページ</span>

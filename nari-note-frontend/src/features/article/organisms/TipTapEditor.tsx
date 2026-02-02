@@ -46,7 +46,7 @@ export function TipTapEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none min-h-[400px] p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
+        class: 'prose prose-sm max-w-none min-h-[clamp(20rem,40vh,40rem)] p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
       },
     },
   });
@@ -60,7 +60,7 @@ export function TipTapEditor({
 
   if (!editor) {
     return (
-      <div className="flex items-center justify-center h-[400px] border border-gray-300 rounded-lg bg-gray-50">
+      <div className="flex items-center justify-center min-h-[clamp(20rem,40vh,40rem)] border border-gray-300 rounded-lg bg-gray-50">
         <div className="text-gray-500">エディターを読み込み中...</div>
       </div>
     );

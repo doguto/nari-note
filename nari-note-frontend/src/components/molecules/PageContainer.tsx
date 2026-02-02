@@ -15,7 +15,7 @@ export function PageContainer({ children, maxWidth = 'wide' }: PageContainerProp
   const widthClasses = {
     narrow: 'max-w-3xl',
     medium: 'max-w-5xl',
-    wide: 'w-4/5',
+    wide: 'max-w-6xl',
     full: 'max-w-7xl w-full'
   };
 
