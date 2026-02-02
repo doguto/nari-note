@@ -34,12 +34,12 @@ export function Header() {
     <header>
       {/* Top row: Site title with white background */}
       <div className="bg-white border-b border-gray-200">
-        <div className="w-11/12 mx-auto px-4 py-3">
+        <div className="w-11/12 mx-auto px-4 py-2">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
-            <div className="w-10 h-10 bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">
+            <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold text-base">
               将
             </div>
-            <span className="text-lg font-bold text-brand-text" style={{ fontFamily: 'serif' }}>
+            <span className="text-base font-bold text-brand-text" style={{ fontFamily: 'serif' }}>
               将棋ブログ投稿サイト ～なりノート～
             </span>
           </Link>
@@ -48,7 +48,7 @@ export function Header() {
       
       {/* Bottom row: Navigation menu with dark background */}
       <div className="bg-brand-text border-b border-brand-text-dark shadow-sm">
-        <div className="w-11/12 mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="w-11/12 mx-auto px-4 py-2 flex items-center justify-between">
           <nav className="hidden md:flex items-center gap-8">
             <Link 
               href="/" 
