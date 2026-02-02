@@ -11,8 +11,7 @@ import type {
   CreateCourseRequest,
   CreateCourseResponse,
   DeleteArticleRequest,
-  GetArticleContentRequest,
-  GetArticleContentResponse,
+  DeleteCourseRequest,
   GetArticlesByAuthorRequest,
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
@@ -44,6 +43,8 @@ import type {
   ToggleLikeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
+  UpdateCourseRequest,
+  UpdateCourseResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
 } from './types';
@@ -58,8 +59,8 @@ export const articlesApi = {
     const response = await apiClient.post<CreateArticleResponse>('/api/articles', data);
     return response;
   },
-  getArticleContent: async (data: GetArticleContentRequest): Promise<GetArticleContentResponse> => {
-    const response = await apiClient.get<GetArticleContentResponse>(`/api/articles/${data.id}`);
+  getArticle: async (): Promise<void> => {
+    const response = await apiClient.get<void>(`/api/articles/${data.id}`);
     return response;
   },
   updateArticle: async (data: UpdateArticleRequest): Promise<UpdateArticleResponse> => {
@@ -119,6 +120,13 @@ export const authApi = {
 export const coursesApi = {
   createCourse: async (data: CreateCourseRequest): Promise<CreateCourseResponse> => {
     const response = await apiClient.post<CreateCourseResponse>('/api/courses', data);
+    return response;
+  },
+  deleteCourse: async (data: DeleteCourseRequest): Promise<void> => {
+    await apiClient.delete(`/api/courses/${data.id}`);
+  },
+  updateCourse: async (data: UpdateCourseRequest): Promise<UpdateCourseResponse> => {
+    const response = await apiClient.put<UpdateCourseResponse>(`/api/courses/${data.id}`, data);
     return response;
   },
 };

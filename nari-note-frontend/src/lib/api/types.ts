@@ -41,6 +41,8 @@ export interface CreateArticleRequest {
   title?: string;
   body?: string;
   authorId?: number;
+  courseId?: number;
+  articleOrder?: number;
   tags?: string[];
   isPublished?: boolean;
   publishedAt?: string;
@@ -70,6 +72,10 @@ export interface CreateCourseResponse {
 }
 
 export interface DeleteArticleRequest {
+  id?: number;
+}
+
+export interface DeleteCourseRequest {
   id?: number;
 }
 
@@ -260,9 +266,22 @@ export interface UpdateArticleRequest {
   tags?: string[];
   isPublished?: boolean;
   publishedAt?: string;
+  articleOrder?: number;
 }
 
 export interface UpdateArticleResponse {
+  id?: number;
+  updatedAt?: string;
+}
+
+export interface UpdateCourseRequest {
+  id?: number;
+  name?: string;
+  isPublished?: boolean;
+  publishedAt?: string;
+}
+
+export interface UpdateCourseResponse {
   id?: number;
   updatedAt?: string;
 }
