@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NariNoteBackend.Migrations
 {
     [DbContext(typeof(NariNoteDbContext))]
-    [Migration("20260201025930_ChangeCourseArticleCascadeDelete")]
-    partial class ChangeCourseArticleCascadeDelete
+    [Migration("20260202031815_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -143,6 +143,9 @@ namespace NariNoteBackend.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
