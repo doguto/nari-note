@@ -27,6 +27,7 @@ public class ArticleRepository : IArticleRepository
     {
         return await context.Articles
                             .Include(a => a.Author)
+                            .Include(a => a.Course)
                             .Include(a => a.ArticleTags)
                             .ThenInclude(at => at.Tag)
                             .Include(a => a.Likes)

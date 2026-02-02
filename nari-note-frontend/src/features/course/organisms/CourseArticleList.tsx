@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpen, Check } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import { CourseArticleDto } from '@/lib/api/types';
 
 interface CourseArticleListProps {
@@ -44,17 +44,6 @@ export function CourseArticleList({ articles }: CourseArticleListProps) {
                   {article.title || '無題の記事'}
                 </h3>
               </div>
-              {article.isPublished && (
-                <div className="flex-shrink-0 flex items-center gap-1 text-green-600 text-sm">
-                  <Check className="w-4 h-4" />
-                  <span>公開済み</span>
-                </div>
-              )}
-              {!article.isPublished && (
-                <div className="flex-shrink-0 text-gray-400 text-sm">
-                  下書き
-                </div>
-              )}
             </div>
           </Link>
         ))}

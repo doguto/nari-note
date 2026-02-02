@@ -17,4 +17,6 @@ public class GetArticleContentResponse
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<CommentDto> Comments { get; set; } = new();
+    public CourseId? CourseId { get; set; }
+    public string? CourseName { get; set; }
 }
