@@ -27,7 +27,6 @@ public class GetCourseContentService
             IsPublished = course.IsPublished,
             PublishedAt = course.PublishedAt,
             CreatedAt = course.CreatedAt,
-            UpdatedAt = course.UpdatedAt,
             Articles = course.Articles
                 .OrderBy(a => a.ArticleOrder)
                 .Select(a => new CourseArticleDto
