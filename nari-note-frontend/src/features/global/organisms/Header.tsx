@@ -34,12 +34,12 @@ export function Header() {
     <header>
       {/* Top row: Site title with white background */}
       <div className="bg-white border-b border-gray-200">
-        <div className="w-11/12 mx-auto px-4 py-2">
+        <div className="w-11/12 mx-auto px-4 py-1">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
-            <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold text-base">
+            <div className="w-7 h-7 bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold text-sm">
               将
             </div>
-            <span className="text-base font-bold text-brand-text" style={{ fontFamily: 'serif' }}>
+            <span className="text-sm font-bold text-brand-text" style={{ fontFamily: 'serif' }}>
               将棋ブログ投稿サイト ～なりノート～
             </span>
           </Link>
@@ -48,25 +48,25 @@ export function Header() {
       
       {/* Bottom row: Navigation menu with dark background */}
       <div className="bg-brand-text border-b border-brand-text-dark shadow-sm">
-        <div className="w-11/12 mx-auto px-4 py-2 flex items-center justify-between">
+        <div className="w-11/12 mx-auto px-4 py-1 flex items-center justify-between">
           <nav className="hidden md:flex items-center gap-8">
             <Link 
               href="/" 
-              className="text-white hover:text-brand-primary font-medium transition-colors"
+              className="text-white hover:text-brand-primary font-medium transition-colors text-sm"
               style={{ fontFamily: 'serif' }}
             >
               ホーム
             </Link>
             <Link 
               href="/articles/search" 
-              className="text-white hover:text-brand-primary transition-colors"
+              className="text-white hover:text-brand-primary transition-colors text-sm"
               style={{ fontFamily: 'serif' }}
             >
               記事を探す
             </Link>
             <Link 
               href="/articles/new" 
-              className="text-white hover:text-brand-primary transition-colors"
+              className="text-white hover:text-brand-primary transition-colors text-sm"
               style={{ fontFamily: 'serif' }}
             >
               投稿する
@@ -76,22 +76,22 @@ export function Header() {
           <div className="flex items-center gap-4 ml-auto">
             {isLoading ? (
               // ローディング中はスケルトン表示
-              <div className="w-24 h-8 bg-brand-text-dark rounded animate-pulse" />
+              <div className="w-24 h-6 bg-brand-text-dark rounded animate-pulse" />
             ) : isLoggedIn ? (
               // ログイン時: マイページメニューとログアウトボタン
               <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className="flex items-center gap-2 text-white hover:text-brand-primary transition-colors"
+                      className="flex items-center gap-2 text-white hover:text-brand-primary transition-colors text-sm"
                       style={{ fontFamily: 'serif' }}
                     >
-                      <div className="w-8 h-8 bg-brand-primary rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      <div className="w-6 h-6 bg-brand-primary rounded-full flex items-center justify-center text-white text-xs font-bold">
                         👤
                       </div>
                       <span>マイページ</span>
                       <svg
-                        className="w-4 h-4"
+                        className="w-3 h-3"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -107,7 +107,7 @@ export function Header() {
                     <DropdownMenuItem asChild>
                       <Link
                         href={`/users/${userId}`}
-                        className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2"
+                        className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
                         style={{ fontFamily: 'serif' }}
                       >
                         <User className="w-4 h-4" />
@@ -118,7 +118,7 @@ export function Header() {
                     <DropdownMenuItem asChild>
                       <Link
                         href="/articles/my-articles"
-                        className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2"
+                        className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
                         style={{ fontFamily: 'serif' }}
                       >
                         <FileText className="w-4 h-4" />
@@ -130,7 +130,7 @@ export function Header() {
                 <button
                   onClick={handleLogout}
                   disabled={logoutMutation.isPending}
-                  className="text-white hover:text-brand-primary transition-colors"
+                  className="text-white hover:text-brand-primary transition-colors text-sm"
                   style={{ fontFamily: 'serif' }}
                 >
                   {logoutMutation.isPending ? 'ログアウト中...' : 'ログアウト'}
@@ -141,14 +141,14 @@ export function Header() {
               <>
                 <Link
                   href="/login"
-                  className="text-white hover:text-brand-primary transition-colors"
+                  className="text-white hover:text-brand-primary transition-colors text-sm"
                   style={{ fontFamily: 'serif' }}
                 >
                   ログイン
                 </Link>
                 <Link
                   href="/signup"
-                  className="px-4 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors"
+                  className="px-3 py-1 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors text-sm"
                   style={{ fontFamily: 'serif' }}
                 >
                   新規登録
