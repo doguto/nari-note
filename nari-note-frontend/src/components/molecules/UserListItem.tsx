@@ -8,13 +8,7 @@ interface UserListItemProps {
   profileImage?: string;
 }
 
-/**
- * UserListItem - Molecule Component
- * 
- * ユーザーリストアイテム
- * ユーザーアイコン、ユーザー名を表示
- * クリックでユーザープロフィールページに遷移
- */
+// TODO: プロフィール画像の表示対応
 export function UserListItem({ userId, username, profileImage }: UserListItemProps) {
   const router = useRouter();
 
