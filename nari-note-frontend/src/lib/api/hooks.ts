@@ -19,6 +19,9 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetCourseContentResponse,
+  GetCoursesRequest,
+  GetCoursesResponse,
   GetCurrentUserRequest,
   GetDraftArticlesRequest,
   GetDraftArticlesResponse,
@@ -64,6 +67,8 @@ export const queryKeys = {
     getCurrentUser: ['auth', 'getCurrentUser'] as const,
   },
   courses: {
+    getCourses: ['courses', 'getCourses'] as const,
+    getCourse: ['courses', 'getCourse'] as const,
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
@@ -234,6 +239,14 @@ export function useLogout(options?: UseMutationOptions<void, Error, LogoutReques
 }
 
 // Courses Hooks
+export function useGetCourses(params: GetCoursesRequest, options?: Omit<UseQueryOptions<GetCoursesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCoursesResponse>({
+    queryKey: [...queryKeys.courses.getCourses, params],
+    queryFn: () => coursesApi.getCourses(params),
+    ...options,
+  });
+}
+
 export function useCreateCourse(options?: UseMutationOptions<CreateCourseResponse, Error, CreateCourseRequest>) {
   const queryClient = useQueryClient();
   return useMutation<CreateCourseResponse, Error, CreateCourseRequest>({
@@ -242,6 +255,14 @@ export function useCreateCourse(options?: UseMutationOptions<CreateCourseRespons
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       options?.onSuccess?.(...args);
     },
+    ...options,
+  });
+}
+
+export function useGetCourse(options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCourseContentResponse>({
+    queryKey: queryKeys.courses.getCourse,
+    queryFn: () => coursesApi.getCourse(),
     ...options,
   });
 }
