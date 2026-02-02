@@ -31,7 +31,7 @@ export function CourseCard({
     >
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <span className="bg-blue-50 text-blue-600 rounded px-2 py-0.5 text-xs font-medium">
+          <span className="bg-blue-50 text-blue-600 rounded px-2 py-0.5 text-xs font-medium" aria-label="コンテンツタイプ: 講座">
             講座
           </span>
           <h3 className="text-lg font-bold text-gray-800">{name}</h3>
