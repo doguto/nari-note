@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
+import { UserAvatar } from '@/components/ui';
 
 interface ArticleCardProps {
   id: number;
@@ -34,7 +35,7 @@ export function ArticleCard({
       <div className="flex flex-col gap-3">
         <h3 className="text-lg font-bold text-gray-800">{title}</h3>
         <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span className="w-6 h-6 bg-gray-200 rounded-full"></span>
+          <UserAvatar username={author} size="sm" />
           <Link
             href={`/users/${authorId}`}
             onClick={(e) => e.stopPropagation()}

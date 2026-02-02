@@ -21,6 +21,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetCourseContentRequest,
   GetCourseContentResponse,
   GetCoursesRequest,
   GetCoursesResponse,
@@ -260,10 +261,10 @@ export function useCreateCourse(options?: UseMutationOptions<CreateCourseRespons
   });
 }
 
-export function useGetCourse(options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetCourse(params: GetCourseContentRequest, options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetCourseContentResponse>({
-    queryKey: queryKeys.courses.getCourse,
-    queryFn: () => coursesApi.getCourse(),
+    queryKey: [...queryKeys.courses.getCourse, params],
+    queryFn: () => coursesApi.getCourse(params),
     ...options,
   });
 }

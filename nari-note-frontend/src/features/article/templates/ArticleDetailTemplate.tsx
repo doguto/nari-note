@@ -8,10 +8,10 @@ import { CommentList } from '../organisms/CommentList';
 import { Comment } from '@/types/comment';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
-import { GetArticleResponse } from '@/lib/api/types';
+import { GetArticleContentResponse } from '@/lib/api/types';
 
 interface ArticleDetailTemplateProps {
-  article: GetArticleResponse;
+  article: GetArticleContentResponse;
   comments: Comment[];
   isOwnArticle: boolean;
   isLikePending: boolean;

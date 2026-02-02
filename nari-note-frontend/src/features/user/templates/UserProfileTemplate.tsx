@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { FollowButton, FollowStats, LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { FollowButton, FollowStats, LoadingSpinner, ErrorMessage, UserAvatar } from '@/components/ui';
 import { UserListItem, ArticleList } from '@/components/molecules';
 import type { GetUserProfileResponse, GetArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
@@ -82,9 +82,10 @@ export function UserProfileTemplate({
       {/* プロフィールカード */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-start gap-6">
-          <div className="w-24 h-24 bg-brand-primary rounded-full flex items-center justify-center text-white text-4xl font-bold flex-shrink-0">
-            {user.username?.charAt(0).toUpperCase() || 'U'}
-          </div>
+          <UserAvatar 
+            username={user.username || 'Unknown User'} 
+            size="xl"
+          />
           
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-brand-text mb-2">
