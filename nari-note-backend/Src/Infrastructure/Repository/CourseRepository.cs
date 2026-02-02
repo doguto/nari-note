@@ -82,4 +82,24 @@ public class CourseRepository : ICourseRepository
 
         return course;
     }
+
+    public async Task<(List<Course> Courses, int TotalCount)> FindLatestAsync(int limit, int offset)
+    {
+        var now = DateTime.UtcNow;
+        
+        var query = context.Courses
+            .Include(c => c.User)
+            .Include(c => c.CourseLikes)
+            .Include(c => c.Articles)
+            .Where(c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now)
+            .OrderByDescending(c => c.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var courses = await query
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+
+        return (courses, totalCount);
+    }
 }
