@@ -48,7 +48,7 @@ export function Header() {
       
       {/* Bottom row: Navigation menu with dark background */}
       <div className="bg-brand-text border-b border-brand-text-dark shadow-sm">
-        <div className="w-11/12 mx-auto px-4 py-1 flex items-center justify-between">
+        <div className="w-11/12 mx-auto px-4 py-1 flex items-center justify-center relative">
           <nav className="hidden md:flex items-center gap-8">
             <Link 
               href="/" 
@@ -73,7 +73,7 @@ export function Header() {
             </Link>
           </nav>
           
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-4 absolute right-4">
             {isLoading ? (
               // ローディング中はスケルトン表示
               <div className="w-24 h-6 bg-brand-text-dark rounded animate-pulse" />
