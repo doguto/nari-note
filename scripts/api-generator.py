@@ -2,6 +2,8 @@
 
 import os
 import re
+import sys
+import argparse
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
@@ -151,20 +153,22 @@ def parse_csharp_class(file_path: Path) -> Optional[CSharpClass]:
     return CSharpClass(name=class_name, properties=properties, namespace=namespace)
 
 
-def parse_controller(file_path: Path, all_request_types: set, all_response_types: set) -> List[EndpointInfo]:
+def parse_controller(file_path: Path, all_request_types: set, all_response_types: set) -> Tuple[List[EndpointInfo], List[str]]:
+    """コントローラーをパースしてエンドポイント情報とスキップされたメソッドを返す"""
     try:
         content = file_path.read_text(encoding='utf-8')
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
-        return []
+        return [], []
 
     # コントローラー名を抽出
     controller_match = re.search(r'public class (\w+)Controller', content)
     if not controller_match:
-        return []
+        return [], []
     controller_name = controller_match.group(1).lower()
 
     endpoints = []
+    skipped_methods = []
     
     # エンドポイントを抽出
     # [HttpGet], [HttpPost]などのアトリビュートとメソッド、パラメータを見つける
@@ -181,6 +185,8 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
         # パラメータからリクエスト型を抽出
         request_type = None
         has_body_param = False
+        has_path_params = bool(re.findall(r'\{(\w+)\}', route or ""))
+        
         if parameters:
             # [FromBody] XxxRequest のパターンを探す
             from_body_match = re.search(r'\[FromBody\]\s+(\w+Request)\s+\w+', parameters)
@@ -193,8 +199,10 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
         inferred_response = f"{function_name}Response"
         
         # リクエスト型: 明示的に指定されていない場合、推測した型が存在すれば使用
+        # GET メソッドでパスパラメータがある場合も Request DTO があれば使用
         if not request_type and inferred_request in all_request_types:
-            request_type = inferred_request
+            if has_body_param or has_path_params or http_method == "GET":
+                request_type = inferred_request
         
         # レスポンス型: 明示的に指定されている場合はそれを使用、なければ推測
         if explicit_response_type:
@@ -202,24 +210,35 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
         elif inferred_response in all_response_types:
             response_type = inferred_response
         else:
-            response_type = None
+            # ActionResultでジェネリック型がない場合は推測を試みる
+            # DELETE/Logout などで NoContent を返す場合は void として扱う
+            if http_method == "DELETE" or function_name.lower() in ["logout", "signout"]:
+                response_type = "void"
+            elif inferred_response in all_response_types:
+                response_type = inferred_response
+                skipped_methods.append(f"{function_name} (inferred response: {inferred_response})")
+            else:
+                response_type = None
         
         # ルートパスを構築
         path = f"/api/{controller_name}"
         if route:
             path += f"/{route}"
         
-        endpoints.append(EndpointInfo(
-            method=http_method,
-            path=path,
-            function_name=function_name,
-            request_type=request_type,
-            response_type=response_type,
-            controller_name=controller_name,
-            has_body_param=has_body_param
-        ))
+        if response_type:
+            endpoints.append(EndpointInfo(
+                method=http_method,
+                path=path,
+                function_name=function_name,
+                request_type=request_type,
+                response_type=response_type,
+                controller_name=controller_name,
+                has_body_param=has_body_param
+            ))
+        else:
+            skipped_methods.append(f"{function_name} (no response type found)")
     
-    return endpoints
+    return endpoints, skipped_methods
 
 
 def generate_types_file(classes: List[CSharpClass], value_object_types: set[str]) -> str:
@@ -246,9 +265,9 @@ def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpC
     # 型のインポートを追加
     all_types = set()
     for ep in endpoints:
-        if ep.request_type:
+        if ep.request_type and ep.request_type != "void":
             all_types.add(ep.request_type)
-        if ep.response_type:
+        if ep.response_type and ep.response_type != "void":
             all_types.add(ep.response_type)
     
     for type_name in sorted(all_types):
@@ -343,9 +362,9 @@ def generate_hooks_file(endpoints: List[EndpointInfo]) -> str:
     # 型のインポート
     all_types = set()
     for ep in endpoints:
-        if ep.request_type:
+        if ep.request_type and ep.request_type != "void":
             all_types.add(ep.request_type)
-        if ep.response_type:
+        if ep.response_type and ep.response_type != "void":
             all_types.add(ep.response_type)
     
     if all_types:
@@ -394,7 +413,25 @@ def generate_hooks_file(endpoints: List[EndpointInfo]) -> str:
 
 
 def main():
+    # コマンドライン引数をパース
+    parser = argparse.ArgumentParser(
+        description='Generate TypeScript API definitions from C# backend code'
+    )
+    parser.add_argument(
+        '--force', '-f',
+        action='store_true',
+        help='Force regeneration of all files'
+    )
+    parser.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        help='Show detailed parsing information'
+    )
+    args = parser.parse_args()
+    
     print("🚀 API Generator - Starting...")
+    if args.force:
+        print("⚡ Force mode enabled - will regenerate all files")
     
     # ディレクトリの存在確認
     if not BACKEND_ROOT.exists():
@@ -432,18 +469,23 @@ def main():
     # コントローラーをパース
     print("\n📖 Parsing Controllers...")
     all_endpoints: List[EndpointInfo] = []
+    all_skipped: Dict[str, List[str]] = {}
     
     if CONTROLLER_DIR.exists():
         for file_path in CONTROLLER_DIR.glob("*Controller.cs"):
-            endpoints = parse_controller(file_path, all_request_types, all_response_types)
+            endpoints, skipped = parse_controller(file_path, all_request_types, all_response_types)
             all_endpoints.extend(endpoints)
+            if skipped:
+                all_skipped[file_path.name] = skipped
             if endpoints:
                 print(f"  ✓ {file_path.name}: {len(endpoints)} endpoints")
+            if args.verbose and skipped:
+                print(f"    ⚠️  Skipped {len(skipped)} methods (missing response types)")
     
     # 出力ディレクトリを作成
     FRONTEND_API_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 出力先（既存ファイルを上書き）
+    # 出力先
     types_file = FRONTEND_API_DIR / "types.ts"
     endpoints_file = FRONTEND_API_DIR / "endpoints.ts"
     hooks_file = FRONTEND_API_DIR / "hooks.ts"
@@ -481,6 +523,15 @@ def main():
     print(f"\n📊 Summary:")
     print(f"   - {len(classes)} types generated")
     print(f"   - {len(all_endpoints)} endpoints found")
+    
+    # スキップされたメソッドを報告
+    if all_skipped:
+        print(f"\n⚠️  Skipped methods (missing response type definitions):")
+        for controller, methods in sorted(all_skipped.items()):
+            print(f"   {controller}:")
+            for method in methods:
+                print(f"     - {method}")
+        print("\n💡 Tip: Add explicit ActionResult<TResponse> types or create Response DTOs")
 
 
 if __name__ == "__main__":

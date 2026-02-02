@@ -13,12 +13,16 @@ import type {
   CreateCourseResponse,
   DeleteArticleRequest,
   DeleteCourseRequest,
+  GetArticleContentRequest,
+  GetArticleContentResponse,
   GetArticlesByAuthorRequest,
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetCoursesRequest,
+  GetCoursesResponse,
   GetCurrentUserRequest,
   GetDraftArticlesRequest,
   GetDraftArticlesResponse,
@@ -33,7 +37,6 @@ import type {
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
-  LogoutRequest,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SignInRequest,
@@ -54,7 +57,7 @@ import type {
 export const queryKeys = {
   articles: {
     getArticles: ['articles', 'getArticles'] as const,
-    getArticle: ['articles', 'getArticle'] as const,
+    getArticleContent: ['articles', 'getArticleContent'] as const,
     getArticlesByAuthor: ['articles', 'getArticlesByAuthor'] as const,
     getArticlesByTag: ['articles', 'getArticlesByTag'] as const,
     getDraftArticles: ['articles', 'getDraftArticles'] as const,
@@ -64,6 +67,7 @@ export const queryKeys = {
     getCurrentUser: ['auth', 'getCurrentUser'] as const,
   },
   courses: {
+    getCourses: ['courses', 'getCourses'] as const,
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
@@ -100,10 +104,10 @@ export function useCreateArticle(options?: UseMutationOptions<CreateArticleRespo
   });
 }
 
-export function useGetArticle(options?: Omit<UseQueryOptions<void>, 'queryKey' | 'queryFn'>) {
-  return useQuery<void>({
-    queryKey: queryKeys.articles.getArticle,
-    queryFn: () => articlesApi.getArticle(),
+export function useGetArticleContent(params: GetArticleContentRequest, options?: Omit<UseQueryOptions<GetArticleContentResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticleContentResponse>({
+    queryKey: [...queryKeys.articles.getArticleContent, params],
+    queryFn: () => articlesApi.getArticleContent(params),
     ...options,
   });
 }
@@ -221,10 +225,10 @@ export function useGetCurrentUser(params: GetCurrentUserRequest, options?: Omit<
   });
 }
 
-export function useLogout(options?: UseMutationOptions<void, Error, LogoutRequest>) {
+export function useLogout(options?: UseMutationOptions<void, Error, void>) {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, LogoutRequest>({
-    mutationFn: (data) => authApi.logout(data),
+  return useMutation<void, Error, void>({
+    mutationFn: () => authApi.logout(),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
@@ -234,6 +238,14 @@ export function useLogout(options?: UseMutationOptions<void, Error, LogoutReques
 }
 
 // Courses Hooks
+export function useGetCourses(params: GetCoursesRequest, options?: Omit<UseQueryOptions<GetCoursesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCoursesResponse>({
+    queryKey: [...queryKeys.courses.getCourses, params],
+    queryFn: () => coursesApi.getCourses(params),
+    ...options,
+  });
+}
+
 export function useCreateCourse(options?: UseMutationOptions<CreateCourseResponse, Error, CreateCourseRequest>) {
   const queryClient = useQueryClient();
   return useMutation<CreateCourseResponse, Error, CreateCourseRequest>({

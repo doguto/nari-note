@@ -140,6 +140,16 @@ export interface GetArticlesResponse {
   totalCount?: number;
 }
 
+export interface GetCoursesRequest {
+  limit?: number;
+  offset?: number;
+}
+
+export interface GetCoursesResponse {
+  courses?: CourseDto[];
+  totalCount?: number;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface GetCurrentUserRequest {
 }
