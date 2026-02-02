@@ -4,6 +4,8 @@ import { Heart, BookOpen } from 'lucide-react';
 interface CourseCardProps {
   id: number;
   name: string;
+  userId: number;
+  userName: string;
   articleCount: number;
   likeCount: number;
 }
@@ -17,6 +19,8 @@ interface CourseCardProps {
 export function CourseCard({
   id,
   name,
+  userId,
+  userName,
   articleCount,
   likeCount,
 }: CourseCardProps) {
@@ -27,6 +31,16 @@ export function CourseCard({
     >
       <div className="flex flex-col gap-3">
         <h3 className="text-lg font-bold text-gray-800">{name}</h3>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span className="w-6 h-6 bg-gray-200 rounded-full"></span>
+          <Link
+            href={`/users/${userId}`}
+            onClick={(e) => e.stopPropagation()}
+            className="hover:text-brand-primary hover:underline"
+          >
+            {userName}
+          </Link>
+        </div>
         <div className="flex gap-4 text-sm text-gray-600 items-center">
           <span className="flex items-center gap-1">
             <BookOpen className="w-4 h-4" />
