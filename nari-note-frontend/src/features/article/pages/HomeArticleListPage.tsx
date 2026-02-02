@@ -2,7 +2,7 @@
 
 import { useGetArticles } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
-import { HeroSection, MainContentSection } from '@/features/global/organisms';
+import { MainContentSection } from '@/features/global/organisms';
 import { HomeArticleListTemplate } from '../templates/HomeArticleListTemplate';
 
 /**
@@ -31,11 +31,8 @@ export function HomeArticleListPage() {
   const articlesWithId = data?.articles?.filter((article) => article.id !== null && article.id !== undefined) || [];
 
   return (
-    <>
-      <HeroSection />
-      <MainContentSection title="新着記事">
-        <HomeArticleListTemplate articles={articlesWithId} />
-      </MainContentSection>
-    </>
+    <MainContentSection title="新着記事">
+      <HomeArticleListTemplate articles={articlesWithId} />
+    </MainContentSection>
   );
 }
