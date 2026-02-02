@@ -15,11 +15,3 @@ public class GetCourseContentResponse
     public DateTime UpdatedAt { get; set; }
     public List<CourseArticleDto> Articles { get; set; } = new();
 }
-
-public class CourseArticleDto
-{
-    public ArticleId Id { get; set; }
-    public required string Title { get; set; }
-    public int? ArticleOrder { get; set; }
-    public bool IsPublished { get; set; }
-}

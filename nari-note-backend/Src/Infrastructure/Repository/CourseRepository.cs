@@ -74,7 +74,7 @@ public class CourseRepository : ICourseRepository
     {
         var course = await context.Courses
             .Include(c => c.User)
-            .Include(c => c.Articles)
+            .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue))
             .Include(c => c.CourseLikes)
             .FirstOrDefaultAsync(c => c.Id == id);
 
