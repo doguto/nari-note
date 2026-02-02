@@ -7,21 +7,17 @@ import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { FormPageLayout } from '@/components/molecules';
 import { CourseFormTemplate } from '../templates/CourseFormTemplate';
 
-interface CourseFormPageProps {
-  courseId?: number;
-  mode?: 'create' | 'edit';
-}
+type CourseFormPageProps =
+  | { mode: 'create' }
+  | { mode: 'edit'; courseId: number };
 
 /**
  * CourseFormPage - Page Component
  * 
  * 講座作成・編集ページのロジックを管理するコンポーネント
  * データフェッチング、状態管理、ビジネスロジックを担当
- * 
- * @param courseId - 編集モード時の講座ID
- * @param mode - 'create' または 'edit' (デフォルト: 'create')
  */
-export function CourseFormPage({ courseId, mode = 'create' }: CourseFormPageProps = {}) {
+export function CourseFormPage(props: CourseFormPageProps = { mode: 'create' }) {
   const [name, setName] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -29,7 +25,8 @@ export function CourseFormPage({ courseId, mode = 'create' }: CourseFormPageProp
   const [isPublishing, setIsPublishing] = useState(false);
   
   const router = useRouter();
-  const isEditMode = mode === 'edit' && courseId;
+  const isEditMode = props.mode === 'edit';
+  const courseId = isEditMode ? props.courseId : undefined;
   
   // 編集モード時の講座データ取得
   const { data: course, isLoading: isLoadingCourse, error: courseError, refetch } = useGetCourseContent(
@@ -77,10 +74,15 @@ export function CourseFormPage({ courseId, mode = 'create' }: CourseFormPageProp
 
   // フォームの変更を追跡
   useEffect(() => {
-    if (isInitialized && name) {
+    if (isInitialized && isEditMode) {
+      // 編集モード時は元の値と比較
+      const hasChanges = name !== (course?.name || '');
+      setHasUnsavedChanges(hasChanges);
+    } else if (isInitialized && !isEditMode && name) {
+      // 新規作成モード時は何か入力があれば変更ありとみなす
       setHasUnsavedChanges(true);
     }
-  }, [name, isInitialized]);
+  }, [name, isInitialized, isEditMode, course?.name]);
 
   // ページ離脱時の確認
   useEffect(() => {
@@ -130,21 +132,19 @@ export function CourseFormPage({ courseId, mode = 'create' }: CourseFormPageProp
   };
 
   const handlePublish = (publishedAt?: string) => {
-    setIsPublishing(true);
-    if (isEditMode) {
-      updateCourse.mutate({
-        id: courseId,
-        name: name.trim(),
-        isPublished: true,
-        publishedAt: publishedAt,
-      });
-    } else {
-      createCourse.mutate({
-        name: name.trim(),
-      });
-      // Note: 新規作成時はまだ公開設定をサポートしていないため、
-      // 作成後に編集画面から公開設定を行う必要があります
+    // 編集モードのみ公開設定をサポート
+    if (!isEditMode) {
+      console.warn('公開設定は編集モードでのみ利用可能です');
+      return;
     }
+
+    setIsPublishing(true);
+    updateCourse.mutate({
+      id: courseId,
+      name: name.trim(),
+      isPublished: true,
+      publishedAt: publishedAt,
+    });
     
     setShowPublishDialog(false);
   };
