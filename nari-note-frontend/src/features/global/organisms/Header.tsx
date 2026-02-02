@@ -32,8 +32,8 @@ export function Header() {
 
   return (
     <header>
-      {/* Top row: Site title with white background */}
-      <div className="bg-white border-b border-gray-200">
+      {/* Top row: Site title with ochre/tan background */}
+      <div className="bg-brand-bg-light border-b border-brand-border">
         <div className="w-11/12 mx-auto px-4 py-1">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
             <div className="w-7 h-7 bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold text-sm">
