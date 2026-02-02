@@ -1,6 +1,6 @@
 'use client';
 
-import { useGetCourse } from '@/lib/api';
+import { useGetCourseContent } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PageWithSidebar } from '@/features/global/organisms';
 import { CourseDetailTemplate } from '../templates';
@@ -16,7 +16,7 @@ interface CourseDetailPageProps {
  * データフェッチング、状態管理、ビジネスロジックを担当
  */
 export function CourseDetailPage({ courseId }: CourseDetailPageProps) {
-  const { data: course, isLoading, error, refetch } = useGetCourse({ id: courseId });
+  const { data: course, isLoading, error, refetch } = useGetCourseContent({ id: courseId });
 
   if (isLoading) {
     return <LoadingSpinner text="講座を読み込み中..." />;

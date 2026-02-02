@@ -13,9 +13,9 @@ public class CoursesController : ApplicationController
 {
     readonly CreateCourseService createCourseService;
     readonly DeleteCourseService deleteCourseService;
-    readonly UpdateCourseService updateCourseService;
-    readonly GetCoursesService getCoursesService;
     readonly GetCourseContentService getCourseContentService;
+    readonly GetCoursesService getCoursesService;
+    readonly UpdateCourseService updateCourseService;
 
     public CoursesController(
         CreateCourseService createCourseService,
@@ -54,7 +54,7 @@ public class CoursesController : ApplicationController
 
     [HttpGet("{id}")]
     [AllowAnonymous]
-    public async Task<ActionResult<GetCourseContentResponse>> GetCourse(CourseId id)
+    public async Task<ActionResult<GetCourseContentResponse>> GetCourseContent(CourseId id)
     {
         var request = new GetCourseContentRequest { Id = id };
         var response = await getCourseContentService.ExecuteAsync(request);
