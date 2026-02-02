@@ -16,7 +16,7 @@ public class GetArticlesService
 
     public async Task<GetArticlesResponse> ExecuteAsync(GetArticlesRequest request)
     {
-        var (articles, totalCount) = await articleRepository.FindLatestAsync(request.Limit, request.Offset);
+        var (articles, totalCount) = await articleRepository.FindLatestSingleArticlesAsync(request.Limit, request.Offset);
 
         var articleDtos = articles.Select(a => new ArticleDto
         {
