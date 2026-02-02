@@ -16,7 +16,7 @@ export function MainContentSection({ children, title }: MainContentSectionProps)
     <section className="w-11/12 mx-auto px-4 pb-16">
       <div className="flex gap-8">
         {/* メインコンテンツ */}
-        <div className="flex-1 mr-2">
+        <div className="flex-1 mr-2 max-w-3xl">
           <h2 className="text-2xl font-bold text-brand-text mb-6">{title}</h2>
           {children}
         </div>

@@ -38,7 +38,7 @@ export function Header() {
             <div className="w-10 h-10 bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">
               将
             </div>
-            <span className="text-xl font-bold text-white" style={{ fontFamily: 'serif' }}>
+            <span className="text-lg font-bold text-white" style={{ fontFamily: 'serif' }}>
               将棋ブログ投稿サイト ～なりノート～
             </span>
           </Link>
