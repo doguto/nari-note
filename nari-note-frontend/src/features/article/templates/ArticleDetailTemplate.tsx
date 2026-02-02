@@ -7,7 +7,11 @@ import { CommentForm } from '../organisms/CommentForm';
 import { CommentList } from '../organisms/CommentList';
 import { Comment } from '@/types/comment';
 import { Button } from '@/components/ui/button';
+<<<<<<< HEAD
 import { Pencil } from 'lucide-react';
+=======
+import { Pencil, BookOpen, ChevronRight } from 'lucide-react';
+>>>>>>> 6295498e9d945624c7feac83fa134d07af2b57ac
 import { GetArticleContentResponse } from '@/lib/api/types';
 
 interface ArticleDetailTemplateProps {
@@ -35,6 +39,21 @@ export function ArticleDetailTemplate({
 }: ArticleDetailTemplateProps) {
   return (
     <article className="bg-white rounded-lg shadow-lg p-8">
+      {/* Course breadcrumb - only show if article is part of a course */}
+      {article.courseId && article.courseName && (
+        <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
+          <BookOpen className="w-4 h-4" />
+          <Link
+            href={`/courses/${article.courseId}`}
+            className="hover:text-brand-primary hover:underline flex items-center gap-1"
+          >
+            {article.courseName}
+          </Link>
+          <ChevronRight className="w-4 h-4" />
+          <span className="text-gray-800 font-medium">この記事</span>
+        </div>
+      )}
+      
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-4xl font-bold text-brand-text">
           {article.title}

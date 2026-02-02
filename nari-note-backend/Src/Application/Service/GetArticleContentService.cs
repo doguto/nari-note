@@ -51,6 +51,8 @@ public class GetArticleContentService
             PublishedAt = article.PublishedAt,
             CreatedAt = article.CreatedAt,
             UpdatedAt = article.UpdatedAt,
+            CourseId = article.CourseId,
+            CourseName = article.Course?.Name,
             Comments = comments
                        .Where(c => !string.IsNullOrEmpty(c.User?.Name))
                        .Select(c => new CommentDto

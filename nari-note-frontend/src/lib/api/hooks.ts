@@ -70,7 +70,7 @@ export const queryKeys = {
   },
   courses: {
     getCourses: ['courses', 'getCourses'] as const,
-    getCourse: ['courses', 'getCourse'] as const,
+    getCourseContent: ['courses', 'getCourseContent'] as const,
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
@@ -261,10 +261,10 @@ export function useCreateCourse(options?: UseMutationOptions<CreateCourseRespons
   });
 }
 
-export function useGetCourse(params: GetCourseContentRequest, options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetCourseContent(params: GetCourseContentRequest, options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetCourseContentResponse>({
-    queryKey: [...queryKeys.courses.getCourse, params],
-    queryFn: () => coursesApi.getCourse(params),
+    queryKey: [...queryKeys.courses.getCourseContent, params],
+    queryFn: () => coursesApi.getCourseContent(params),
     ...options,
   });
 }

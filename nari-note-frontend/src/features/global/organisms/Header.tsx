@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { User, FileText } from 'lucide-react';
+import { User, FileText, BookOpen } from 'lucide-react';
 
 /**
  * ヘッダーコンポーネント
@@ -69,7 +69,14 @@ export function Header() {
               className="text-white hover:text-brand-primary transition-colors text-sm"
               style={{ fontFamily: 'serif' }}
             >
-              投稿する
+              記事を投稿
+            </Link>
+            <Link 
+              href="/courses/new" 
+              className="text-white hover:text-brand-primary transition-colors text-sm"
+              style={{ fontFamily: 'serif' }}
+            >
+              講座を作成
             </Link>
           </nav>
           
@@ -123,6 +130,16 @@ export function Header() {
                       >
                         <FileText className="w-4 h-4" />
                         <span>マイ記事一覧</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/courses/my-courses"
+                        className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
+                        style={{ fontFamily: 'serif' }}
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        <span>マイ講座一覧</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
