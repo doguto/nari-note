@@ -14,16 +14,30 @@ public class CoursesController : ApplicationController
     readonly CreateCourseService createCourseService;
     readonly DeleteCourseService deleteCourseService;
     readonly UpdateCourseService updateCourseService;
+    readonly GetCoursesService getCoursesService;
 
     public CoursesController(
         CreateCourseService createCourseService,
         DeleteCourseService deleteCourseService,
-        UpdateCourseService updateCourseService
+        UpdateCourseService updateCourseService,
+        GetCoursesService getCoursesService
     )
     {
         this.createCourseService = createCourseService;
         this.deleteCourseService = deleteCourseService;
         this.updateCourseService = updateCourseService;
+        this.getCoursesService = getCoursesService;
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<ActionResult<GetCoursesResponse>> GetCourses(
+        [FromQuery] int limit = 20, [FromQuery] int offset = 0
+    )
+    {
+        var request = new GetCoursesRequest { Limit = limit, Offset = offset };
+        var response = await getCoursesService.ExecuteAsync(request);
+        return Ok(response);
     }
 
     [HttpPost]
