@@ -117,6 +117,8 @@ export interface GetArticleContentResponse {
   createdAt?: string;
   updatedAt?: string;
   comments?: CommentDto[];
+  courseId?: number;
+  courseName?: string;
 }
 
 export interface GetArticlesByAuthorRequest {
