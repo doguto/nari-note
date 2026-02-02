@@ -30,7 +30,12 @@ export function CourseCard({
       className="block bg-white rounded-lg p-5 border border-gray-200 hover:shadow-lg hover:border-brand-primary/30 transition-all duration-200"
     >
       <div className="flex flex-col gap-3">
-        <h3 className="text-lg font-bold text-gray-800">{name}</h3>
+        <div className="flex items-center gap-2">
+          <span className="bg-blue-50 text-blue-600 rounded px-2 py-0.5 text-xs font-medium">
+            講座
+          </span>
+          <h3 className="text-lg font-bold text-gray-800">{name}</h3>
+        </div>
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <span className="w-6 h-6 bg-gray-200 rounded-full" aria-hidden="true"></span>
           <Link
@@ -41,7 +46,7 @@ export function CourseCard({
             {userName}
           </Link>
         </div>
-        <div className="flex gap-4 text-sm text-gray-600 items-center">
+        <div className="flex gap-4 text-sm text-gray-500 items-center">
           <span className="flex items-center gap-1">
             <BookOpen className="w-4 h-4" />
             {articleCount}記事
