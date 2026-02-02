@@ -70,6 +70,19 @@ public class CourseRepository : ICourseRepository
         return course;
     }
 
+    public async Task<Course> FindByIdWithArticlesAsync(CourseId id)
+    {
+        var course = await context.Courses
+            .Include(c => c.User)
+            .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue))
+            .Include(c => c.CourseLikes)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (course == null) throw new KeyNotFoundException($"ID: {id} の講座が見つかりません");
+
+        return course;
+    }
+
     public async Task<(List<Course> Courses, int TotalCount)> FindLatestAsync(int limit, int offset)
     {
         var now = DateTime.UtcNow;
