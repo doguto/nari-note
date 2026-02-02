@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NariNoteBackend.Migrations
 {
     [DbContext(typeof(NariNoteDbContext))]
-    [Migration("20260201025748_AddPublishedAtToCourse")]
-    partial class AddPublishedAtToCourse
+    [Migration("20260202031815_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -357,7 +357,7 @@ namespace NariNoteBackend.Migrations
                     b.HasOne("NariNoteBackend.Domain.Entity.Course", "Course")
                         .WithMany("Articles")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Author");
 

@@ -354,7 +354,7 @@ namespace NariNoteBackend.Migrations
                     b.HasOne("NariNoteBackend.Domain.Entity.Course", "Course")
                         .WithMany("Articles")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Author");
 

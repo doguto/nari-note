@@ -12,11 +12,17 @@ namespace NariNoteBackend.Controller;
 public class CoursesController : ApplicationController
 {
     readonly CreateCourseService createCourseService;
+    readonly DeleteCourseService deleteCourseService;
     readonly UpdateCourseService updateCourseService;
 
-    public CoursesController(CreateCourseService createCourseService, UpdateCourseService updateCourseService)
+    public CoursesController(
+        CreateCourseService createCourseService,
+        DeleteCourseService deleteCourseService,
+        UpdateCourseService updateCourseService
+    )
     {
         this.createCourseService = createCourseService;
+        this.deleteCourseService = deleteCourseService;
         this.updateCourseService = updateCourseService;
     }
 
@@ -27,6 +33,15 @@ public class CoursesController : ApplicationController
     {
         var response = await createCourseService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
+    }
+
+    [HttpDelete("{id}")]
+    [RequireAuth]
+    public async Task<ActionResult> DeleteCourse(CourseId id)
+    {
+        var request = new DeleteCourseRequest { Id = id };
+        await deleteCourseService.ExecuteAsync(UserId!.Value, request);
+        return NoContent();
     }
 
     [HttpPut("{id}")]
