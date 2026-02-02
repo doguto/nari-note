@@ -45,7 +45,7 @@ export function HomeListTemplate({
         <TabsTrigger value="articles">新着記事</TabsTrigger>
         <TabsTrigger value="courses">講座一覧</TabsTrigger>
       </TabsList>
-      
+
       <TabsContent value="articles">
         <ArticleList
           articles={articles}

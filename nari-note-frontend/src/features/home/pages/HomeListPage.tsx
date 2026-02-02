@@ -5,13 +5,7 @@ import { useGetArticles, useGetCourses } from '@/lib/api';
 import { MainContentSection } from '@/features/global/organisms';
 import { HomeListTemplate } from '../templates';
 
-/**
- * HomeListPage - Page Component
- * 
- * ホーム画面の記事・講座一覧のロジックを管理するコンポーネント
- * データフェッチング、状態管理、ビジネスロジックを担当
- * タブで記事と講座を切り替え可能
- */
+
 export function HomeListPage() {
   const [activeTab, setActiveTab] = useState<'articles' | 'courses'>('articles');
   
