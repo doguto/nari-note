@@ -260,10 +260,10 @@ export function useCreateCourse(options?: UseMutationOptions<CreateCourseRespons
   });
 }
 
-export function useGetCourse(options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetCourseContent(params: { id: number }, options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetCourseContentResponse>({
-    queryKey: queryKeys.courses.getCourse,
-    queryFn: () => coursesApi.getCourse(),
+    queryKey: [...queryKeys.courses.getCourse, params.id],
+    queryFn: () => coursesApi.getCourse(params),
     ...options,
   });
 }
