@@ -12,8 +12,7 @@ import type {
   CreateCourseRequest,
   CreateCourseResponse,
   DeleteArticleRequest,
-  GetArticleContentRequest,
-  GetArticleContentResponse,
+  DeleteCourseRequest,
   GetArticlesByAuthorRequest,
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
@@ -45,6 +44,8 @@ import type {
   ToggleLikeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
+  UpdateCourseRequest,
+  UpdateCourseResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
 } from './types';
@@ -53,7 +54,7 @@ import type {
 export const queryKeys = {
   articles: {
     getArticles: ['articles', 'getArticles'] as const,
-    getArticleContent: ['articles', 'getArticleContent'] as const,
+    getArticle: ['articles', 'getArticle'] as const,
     getArticlesByAuthor: ['articles', 'getArticlesByAuthor'] as const,
     getArticlesByTag: ['articles', 'getArticlesByTag'] as const,
     getDraftArticles: ['articles', 'getDraftArticles'] as const,
@@ -99,10 +100,10 @@ export function useCreateArticle(options?: UseMutationOptions<CreateArticleRespo
   });
 }
 
-export function useGetArticleContent(params: GetArticleContentRequest, options?: Omit<UseQueryOptions<GetArticleContentResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<GetArticleContentResponse>({
-    queryKey: [...queryKeys.articles.getArticleContent, params],
-    queryFn: () => articlesApi.getArticleContent(params),
+export function useGetArticle(options?: Omit<UseQueryOptions<void>, 'queryKey' | 'queryFn'>) {
+  return useQuery<void>({
+    queryKey: queryKeys.articles.getArticle,
+    queryFn: () => articlesApi.getArticle(),
     ...options,
   });
 }
@@ -237,6 +238,30 @@ export function useCreateCourse(options?: UseMutationOptions<CreateCourseRespons
   const queryClient = useQueryClient();
   return useMutation<CreateCourseResponse, Error, CreateCourseRequest>({
     mutationFn: (data) => coursesApi.createCourse(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useDeleteCourse(options?: UseMutationOptions<void, Error, DeleteCourseRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeleteCourseRequest>({
+    mutationFn: (data) => coursesApi.deleteCourse(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useUpdateCourse(options?: UseMutationOptions<UpdateCourseResponse, Error, UpdateCourseRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UpdateCourseResponse, Error, UpdateCourseRequest>({
+    mutationFn: (data) => coursesApi.updateCourse(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       options?.onSuccess?.(...args);
