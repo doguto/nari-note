@@ -30,7 +30,7 @@ export function FollowingsModal({ userId, isOpen, onClose }: FollowingsModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
+      <DialogContent className="w-1/2 max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>フォロー中</DialogTitle>
         </DialogHeader>
