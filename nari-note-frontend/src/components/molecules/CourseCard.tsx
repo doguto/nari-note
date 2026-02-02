@@ -32,7 +32,7 @@ export function CourseCard({
       <div className="flex flex-col gap-3">
         <h3 className="text-lg font-bold text-gray-800">{name}</h3>
         <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span className="w-6 h-6 bg-gray-200 rounded-full"></span>
+          <span className="w-6 h-6 bg-gray-200 rounded-full" aria-hidden="true"></span>
           <Link
             href={`/users/${userId}`}
             onClick={(e) => e.stopPropagation()}
