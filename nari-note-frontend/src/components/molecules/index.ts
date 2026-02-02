@@ -5,6 +5,7 @@ export { TagInput } from './TagInput';
 export { CharacterCounter } from './CharacterCounter';
 export { UserListItem } from './UserListItem';
 export { ArticleCard } from './ArticleCard';
+export { CourseCard } from './CourseCard';
 export { UnauthorizedModal } from './UnauthorizedModal';
 export { SearchBar } from './SearchBar';
 export { MarkdownEditor } from './MarkdownEditor';

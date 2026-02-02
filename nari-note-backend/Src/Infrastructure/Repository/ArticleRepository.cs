@@ -137,17 +137,19 @@ public class ArticleRepository : IArticleRepository
         }
     }
 
-    public async Task<(List<Article> Articles, int TotalCount)> FindLatestAsync(int limit, int offset)
+    public async Task<(List<Article> Articles, int TotalCount)> FindLatestSingleArticlesAsync(int limit, int offset)
     {
         var now = DateTime.UtcNow;
         var visibilityFilter = IsPubliclyVisible(now);
 
+        // 講座の記事は取得しない
         var query = context.Articles
                            .Include(a => a.Author)
                            .Include(a => a.ArticleTags)
                            .ThenInclude(at => at.Tag)
                            .Include(a => a.Likes)
                            .Where(visibilityFilter)
+                           .Where(a => !a.CourseId.HasValue)
                            .OrderByDescending(a => a.CreatedAt);
 
         // 注: ページネーションの標準的な実装として、
