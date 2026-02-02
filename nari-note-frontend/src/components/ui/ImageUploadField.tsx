@@ -88,7 +88,7 @@ export function ImageUploadField({
       
       <div className="flex items-start gap-4">
         {preview && (
-          <div className="relative w-[6rem] h-[6rem]">
+          <div className="relative w-24 h-24">
             <Image
               src={preview}
               alt="プレビュー"

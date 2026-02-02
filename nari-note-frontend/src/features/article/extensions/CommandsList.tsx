@@ -83,7 +83,7 @@ export const CommandsList = forwardRef<KeyDownHandler, CommandsListProps>((props
 
   if (props.items.length === 0) {
     return (
-      <div className="w-full max-w-xs bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+      <div className="w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
         <div className="text-center text-gray-500 text-sm">
           該当するコマンドが見つかりません
         </div>
@@ -92,7 +92,7 @@ export const CommandsList = forwardRef<KeyDownHandler, CommandsListProps>((props
   }
 
   return (
-    <div className="w-full max-w-xs bg-white border border-gray-200 rounded-lg shadow-lg max-h-[clamp(12rem,50vh,24rem)] overflow-y-auto">
+    <div className="w-64 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-y-auto">
       {props.items.map((item, index) => {
         const Icon = iconMap[item.icon];
         return (

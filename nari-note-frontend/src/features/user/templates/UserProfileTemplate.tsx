@@ -82,7 +82,7 @@ export function UserProfileTemplate({
       {/* プロフィールカード */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-start gap-6">
-          <div className="w-[6rem] h-[6rem] bg-brand-primary rounded-full flex items-center justify-center text-white text-4xl font-bold flex-shrink-0">
+          <div className="w-24 h-24 bg-brand-primary rounded-full flex items-center justify-center text-white text-4xl font-bold flex-shrink-0">
             {user.username?.charAt(0).toUpperCase() || 'U'}
           </div>
           

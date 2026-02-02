@@ -239,17 +239,18 @@ export function MarkdownEditor({
               handleTab(e);
             }}
             placeholder={placeholder}
-            className="w-full min-h-[clamp(20rem,50vh,40rem)] p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono text-sm resize-y"
+            className="w-full min-h-[50vh] p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono text-sm resize-y"
           />
 
           {/* Command Menu */}
           {showCommands && filteredCommands.length > 0 && (
             <div
               ref={commandsRef}
-              className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg max-h-[clamp(12rem,50vh,24rem)] overflow-y-auto w-[clamp(16rem,calc(100vw-2rem),37.5rem)]"
+              className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto"
               style={{
                 top: `${commandMenuPosition.top}px`,
                 left: `${commandMenuPosition.left}px`,
+                width: '80%',
               }}
             >
               {filteredCommands.map((cmd, index) => (
@@ -270,7 +271,7 @@ export function MarkdownEditor({
         </div>
 
         {/* Live Preview */}
-        <div className="border border-gray-300 rounded-lg p-4 bg-white overflow-y-auto min-h-[clamp(20rem,50vh,40rem)]">
+        <div className="border border-gray-300 rounded-lg p-4 bg-white overflow-y-auto min-h-[50vh]">
           <div className="prose prose-sm max-w-none">
             <ReactMarkdown
               components={{

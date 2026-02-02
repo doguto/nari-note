@@ -28,7 +28,7 @@ export function UserListItem({ userId, username, profileImage }: UserListItemPro
       className="flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer transition-colors rounded-lg"
     >
       {/* ユーザーアイコン */}
-      <div className="w-[3rem] h-[3rem] bg-brand-primary rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
+      <div className="w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
         {username.charAt(0).toUpperCase()}
       </div>
       
