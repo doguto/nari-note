@@ -20,6 +20,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetCourseContentResponse,
   GetCoursesRequest,
   GetCoursesResponse,
   GetCurrentUserRequest,
@@ -127,6 +128,10 @@ export const coursesApi = {
   },
   createCourse: async (data: CreateCourseRequest): Promise<CreateCourseResponse> => {
     const response = await apiClient.post<CreateCourseResponse>('/api/courses', data);
+    return response;
+  },
+  getCourse: async (): Promise<GetCourseContentResponse> => {
+    const response = await apiClient.get<GetCourseContentResponse>(`/api/courses/${data.id}`);
     return response;
   },
   deleteCourse: async (data: DeleteCourseRequest): Promise<void> => {

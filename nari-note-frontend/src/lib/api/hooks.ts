@@ -21,6 +21,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetCourseContentResponse,
   GetCoursesRequest,
   GetCoursesResponse,
   GetCurrentUserRequest,
@@ -68,6 +69,7 @@ export const queryKeys = {
   },
   courses: {
     getCourses: ['courses', 'getCourses'] as const,
+    getCourse: ['courses', 'getCourse'] as const,
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
@@ -254,6 +256,14 @@ export function useCreateCourse(options?: UseMutationOptions<CreateCourseRespons
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       options?.onSuccess?.(...args);
     },
+    ...options,
+  });
+}
+
+export function useGetCourse(options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCourseContentResponse>({
+    queryKey: queryKeys.courses.getCourse,
+    queryFn: () => coursesApi.getCourse(),
     ...options,
   });
 }

@@ -28,6 +28,13 @@ export interface CommentDto {
   createdAt?: string;
 }
 
+export interface CourseArticleDto {
+  id?: number;
+  title?: string;
+  articleOrder?: number;
+  isPublished?: boolean;
+}
+
 export interface CourseDto {
   id?: number;
   userId?: number;
@@ -138,6 +145,22 @@ export interface GetArticlesRequest {
 export interface GetArticlesResponse {
   articles?: ArticleDto[];
   totalCount?: number;
+}
+
+export interface GetCourseContentRequest {
+  id?: number;
+}
+
+export interface GetCourseContentResponse {
+  id?: number;
+  name?: string;
+  userId?: number;
+  userName?: string;
+  likeCount?: number;
+  isPublished?: boolean;
+  publishedAt?: string;
+  createdAt?: string;
+  articles?: CourseArticleDto[];
 }
 
 export interface GetCoursesRequest {

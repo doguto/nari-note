@@ -15,17 +15,20 @@ public class CoursesController : ApplicationController
     readonly DeleteCourseService deleteCourseService;
     readonly UpdateCourseService updateCourseService;
     readonly GetCoursesService getCoursesService;
+    readonly GetCourseContentService getCourseContentService;
 
     public CoursesController(
         CreateCourseService createCourseService,
         DeleteCourseService deleteCourseService,
         UpdateCourseService updateCourseService,
-        GetCoursesService getCoursesService
+        GetCoursesService getCoursesService,
+        GetCourseContentService getCourseContentService
     )
     {
         this.createCourseService = createCourseService;
         this.deleteCourseService = deleteCourseService;
         this.updateCourseService = updateCourseService;
+        this.getCourseContentService = getCourseContentService;
         this.getCoursesService = getCoursesService;
     }
 
@@ -46,6 +49,15 @@ public class CoursesController : ApplicationController
     public async Task<ActionResult<CreateCourseResponse>> CreateCourse([FromBody] CreateCourseRequest request)
     {
         var response = await createCourseService.ExecuteAsync(UserId!.Value, request);
+        return Ok(response);
+    }
+
+    [HttpGet("{id}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<GetCourseContentResponse>> GetCourse(CourseId id)
+    {
+        var request = new GetCourseContentRequest { Id = id };
+        var response = await getCourseContentService.ExecuteAsync(request);
         return Ok(response);
     }
 
