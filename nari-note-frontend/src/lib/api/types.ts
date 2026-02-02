@@ -38,6 +38,7 @@ export interface CourseArticleDto {
 export interface CourseDto {
   id?: number;
   userId?: number;
+  userName?: string;
   name?: string;
   articleIds?: number[];
   articleNames?: string[];
