@@ -43,7 +43,7 @@ export function CourseList({ courses, isLoading, error, onRetry }: CourseListPro
           id={course.id!}
           name={course.name ?? ''}
           userId={course.userId ?? 0}
-          userName="作成者" // TODO (Backend): Fetch userName from backend API
+          userName={course.userName ?? '不明なユーザー'}
           articleCount={course.articleIds?.length ?? 0}
           likeCount={course.likeCount ?? 0}
         />
