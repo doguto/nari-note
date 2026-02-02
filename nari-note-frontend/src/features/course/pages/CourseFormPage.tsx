@@ -193,6 +193,7 @@ export function CourseFormPage({ courseId, mode = 'create' }: CourseFormPageProp
         showPublishDialog={showPublishDialog}
         isLoading={isLoading}
         isFormDisabled={isFormDisabled}
+        isEditMode={!!isEditMode}
         onNameChange={setName}
         onSave={handleSave}
         onOpenPublishSettings={handleOpenPublishSettings}

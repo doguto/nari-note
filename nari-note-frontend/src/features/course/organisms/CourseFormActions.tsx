@@ -5,6 +5,7 @@ interface CourseFormActionsProps {
   onOpenPublishSettings: () => void;
   isLoading: boolean;
   isDisabled: boolean;
+  isEditMode: boolean;
 }
 
 /**
@@ -17,6 +18,7 @@ export function CourseFormActions({
   onOpenPublishSettings,
   isLoading,
   isDisabled,
+  isEditMode,
 }: CourseFormActionsProps) {
   return (
     <div className="flex gap-4">
@@ -29,14 +31,16 @@ export function CourseFormActions({
       >
         {isLoading ? '保存中...' : '保存'}
       </Button>
-      <Button
-        type="button"
-        onClick={onOpenPublishSettings}
-        disabled={isDisabled || isLoading}
-        className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
-      >
-        投稿設定
-      </Button>
+      {isEditMode && (
+        <Button
+          type="button"
+          onClick={onOpenPublishSettings}
+          disabled={isDisabled || isLoading}
+          className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
+        >
+          投稿設定
+        </Button>
+      )}
     </div>
   );
 }

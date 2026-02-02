@@ -11,6 +11,7 @@ interface CourseFormTemplateProps {
   showPublishDialog: boolean;
   isLoading: boolean;
   isFormDisabled: boolean;
+  isEditMode: boolean;
   onNameChange: (value: string) => void;
   onSave: () => void;
   onOpenPublishSettings: () => void;
@@ -29,6 +30,7 @@ export function CourseFormTemplate({
   showPublishDialog,
   isLoading,
   isFormDisabled,
+  isEditMode,
   onNameChange,
   onSave,
   onOpenPublishSettings,
@@ -46,16 +48,19 @@ export function CourseFormTemplate({
         onOpenPublishSettings={onOpenPublishSettings}
         isLoading={isLoading}
         isDisabled={isFormDisabled}
+        isEditMode={isEditMode}
       />
 
       <CourseTitleInput value={name} onChange={onNameChange} />
 
-      <PublishSettingsDialog
-        open={showPublishDialog}
-        onOpenChange={onPublishDialogChange}
-        onPublish={onPublish}
-        isLoading={isLoading}
-      />
+      {isEditMode && (
+        <PublishSettingsDialog
+          open={showPublishDialog}
+          onOpenChange={onPublishDialogChange}
+          onPublish={onPublish}
+          isLoading={isLoading}
+        />
+      )}
     </form>
   );
 }
