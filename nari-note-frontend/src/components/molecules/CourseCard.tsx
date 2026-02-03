@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Heart, BookOpen } from 'lucide-react';
+import { UserAvatar } from '@/components/ui';
 
 interface CourseCardProps {
   id: number;
@@ -37,7 +38,7 @@ export function CourseCard({
           <h3 className="text-lg font-bold text-gray-800">{name}</h3>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span className="w-6 h-6 bg-gray-200 rounded-full" aria-hidden="true"></span>
+          <UserAvatar username={userName} size="sm" />
           <Link
             href={`/users/${userId}`}
             onClick={(e) => e.stopPropagation()}
