@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { UserAvatar } from '@/components/ui';
 import { User, FileText, BookOpen } from 'lucide-react';
 
 /**
@@ -19,7 +20,7 @@ import { User, FileText, BookOpen } from 'lucide-react';
  * ロゴ、ナビゲーション、ユーザーメニューを表示します。
  */
 export function Header() {
-  const { userId, isLoggedIn, isLoading, refetch } = useAuth();
+  const { userId, userName, isLoggedIn, isLoading, refetch } = useAuth();
   const logoutMutation = useLogout({
     onSuccess: () => {
       refetch();
@@ -93,9 +94,7 @@ export function Header() {
                       className="flex items-center gap-2 text-white hover:text-brand-primary transition-colors text-sm"
                       style={{ fontFamily: 'serif' }}
                     >
-                      <div className="w-6 h-6 bg-brand-primary rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        👤
-                      </div>
+                      <UserAvatar username={userName!} size="sm" />
                       <span>マイページ</span>
                       <svg
                         className="w-3 h-3"
@@ -114,11 +113,11 @@ export function Header() {
                     <DropdownMenuItem asChild>
                       <Link
                         href={`/users/${userId}`}
-                        className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
+                        className="cursor-pointer hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
                         style={{ fontFamily: 'serif' }}
                       >
                         <User className="w-4 h-4" />
-                        <span>マイページ</span>
+                        <span className='text-white'>マイページ</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-brand-text-dark" />

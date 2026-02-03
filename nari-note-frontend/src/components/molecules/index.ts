@@ -4,6 +4,7 @@ export { NameField } from './NameField';
 export { TagInput } from './TagInput';
 export { CharacterCounter } from './CharacterCounter';
 export { UserListItem } from './UserListItem';
+export { UserAvatarLink } from './UserAvatarLink';
 export { ArticleCard } from './ArticleCard';
 export { CourseCard } from './CourseCard';
 export { UnauthorizedModal } from './UnauthorizedModal';

@@ -9,7 +9,7 @@ import { useGetPopularTags } from '@/lib/api/hooks';
  * トレンドタグと注目の記事を表示します。
  */
 export function Sidebar() {
-  const { data: tagsData, isLoading, isError } = useGetPopularTags();
+  const { data: tagsData, isLoading, isError } = useGetPopularTags({});
 
   return (
     <aside className="lg:w-1/5 hidden lg:block">

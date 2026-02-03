@@ -5,6 +5,7 @@ import { useGetCurrentUser } from '@/lib/api';
 
 interface AuthContextType {
   userId: number | null;
+  userName: string | null;
   isLoggedIn: boolean;
   isLoading: boolean;
   refetch: () => void;
@@ -19,11 +20,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const userId = data?.userId ?? null;
+  const userName = data?.userName ?? null;
 
   return (
     <AuthContext.Provider
       value={{
         userId,
+        userName,
         isLoggedIn: userId !== null,
         isLoading,
         refetch,

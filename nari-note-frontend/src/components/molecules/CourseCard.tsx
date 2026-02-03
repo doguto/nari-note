@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Heart, BookOpen } from 'lucide-react';
+import { UserAvatarLink } from '@/components/molecules';
 
 interface CourseCardProps {
   id: number;
@@ -36,16 +37,7 @@ export function CourseCard({
           </span>
           <h3 className="text-lg font-bold text-gray-800">{name}</h3>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span className="w-6 h-6 bg-gray-200 rounded-full" aria-hidden="true"></span>
-          <Link
-            href={`/users/${userId}`}
-            onClick={(e) => e.stopPropagation()}
-            className="hover:text-brand-primary hover:underline"
-          >
-            {userName}
-          </Link>
-        </div>
+        <UserAvatarLink userId={userId} username={userName} size="sm" />
         <div className="flex gap-4 text-sm text-gray-500 items-center">
           <span className="flex items-center gap-1">
             <BookOpen className="w-4 h-4" />

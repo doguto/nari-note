@@ -1,4 +1,5 @@
 import { Comment } from '@/types/comment';
+import { UserAvatar } from '@/components/ui';
 
 interface CommentItemProps {
   comment: Comment;
@@ -24,9 +25,7 @@ export function CommentItem({ comment }: CommentItemProps) {
   return (
     <div className="bg-gray-50 rounded-lg p-4 mb-3">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 bg-brand-primary rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-          {comment.userName?.charAt(0).toUpperCase() || 'U'}
-        </div>
+        <UserAvatar username={comment.userName || 'Unknown'} size="sm" />
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-medium text-brand-text">{comment.userName}</span>

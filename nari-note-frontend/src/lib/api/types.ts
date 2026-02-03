@@ -18,6 +18,7 @@ export interface ArticleDto {
 
 export interface AuthResponse {
   userId?: number;
+  userName?: string;
 }
 
 export interface CommentDto {

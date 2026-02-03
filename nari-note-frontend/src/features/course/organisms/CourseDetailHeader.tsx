@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Heart, BookOpen } from 'lucide-react';
+import { UserAvatar } from '@/components/ui';
 
 interface CourseDetailHeaderProps {
   courseName: string;
@@ -41,9 +42,7 @@ export function CourseDetailHeader({
           href={`/users/${userId}`}
           className="flex items-center gap-3 hover:opacity-80 transition-opacity"
         >
-          <div className="w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center text-white font-bold text-lg">
-            {userName?.charAt(0).toUpperCase() || 'U'}
-          </div>
+          <UserAvatar username={userName} size="md" />
           <div>
             <div className="font-medium text-gray-800">
               {userName || '不明なユーザー'}

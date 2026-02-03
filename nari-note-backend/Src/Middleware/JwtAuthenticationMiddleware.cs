@@ -1,7 +1,5 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using NariNoteBackend.Domain.Security;
-using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Extension;
 using NariNoteBackend.Filter;
 
@@ -25,12 +23,9 @@ public class JwtAuthenticationMiddleware
         // エンドポイントの属性を確認
         var allowAnonymous = endpoint?.Metadata.GetMetadata<AllowAnonymousAttribute>() != null;
         var optionalAuth = endpoint?.Metadata.GetMetadata<OptionalAuthAttribute>() != null;
-        var requireAuth = endpoint?.Metadata.GetMetadata<RequireAuthAttribute>() != null;
 
-        // Cookieからトークンを取得
         var token = context.Request.Cookies["authToken"];
 
-        // トークンが見つからない場合
         if (token.IsNullOrEmpty())
         {
             if (allowAnonymous || optionalAuth)
@@ -79,33 +74,33 @@ public class JwtAuthenticationMiddleware
             return;
         }
 
-        // JWTトークンからUserIdを取得
-        var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub);
-        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userIdValue))
+        var userId = jwtHelper.GetUserIdFromToken(token!);
+        var userName = jwtHelper.GetUserNameFromToken(token!);
+        if (userId == null || userName == null)
         {
             if (allowAnonymous || optionalAuth)
             {
-                // 認証不要または任意認証の場合、ユーザーID情報がなくても次のミドルウェアに進む
                 await next(context);
                 return;
             }
 
             context.Response.StatusCode = HttpStatusCode.Unauthorized.AsInt();
-            await context.Response.WriteAsJsonAsync(new
-            {
-                error = new
+            await context.Response.WriteAsJsonAsync(
+                new
                 {
-                    code = "UNAUTHORIZED",
-                    message = "ユーザー情報が見つかりません",
-                    timestamp = DateTime.UtcNow,
-                    path = context.Request.Path
-                }
-            });
+                    error = new
+                    {
+                        code = "UNAUTHORIZED",
+                        message = "ユーザー情報が見つかりません",
+                        timestamp = DateTime.UtcNow,
+                        path = context.Request.Path
+                    }
+                });
             return;
         }
 
-        // ユーザーIDをHttpContext.Itemsに設定
-        context.Items["UserId"] = UserId.From(userIdValue);
+        context.Items["UserId"] = userId;
+        context.Items["UserName"] = userName;
 
         await next(context);
     }
