@@ -42,7 +42,7 @@ export function CourseDetailHeader({
           href={`/users/${userId}`}
           className="flex items-center gap-3 hover:opacity-80 transition-opacity"
         >
-          <UserAvatar username={userName || '不明なユーザー'} size="md" />
+          <UserAvatar username={userName} size="md" />
           <div>
             <div className="font-medium text-gray-800">
               {userName || '不明なユーザー'}

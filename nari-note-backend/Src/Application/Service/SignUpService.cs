@@ -38,8 +38,7 @@ public class SignUpService
         };
 
         var createdUser = await userRepository.CreateAsync(user);
-
-        var token = jwtHelper.GenerateToken(createdUser.Id);
+        var token = jwtHelper.GenerateToken(createdUser.Id, user.Name);
 
         // HttpOnly Cookieにトークンを設定
         var cookieOptions = cookieOptionsHelper.CreateAuthCookieOptions(

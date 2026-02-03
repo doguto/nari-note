@@ -10,23 +10,24 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class AuthController : ApplicationController
 {
-    readonly SignUpService signUpService;
-    readonly SignInService signInService;
     readonly GetCurrentUserService getCurrentUserService;
     readonly LogoutService logoutService;
-    
+    readonly SignInService signInService;
+    readonly SignUpService signUpService;
+
     public AuthController(
         SignUpService signUpService,
         SignInService signInService,
         GetCurrentUserService getCurrentUserService,
-        LogoutService logoutService)
+        LogoutService logoutService
+    )
     {
         this.signUpService = signUpService;
         this.signInService = signInService;
         this.getCurrentUserService = getCurrentUserService;
         this.logoutService = logoutService;
     }
-    
+
     [HttpPost("signup")]
     [AllowAnonymous]
     [ValidateModelState]
@@ -35,7 +36,7 @@ public class AuthController : ApplicationController
         var response = await signUpService.ExecuteAsync(request, Response);
         return Ok(response);
     }
-    
+
     [HttpPost("signin")]
     [AllowAnonymous]
     [ValidateModelState]
@@ -44,16 +45,16 @@ public class AuthController : ApplicationController
         var response = await signInService.ExecuteAsync(request, Response);
         return Ok(response);
     }
-    
+
     [HttpGet("me")]
     [OptionalAuth]
     public async Task<ActionResult<AuthResponse>> GetCurrentUser()
     {
         var request = new GetCurrentUserRequest();
-        var response = await getCurrentUserService.ExecuteAsync(request, UserId);
+        var response = await getCurrentUserService.ExecuteAsync(request, UserId, UserName);
         return Ok(response);
     }
-    
+
     [HttpPost("logout")]
     [OptionalAuth]
     public async Task<ActionResult> Logout()

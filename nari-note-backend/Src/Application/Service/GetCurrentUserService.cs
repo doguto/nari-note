@@ -6,13 +6,14 @@ namespace NariNoteBackend.Application.Service;
 
 public class GetCurrentUserService
 {
-    public Task<AuthResponse> ExecuteAsync(GetCurrentUserRequest request, UserId? currentUserId)
+    public Task<AuthResponse> ExecuteAsync(GetCurrentUserRequest request, UserId? currentUserId, string? userName)
     {
         var response = new AuthResponse
         {
-            UserId = currentUserId
+            UserId = currentUserId,
+            UserName = userName
         };
-        
+
         return Task.FromResult(response);
     }
 }

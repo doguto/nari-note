@@ -30,7 +30,7 @@ public class SignInService
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordValid) throw new ArgumentException("ユーザー名またはパスワードが正しくありません");
 
-        var token = jwtHelper.GenerateToken(user.Id);
+        var token = jwtHelper.GenerateToken(user.Id, user.Name);
 
         // HttpOnly Cookieにトークンを設定
         var cookieOptions = cookieOptionsHelper.CreateAuthCookieOptions(

@@ -32,27 +32,6 @@ public class JwtHelper : IJwtHelper
         return expirationInHours;
     }
 
-    public string GenerateToken(UserId userId)
-    {
-        var credentials = new SigningCredentials(SymmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, userId.Value.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
-
-        var token = new JwtSecurityToken(
-            issuer,
-            audience,
-            claims,
-            expires: DateTime.UtcNow.AddHours(expirationInHours),
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
     public ClaimsPrincipal? ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -100,5 +79,38 @@ public class JwtHelper : IJwtHelper
         if (int.TryParse(userIdClaim.Value, out var userIdValue)) return UserId.From(userIdValue);
 
         return null;
+    }
+
+    public string GenerateToken(UserId userId, string userName)
+    {
+        var credentials = new SigningCredentials(SymmetricSecurityKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, userId.Value.ToString()),
+            new Claim(JwtRegisteredClaimNames.Name, userName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var token = new JwtSecurityToken(
+            issuer,
+            audience,
+            claims,
+            expires: DateTime.UtcNow.AddHours(expirationInHours),
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string? GetUserNameFromToken(string token)
+    {
+        var principal = ValidateToken(token);
+        if (principal == null) return null;
+
+        var userNameClaim = principal.FindFirst(JwtRegisteredClaimNames.Name);
+        if (userNameClaim == null) return null;
+
+        return userNameClaim.Value;
     }
 }

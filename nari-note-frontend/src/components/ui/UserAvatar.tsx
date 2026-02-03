@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { UserRoundIcon } from 'lucide-react';
 
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -12,11 +13,11 @@ interface UserAvatarProps {
   className?: string;
 }
 
-const sizeClasses: Record<AvatarSize, { container: string; text: string }> = {
-  sm: { container: 'w-8 h-8', text: 'text-sm' },
-  md: { container: 'w-12 h-12', text: 'text-lg' },
-  lg: { container: 'w-20 h-20', text: 'text-2xl' },
-  xl: { container: 'w-24 h-24', text: 'text-4xl' },
+const sizeClasses: Record<AvatarSize, { container: string }> = {
+  sm: { container: 'w-8 h-8'},
+  md: { container: 'w-12 h-12' },
+  lg: { container: 'w-20 h-20' },
+  xl: { container: 'w-24 h-24' },
 };
 
 /**
@@ -42,7 +43,7 @@ export function UserAvatar({
       <div className={`${sizeConfig.container} relative rounded-full overflow-hidden bg-gray-200 flex-shrink-0 ${className}`}>
         <Image
           src={profileImage}
-          alt={`${username}のプロフィール画像`}
+          alt={`${username}のアイコン`}
           fill
           sizes={size === 'sm' ? '32px' : size === 'md' ? '48px' : size === 'lg' ? '80px' : '96px'}
           className="object-cover"
@@ -52,13 +53,13 @@ export function UserAvatar({
     );
   }
   
-  // 画像がない場合はユーザー名の最初の文字を表示
+  // 画像がない場合はデフォルトアイコンを表示
   return (
     <div 
-      className={`${sizeConfig.container} bg-brand-primary rounded-full flex items-center justify-center text-white ${sizeConfig.text} font-bold flex-shrink-0 ${className}`}
+      className={`${sizeConfig.container} bg-brand-primary rounded-full flex items-center justify-center flex-shrink-0 ${className}`}
       aria-label={`${username}のアバター`}
     >
-      {username.charAt(0).toUpperCase()}
+      <UserRoundIcon />
     </div>
   );
 }
