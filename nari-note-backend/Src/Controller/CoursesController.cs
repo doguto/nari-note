@@ -15,6 +15,7 @@ public class CoursesController : ApplicationController
     readonly DeleteCourseService deleteCourseService;
     readonly GetCourseContentService getCourseContentService;
     readonly GetCoursesService getCoursesService;
+    readonly SearchCoursesService searchCoursesService;
     readonly UpdateCourseService updateCourseService;
 
     public CoursesController(
@@ -22,7 +23,8 @@ public class CoursesController : ApplicationController
         DeleteCourseService deleteCourseService,
         UpdateCourseService updateCourseService,
         GetCoursesService getCoursesService,
-        GetCourseContentService getCourseContentService
+        GetCourseContentService getCourseContentService,
+        SearchCoursesService searchCoursesService
     )
     {
         this.createCourseService = createCourseService;
@@ -30,6 +32,7 @@ public class CoursesController : ApplicationController
         this.updateCourseService = updateCourseService;
         this.getCourseContentService = getCourseContentService;
         this.getCoursesService = getCoursesService;
+        this.searchCoursesService = searchCoursesService;
     }
 
     [HttpGet]
@@ -40,6 +43,15 @@ public class CoursesController : ApplicationController
     {
         var request = new GetCoursesRequest { Limit = limit, Offset = offset };
         var response = await getCoursesService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpGet("search")]
+    [AllowAnonymous]
+    [ValidateModelState]
+    public async Task<ActionResult<SearchCoursesResponse>> SearchCourses([FromQuery] SearchCoursesRequest request)
+    {
+        var response = await searchCoursesService.ExecuteAsync(request);
         return Ok(response);
     }
 
