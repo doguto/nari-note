@@ -40,6 +40,8 @@ import type {
   GetUserProfileResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
+  SearchCoursesRequest,
+  SearchCoursesResponse,
   SignInRequest,
   SignUpRequest,
   ToggleFollowRequest,
@@ -125,6 +127,10 @@ export const authApi = {
 export const coursesApi = {
   getCourses: async (data: GetCoursesRequest): Promise<GetCoursesResponse> => {
     const response = await apiClient.get<GetCoursesResponse>('/api/courses', { params: data });
+    return response;
+  },
+  searchCourses: async (data: SearchCoursesRequest): Promise<SearchCoursesResponse> => {
+    const response = await apiClient.get<SearchCoursesResponse>('/api/courses/search', { params: data });
     return response;
   },
   createCourse: async (data: CreateCourseRequest): Promise<CreateCourseResponse> => {

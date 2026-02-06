@@ -41,6 +41,8 @@ import type {
   GetUserProfileResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
+  SearchCoursesRequest,
+  SearchCoursesResponse,
   SignInRequest,
   SignUpRequest,
   ToggleFollowRequest,
@@ -70,6 +72,7 @@ export const queryKeys = {
   },
   courses: {
     getCourses: ['courses', 'getCourses'] as const,
+    searchCourses: ['courses', 'searchCourses'] as const,
     getCourseContent: ['courses', 'getCourseContent'] as const,
   },
   health: {
@@ -245,6 +248,14 @@ export function useGetCourses(params: GetCoursesRequest, options?: Omit<UseQuery
   return useQuery<GetCoursesResponse>({
     queryKey: [...queryKeys.courses.getCourses, params],
     queryFn: () => coursesApi.getCourses(params),
+    ...options,
+  });
+}
+
+export function useSearchCourses(params: SearchCoursesRequest, options?: Omit<UseQueryOptions<SearchCoursesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<SearchCoursesResponse>({
+    queryKey: [...queryKeys.courses.searchCourses, params],
+    queryFn: () => coursesApi.searchCourses(params),
     ...options,
   });
 }
