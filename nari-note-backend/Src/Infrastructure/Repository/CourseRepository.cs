@@ -124,6 +124,7 @@ public class CourseRepository : ICourseRepository
 
     static Expression<Func<Course, bool>> IsPubliclyVisibleAndContainsKeyword(DateTime now, string keyword)
     {
-        return c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now && c.Name.Contains(keyword);
+        return c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now &&
+                    (c.Name.Contains(keyword) || c.Articles.Any(a => a.Title.Contains(keyword)));
     }
 }
