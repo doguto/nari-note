@@ -262,6 +262,16 @@ export interface SearchArticlesResponse {
   articles?: ArticleDto[];
 }
 
+export interface SearchCoursesRequest {
+  keyword?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface SearchCoursesResponse {
+  courses?: CourseDto[];
+}
+
 export interface SignInRequest {
   usernameOrEmail?: string;
   password?: string;

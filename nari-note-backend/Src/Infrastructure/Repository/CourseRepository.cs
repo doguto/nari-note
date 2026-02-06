@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
@@ -101,5 +102,29 @@ public class CourseRepository : ICourseRepository
             .ToListAsync();
 
         return (courses, totalCount);
+    }
+
+    public async Task<List<Course>> SearchAsync(string keyword, int limit, int offset)
+    {
+        var now = DateTime.UtcNow;
+        var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
+
+        var courses = await context.Courses
+            .Include(c => c.User)
+            .Include(c => c.CourseLikes)
+            .Include(c => c.Articles)
+            .Where(searchFilter)
+            .OrderByDescending(c => c.CreatedAt)
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+
+        return courses;
+    }
+
+    static Expression<Func<Course, bool>> IsPubliclyVisibleAndContainsKeyword(DateTime now, string keyword)
+    {
+        return c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now &&
+                    (c.Name.Contains(keyword) || c.Articles.Any(a => a.Title.Contains(keyword)));
     }
 }
