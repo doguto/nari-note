@@ -11,4 +11,6 @@ public class CourseDto
     public List<ArticleId> ArticleIds { get; set; } = new();
     public List<string> ArticleNames { get; set; } = new();
     public int LikeCount { get; set; }
+    public bool IsPublished { get; set; }
+    public DateTime? PublishedAt { get; set; }
 }

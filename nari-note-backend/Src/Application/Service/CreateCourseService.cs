@@ -29,7 +29,9 @@ public class CreateCourseService
         {
             Id = course.Id,
             UserId = userId,
-            Name = course.Name
+            Name = course.Name,
+            IsPublished = course.IsPublished,
+            PublishedAt = course.PublishedAt
         };
 
         return new CreateCourseResponse { Course = courseDto };

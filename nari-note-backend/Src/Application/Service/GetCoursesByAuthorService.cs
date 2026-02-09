@@ -26,7 +26,9 @@ public class GetCoursesByAuthorService
             Name = c.Name,
             ArticleIds = c.Articles.Select(a => a.Id).ToList(),
             ArticleNames = c.Articles.Select(a => a.Title).ToList(),
-            LikeCount = c.LikeCount
+            LikeCount = c.LikeCount,
+            IsPublished = c.IsPublished,
+            PublishedAt = c.PublishedAt
         }).ToList();
 
         return new GetCoursesByAuthorResponse
