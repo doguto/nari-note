@@ -117,6 +117,7 @@ Pages（ページ）- ページのロジック
   - 他のレスポンシブデザインも基本的にこのレイヤーで担当
   - 必ずしもPageと1:1対応ではない場合もある
   - Organismsを組み合わせてレイアウト構築
+  - **サーバーサイドコンポーネントとして実装**（`use client`は使用しない）
 - **例**: `ArticleFormTemplate`, `ArticleDetailTemplate`
 
 #### 5. Pages（ページ）
@@ -128,6 +129,7 @@ Pages（ページ）- ページのロジック
   - データフェッチング（TanStack Query）
   - 状態管理とビジネスロジック
   - Templateを呼び出してデータを渡す
+  - **サーバーサイドコンポーネントとして実装**（`use client`は使用しない）
 - **例**: `ArticleEditPage`, `ArticleDetailPage`, `LoginPage`
 
 ## 実装時の注意点
