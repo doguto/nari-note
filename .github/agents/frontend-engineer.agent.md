@@ -107,6 +107,7 @@ Pages（ページ）- ページのロジック
   - どうしてもこのレイヤーで調整しないといけないもののみ特例でレスポンシブデザインの調整を行っても良い（基本はTemplateで行う）
   - Molecules/Atomsを使用してUI構築
   - 特定のTemplateに紐づく
+  - Templateの可読性向上のため、あるページでのみ使用する場合でも、ある程度のまとまりがあればOrganismとしてコンポーネント化する
 - **例**: `TitleForm`, `BodyForm`, `ArticleHeader`
 
 #### 4. Templates（テンプレート）
