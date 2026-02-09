@@ -38,7 +38,7 @@ export function UnifiedSearchTemplate({
 }: UnifiedSearchTemplateProps) {
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className='flex justify-center w-2/3 mx-auto mb-8'>
+      <div className='flex justify-center w-full max-w-2xl mx-auto mb-8'>
         <SearchBar
           value={keyword} 
           onChange={onKeywordChange}
