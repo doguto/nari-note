@@ -23,6 +23,8 @@ import type {
   GetArticlesResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
+  GetCoursesByAuthorRequest,
+  GetCoursesByAuthorResponse,
   GetCoursesRequest,
   GetCoursesResponse,
   GetCurrentUserRequest,
@@ -73,6 +75,7 @@ export const queryKeys = {
   courses: {
     getCourses: ['courses', 'getCourses'] as const,
     searchCourses: ['courses', 'searchCourses'] as const,
+    getCoursesByAuthor: ['courses', 'getCoursesByAuthor'] as const,
     getCourseContent: ['courses', 'getCourseContent'] as const,
   },
   health: {
@@ -256,6 +259,14 @@ export function useSearchCourses(params: SearchCoursesRequest, options?: Omit<Us
   return useQuery<SearchCoursesResponse>({
     queryKey: [...queryKeys.courses.searchCourses, params],
     queryFn: () => coursesApi.searchCourses(params),
+    ...options,
+  });
+}
+
+export function useGetCoursesByAuthor(params: GetCoursesByAuthorRequest, options?: Omit<UseQueryOptions<GetCoursesByAuthorResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCoursesByAuthorResponse>({
+    queryKey: [...queryKeys.courses.getCoursesByAuthor, params],
+    queryFn: () => coursesApi.getCoursesByAuthor(params),
     ...options,
   });
 }
