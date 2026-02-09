@@ -1,5 +1,5 @@
-import { ArticleSearchPage as ArticleSearchPageComponent } from '@/features/article/pages';
+import { redirect } from 'next/navigation';
 
 export default function ArticleSearchPage() {
-  return <ArticleSearchPageComponent />;
+  redirect('/search');
 }
