@@ -1,0 +1,1 @@
+export { UnifiedSearchTemplate } from './UnifiedSearchTemplate';
