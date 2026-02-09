@@ -226,6 +226,36 @@ nari-note-frontend/src/
 - データフェッチングはTanStack Queryのフックを使用
   - 例: `useGetArticle`, `useCreateArticle`
 
+## ユーティリティスクリプト
+
+### API Generator Skill
+
+バックエンドで実装したAPIに基づき、フロントエンドのAPI関連コードを自動生成します。
+
+```bash
+# 全APIコードを生成
+python scripts/api-generator.py --force --verbose
+```
+
+詳細: [.github/skills/api-generator/SKILL.md](.github/skills/api-generator/SKILL.md)
+
+### Agent Doc Updater Skill
+
+各エージェントの`.agent.md`ファイルを最新のプロジェクト情報に基づいて検証・更新します。
+
+```bash
+# 全エージェントのドキュメントを検証
+python scripts/update-agent-docs.py --verbose
+
+# 特定のエージェントのみ検証
+python scripts/update-agent-docs.py --agent backend-engineer --verbose
+
+# ドライラン（変更せず検証のみ）
+python scripts/update-agent-docs.py --dry-run --verbose
+```
+
+詳細: [.github/skills/agent-doc-updater/SKILL.md](.github/skills/agent-doc-updater/SKILL.md)
+
 ## 新機能実装の手順
 
 ### バックエンド
