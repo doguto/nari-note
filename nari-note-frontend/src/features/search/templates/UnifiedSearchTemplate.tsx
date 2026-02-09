@@ -38,26 +38,20 @@ export function UnifiedSearchTemplate({
 }: UnifiedSearchTemplateProps) {
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center" style={{ fontFamily: 'serif' }}>
-        検索
-      </h1>
-      
-      <SearchBar 
-        value={keyword} 
-        onChange={onKeywordChange}
-        onSearch={onSearch}
-      />
-
-      {/* タブで記事検索と講座検索を切り替え */}
+      <div className='flex justify-center w-2/3 mx-auto'>
+        <SearchBar
+          value={keyword} 
+          onChange={onKeywordChange}
+          onSearch={onSearch}
+        />
+      </div>
       <Tabs defaultValue="articles" className="mt-8">
         <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
           <TabsTrigger value="articles">記事</TabsTrigger>
           <TabsTrigger value="courses">講座</TabsTrigger>
         </TabsList>
 
-        {/* 記事検索タブ */}
         <TabsContent value="articles">
-          {/* 初期状態: まだ検索していない */}
           {!hasSearched && (
             <EmptyState
               icon={<Search />}
@@ -66,7 +60,6 @@ export function UnifiedSearchTemplate({
             />
           )}
 
-          {/* 検索結果が0件 */}
           {hasSearched && !hasArticleResults && (
             <EmptyState
               icon={<Search />}
@@ -75,17 +68,14 @@ export function UnifiedSearchTemplate({
             />
           )}
 
-          {/* 検索結果表示 */}
           {hasSearched && hasArticleResults && (
             <>
-              {/* 検索結果件数 */}
               <div className="mb-4">
                 <p className="text-gray-600">
                   {articles.length}件の記事が見つかりました
                 </p>
               </div>
 
-              {/* 検索結果一覧 */}
               <div className="space-y-4">
                 {articles.map((article) => (
                   <ArticleCard
@@ -109,9 +99,7 @@ export function UnifiedSearchTemplate({
           )}
         </TabsContent>
 
-        {/* 講座検索タブ */}
         <TabsContent value="courses">
-          {/* 初期状態: まだ検索していない */}
           {!hasSearched && (
             <EmptyState
               icon={<Search />}
@@ -120,7 +108,6 @@ export function UnifiedSearchTemplate({
             />
           )}
 
-          {/* 検索結果が0件 */}
           {hasSearched && !hasCourseResults && (
             <EmptyState
               icon={<Search />}
@@ -129,17 +116,14 @@ export function UnifiedSearchTemplate({
             />
           )}
 
-          {/* 検索結果表示 */}
           {hasSearched && hasCourseResults && (
             <>
-              {/* 検索結果件数 */}
               <div className="mb-4">
                 <p className="text-gray-600">
                   {courses.length}件の講座が見つかりました
                 </p>
               </div>
 
-              {/* 検索結果一覧 */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {courses.map((course) => (
                   <CourseCard
