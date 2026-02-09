@@ -15,6 +15,7 @@ public class CoursesController : ApplicationController
     readonly DeleteCourseService deleteCourseService;
     readonly GetCourseContentService getCourseContentService;
     readonly GetCoursesService getCoursesService;
+    readonly GetCoursesByAuthorService getCoursesByAuthorService;
     readonly SearchCoursesService searchCoursesService;
     readonly UpdateCourseService updateCourseService;
 
@@ -23,6 +24,7 @@ public class CoursesController : ApplicationController
         DeleteCourseService deleteCourseService,
         UpdateCourseService updateCourseService,
         GetCoursesService getCoursesService,
+        GetCoursesByAuthorService getCoursesByAuthorService,
         GetCourseContentService getCourseContentService,
         SearchCoursesService searchCoursesService
     )
@@ -32,6 +34,7 @@ public class CoursesController : ApplicationController
         this.updateCourseService = updateCourseService;
         this.getCourseContentService = getCourseContentService;
         this.getCoursesService = getCoursesService;
+        this.getCoursesByAuthorService = getCoursesByAuthorService;
         this.searchCoursesService = searchCoursesService;
     }
 
@@ -52,6 +55,15 @@ public class CoursesController : ApplicationController
     public async Task<ActionResult<SearchCoursesResponse>> SearchCourses([FromQuery] SearchCoursesRequest request)
     {
         var response = await searchCoursesService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpGet("author/{authorId}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<GetCoursesByAuthorResponse>> GetCoursesByAuthor(UserId authorId)
+    {
+        var request = new GetCoursesByAuthorRequest { AuthorId = authorId };
+        var response = await getCoursesByAuthorService.ExecuteAsync(request);
         return Ok(response);
     }
 

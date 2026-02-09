@@ -127,4 +127,15 @@ public class CourseRepository : ICourseRepository
         return c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now &&
                     (c.Name.Contains(keyword) || c.Articles.Any(a => a.Title.Contains(keyword)));
     }
+
+    public async Task<List<Course>> FindByAuthorAsync(UserId authorId)
+    {
+        return await context.Courses
+            .Include(c => c.User)
+            .Include(c => c.CourseLikes)
+            .Include(c => c.Articles)
+            .Where(c => c.UserId == authorId)
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync();
+    }
 }
