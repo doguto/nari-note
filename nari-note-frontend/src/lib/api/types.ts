@@ -44,6 +44,8 @@ export interface CourseDto {
   articleIds?: number[];
   articleNames?: string[];
   likeCount?: number;
+  isPublished?: boolean;
+  publishedAt?: string;
 }
 
 export interface CreateArticleRequest {
@@ -165,6 +167,17 @@ export interface GetCourseContentResponse {
   publishedAt?: string;
   createdAt?: string;
   articles?: CourseArticleDto[];
+}
+
+export interface GetCoursesByAuthorRequest {
+  authorId?: number;
+}
+
+export interface GetCoursesByAuthorResponse {
+  authorId?: number;
+  authorName?: string;
+  courses?: CourseDto[];
+  totalCount?: number;
 }
 
 export interface GetCoursesRequest {

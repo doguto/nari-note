@@ -22,6 +22,8 @@ import type {
   GetArticlesResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
+  GetCoursesByAuthorRequest,
+  GetCoursesByAuthorResponse,
   GetCoursesRequest,
   GetCoursesResponse,
   GetCurrentUserRequest,
@@ -131,6 +133,10 @@ export const coursesApi = {
   },
   searchCourses: async (data: SearchCoursesRequest): Promise<SearchCoursesResponse> => {
     const response = await apiClient.get<SearchCoursesResponse>('/api/courses/search', { params: data });
+    return response;
+  },
+  getCoursesByAuthor: async (data: GetCoursesByAuthorRequest): Promise<GetCoursesByAuthorResponse> => {
+    const response = await apiClient.get<GetCoursesByAuthorResponse>(`/api/courses/author/${data.authorId}`);
     return response;
   },
   createCourse: async (data: CreateCourseRequest): Promise<CreateCourseResponse> => {

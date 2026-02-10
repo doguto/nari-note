@@ -5,18 +5,18 @@ using NariNoteBackend.Domain.Repository;
 
 namespace NariNoteBackend.Application.Service;
 
-public class GetCoursesService
+public class GetCoursesByAuthorService
 {
     readonly ICourseRepository courseRepository;
 
-    public GetCoursesService(ICourseRepository courseRepository)
+    public GetCoursesByAuthorService(ICourseRepository courseRepository)
     {
         this.courseRepository = courseRepository;
     }
 
-    public async Task<GetCoursesResponse> ExecuteAsync(GetCoursesRequest request)
+    public async Task<GetCoursesByAuthorResponse> ExecuteAsync(GetCoursesByAuthorRequest request)
     {
-        var (courses, totalCount) = await courseRepository.FindLatestAsync(request.Limit, request.Offset);
+        var courses = await courseRepository.FindPublishedByAuthorAsync(request.AuthorId);
 
         var courseDtos = courses.Select(c => new CourseDto
         {
@@ -31,10 +31,12 @@ public class GetCoursesService
             PublishedAt = c.PublishedAt
         }).ToList();
 
-        return new GetCoursesResponse
+        return new GetCoursesByAuthorResponse
         {
+            AuthorId = request.AuthorId,
+            AuthorName = courses.FirstOrDefault()?.User.Name ?? "",
             Courses = courseDtos,
-            TotalCount = totalCount
+            TotalCount = courses.Count
         };
     }
 }
