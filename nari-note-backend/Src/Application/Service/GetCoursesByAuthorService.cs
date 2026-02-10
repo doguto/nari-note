@@ -16,7 +16,7 @@ public class GetCoursesByAuthorService
 
     public async Task<GetCoursesByAuthorResponse> ExecuteAsync(GetCoursesByAuthorRequest request)
     {
-        var courses = await courseRepository.FindByAuthorAsync(request.AuthorId);
+        var courses = await courseRepository.FindPublishedByAuthorAsync(request.AuthorId);
 
         var courseDtos = courses.Select(c => new CourseDto
         {

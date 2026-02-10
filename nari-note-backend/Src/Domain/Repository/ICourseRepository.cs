@@ -9,5 +9,5 @@ public interface ICourseRepository : IRepository<Course, CourseId>
     Task<Course> FindByIdWithArticlesAsync(CourseId id);
     Task<(List<Course> Courses, int TotalCount)> FindLatestAsync(int limit, int offset);
     Task<List<Course>> SearchAsync(string keyword, int limit, int offset);
-    Task<List<Course>> FindByAuthorAsync(UserId authorId);
+    Task<List<Course>> FindPublishedByAuthorAsync(UserId authorId);
 }
