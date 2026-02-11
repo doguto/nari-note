@@ -1,6 +1,4 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { UserAvatar } from '@/components/ui';
 
 interface UserListItemProps {
@@ -16,15 +14,9 @@ interface UserListItemProps {
  * ユーザー情報を一覧で表示する際に使用
  */
 export function UserListItem({ userId, username, profileImage }: UserListItemProps) {
-  const router = useRouter();
-
-  const handleClick = () => {
-    router.push(`/users/${userId}`);
-  };
-
   return (
-    <div
-      onClick={handleClick}
+    <Link
+      href={`/users/${userId}`}
       className="flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer transition-colors rounded-lg"
     >
       {/* ユーザーアイコン */}
@@ -36,6 +28,6 @@ export function UserListItem({ userId, username, profileImage }: UserListItemPro
           {username}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

@@ -1,5 +1,3 @@
-'use client';
-
 import { PublishSettingsDialog } from '@/features/article/organisms/PublishSettingsDialog';
 import {
   CourseTitleInput,

@@ -1,5 +1,3 @@
-'use client';
-
 import { DraftArticleCard } from '@/components/molecules/DraftArticleCard';
 import { LoadingSpinner } from '@/components/ui';
 import { Button } from '@/components/ui/button';

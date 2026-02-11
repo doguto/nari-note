@@ -1,5 +1,3 @@
-'use client';
-
 import { TagInput } from '@/components/molecules';
 import { PublishSettingsDialog } from '../organisms/PublishSettingsDialog';
 import {

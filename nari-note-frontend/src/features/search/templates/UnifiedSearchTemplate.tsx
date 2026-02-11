@@ -1,5 +1,3 @@
-'use client';
-
 import { SearchBar } from '@/components/molecules';
 import { ArticleCard, CourseCard } from '@/components/molecules';
 import { EmptyState } from '@/components/ui';
