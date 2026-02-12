@@ -44,3 +44,54 @@ class BaseTemplate(ABC):
     def _extract_path_params(self, path: str) -> List[str]:
         """パスからパラメータを抽出"""
         return re.findall(r'\{(\w+)\}', path)
+
+    def _collect_types_from_endpoints(self, endpoints: List[EndpointInfo]) -> set[str]:
+        """エンドポイントから使用される型を収集"""
+        all_types = set()
+        for ep in endpoints:
+            if ep.request_type and ep.request_type != "void":
+                all_types.add(ep.request_type)
+            if ep.response_type and ep.response_type != "void":
+                all_types.add(ep.response_type)
+        return all_types
+
+    def _resolve_path_param(self, param: str, request_type: str, class_map: Dict) -> str:
+        """
+        パスパラメータ名を解決（{id} -> 実際のプロパティ名）
+
+        Args:
+            param: パスパラメータ名
+            request_type: リクエスト型名
+            class_map: クラス名->CSharpClassのマッピング
+
+        Returns:
+            解決されたプロパティ名（キャメルケース）
+        """
+        camel_param = self._to_camel_case(param) if param else param
+
+        # リクエストクラスがある場合、プロパティ名を確認
+        if request_type in class_map:
+            req_class = class_map[request_type]
+            prop_names = [self._to_camel_case(prop.name) for prop in req_class.properties]
+
+            # {id} の場合の堅牢な推測
+            if camel_param == 'id':
+                if 'id' in prop_names:
+                    return 'id'
+
+                # "*Id" がちょうど1つならそれを使う
+                id_like = [p for p in prop_names if p.endswith('Id')]
+                if len(id_like) == 1:
+                    return id_like[0]
+
+                # ValueObject型から候補を生成してマッチング
+                candidates = [
+                    self._to_camel_case(vo_type)
+                    for vo_type in self.value_object_types
+                    if vo_type.endswith('Id')
+                ]
+                for candidate in candidates:
+                    if candidate in prop_names:
+                        return candidate
+
+        return camel_param

@@ -73,19 +73,8 @@ import type {"""
 
     def _generate_type_imports(self, endpoints: List[EndpointInfo]) -> List[str]:
         """型インポートセクションを生成"""
-        all_types = set()
-        for ep in endpoints:
-            if ep.request_type and ep.request_type != "void":
-                all_types.add(ep.request_type)
-            if ep.response_type and ep.response_type != "void":
-                all_types.add(ep.response_type)
-
-        lines = []
-        for type_name in sorted(all_types):
-            lines.append(f"  {type_name},")
-        lines.append("} from './types';")
-
-        return lines
+        all_types = self._collect_types_from_endpoints(endpoints)
+        return [f"  {type_name}," for type_name in sorted(all_types)] + ["} from './types';"]
 
     def _generate_server_function(self, ep: EndpointInfo) -> List[str]:
         """個別のサーバ関数を生成"""
@@ -98,32 +87,12 @@ import type {"""
         # パスパラメータを検出
         path_params = self._extract_path_params(ep.path)
 
-        # パスパラメータがある場合、テンプレートリテラルを使用
+        # URL式を構築
         if path_params:
             url_path = ep.path
             for param in path_params:
-                camel_param = self._to_camel_case(param) if param else param
-
-                # リクエストクラスがある場合、プロパティ名を確認
-                if request_type in self.class_map:
-                    req_class = self.class_map[request_type]
-                    prop_names = [self._to_camel_case(prop.name) for prop in req_class.properties]
-
-                    if camel_param == 'id':
-                        if 'id' in prop_names:
-                            camel_param = 'id'
-                        else:
-                            id_like = [p for p in prop_names if p.endswith('Id')]
-                            if len(id_like) == 1:
-                                camel_param = id_like[0]
-                            else:
-                                # ValueObject型から候補を動的に生成 (ArticleId -> articleId)
-                                candidates = [self._to_camel_case(vo_type) for vo_type in self.value_object_types if vo_type.endswith('Id')]
-                                for candidate in candidates:
-                                    if candidate in prop_names:
-                                        camel_param = candidate
-                                        break
-                url_path = url_path.replace(f'{{{param}}}', f'${{params.{camel_param}}}')
+                resolved_param = self._resolve_path_param(param, request_type, self.class_map)
+                url_path = url_path.replace(f'{{{param}}}', f'${{params.{resolved_param}}}')
             url_expression = f"`{url_path}`"
         else:
             url_expression = f"'{ep.path}'"

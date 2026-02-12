@@ -38,12 +38,11 @@ class TypesTemplate(BaseTemplate):
         """インターフェース全体を生成"""
         lines = []
 
-        # インターフェース宣言
+        # 空インターフェースの場合はeslint-disableを追加
         if not cls.properties:
-            lines.append(f"// eslint-disable-next-line @typescript-eslint/no-empty-object-type")
-            lines.append(f"export interface {cls.name} {{")
-        else:
-            lines.append(f"export interface {cls.name} {{")
+            lines.append("// eslint-disable-next-line @typescript-eslint/no-empty-object-type")
+
+        lines.append(f"export interface {cls.name} {{")
 
         # プロパティ生成
         for prop in cls.properties:
@@ -54,5 +53,4 @@ class TypesTemplate(BaseTemplate):
             lines.append(f"  {camel_name}{optional}: {ts_type};")
 
         lines.append("}")
-
         return lines

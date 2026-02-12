@@ -2,7 +2,7 @@
 hooks.ts生成用テンプレート
 """
 
-from typing import List
+from typing import List, Dict
 from models import EndpointInfo
 from .base import BaseTemplate
 
@@ -27,54 +27,45 @@ import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type Us
             hooks.tsの完全な内容
         """
         lines = [self.get_header()]
+        by_controller = self._group_by_controller(endpoints)
 
         # インポートを生成
-        lines.extend(self._generate_imports(endpoints))
+        lines.extend(self._generate_imports(endpoints, by_controller))
         lines.append("")
 
         # Query Keysを生成
-        lines.extend(self._generate_query_keys(endpoints))
+        lines.extend(self._generate_query_keys(by_controller))
         lines.append("")
 
         # フックを生成
-        by_controller = self._group_by_controller(endpoints)
         for controller, eps in sorted(by_controller.items()):
             lines.extend(self._generate_hooks(controller, eps))
 
         return self._join_lines(lines)
 
-    def _generate_imports(self, endpoints: List[EndpointInfo]) -> List[str]:
+    def _generate_imports(self, endpoints: List[EndpointInfo], by_controller: Dict[str, List[EndpointInfo]]) -> List[str]:
         """インポート文を生成"""
         lines = []
 
-        # コントローラーごとにグループ化してインポート
-        by_controller = self._group_by_controller(endpoints)
+        # コントローラーインポート
         controller_imports = ", ".join([f"{c}Api" for c in sorted(by_controller.keys())])
         lines.append(f"import {{ {controller_imports} }} from './endpoints';")
 
         # 型のインポート
-        all_types = set()
-        for ep in endpoints:
-            if ep.request_type and ep.request_type != "void":
-                all_types.add(ep.request_type)
-            if ep.response_type and ep.response_type != "void":
-                all_types.add(ep.response_type)
-
+        all_types = self._collect_types_from_endpoints(endpoints)
         if all_types:
-            lines.append("import type {")
-            for type_name in sorted(all_types):
-                lines.append(f"  {type_name},")
-            lines.append("} from './types';")
+            lines.extend([
+                "import type {",
+                *[f"  {type_name}," for type_name in sorted(all_types)],
+                "} from './types';"
+            ])
 
         return lines
 
-    def _generate_query_keys(self, endpoints: List[EndpointInfo]) -> List[str]:
+    def _generate_query_keys(self, by_controller: Dict[str, List[EndpointInfo]]) -> List[str]:
         """Query Keysセクションを生成"""
-        lines = []
-        lines.append("// Query Keys")
-        lines.append("export const queryKeys = {")
+        lines = ["// Query Keys", "export const queryKeys = {"]
 
-        by_controller = self._group_by_controller(endpoints)
         for controller in sorted(by_controller.keys()):
             lines.append(f"  {controller}: {{")
             for ep in by_controller[controller]:
@@ -84,7 +75,6 @@ import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type Us
             lines.append("  },")
 
         lines.append("};")
-
         return lines
 
     def _generate_hooks(self, controller: str, endpoints: List[EndpointInfo]) -> List[str]:
@@ -135,39 +125,21 @@ import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type Us
 
     def _generate_mutation_hook(self, ep: EndpointInfo, hook_name: str, func_name: str, controller: str) -> List[str]:
         """Mutationフックを生成"""
-        lines = []
-
         request_type = ep.request_type or "void"
         response_type = ep.response_type or "void"
 
-        if request_type == "void":
-            # request_type が void の場合は引数なし
-            lines = [
-                f"export function {hook_name}(options?: UseMutationOptions<{response_type}, Error, {request_type}>) {{",
-                "  const queryClient = useQueryClient();",
-                f"  return useMutation<{response_type}, Error, {request_type}>({{",
-                f"    mutationFn: () => {controller}Api.{func_name}(),",
-                "    onSuccess: (...args) => {",
-                f"      queryClient.invalidateQueries({{ queryKey: ['{controller}'] }});",
-                "      options?.onSuccess?.(...args);",
-                "    },",
-                "    ...options,",
-                "  });",
-                "}",
-            ]
-        else:
-            lines = [
-                f"export function {hook_name}(options?: UseMutationOptions<{response_type}, Error, {request_type}>) {{",
-                "  const queryClient = useQueryClient();",
-                f"  return useMutation<{response_type}, Error, {request_type}>({{",
-                f"    mutationFn: (data) => {controller}Api.{func_name}(data),",
-                "    onSuccess: (...args) => {",
-                f"      queryClient.invalidateQueries({{ queryKey: ['{controller}'] }});",
-                "      options?.onSuccess?.(...args);",
-                "    },",
-                "    ...options,",
-                "  });",
-                "}",
-            ]
+        mutation_fn = f"{controller}Api.{func_name}()" if request_type == "void" else f"{controller}Api.{func_name}(data)"
 
-        return lines
+        return [
+            f"export function {hook_name}(options?: UseMutationOptions<{response_type}, Error, {request_type}>) {{",
+            "  const queryClient = useQueryClient();",
+            f"  return useMutation<{response_type}, Error, {request_type}>({{",
+            f"    mutationFn: {'() => ' if request_type == 'void' else '(data) => '}{mutation_fn},",
+            "    onSuccess: (...args) => {",
+            f"      queryClient.invalidateQueries({{ queryKey: ['{controller}'] }});",
+            "      options?.onSuccess?.(...args);",
+            "    },",
+            "    ...options,",
+            "  });",
+            "}",
+        ]
