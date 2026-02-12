@@ -8,9 +8,10 @@ from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 from templates import (
-    TYPES_HEADER, ENDPOINTS_HEADER, HOOKS_HEADER,
+    TYPES_HEADER, ENDPOINTS_HEADER, HOOKS_HEADER, SERVER_HEADER,
     generate_interface_declaration, generate_property_declaration,
-    generate_api_function, generate_query_hook, generate_mutation_hook
+    generate_api_function, generate_query_hook, generate_mutation_hook,
+    generate_server_function
 )
 
 # 設定
@@ -256,7 +257,7 @@ def generate_types_file(classes: List[CSharpClass], value_object_types: set[str]
     return "\n".join(lines)
 
 
-def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpClass]) -> str:
+def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpClass], value_object_types: set[str]) -> str:
     lines = [ENDPOINTS_HEADER]
     
     # クラス情報を名前でマッピング
@@ -312,7 +313,7 @@ def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpC
                         # {id} の場合のより堅牢な推測:
                         # 1) 同名プロパティがあればそれを使う
                         # 2) requestに "*Id" がちょうど1つならそれを使う
-                        # 3) それ以外は既存のヒューリスティクスにフォールバック
+                        # 3) ValueObject型から候補を生成してマッチング
                         if camel_param == 'id':
                             if 'id' in prop_names:
                                 camel_param = 'id'
@@ -321,7 +322,8 @@ def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpC
                                 if len(id_like) == 1:
                                     camel_param = id_like[0]
                                 else:
-                                    candidates = ['articleId', 'userId', 'authorId', 'followingId', 'followerId']
+                                    # ValueObject型から候補を動的に生成 (ArticleId -> articleId)
+                                    candidates = [vo_type[0].lower() + vo_type[1:] for vo_type in value_object_types if vo_type.endswith('Id')]
                                     for candidate in candidates:
                                         if candidate in prop_names:
                                             camel_param = candidate
@@ -347,18 +349,18 @@ def generate_endpoints_file(endpoints: List[EndpointInfo], classes: List[CSharpC
 
 def generate_hooks_file(endpoints: List[EndpointInfo]) -> str:
     lines = [HOOKS_HEADER]
-    
+
     # コントローラーごとにグループ化
     by_controller: Dict[str, List[EndpointInfo]] = {}
     for ep in endpoints:
         if ep.controller_name not in by_controller:
             by_controller[ep.controller_name] = []
         by_controller[ep.controller_name].append(ep)
-    
+
     # インポート文を生成
     controller_imports = ", ".join([f"{c}Api" for c in sorted(by_controller.keys())])
     lines.append(f"import {{ {controller_imports} }} from './endpoints';")
-    
+
     # 型のインポート
     all_types = set()
     for ep in endpoints:
@@ -366,14 +368,14 @@ def generate_hooks_file(endpoints: List[EndpointInfo]) -> str:
             all_types.add(ep.request_type)
         if ep.response_type and ep.response_type != "void":
             all_types.add(ep.response_type)
-    
+
     if all_types:
         lines.append("import type {")
         for type_name in sorted(all_types):
             lines.append(f"  {type_name},")
         lines.append("} from './types';")
     lines.append("")
-    
+
     # Query Keysを生成
     lines.append("// Query Keys")
     lines.append("export const queryKeys = {")
@@ -386,14 +388,14 @@ def generate_hooks_file(endpoints: List[EndpointInfo]) -> str:
         lines.append("  },")
     lines.append("};")
     lines.append("")
-    
+
     # フックを生成
     for controller, eps in sorted(by_controller.items()):
         lines.append(f"// {controller.capitalize()} Hooks")
         for ep in eps:
             func_name = ep.function_name[0].lower() + ep.function_name[1:]
             hook_name = f"use{ep.function_name}"
-            
+
             if ep.method == "GET":
                 # Query hook
                 return_type = ep.response_type or "void"
@@ -408,7 +410,89 @@ def generate_hooks_file(endpoints: List[EndpointInfo]) -> str:
                 hook_lines = generate_mutation_hook(hook_name, func_name, controller, request_type, response_type)
                 lines.extend(hook_lines)
                 lines.append("")
-    
+
+    return "\n".join(lines)
+
+
+def generate_server_file(endpoints: List[EndpointInfo], classes: List[CSharpClass], value_object_types: set[str]) -> str:
+    """Server-side fetch関数を生成（GETエンドポイントのみ）"""
+    lines = [SERVER_HEADER]
+
+    # クラス情報を名前でマッピング
+    class_map = {cls.name: cls for cls in classes}
+
+    # 型のインポートを追加（GETエンドポイントのみ）
+    all_types = set()
+    get_endpoints = [ep for ep in endpoints if ep.method == "GET"]
+
+    for ep in get_endpoints:
+        if ep.request_type and ep.request_type != "void":
+            all_types.add(ep.request_type)
+        if ep.response_type and ep.response_type != "void":
+            all_types.add(ep.response_type)
+
+    for type_name in sorted(all_types):
+        lines.append(f"  {type_name},")
+    lines.append("} from './types';")
+    lines.append("")
+
+    # コントローラー別にグループ化
+    by_controller: Dict[str, List[EndpointInfo]] = {}
+    for ep in get_endpoints:
+        if ep.controller_name not in by_controller:
+            by_controller[ep.controller_name] = []
+        by_controller[ep.controller_name].append(ep)
+
+    # 各コントローラーのServer関数を生成
+    for controller, eps in sorted(by_controller.items()):
+        lines.append(f"// {controller.capitalize()} Server Functions")
+
+        for ep in eps:
+            func_name = ep.function_name[0].lower() + ep.function_name[1:]
+            request_type = ep.request_type or "void"
+            response_type = ep.response_type or "void"
+
+            # パスパラメータを検出
+            path_params = re.findall(r'\{(\w+)\}', ep.path)
+
+            # パスパラメータがある場合、テンプレートリテラルを使用
+            if path_params:
+                url_path = ep.path
+                for param in path_params:
+                    camel_param = param[0].lower() + param[1:] if param else param
+
+                    # リクエストクラスがある場合、プロパティ名を確認
+                    if request_type in class_map:
+                        req_class = class_map[request_type]
+                        prop_names = [prop.name[0].lower() + prop.name[1:] for prop in req_class.properties]
+
+                        if camel_param == 'id':
+                            if 'id' in prop_names:
+                                camel_param = 'id'
+                            else:
+                                id_like = [p for p in prop_names if p.endswith('Id')]
+                                if len(id_like) == 1:
+                                    camel_param = id_like[0]
+                                else:
+                                    # ValueObject型から候補を動的に生成 (ArticleId -> articleId)
+                                    candidates = [vo_type[0].lower() + vo_type[1:] for vo_type in value_object_types if vo_type.endswith('Id')]
+                                    for candidate in candidates:
+                                        if candidate in prop_names:
+                                            camel_param = candidate
+                                            break
+                    url_path = url_path.replace(f'{{{param}}}', f'${{params.{camel_param}}}')
+                url_expression = f"`{url_path}`"
+            else:
+                url_expression = f"'{ep.path}'"
+
+            # Server関数を生成
+            func_lines = generate_server_function(
+                func_name, request_type, response_type,
+                url_expression, path_params
+            )
+            lines.extend(func_lines)
+            lines.append("")
+
     return "\n".join(lines)
 
 
@@ -489,6 +573,7 @@ def main():
     types_file = FRONTEND_API_DIR / "types.ts"
     endpoints_file = FRONTEND_API_DIR / "endpoints.ts"
     hooks_file = FRONTEND_API_DIR / "hooks.ts"
+    server_file = FRONTEND_API_DIR / "server.ts"
 
     # 何も検出できない場合は上書きを避ける（空ファイル化の防止）
     if len(classes) == 0 and len(all_endpoints) == 0:
@@ -507,7 +592,7 @@ def main():
     # endpoints.ts を生成（エンドポイントがある場合のみ）
     if len(all_endpoints) > 0:
         print("\n✏️  Generating endpoints.ts (overwrite)...")
-        endpoints_content = generate_endpoints_file(all_endpoints, classes)
+        endpoints_content = generate_endpoints_file(all_endpoints, classes, value_object_types)
         endpoints_file.write_text(endpoints_content, encoding='utf-8')
         print(f"  ✓ {endpoints_file}")
 
@@ -516,13 +601,27 @@ def main():
         hooks_content = generate_hooks_file(all_endpoints)
         hooks_file.write_text(hooks_content, encoding='utf-8')
         print(f"  ✓ {hooks_file}")
+
+        # server.ts を生成 (GETエンドポイントのみ)
+        get_endpoints = [ep for ep in all_endpoints if ep.method == "GET"]
+        if get_endpoints:
+            print("\n✏️  Generating server.ts (overwrite)...")
+            server_content = generate_server_file(all_endpoints, classes, value_object_types)
+            server_file.write_text(server_content, encoding='utf-8')
+            print(f"  ✓ {server_file}")
+            print(f"     ({len(get_endpoints)} GET endpoints)")
+        else:
+            print("\n↷  Skip server.ts (no GET endpoints found)")
     else:
-        print("\n↷  Skip endpoints.ts/hooks.ts (no endpoints found)")
+        print("\n↷  Skip endpoints.ts/hooks.ts/server.ts (no endpoints found)")
 
     print("\n✅ API generation completed!")
     print(f"\n📊 Summary:")
     print(f"   - {len(classes)} types generated")
     print(f"   - {len(all_endpoints)} endpoints found")
+    get_endpoints = [ep for ep in all_endpoints if ep.method == "GET"]
+    if get_endpoints:
+        print(f"   - {len(get_endpoints)} server-side fetch functions generated")
     
     # スキップされたメソッドを報告
     if all_skipped:
