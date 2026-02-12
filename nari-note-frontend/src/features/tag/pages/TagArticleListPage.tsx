@@ -1,38 +1,19 @@
-'use client';
-
-import { useGetArticlesByTag } from '@/lib/api';
-import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PageWithSidebar } from '@/features/global/organisms';
 import { TagArticleListTemplate } from '../templates/TagArticleListTemplate';
+import type { ArticleDto } from '@/lib/api/types';
 
 interface TagArticleListPageProps {
   tag: string;
+  articles: ArticleDto[];
 }
 
 /**
  * TagArticleListPage - Page Component
  * 
  * タグ別記事一覧ページのビジネスロジックを担当するページコンポーネント
- * データフェッチング、状態管理、イベントハンドリングを行い、Templateにpropsを渡す
+ * データはサーバーサイドで取得され、propsとして渡される
  */
-export function TagArticleListPage({ tag }: TagArticleListPageProps) {
-  const { data, isLoading, error, refetch } = useGetArticlesByTag({ tagName: tag });
-
-  if (isLoading) {
-    return <LoadingSpinner text="記事を読み込み中..." />;
-  }
-
-  if (error) {
-    return (
-      <ErrorMessage 
-        message="記事の取得に失敗しました" 
-        onRetry={refetch}
-      />
-    );
-  }
-
-  const articles = data?.articles ?? [];
-
+export function TagArticleListPage({ tag, articles }: TagArticleListPageProps) {
   return (
     <PageWithSidebar>
       <TagArticleListTemplate tag={tag} articles={articles} />

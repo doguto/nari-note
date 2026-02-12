@@ -4,9 +4,9 @@ import { ArticleDto } from '@/lib/api/types';
 
 interface ArticleListProps {
   articles: ArticleDto[];
-  isLoading: boolean;
-  error: Error | null;
-  onRetry: () => void;
+  isLoading?: boolean;
+  error?: Error | null;
+  onRetry?: () => void;
 }
 
 /**
@@ -15,7 +15,7 @@ interface ArticleListProps {
  * 記事一覧を表示するOrganismコンポーネント
  * ローディング、エラー、空状態のハンドリングを含む
  */
-export function ArticleList({ articles, isLoading, error, onRetry }: ArticleListProps) {
+export function ArticleList({ articles, isLoading = false, error = null, onRetry }: ArticleListProps) {
   if (isLoading) {
     return <LoadingSpinner text="記事を読み込み中..." />;
   }
