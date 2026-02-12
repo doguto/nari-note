@@ -30,7 +30,7 @@ export function FollowersModal({ userId, isOpen, onClose }: FollowersModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-1/2 max-h-[80vh] flex flex-col">
+      <DialogContent className="w-full max-w-lg max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>フォロワー</DialogTitle>
         </DialogHeader>

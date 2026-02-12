@@ -29,7 +29,7 @@ export function LoginTemplate({
   onSubmit,
 }: LoginTemplateProps) {
   return (
-    <div className="w-3/4 w-full mx-auto bg-white rounded-lg shadow-lg px-10 py-12">
+    <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-lg px-10 py-12">
       <FormTitle>ログイン</FormTitle>
       
       {error && <ErrorAlert message={error} />}

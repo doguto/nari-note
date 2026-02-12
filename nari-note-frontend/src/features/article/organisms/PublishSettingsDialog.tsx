@@ -124,7 +124,7 @@ export function PublishSettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:w-1/2">
+      <DialogContent className="w-full max-w-md">
         <DialogHeader>
           <DialogTitle>投稿設定</DialogTitle>
           <DialogDescription>
