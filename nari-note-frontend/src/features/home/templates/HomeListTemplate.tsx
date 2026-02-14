@@ -7,12 +7,12 @@ interface HomeListTemplateProps {
   onTabChange: (tab: 'articles' | 'courses') => void;
   articles: ArticleDto[];
   courses: CourseDto[];
-  isLoadingArticles?: boolean;
-  isLoadingCourses?: boolean;
-  articlesError?: Error | null;
-  coursesError?: Error | null;
-  onRetryArticles?: () => void;
-  onRetryCourses?: () => void;
+  isLoadingArticles: boolean;
+  isLoadingCourses: boolean;
+  articlesError: Error | null;
+  coursesError: Error | null;
+  onRetryArticles: () => void;
+  onRetryCourses: () => void;
 }
 
 /**

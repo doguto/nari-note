@@ -4,9 +4,9 @@ import { CourseDto } from '@/lib/api/types';
 
 interface CourseListProps {
   courses: CourseDto[];
-  isLoading?: boolean;
-  error?: Error | null;
-  onRetry?: () => void;
+  isLoading: boolean;
+  error: Error | null;
+  onRetry: () => void;
 }
 
 /**
@@ -15,7 +15,7 @@ interface CourseListProps {
  * 講座一覧を表示するOrganismコンポーネント
  * ローディング、エラー、空状態のハンドリングを含む
  */
-export function CourseList({ courses, isLoading = false, error = null, onRetry }: CourseListProps) {
+export function CourseList({ courses, isLoading, error, onRetry }: CourseListProps) {
   if (isLoading) {
     return <LoadingSpinner text="講座を読み込み中..." />;
   }
