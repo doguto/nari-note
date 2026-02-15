@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Suspense } from "react";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
 import { UnauthorizedProvider } from "@/lib/providers/UnauthorizedProvider";
@@ -19,9 +20,11 @@ export default function RootLayout({
       <body className="antialiased">
         <QueryProvider>
           <AuthProvider>
-            <UnauthorizedProvider>
-              {children}
-            </UnauthorizedProvider>
+            <Suspense fallback={null}>
+              <UnauthorizedProvider>
+                {children}
+              </UnauthorizedProvider>
+            </Suspense>
           </AuthProvider>
         </QueryProvider>
       </body>

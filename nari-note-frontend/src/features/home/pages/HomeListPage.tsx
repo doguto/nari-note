@@ -5,10 +5,16 @@ import { useGetArticles, useGetCourses } from '@/lib/api';
 import { MainContentSection } from '@/features/global/organisms';
 import { HomeListTemplate } from '../templates';
 
-
+/**
+ * HomeListPage - Page Component
+ * 
+ * ホーム画面のビジネスロジックを担当するページコンポーネント
+ * データフェッチング、状態管理、イベントハンドリングを行い、Templateにpropsを渡す
+ */
 export function HomeListPage() {
   const [activeTab, setActiveTab] = useState<'articles' | 'courses'>('articles');
   
+  // クライアントサイドでデータをフェッチ
   const { 
     data: articlesData, 
     isLoading: isLoadingArticles, 
@@ -23,7 +29,7 @@ export function HomeListPage() {
     refetch: refetchCourses 
   } = useGetCourses({ limit: 20, offset: 0 });
 
-  // IDが存在しない記事をフィルタリング（メモ化して不要な再計算を防ぐ）
+  // IDが存在する記事と講座のみをフィルタリング（メモ化して不要な再計算を防ぐ）
   const articlesWithId = useMemo(
     () => articlesData?.articles?.filter(
       (article) => article.id !== null && article.id !== undefined
@@ -31,7 +37,6 @@ export function HomeListPage() {
     [articlesData?.articles]
   );
   
-  // IDが存在しない講座をフィルタリング（メモ化して不要な再計算を防ぐ）
   const coursesWithId = useMemo(
     () => coursesData?.courses?.filter(
       (course) => course.id !== null && course.id !== undefined

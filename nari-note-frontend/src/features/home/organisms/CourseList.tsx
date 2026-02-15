@@ -1,5 +1,3 @@
-'use client';
-
 import { CourseCard } from '@/components/molecules';
 import { EmptyState, LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { CourseDto } from '@/lib/api/types';

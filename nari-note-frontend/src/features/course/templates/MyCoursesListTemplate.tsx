@@ -1,5 +1,3 @@
-'use client';
-
 import { LoadingSpinner } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Plus, BookOpen, Trash2, Edit } from 'lucide-react';

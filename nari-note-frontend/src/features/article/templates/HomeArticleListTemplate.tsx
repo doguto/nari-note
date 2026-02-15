@@ -1,5 +1,3 @@
-'use client';
-
 import { ArticleCard } from '@/components/molecules';
 import { EmptyState } from '@/components/ui';
 import { ArticleDto } from '@/lib/api/types';

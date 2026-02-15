@@ -1,5 +1,3 @@
-'use client';
-
 import { Comment } from '@/types/comment';
 import { CommentItem } from './CommentItem';
 import { EmptyState } from '@/components/ui';

@@ -1,5 +1,3 @@
-'use client';
-
 import { ArticleCard } from '@/components/molecules';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import type { ArticleDto } from '@/lib/api';

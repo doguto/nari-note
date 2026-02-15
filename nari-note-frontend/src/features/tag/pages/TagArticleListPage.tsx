@@ -1,41 +1,28 @@
-'use client';
-
-import { useGetArticlesByTag } from '@/lib/api';
-import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PageWithSidebar } from '@/features/global/organisms';
 import { TagArticleListTemplate } from '../templates/TagArticleListTemplate';
+import { getArticlesByTag } from '@/lib/api/server';
 
 interface TagArticleListPageProps {
-  tag: string;
+  tagName: string;
 }
 
 /**
  * TagArticleListPage - Page Component
  * 
  * タグ別記事一覧ページのビジネスロジックを担当するページコンポーネント
- * データフェッチング、状態管理、イベントハンドリングを行い、Templateにpropsを渡す
+ * サーバーサイドでデータフェッチを行い、Templateに渡す
  */
-export function TagArticleListPage({ tag }: TagArticleListPageProps) {
-  const { data, isLoading, error, refetch } = useGetArticlesByTag({ tagName: tag });
-
-  if (isLoading) {
-    return <LoadingSpinner text="記事を読み込み中..." />;
-  }
-
-  if (error) {
-    return (
-      <ErrorMessage 
-        message="記事の取得に失敗しました" 
-        onRetry={refetch}
-      />
-    );
-  }
-
+export async function TagArticleListPage({ tagName }: TagArticleListPageProps) {
+  // URLエンコードされたタグ名をデコード
+  const decodedTagName = decodeURIComponent(tagName);
+  
+  // サーバーサイドでデータをフェッチ
+  const data = await getArticlesByTag({ tagName: decodedTagName }).catch(() => ({ articles: [] }));
   const articles = data?.articles ?? [];
 
   return (
     <PageWithSidebar>
-      <TagArticleListTemplate tag={tag} articles={articles} />
+      <TagArticleListTemplate tag={decodedTagName} articles={articles} />
     </PageWithSidebar>
   );
 }
