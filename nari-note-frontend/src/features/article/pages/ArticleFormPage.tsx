@@ -32,7 +32,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   
   const router = useRouter();
   const isEditMode = mode === 'edit' && articleId;
-  
+
   // 編集モード時の記事データ取得
   const { data: article, isLoading: isLoadingArticle, error: articleError, refetch } = useGetArticleContent(
     { id: articleId || 0 },

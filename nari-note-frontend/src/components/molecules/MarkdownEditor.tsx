@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { Label } from '@/components/ui/label';
-import { CharacterCounter } from '@/components/molecules';
+import { CharacterCounter, NarinoteMarkdown } from '@/components/molecules';
 
 const PREVIEW_PLACEHOLDER = '*プレビューがここに表示されます*';
 
@@ -273,34 +272,7 @@ export function MarkdownEditor({
         {/* Live Preview */}
         <div className="border border-gray-300 rounded-lg p-4 bg-white overflow-y-auto min-h-[50vh]">
           <div className="prose prose-sm max-w-none">
-            <ReactMarkdown
-              components={{
-                h1: ({ ...props }) => <h1 className="text-3xl font-bold mt-6 mb-4" {...props} />,
-                h2: ({ ...props }) => <h2 className="text-2xl font-bold mt-5 mb-3" {...props} />,
-                h3: ({ ...props }) => <h3 className="text-xl font-bold mt-4 mb-2" {...props} />,
-                p: ({ ...props }) => <p className="mb-4" {...props} />,
-                code: ({ className, children, ...props }) => {
-                  const isInline = !className;
-                  return isInline ? (
-                    <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-pink-600" {...props}>
-                      {children}
-                    </code>
-                  ) : (
-                    <code className="block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto font-mono text-sm" {...props}>
-                      {children}
-                    </code>
-                  );
-                },
-                pre: ({ ...props }) => <pre className="my-4" {...props} />,
-                ul: ({ ...props }) => <ul className="list-disc list-inside mb-4 space-y-1" {...props} />,
-                ol: ({ ...props }) => <ol className="list-decimal list-inside mb-4 space-y-1" {...props} />,
-                blockquote: ({ ...props }) => <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4" {...props} />,
-                a: ({ ...props }) => <a className="text-blue-600 hover:underline" {...props} />,
-                hr: ({ ...props }) => <hr className="my-6 border-t-2 border-gray-300" {...props} />,
-              }}
-            >
-              {value || PREVIEW_PLACEHOLDER}
-            </ReactMarkdown>
+            <NarinoteMarkdown content={value || PREVIEW_PLACEHOLDER} />
           </div>
         </div>
       </div>

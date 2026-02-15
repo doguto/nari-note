@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLogout } from '@/lib/api';
@@ -20,12 +21,17 @@ import { User, FileText, BookOpen } from 'lucide-react';
  * ロゴ、ナビゲーション、ユーザーメニューを表示します。
  */
 export function Header() {
+  const [isMounted, setIsMounted] = useState(false);
   const { userId, userName, isLoggedIn, isLoading, refetch } = useAuth();
   const logoutMutation = useLogout({
     onSuccess: () => {
       refetch();
     },
   });
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -82,8 +88,8 @@ export function Header() {
           </nav>
           
           <div className="flex items-center gap-4 absolute right-4">
-            {isLoading ? (
-              // ローディング中はスケルトン表示
+            {!isMounted || isLoading ? (
+              // ローディング中またはマウント前はスケルトン表示
               <div className="w-24 h-6 bg-brand-text-dark rounded animate-pulse" />
             ) : isLoggedIn ? (
               // ログイン時: マイページメニューとログアウトボタン
