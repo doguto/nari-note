@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import dynamic from 'next/dynamic';
 import { LikeButton, UserAvatar } from '@/components/ui';
 import { CommentForm } from '../organisms/CommentForm';
 import { CommentList } from '../organisms/CommentList';
@@ -8,6 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Pencil, BookOpen, ChevronRight } from 'lucide-react';
 import { GetArticleContentResponse } from '@/lib/api/types';
 
+// ShogiBoard を動的インポート（SSR無効化）
+const ShogiBoard = dynamic(
+  () => import('@/components/molecules/ShogiBoard').then(mod => ({ default: mod.ShogiBoard })),
+  { ssr: false }
+);
+
 interface ArticleDetailTemplateProps {
   article: GetArticleContentResponse;
   comments: Comment[];
@@ -15,6 +22,21 @@ interface ArticleDetailTemplateProps {
   isLikePending: boolean;
   onLikeClick: () => void;
   onCommentSuccess: () => void;
+}
+
+/**
+ * BOD形式（将棋盤面）かどうかを判定する
+ * @param code コードブロックのテキスト
+ */
+function isBODFormat(code: string): boolean {
+  const bodPatterns = [
+    /後手の持駒/,
+    /先手の持駒/,
+    /\+\-{20,}\+/, // +-----------+ のような罫線
+    /[v ][香桂銀金王玉飛角歩と杏圭全竜馬]/u, // 将棋の駒
+  ];
+  
+  return bodPatterns.some(pattern => pattern.test(code));
 }
 
 /**
@@ -100,6 +122,12 @@ export function ArticleDetailTemplate({
             p: ({ ...props }) => <p className="mb-4" {...props} />,
             code: ({ className, children, ...props }) => {
               const isInline = !className;
+              
+              // コードブロックの場合、BOD形式かチェック
+              if (!isInline && typeof children === 'string' && isBODFormat(children)) {
+                return <ShogiBoard bodText={children} />;
+              }
+              
               return isInline ? (
                 <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-pink-600" {...props}>
                   {children}
