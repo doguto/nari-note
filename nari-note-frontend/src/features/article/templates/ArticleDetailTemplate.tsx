@@ -1,19 +1,13 @@
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
-import dynamic from 'next/dynamic';
 import { LikeButton, UserAvatar } from '@/components/ui';
+import { ShogiBoard } from '@/components/molecules/ShogiBoard';
 import { CommentForm } from '../organisms/CommentForm';
 import { CommentList } from '../organisms/CommentList';
 import { Comment } from '@/types/comment';
 import { Button } from '@/components/ui/button';
 import { Pencil, BookOpen, ChevronRight } from 'lucide-react';
 import { GetArticleContentResponse } from '@/lib/api/types';
-
-// ShogiBoard を動的インポート（SSR無効化）
-const ShogiBoard = dynamic(
-  () => import('@/components/molecules/ShogiBoard').then(mod => ({ default: mod.ShogiBoard })),
-  { ssr: false }
-);
 
 interface ArticleDetailTemplateProps {
   article: GetArticleContentResponse;
@@ -123,11 +117,6 @@ export function ArticleDetailTemplate({
             code: ({ className, children, ...props }) => {
               const isInline = !className;
               
-              // コードブロックの場合、BOD形式かチェック
-              if (!isInline && typeof children === 'string' && isBODFormat(children)) {
-                return <ShogiBoard bodText={children} />;
-              }
-              
               return isInline ? (
                 <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-pink-600" {...props}>
                   {children}
@@ -138,7 +127,20 @@ export function ArticleDetailTemplate({
                 </code>
               );
             },
-            pre: ({ ...props }) => <pre className="my-4" {...props} />,
+            pre: ({ children, ...props }) => {
+              // pre タグの中の code 要素からテキストを抽出
+              if (children && typeof children === 'object' && 'props' in children) {
+                const codeElement = children as any;
+                const codeText = codeElement.props?.children;
+                
+                // BOD形式かチェック
+                if (typeof codeText === 'string' && isBODFormat(codeText)) {
+                  return <ShogiBoard bodText={codeText} />;
+                }
+              }
+              
+              return <pre className="my-4" {...props}>{children}</pre>;
+            },
             ul: ({ ...props }) => <ul className="list-disc list-inside mb-4 space-y-1" {...props} />,
             ol: ({ ...props }) => <ol className="list-decimal list-inside mb-4 space-y-1" {...props} />,
             blockquote: ({ ...props }) => <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4" {...props} />,
