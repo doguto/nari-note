@@ -32,8 +32,8 @@ function isBODFormat(code: string): boolean {
   const bodPatterns = [
     /後手の持駒/,
     /先手の持駒/,
-    /\+\-{20,}\+/, // +-----------+ のような罫線
-    /[v ][香桂銀金王玉飛角歩と杏圭全竜馬]/u, // 将棋の駒
+    /\+\-{6,}\+/, // +-----------+ のような罫線（6文字以上）
+    /[v ]?[香桂銀金王玉飛角歩と杏圭全竜馬]/u, // 将棋の駒（v接頭辞は任意）
   ];
   
   return bodPatterns.some(pattern => pattern.test(code));
