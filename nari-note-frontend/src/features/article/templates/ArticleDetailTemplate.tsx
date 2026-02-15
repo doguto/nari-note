@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
 import { LikeButton, UserAvatar } from '@/components/ui';
-import { ShogiBoard } from '@/components/molecules/ShogiBoard';
+import { NarinoteMarkdown } from '@/components/molecules';
 import { CommentForm } from '../organisms/CommentForm';
 import { CommentList } from '../organisms/CommentList';
 import { Comment } from '@/types/comment';
@@ -16,21 +15,6 @@ interface ArticleDetailTemplateProps {
   isLikePending: boolean;
   onLikeClick: () => void;
   onCommentSuccess: () => void;
-}
-
-/**
- * BOD形式（将棋盤面）かどうかを判定する
- * @param code コードブロックのテキスト
- */
-function isBODFormat(code: string): boolean {
-  const bodPatterns = [
-    /後手の持駒/,
-    /先手の持駒/,
-    /\+\-{6,}\+/, // +-----------+ のような罫線（6文字以上）
-    /[v ]?[香桂銀金王玉飛角歩と杏圭全竜馬]/u, // 将棋の駒（v接頭辞は任意）
-  ];
-  
-  return bodPatterns.some(pattern => pattern.test(code));
 }
 
 /**
@@ -108,48 +92,7 @@ export function ArticleDetailTemplate({
       </div>
       
       <div className="prose prose-lg max-w-none mb-8 text-gray-800 leading-relaxed">
-        <ReactMarkdown
-          components={{
-            h1: ({ ...props }) => <h1 className="text-3xl font-bold mt-8 mb-4" {...props} />,
-            h2: ({ ...props }) => <h2 className="text-2xl font-bold mt-6 mb-3" {...props} />,
-            h3: ({ ...props }) => <h3 className="text-xl font-bold mt-4 mb-2" {...props} />,
-            p: ({ ...props }) => <p className="mb-4" {...props} />,
-            code: ({ className, children, ...props }) => {
-              const isInline = !className;
-              
-              return isInline ? (
-                <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-pink-600" {...props}>
-                  {children}
-                </code>
-              ) : (
-                <code className="block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto font-mono text-sm" {...props}>
-                  {children}
-                </code>
-              );
-            },
-            pre: ({ children, ...props }) => {
-              // pre タグの中の code 要素からテキストを抽出
-              // ReactMarkdownはコードブロックを <pre><code>children</code></pre> として出力
-              if (children && typeof children === 'object' && 'props' in children) {
-                const codeElement = children as { props?: { children?: unknown } };
-                const codeText = codeElement.props?.children;
-                
-                // BOD形式かチェック
-                if (typeof codeText === 'string' && isBODFormat(codeText)) {
-                  return <ShogiBoard bodText={codeText} />;
-                }
-              }
-              
-              return <pre className="my-4" {...props}>{children}</pre>;
-            },
-            ul: ({ ...props }) => <ul className="list-disc list-inside mb-4 space-y-1" {...props} />,
-            ol: ({ ...props }) => <ol className="list-decimal list-inside mb-4 space-y-1" {...props} />,
-            blockquote: ({ ...props }) => <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4" {...props} />,
-            a: ({ ...props }) => <a className="text-brand-primary hover:underline" {...props} />,
-          }}
-        >
-          {article.body}
-        </ReactMarkdown>
+        <NarinoteMarkdown content={article.body} />
       </div>
       
       {article.tags && article.tags.length > 0 && (
