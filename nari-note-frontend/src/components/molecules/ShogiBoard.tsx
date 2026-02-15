@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ReactElement } from 'react';
 
 interface ShogiBoardProps {
   /**
@@ -20,7 +21,7 @@ interface ShogiBoardProps {
  * kifu-for-js の静的図面モードを使用
  */
 export function ShogiBoard({ bodText, className = '' }: ShogiBoardProps) {
-  const [KifuLite, setKifuLite] = useState<any>(null);
+  const [KifuLite, setKifuLite] = useState<React.ComponentType<{ static?: boolean; children?: React.ReactNode }> | null>(null);
   
   useEffect(() => {
     // クライアントサイドでのみ kifu-for-js をインポート

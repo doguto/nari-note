@@ -129,8 +129,9 @@ export function ArticleDetailTemplate({
             },
             pre: ({ children, ...props }) => {
               // pre タグの中の code 要素からテキストを抽出
+              // ReactMarkdownはコードブロックを <pre><code>children</code></pre> として出力
               if (children && typeof children === 'object' && 'props' in children) {
-                const codeElement = children as any;
+                const codeElement = children as { props?: { children?: unknown } };
                 const codeText = codeElement.props?.children;
                 
                 // BOD形式かチェック
