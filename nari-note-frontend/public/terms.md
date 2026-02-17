@@ -1,7 +1,4 @@
-import { NarinoteMarkdown } from '@/components/molecules/NarinoteMarkdown';
-
-// 利用規約のMarkdownコンテンツを読み込み
-const termsContent = `# 利用規約
+# 利用規約
 
 最終更新日：2024年1月1日
 
@@ -51,18 +48,3 @@ const termsContent = `# 利用規約
 
 本規約の解釈にあたっては、日本法を準拠法とします。
 本サービスに関して紛争が生じた場合には、当社の本店所在地を管轄する裁判所を専属的合意管轄とします。
-`;
-
-/**
- * TermsTemplate - Template Component
- *
- * 利用規約ページのUI構成に責任を持つ
- * Markdownコンテンツを使用することで、規約の編集が容易になる
- */
-export function TermsTemplate() {
-  return (
-    <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-8">
-      <NarinoteMarkdown content={termsContent} className="prose prose-slate max-w-none" />
-    </div>
-  );
-}
