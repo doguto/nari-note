@@ -1,6 +1,8 @@
+import Link from 'next/link';
+
 /**
  * フッターコンポーネント
- * 
+ *
  * 全ページ共通のフッター。
  */
 export function Footer() {
@@ -14,9 +16,9 @@ export function Footer() {
             </p>
           </div>
           <div className="flex gap-6 text-sm">
-            <a href="#" className="text-gray-400 hover:text-brand-primary transition-colors">
+            <Link href="/terms" className="text-gray-400 hover:text-brand-primary transition-colors">
               利用規約
-            </a>
+            </Link>
             <a href="#" className="text-gray-400 hover:text-brand-primary transition-colors">
               プライバシーポリシー
             </a>
