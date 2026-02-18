@@ -1,5 +1,3 @@
-'use client';
-
 import { TermsTemplate } from '../templates/TermsTemplate';
 
 /**
