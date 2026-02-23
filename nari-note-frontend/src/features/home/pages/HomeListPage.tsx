@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react';
 import { useGetArticles, useGetCourses } from '@/lib/api';
-import { MainContentSection } from '@/features/global/organisms';
 import { HomeListTemplate } from '../templates';
 
 /**
@@ -45,19 +44,17 @@ export function HomeListPage() {
   );
 
   return (
-    <MainContentSection title="">
-      <HomeListTemplate
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        articles={articlesWithId}
-        courses={coursesWithId}
-        isLoadingArticles={isLoadingArticles}
-        isLoadingCourses={isLoadingCourses}
-        articlesError={articlesError}
-        coursesError={coursesError}
-        onRetryArticles={refetchArticles}
-        onRetryCourses={refetchCourses}
-      />
-    </MainContentSection>
+    <HomeListTemplate
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      articles={articlesWithId}
+      courses={coursesWithId}
+      isLoadingArticles={isLoadingArticles}
+      isLoadingCourses={isLoadingCourses}
+      articlesError={articlesError}
+      coursesError={coursesError}
+      onRetryArticles={refetchArticles}
+      onRetryCourses={refetchCourses}
+    />
   );
 }
