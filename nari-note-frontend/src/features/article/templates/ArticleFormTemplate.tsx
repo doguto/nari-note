@@ -5,6 +5,7 @@ import {
   ArticleBodyEditor,
   ArticleFormActions,
 } from '../organisms';
+import { LoadingSpinner, ErrorMessage, ErrorAlert } from '@/components/ui';
 
 interface ArticleFormTemplateProps {
   title: string;
@@ -14,6 +15,10 @@ interface ArticleFormTemplateProps {
   showPublishDialog: boolean;
   isLoading: boolean;
   isFormDisabled: boolean;
+  isLoadingContent?: boolean;
+  contentError?: string;
+  onRetry?: () => void;
+  validationError?: string;
   onTitleChange: (value: string) => void;
   onBodyChange: (value: string) => void;
   onTagsChange: (tags: string[]) => void;
@@ -37,6 +42,10 @@ export function ArticleFormTemplate({
   showPublishDialog,
   isLoading,
   isFormDisabled,
+  isLoadingContent,
+  contentError,
+  onRetry,
+  validationError,
   onTitleChange,
   onBodyChange,
   onTagsChange,
@@ -49,8 +58,25 @@ export function ArticleFormTemplate({
     e.preventDefault();
   };
 
+  // コンテンツ読み込み中
+  if (isLoadingContent) {
+    return <LoadingSpinner text="記事を読み込み中..." />;
+  }
+
+  // コンテンツ取得エラー
+  if (contentError) {
+    return (
+      <ErrorMessage 
+        message={contentError} 
+        onRetry={onRetry}
+      />
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {validationError && <ErrorAlert message={validationError} />}
+      
       <ArticleFormActions
         onSave={onSave}
         onOpenPublishSettings={onOpenPublishSettings}
