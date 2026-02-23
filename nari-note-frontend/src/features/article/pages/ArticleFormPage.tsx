@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCreateArticle, useUpdateArticle, useGetArticleContent } from '@/lib/api';
-import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { FormPageLayout } from '@/components/molecules';
 import { ArticleFormTemplate } from '../templates/ArticleFormTemplate';
 
@@ -29,6 +28,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const [isInitialized, setIsInitialized] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [validationError, setValidationError] = useState<string>('');
   
   const router = useRouter();
   const isEditMode = mode === 'edit' && articleId;
@@ -51,7 +51,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     },
     onError: (error) => {
       console.error('記事の投稿に失敗しました:', error);
-      alert('記事の投稿に失敗しました。もう一度お試しください。');
+      setValidationError('記事の投稿に失敗しました。もう一度お試しください。');
       setIsPublishing(false);
     },
   });
@@ -64,7 +64,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     },
     onError: (error) => {
       console.error('記事の更新に失敗しました:', error);
-      alert('記事の更新に失敗しました。もう一度お試しください。');
+      setValidationError('記事の更新に失敗しました。もう一度お試しください。');
       setIsPublishing(false);
     },
   });
@@ -101,39 +101,21 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges, createArticle.isSuccess, updateArticle.isSuccess]);
 
-  // ローディング状態
-  if (isEditMode && isLoadingArticle) {
-    return <LoadingSpinner text="記事を読み込み中..." />;
-  }
-
-  // エラー状態
-  if (isEditMode && articleError) {
-    return (
-      <ErrorMessage 
-        message="記事の取得に失敗しました" 
-        onRetry={refetch}
-      />
-    );
-  }
-
-  // 記事が見つからない場合
-  if (isEditMode && !article) {
-    return <ErrorMessage message="記事が見つかりません" />;
-  }
-
   const validateForm = (): boolean => {
+    setValidationError('');
+
     if (!title.trim()) {
-      alert('タイトルを入力してください');
+      setValidationError('タイトルを入力してください');
       return false;
     }
 
     if (tags.length === 0) {
-      alert('少なくとも1つのタグを追加してください');
+      setValidationError('少なくとも1つのタグを追加してください');
       return false;
     }
 
     if (body.length > maxCharacters) {
-      alert(`文字数が上限を超えています。${maxCharacters.toLocaleString()}文字以内に収めてください。`);
+      setValidationError(`文字数が上限を超えています。${maxCharacters.toLocaleString()}文字以内に収めてください。`);
       return false;
     }
 
@@ -141,6 +123,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   };
 
   const handlePublish = (publishedAt?: string) => {
+    setValidationError('');
     setIsPublishing(true);
     if (isEditMode) {
       updateArticle.mutate({
@@ -169,6 +152,8 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
       return;
     }
 
+    setValidationError('');
+
     if (isEditMode) {
       updateArticle.mutate({
         id: articleId,
@@ -194,6 +179,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
       return;
     }
 
+    setValidationError('');
     setShowPublishDialog(true);
   };
 
@@ -209,6 +195,18 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const pageTitle = isEditMode ? '記事を編集' : '新規記事作成';
   const pageDescription = 'マークダウン形式で記事を作成できます。プレビュー機能を使用して、公開前に記事の見た目を確認できます。';
 
+  // コンテンツ読み込み状態とエラー状態を判定
+  const isLoadingContent = Boolean(isEditMode && isLoadingArticle);
+  
+  const getContentError = (): string | undefined => {
+    if (!isEditMode) return undefined;
+    if (articleError) return '記事の取得に失敗しました';
+    if (!article && !isLoadingArticle) return '記事が見つかりません';
+    return undefined;
+  };
+  
+  const contentError = getContentError();
+
   return (
     <FormPageLayout title={pageTitle} description={pageDescription}>
       <ArticleFormTemplate
@@ -219,6 +217,10 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         showPublishDialog={showPublishDialog}
         isLoading={isLoading}
         isFormDisabled={isFormDisabled}
+        isLoadingContent={isLoadingContent}
+        contentError={contentError}
+        onRetry={refetch}
+        validationError={validationError}
         onTitleChange={setTitle}
         onBodyChange={setBody}
         onTagsChange={setTags}
