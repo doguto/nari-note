@@ -1,4 +1,4 @@
-import { AuthGuard } from '@/components/molecules';
+import { AuthGuard } from '@/features/global/organisms';
 import { MyCoursesListPage } from '@/features/course/pages';
 
 /**

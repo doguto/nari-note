@@ -5,3 +5,4 @@ export { Sidebar } from './Sidebar';
 export { HeroSection } from './HeroSection';
 export { MainContentSection } from './MainContentSection';
 export { PageWithSidebar } from './PageWithSidebar';
+export { AuthGuard } from './AuthGuard';
