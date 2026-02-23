@@ -194,12 +194,16 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const pageDescription = 'マークダウン形式で記事を作成できます。プレビュー機能を使用して、公開前に記事の見た目を確認できます。';
 
   // コンテンツ読み込み状態とエラー状態を判定
-  const isLoadingContent = !!(isEditMode && isLoadingArticle);
-  const contentError = isEditMode && articleError
-    ? '記事の取得に失敗しました'
-    : isEditMode && !article && !isLoadingArticle
-    ? '記事が見つかりません'
-    : undefined;
+  const isLoadingContent = Boolean(isEditMode && isLoadingArticle);
+  
+  const getContentError = (): string | undefined => {
+    if (!isEditMode) return undefined;
+    if (articleError) return '記事の取得に失敗しました';
+    if (!article && !isLoadingArticle) return '記事が見つかりません';
+    return undefined;
+  };
+  
+  const contentError = getContentError();
 
   return (
     <FormPageLayout title={pageTitle} description={pageDescription}>
