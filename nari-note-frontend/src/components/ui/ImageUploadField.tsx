@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useImageUpload } from '@/lib/hooks/useImageUpload';
 
 interface ImageUploadFieldProps {
   id: string;
@@ -31,46 +32,24 @@ export function ImageUploadField({
   maxSizeMB = 5,
   required = false,
 }: ImageUploadFieldProps) {
-  const [preview, setPreview] = useState<string | undefined>(currentImage);
-  const [validationError, setValidationError] = useState<string>();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { preview, validationError, handleFileChange, handleRemove, setPreview } = useImageUpload(
+    onImageSelect,
+    onImageRemove,
+    { maxSizeMB },
+  );
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setValidationError(undefined);
-
-    // ファイルタイプチェック
-    if (!file.type.startsWith('image/')) {
-      setValidationError('画像ファイルのみアップロード可能です');
-      return;
-    }
-
-    // ファイルサイズチェック
-    const maxSize = maxSizeMB * 1024 * 1024;
-    if (file.size > maxSize) {
-      setValidationError(`ファイルサイズは${maxSizeMB}MB以下である必要があります`);
-      return;
-    }
-
-    // プレビュー表示
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-
-    onImageSelect(file);
-  };
+  useEffect(() => {
+    setPreview(currentImage);
+    // setPreview は useState の setter のため依存配列への追加不要
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentImage]);
 
   const handleRemoveClick = () => {
-    setPreview(undefined);
-    setValidationError(undefined);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    onImageRemove?.();
+    handleRemove();
   };
 
   const handleButtonClick = () => {
