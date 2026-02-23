@@ -1,5 +1,3 @@
-'use client';
-
 import { MarkdownEditor } from '@/components/molecules/MarkdownEditor';
 
 interface ArticleBodyEditorProps {
