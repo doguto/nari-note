@@ -1,4 +1,4 @@
-import { AuthGuard } from '@/components/molecules';
+import { AuthGuard } from '@/features/global/organisms';
 import { CourseFormPage } from '@/features/course/pages';
 
 export default function NewCoursePage() {

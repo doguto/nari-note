@@ -17,7 +17,6 @@ export { PageHeader } from './PageHeader';
 export { PageContainer } from './PageContainer';
 export { FormPageLayout } from './FormPageLayout';
 export { AuthPageLayout } from './AuthPageLayout';
-export { AuthGuard } from './AuthGuard';
 export { ShogiBoard } from './ShogiBoard';
 export { NarinoteMarkdown } from './NarinoteMarkdown';
 

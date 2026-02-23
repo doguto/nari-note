@@ -10,7 +10,7 @@ interface AuthGuardProps {
 }
 
 /**
- * AuthGuard - Molecule Component
+ * AuthGuard - Organism Component
  *
  * 認証が必要なページをラップするコンポーネント
  * 認証チェックとローディング状態の表示を統一的に処理する
