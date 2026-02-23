@@ -2,70 +2,54 @@
 
 認証に関する機能を提供するモジュールです。
 
-**重要**: Atomic Designパターンに従い、完全な機能ブロックは`organisms/`ディレクトリに配置されます。
-
 ## ディレクトリ構造
 
 ```
 auth/
-├── organisms/          # Organisms（完全な機能ブロック）
+├── pages/              # Pageコンポーネント（ロジック担当）
 │   ├── LoginPage.tsx
 │   └── SignUpPage.tsx
-└── types.ts           # 型定義（必要に応じて）
+└── templates/          # Templateコンポーネント（UI担当）
+    ├── LoginTemplate.tsx
+    └── SignUpTemplate.tsx
 ```
 
-## Organisms一覧
+## Pages一覧
 
 ### LoginPage.tsx
-ログインフォーム。Atoms/Moleculesを組み合わせた完全な機能。
+ログインページのロジックに責任を持つコンポーネント。UIには一切責任を持たない。
 
-- EmailField（Molecule）を使用
-- PasswordField（Molecule）を使用
-- ErrorAlert（Atom）を使用
-- データフェッチングとビジネスロジックを含む
+- バックエンドとの通信（`useSignIn`）
+- リダイレクト処理（セキュリティ検証含む）
+- フォームバリデーション
 
 ### SignUpPage.tsx
-新規登録フォーム。Atoms/Moleculesを組み合わせた完全な機能。
+サインアップページのロジックに責任を持つコンポーネント。UIには一切責任を持たない。
 
-- NameField（Molecule）を使用
-- EmailField（Molecule）を使用
-- PasswordField（Molecule）を使用
-- ErrorAlert（Atom）を使用
-- データフェッチングとビジネスロジックを含む
+- バックエンドとの通信（`useSignUp`）
+- フォームバリデーション
 
 ## 使用方法
 
 ### ログインページ
 
 ```tsx
-// src/app/(auth)/login/page.tsx
-import { LoginPage } from '@/features/auth/organisms/LoginPage';
+// src/app/(with-layout)/(auth)/login/page.tsx
+import { LoginPage } from '@/features/auth/pages/LoginPage';
 
-export default function Login() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="max-w-md w-full">
-        <LoginPage />
-      </div>
-    </div>
-  );
+export default function LoginPageRoute() {
+  return <LoginPage />;
 }
 ```
 
 ### サインアップページ
 
 ```tsx
-// src/app/(auth)/signup/page.tsx
-import { SignUpPage } from '@/features/auth/organisms/SignUpPage';
+// src/app/(with-layout)/(auth)/signup/page.tsx
+import { SignUpPage } from '@/features/auth/pages/SignUpPage';
 
-export default function SignUp() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="max-w-md w-full">
-        <SignUpPage />
-      </div>
-    </div>
-  );
+export default function SignUpPageRoute() {
+  return <SignUpPage />;
 }
 ```
 
@@ -80,15 +64,16 @@ export default function SignUp() {
 - `EmailField` - メールアドレス入力（FormFieldを使用）
 - `PasswordField` - パスワード入力（FormFieldを使用）
 - `NameField` - ユーザー名入力（FormFieldを使用）
+- `AuthPageLayout` - 認証ページ共通レイアウト
 
-### Organisms
-- `LoginPage` - 完全なログインフォーム（Molecules + ビジネスロジック）
-- `SignUpPage` - 完全な新規登録フォーム（Molecules + ビジネスロジック）
+### Templates
+- `LoginTemplate` - ログインフォームUI
+- `SignUpTemplate` - 新規登録フォームUI
 
 ## 認証フロー
 
 1. ユーザーがログイン/サインアップフォームに入力
-2. ContainerがAPIを呼び出し
+2. PageコンポーネントがAPIを呼び出し
 3. 成功時にトークンがCookieに保存される（バックエンドで管理）
 4. 以降のリクエストで自動的に認証される
 
