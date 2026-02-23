@@ -1,9 +1,12 @@
 import { ArticleCard } from '@/components/molecules';
-import { EmptyState } from '@/components/ui';
+import { EmptyState, LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { ArticleDto } from '@/lib/api/types';
 
 interface HomeArticleListTemplateProps {
   articles: ArticleDto[];
+  isLoading?: boolean;
+  error?: Error | null;
+  onRetry?: () => void;
 }
 
 /**
@@ -12,7 +15,20 @@ interface HomeArticleListTemplateProps {
  * ホーム画面の記事一覧のUI構成とレイアウトを担当
  * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
  */
-export function HomeArticleListTemplate({ articles }: HomeArticleListTemplateProps) {
+export function HomeArticleListTemplate({ articles, isLoading, error, onRetry }: HomeArticleListTemplateProps) {
+  if (isLoading) {
+    return <LoadingSpinner text="記事を読み込み中..." />;
+  }
+
+  if (error) {
+    return (
+      <ErrorMessage
+        message="記事の取得に失敗しました"
+        onRetry={onRetry}
+      />
+    );
+  }
+
   if (articles.length === 0) {
     return <EmptyState title="まだ記事がありません" />;
   }
