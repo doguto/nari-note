@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LikeButton, UserAvatar } from '@/components/ui';
+import { LikeButton, UserAvatar, LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { NarinoteMarkdown } from '@/components/molecules';
 import { CommentForm } from '../organisms/CommentForm';
 import { CommentList } from '../organisms/CommentList';
@@ -7,12 +7,16 @@ import { Comment } from '@/types/comment';
 import { Button } from '@/components/ui/button';
 import { Pencil, BookOpen, ChevronRight } from 'lucide-react';
 import { GetArticleContentResponse } from '@/lib/api/types';
+import { PageWithSidebar } from '@/features/global/organisms';
 
 interface ArticleDetailTemplateProps {
-  article: GetArticleContentResponse;
+  isLoading: boolean;
+  error: Error | null;
+  article: GetArticleContentResponse | undefined;
   comments: Comment[];
   isOwnArticle: boolean;
   isLikePending: boolean;
+  onRetry: () => void;
   onLikeClick: () => void;
   onCommentSuccess: () => void;
 }
@@ -24,14 +28,42 @@ interface ArticleDetailTemplateProps {
  * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
  */
 export function ArticleDetailTemplate({
+  isLoading,
+  error,
   article,
   comments,
   isOwnArticle,
   isLikePending,
+  onRetry,
   onLikeClick,
   onCommentSuccess,
 }: ArticleDetailTemplateProps) {
+  if (isLoading) {
+    return (
+      <PageWithSidebar>
+        <LoadingSpinner text="記事を読み込み中..." />
+      </PageWithSidebar>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageWithSidebar>
+        <ErrorMessage message="記事の取得に失敗しました" onRetry={onRetry} />
+      </PageWithSidebar>
+    );
+  }
+
+  if (!article) {
+    return (
+      <PageWithSidebar>
+        <ErrorMessage message="記事が見つかりません" />
+      </PageWithSidebar>
+    );
+  }
+
   return (
+    <PageWithSidebar>
     <article className="bg-white rounded-lg shadow-lg p-8">
       {/* Course breadcrumb - only show if article is part of a course */}
       {article.courseId && article.courseName && (
@@ -119,5 +151,6 @@ export function ArticleDetailTemplate({
         <CommentForm articleId={article.id!} onSuccess={onCommentSuccess} />
       </div>
     </article>
+    </PageWithSidebar>
   );
 }

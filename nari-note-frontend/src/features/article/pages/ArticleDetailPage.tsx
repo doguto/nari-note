@@ -1,9 +1,7 @@
 'use client';
 
 import { useGetArticleContent, useToggleLike } from '@/lib/api';
-import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import { PageWithSidebar } from '@/features/global/organisms';
 import { ArticleDetailTemplate } from '../templates/ArticleDetailTemplate';
 import { Comment } from '@/types/comment';
 
@@ -35,25 +33,8 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
     toggleLike({ articleId: articleId });
   };
 
-  if (isLoading) {
-    return <LoadingSpinner text="記事を読み込み中..." />;
-  }
-
-  if (error) {
-    return (
-      <ErrorMessage 
-        message="記事の取得に失敗しました" 
-        onRetry={refetch}
-      />
-    );
-  }
-
-  if (!article) {
-    return <ErrorMessage message="記事が見つかりません" />;
-  }
-
   // APIから取得したコメントをComment型に変換
-  const comments: Comment[] = (article.comments || []).map(c => ({
+  const comments: Comment[] = (article?.comments || []).map(c => ({
     id: c.id || 0,
     userId: c.userId || 0,
     userName: c.userName || '',
@@ -62,18 +43,19 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   }));
 
   // 自分の記事かどうかを判定
-  const isOwnArticle = userId === article.authorId;
+  const isOwnArticle = userId === article?.authorId;
 
   return (
-    <PageWithSidebar>
-      <ArticleDetailTemplate
-        article={article}
-        comments={comments}
-        isOwnArticle={isOwnArticle}
-        isLikePending={isLikePending}
-        onLikeClick={handleLikeClick}
-        onCommentSuccess={handleCommentSuccess}
-      />
-    </PageWithSidebar>
+    <ArticleDetailTemplate
+      isLoading={isLoading}
+      error={error}
+      article={article}
+      comments={comments}
+      isOwnArticle={isOwnArticle}
+      isLikePending={isLikePending}
+      onRetry={refetch}
+      onLikeClick={handleLikeClick}
+      onCommentSuccess={handleCommentSuccess}
+    />
   );
 }
