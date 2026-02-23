@@ -102,6 +102,8 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   }, [hasUnsavedChanges, createArticle.isSuccess, updateArticle.isSuccess]);
 
   const validateForm = (): boolean => {
+    setValidationError('');
+
     if (!title.trim()) {
       setValidationError('タイトルを入力してください');
       return false;
