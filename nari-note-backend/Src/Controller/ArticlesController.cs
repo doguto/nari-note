@@ -103,8 +103,6 @@ public class ArticlesController : ApplicationController
     [AllowAnonymous]
     public async Task<ActionResult<GetArticlesByTagResponse>> GetArticlesByTag(string tagName)
     {
-        if (string.IsNullOrWhiteSpace(tagName)) return BadRequest(new { message = "Tag name cannot be empty" });
-
         var request = new GetArticlesByTagRequest { TagName = tagName };
         var response = await getArticlesByTagService.ExecuteAsync(request);
         return Ok(response);

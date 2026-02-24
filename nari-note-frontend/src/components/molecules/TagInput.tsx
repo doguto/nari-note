@@ -12,6 +12,8 @@ interface TagInputProps {
   required?: boolean;
 }
 
+const VALID_TAG_PATTERN = /^[a-zA-Z0-9\u3040-\u30FF\u4E00-\u9FFF_.\-]+$/;
+
 /**
  * TagInput - Molecule Component
  * 
@@ -19,12 +21,25 @@ interface TagInputProps {
  */
 export function TagInput({ tags, onTagsChange, required = true }: TagInputProps) {
   const [tagInput, setTagInput] = useState('');
+  const [tagError, setTagError] = useState('');
 
   const handleAddTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      onTagsChange([...tags, tagInput.trim()]);
-      setTagInput('');
+    const trimmed = tagInput.trim();
+    if (!trimmed) return;
+
+    if (!VALID_TAG_PATTERN.test(trimmed)) {
+      setTagError('タグ名に使用できない文字が含まれています。英数字・日本語・ハイフン(-)・アンダースコア(_)・ピリオド(.)のみ使用できます。');
+      return;
     }
+
+    if (tags.includes(trimmed)) {
+      setTagError('同じタグがすでに追加されています。');
+      return;
+    }
+
+    onTagsChange([...tags, trimmed]);
+    setTagInput('');
+    setTagError('');
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
@@ -38,6 +53,11 @@ export function TagInput({ tags, onTagsChange, required = true }: TagInputProps)
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTagInput(e.target.value);
+    if (tagError) setTagError('');
+  };
+
   return (
     <div className="space-y-2">
       <Label htmlFor="tags">
@@ -48,10 +68,11 @@ export function TagInput({ tags, onTagsChange, required = true }: TagInputProps)
           id="tags"
           type="text"
           value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
+          onChange={handleInputChange}
           onKeyPress={handleKeyPress}
           placeholder="タグを入力してEnterで追加"
           className="flex-1"
+          aria-describedby={tagError ? 'tag-error' : undefined}
         />
         <Button
           type="button"
@@ -61,6 +82,9 @@ export function TagInput({ tags, onTagsChange, required = true }: TagInputProps)
           追加
         </Button>
       </div>
+      {tagError && (
+        <p id="tag-error" className="text-sm text-red-500" role="alert">{tagError}</p>
+      )}
       {tags.length > 0 && (
         <div className="flex gap-2 flex-wrap">
           {tags.map((tag) => (
