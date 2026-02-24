@@ -22,6 +22,7 @@ interface ArticleFormTemplateProps {
   onTitleChange: (value: string) => void;
   onBodyChange: (value: string) => void;
   onTagsChange: (tags: string[]) => void;
+  onSubmit: (e: React.FormEvent) => void;
   onSave: () => void;
   onOpenPublishSettings: () => void;
   onPublish: (publishedAt?: string) => void;
@@ -49,15 +50,12 @@ export function ArticleFormTemplate({
   onTitleChange,
   onBodyChange,
   onTagsChange,
+  onSubmit,
   onSave,
   onOpenPublishSettings,
   onPublish,
   onPublishDialogChange,
 }: ArticleFormTemplateProps) {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-  };
-
   // コンテンツ読み込み中
   if (isLoadingContent) {
     return <LoadingSpinner text="記事を読み込み中..." />;
@@ -74,7 +72,7 @@ export function ArticleFormTemplate({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className="space-y-6">
       {validationError && <ErrorAlert message={validationError} />}
       
       <ArticleFormActions
