@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Application.Dto.Request;
 
@@ -18,6 +19,7 @@ public class CreateArticleRequest
     
     public int? ArticleOrder { get; set; }
     
+    [ValidTagNames]
     public List<string> Tags { get; set; } = new();
     public bool IsPublished { get; set; } = false;
     public DateTime? PublishedAt { get; set; }

@@ -103,7 +103,9 @@ public class ArticlesController : ApplicationController
     [AllowAnonymous]
     public async Task<ActionResult<GetArticlesByTagResponse>> GetArticlesByTag(string tagName)
     {
-        if (string.IsNullOrWhiteSpace(tagName)) return BadRequest(new { message = "Tag name cannot be empty" });
+        if (string.IsNullOrWhiteSpace(tagName)) return BadRequest(new { message = "タグ名は必須です" });
+        if (!System.Text.RegularExpressions.Regex.IsMatch(tagName, ValidTagNamesAttribute.Pattern))
+            return BadRequest(new { message = "タグ名に使用できない文字が含まれています" });
 
         var request = new GetArticlesByTagRequest { TagName = tagName };
         var response = await getArticlesByTagService.ExecuteAsync(request);
