@@ -6,15 +6,15 @@ namespace NariNoteBackend.Filter;
 public class ValidTagNamesAttribute : ValidationAttribute
 {
     // URLエンコード不要な文字のみ許可（英数字・日本語・ハイフン・アンダースコア・ピリオド）
-    public const string Pattern = @"^[a-zA-Z0-9\u3040-\u30FF\u4E00-\u9FFF_\-.]+$";
-    static readonly Regex TagNamePattern = new(Pattern, RegexOptions.Compiled);
+    public const string Pattern = @"^[a-zA-Z0-9\u3040-\u30FF\u4E00-\u9FFF_\-\.]+$";
+    internal static readonly Regex TagNameRegex = new(Pattern, RegexOptions.Compiled);
 
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
         if (value is not List<string> tags) return ValidationResult.Success;
 
         var invalidTags = tags
-            .Where(tag => string.IsNullOrWhiteSpace(tag) || !TagNamePattern.IsMatch(tag))
+            .Where(tag => string.IsNullOrWhiteSpace(tag) || !TagNameRegex.IsMatch(tag))
             .ToList();
 
         if (invalidTags.Count > 0)
