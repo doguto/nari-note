@@ -98,14 +98,17 @@ def parse_csharp_class(file_path: Path) -> Optional[CSharpClass]:
 
     # プロパティを抽出
     properties = []
-    # 改良版: int, DateTime, List<T>などをサポート、requiredキーワードとnullable型(?）を扱う
-    property_pattern = r'public\s+(?:required\s+)?([\w<>,\s?]+?)\s+(\w+)\s*\{\s*get;\s*set;\s*\}'
+    # int, DateTime, List<T>などをサポート、requiredキーワードとnullable型(?）を扱う
+    # required キーワードをグループ1でキャプチャし、型をグループ2、プロパティ名をグループ3でキャプチャ
+    property_pattern = r'public\s+(required\s+)?([\w<>,\s?]+?)\s+(\w+)\s*\{\s*get;\s*set;\s*\}'
     for match in re.finditer(property_pattern, content):
-        prop_type = match.group(1).strip()
-        prop_name = match.group(2)
+        prop_type = match.group(2).strip()
+        prop_name = match.group(3)
 
         is_list = 'List<' in prop_type
-        is_optional = '= string.Empty' not in content or '= new()' in content or '= false' not in content
+        # nullable判定は csharp_type_to_typescript が型末尾の ? で行うため、
+        # is_optional は常に False とする（required の有無に関わらず）
+        is_optional = False
 
         properties.append(CSharpProperty(
             name=prop_name,
