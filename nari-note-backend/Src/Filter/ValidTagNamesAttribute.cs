@@ -6,8 +6,8 @@ namespace NariNoteBackend.Filter;
 public class ValidTagNamesAttribute : ValidationAttribute
 {
     // URLエンコード不要な文字のみ許可（英数字・日本語・ハイフン・アンダースコア・ピリオド）
-    public const string Pattern = @"^[a-zA-Z0-9\u3040-\u30FF\u4E00-\u9FFF_\-\.]+$";
-    internal static readonly Regex TagNameRegex = new(Pattern, RegexOptions.Compiled);
+    public const string ValidPattern = @"^[a-zA-Z0-9\u3040-\u30FF\u4E00-\u9FFF_\-\.]+$";
+    internal static readonly Regex TagNameRegex = new(ValidPattern, RegexOptions.Compiled);
 
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
