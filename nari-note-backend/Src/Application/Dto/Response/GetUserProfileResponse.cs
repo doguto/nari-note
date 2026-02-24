@@ -5,7 +5,7 @@ namespace NariNoteBackend.Application.Dto.Response;
 public class GetUserProfileResponse
 {
     public UserId Id { get; set; }
-    public string Username { get; set; } = string.Empty;
+    public required string Username { get; set; }
     public string? Bio { get; set; }
     public DateTime CreatedAt { get; set; }
     public int FollowerCount { get; set; }

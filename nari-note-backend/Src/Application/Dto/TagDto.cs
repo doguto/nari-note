@@ -2,6 +2,6 @@ namespace NariNoteBackend.Application.Dto;
 
 public class TagDto
 {
-    public string Name { get; set; } = string.Empty;
+    public required string Name { get; set; }
     public int ArticleCount { get; set; }
 }
