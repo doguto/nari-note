@@ -5,10 +5,10 @@ namespace NariNoteBackend.Application.Dto.Response;
 public class GetArticleContentResponse
 {
     public ArticleId Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string Body { get; set; } = string.Empty;
+    public required string Title { get; set; }
+    public required string Body { get; set; }
     public UserId AuthorId { get; set; }
-    public string AuthorName { get; set; } = string.Empty;
+    public required string AuthorName { get; set; }
     public List<string> Tags { get; set; } = new();
     public int LikeCount { get; set; }
     public bool IsLiked { get; set; }

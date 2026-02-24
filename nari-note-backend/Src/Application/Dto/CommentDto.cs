@@ -6,7 +6,7 @@ public class CommentDto
 {
     public CommentId Id { get; set; }
     public UserId UserId { get; set; }
-    public string UserName { get; set; } = string.Empty;
-    public string Message { get; set; } = string.Empty;
+    public required string UserName { get; set; }
+    public required string Message { get; set; }
     public DateTime CreatedAt { get; set; }
 }
