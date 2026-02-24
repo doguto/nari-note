@@ -174,6 +174,10 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+
   const handleOpenPublishSettings = () => {
     if (!validateForm()) {
       return;
@@ -225,6 +229,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         onBodyChange={setBody}
         onTagsChange={setTags}
         onSave={handleSave}
+        onSubmit={handleSubmit}
         onOpenPublishSettings={handleOpenPublishSettings}
         onPublish={handlePublish}
         onPublishDialogChange={setShowPublishDialog}
