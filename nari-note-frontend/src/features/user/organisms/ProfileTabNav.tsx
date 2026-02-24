@@ -1,5 +1,3 @@
-'use client';
-
 import { ArticleList } from '@/components/organisms';
 import { UserFollowersList } from './UserFollowersList';
 import type { GetArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';

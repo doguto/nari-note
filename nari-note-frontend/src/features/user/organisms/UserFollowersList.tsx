@@ -1,5 +1,3 @@
-'use client';
-
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { UserListItem } from '@/components/molecules';
 import type { FollowerUserDto } from '@/lib/api/types';
