@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { FollowButton, FollowStats, LoadingSpinner, ErrorMessage, UserAvatar } from '@/components/ui';
-import { UserListItem, ArticleList } from '@/components/molecules';
+import { UserListItem } from '@/components/molecules';
+import { ArticleList } from '@/components/organisms';
 import type { GetUserProfileResponse, GetArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
 interface UserProfileTemplateProps {
