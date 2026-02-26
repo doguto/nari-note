@@ -57,7 +57,32 @@ export function SignUpPage() {
       setError('パスワードを入力してください');
       return;
     }
-    
+
+    if (password.length < 8) {
+      setError('パスワードは8文字以上で入力してください');
+      return;
+    }
+
+    if (!/[a-z]/.test(password)) {
+      setError('パスワードは英小文字（a-z）を1文字以上含む必要があります');
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setError('パスワードは英大文字（A-Z）を1文字以上含む必要があります');
+      return;
+    }
+
+    if (!/\d/.test(password)) {
+      setError('パスワードは数字（0-9）を1文字以上含む必要があります');
+      return;
+    }
+
+    if (!/[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>/?]/.test(password)) {
+      setError('パスワードは記号（!@#$%^&*等）を1文字以上含む必要があります');
+      return;
+    }
+
     if (password !== passwordConfirm) {
       setError('パスワードが一致しません');
       return;

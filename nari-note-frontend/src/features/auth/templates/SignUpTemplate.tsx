@@ -47,10 +47,10 @@ export function SignUpTemplate({
         
         <EmailField value={email} onChange={onEmailChange} />
         
-        <PasswordField 
-          value={password} 
+        <PasswordField
+          value={password}
           onChange={onPasswordChange}
-          helperText="8文字以上で入力してください"
+          helperText="8文字以上・英大文字・英小文字・数字・記号をそれぞれ含む必要があります"
         />
         
         <PasswordField

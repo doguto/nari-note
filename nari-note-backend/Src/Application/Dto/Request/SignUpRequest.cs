@@ -16,5 +16,8 @@ public class SignUpRequest
     [Required(ErrorMessage = "パスワードは必須です")]
     [MinLength(8, ErrorMessage = "パスワードは8文字以上で入力してください")]
     [MaxLength(255, ErrorMessage = "パスワードは255文字以内で入力してください")]
+    [RegularExpression(
+        @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\[\]{};':""\\|,.<>\/?]).+$",
+        ErrorMessage = "パスワードは英大文字・英小文字・数字・記号をそれぞれ1文字以上含む必要があります")]
     public required string Password { get; set; }
 }
