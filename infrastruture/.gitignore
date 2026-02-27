@@ -1,0 +1,8 @@
+**/.terraform/*
+
+*.tfstate
+# 例外的にbackendのみS3に置けないのでローカルでGit管理する
+!terraform/backend/*.tfstate
+
+*.terraform.lock.hcl
+*.tfstate.backup
