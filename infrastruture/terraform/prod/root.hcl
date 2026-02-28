@@ -6,7 +6,7 @@ locals {
 
     template_dir = "${get_parent_terragrunt_dir()}/terragrunt-template"
 
-    env_name     = "develop"
+    env_name     = "prod"
 }
 
 remote_state {
@@ -19,7 +19,7 @@ remote_state {
 
     config = {
         bucket = local.s3_bucket
-        key    = "${path_relative_to_include()}/terraform.tfstate"
+        key    = "${local.env_name}/${path_relative_to_include()}/terraform.tfstate"
         region = local.aws_region
     }
 }

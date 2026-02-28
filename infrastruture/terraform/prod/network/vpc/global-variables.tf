@@ -8,7 +8,7 @@ variable "region" { # tflint-ignore: terraform_unused_declarations
 variable "env_name" { # tflint-ignore: terraform_unused_declarations
   description = "Deployment Environment"
   type        = string
-  default     = "develop"
+  default     = "prod"
 }
 
 variable "app_name" { # tflint-ignore: terraform_unused_declarations

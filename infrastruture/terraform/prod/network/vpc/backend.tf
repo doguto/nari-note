@@ -2,7 +2,7 @@
 terraform {
   backend "s3" {
     bucket = "nari-note-terraform"
-    key    = "network/vpc/terraform.tfstate"
+    key    = "prod/network/vpc/terraform.tfstate"
     region = "ap-northeast-1"
   }
 }
