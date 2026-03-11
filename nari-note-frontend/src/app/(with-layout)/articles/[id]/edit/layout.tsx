@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { SignUpPage } from '@/features/auth/pages/SignUpPage';
 
 export const metadata: Metadata = {
   robots: {
@@ -8,6 +7,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SignUpPageRoute() {
-  return <SignUpPage />;
+export default function EditArticleLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }
