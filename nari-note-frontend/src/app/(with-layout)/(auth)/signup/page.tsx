@@ -1,12 +1,4 @@
-import type { Metadata } from 'next';
 import { SignUpPage } from '@/features/auth/pages/SignUpPage';
-
-export const metadata: Metadata = {
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
 
 export default function SignUpPageRoute() {
   return <SignUpPage />;
