@@ -28,10 +28,12 @@ export function ArticleCard({
   date,
 }: ArticleCardProps) {
   return (
-    <Link
-      href={`/articles/${id}`}
-      className="block bg-white rounded-lg p-5 border border-gray-200 hover:shadow-lg hover:border-brand-primary/30 transition-all duration-200"
-    >
+    <div className="relative bg-white rounded-lg p-5 border border-gray-200 hover:shadow-lg hover:border-brand-primary/30 transition-all duration-200">
+      <Link
+        href={`/articles/${id}`}
+        className="absolute inset-0"
+        aria-label={title}
+      />
       <div className="flex flex-col gap-3">
         <h3 className="text-lg font-bold text-gray-800">{title}</h3>
         <UserAvatarLink userId={authorId} username={author} size="sm" />
@@ -52,6 +54,6 @@ export function ArticleCard({
           <span>{date}</span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

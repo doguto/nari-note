@@ -33,7 +33,7 @@ export function UserAvatarLink({
         <Link
           href={`/users/${userId}`}
           onClick={(e) => e.stopPropagation()}
-          className="hover:text-brand-primary hover:underline text-sm text-gray-600"
+          className="relative z-10 hover:text-brand-primary hover:underline text-sm text-gray-600"
         >
           {username}
         </Link>
