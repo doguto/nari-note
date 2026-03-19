@@ -10,6 +10,6 @@ resource "aws_s3_bucket_versioning" "backend_versioning" {
 
   versioning_configuration {
     mfa_delete = "Disabled"
-    status = "Enabled"
+    status     = "Enabled"
   }
 }
