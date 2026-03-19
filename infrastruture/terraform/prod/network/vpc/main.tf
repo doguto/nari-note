@@ -3,7 +3,7 @@ locals {
   availability_zone_count = length(var.availability_zones)
 }
 
-resource "aws_vpc" "nari-note-vpc" {
+resource "aws_vpc" "main" {
   # 最初の16bitをネットワーク部として固定する
   # RFC1918 のCに相当する範囲を通信で使用可能
   cidr_block = "192.168.0.0/16"
@@ -14,10 +14,10 @@ resource "aws_vpc" "nari-note-vpc" {
 }
 
 # コストの削減のため、AZは2つのみに分割する
-resource "aws_subnet" "nari-note-public-subnet" {
+resource "aws_subnet" "public" {
   count = local.availability_zone_count
 
-  vpc_id                  = aws_vpc.nari-note-vpc.id
+  vpc_id                  = aws_vpc.main.id
   map_public_ip_on_launch = true
   availability_zone       = var.availability_zones[count.index]
 
@@ -30,10 +30,10 @@ resource "aws_subnet" "nari-note-public-subnet" {
   }
 }
 
-resource "aws_subnet" "nari-note-private-subnet" {
+resource "aws_subnet" "private" {
   count = local.availability_zone_count
 
-  vpc_id                  = aws_vpc.nari-note-vpc.id
+  vpc_id                  = aws_vpc.main.id
   map_public_ip_on_launch = false
   availability_zone       = var.availability_zones[count.index]
 
