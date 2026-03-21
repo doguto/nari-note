@@ -4,6 +4,6 @@ include "root" {
 
 dependencies {
   paths = [
-    "../ec2"
+    "../server"
   ]
 }
