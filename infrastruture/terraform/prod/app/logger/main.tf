@@ -5,7 +5,7 @@ locals {
 
 # APIアプリケーションのロググループ
 resource "aws_cloudwatch_log_group" "api" {
-  name              = "/nari-note/api"
+  name              = "/nari-note/ec2"
   retention_in_days = 30
 
   tags = {
