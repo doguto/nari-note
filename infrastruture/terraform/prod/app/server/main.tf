@@ -49,12 +49,63 @@ resource "aws_key_pair" "app_server" {
   public_key = file(var.public_key_path)
 }
 
+resource "aws_iam_role" "app_server" {
+  name = "${var.app_name}-app-server-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Name = "${var.app_name}-app-server-role"
+  }
+}
+
+data "aws_iam_policy_document" "cloudwatch_agent" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "cloudwatch_agent" {
+  name   = "${var.app_name}-cloudwatch-agent-policy"
+  role   = aws_iam_role.app_server.id
+  policy = data.aws_iam_policy_document.cloudwatch_agent.json
+}
+
+resource "aws_iam_instance_profile" "app_server" {
+  name = "${var.app_name}-app-server-profile"
+  role = aws_iam_role.app_server.name
+}
+
 resource "aws_instance" "app_server" {
   ami                    = data.aws_ami.amazon_linux_2023.id
   instance_type          = var.instance_type
   subnet_id              = local.public_subnet_ids[0]
   vpc_security_group_ids = [aws_security_group.app_server.id]
-  key_name               = aws_key_pair.app_server.key_name
+
+  # SSH 接続のためのキーペア
+  key_name = aws_key_pair.app_server.key_name
+
+  # EC2 への IAM ロールの割り当て
+  iam_instance_profile = aws_iam_instance_profile.app_server.name
 
   tags = {
     Name = "${var.app_name}-app-server"
