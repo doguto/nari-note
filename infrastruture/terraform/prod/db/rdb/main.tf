@@ -54,24 +54,10 @@ resource "aws_db_instance" "main" {
   }
 }
 
-# デフォルトでは DB のエラーログ以外はログに出力されないため、その他のログも出力するようにパラメータグループを作成する
+# https://docs.aws.amazon.com/ja_jp/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.Parameters.html
 resource "aws_db_parameter_group" "main" {
   name   = "${var.app_name}-rdb-pg"
   family = "postgres17"
-
-  # SQL クエリのログを有効化
-  parameter {
-    name         = "general_query_log"
-    value        = 1
-    apply_method = "immediate"
-  }
-
-  # スロークエリのログを有効化
-  parameter {
-    name         = "slow_query_log"
-    value        = 1
-    apply_method = "immediate"
-  }
 
   tags = {
     Name = "${var.app_name}-rdb-pg"
@@ -84,6 +70,26 @@ resource "aws_db_subnet_group" "main" {
 
   tags = {
     Name = "${var.app_name}-db-subnet-group"
+  }
+}
+
+resource "aws_ssm_parameter" "db_host" {
+  name  = "/${var.app_name}/db/host"
+  type  = "SecureString"
+  value = aws_db_instance.main.address
+
+  tags = {
+    Name = "${var.app_name}-db-host"
+  }
+}
+
+resource "aws_ssm_parameter" "db_name" {
+  name  = "/${var.app_name}/db/name"
+  type  = "SecureString"
+  value = aws_db_instance.main.db_name
+
+  tags = {
+    Name = "${var.app_name}-db-name"
   }
 }
 

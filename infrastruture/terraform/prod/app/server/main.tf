@@ -80,26 +80,6 @@ resource "aws_iam_instance_profile" "app_server" {
   role = aws_iam_role.app_server.name
 }
 
-resource "aws_iam_role_policy" "cloudwatch_agent" {
-  name   = "${var.app_name}-cloudwatch-agent-policy"
-  role   = aws_iam_role.app_server.id
-  policy = data.aws_iam_policy_document.cloudwatch_agent.json
-}
-
-data "aws_iam_policy_document" "cloudwatch_agent" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-      "logs:DescribeLogGroups",
-      "logs:DescribeLogStreams",
-    ]
-    resources = ["*"]
-  }
-}
-
 resource "aws_iam_role" "app_server" {
   name               = "${var.app_name}-app-server-role"
   assume_role_policy = data.aws_iam_policy_document.app_server_assume_role.json
