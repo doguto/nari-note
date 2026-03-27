@@ -3,6 +3,23 @@ locals {
   public_subnet_ids = data.terraform_remote_state.vpc.outputs.public_subnet_ids
 }
 
+resource "aws_instance" "app_server" {
+  ami                    = data.aws_ami.amazon_linux_2023.id
+  instance_type          = var.instance_type
+  subnet_id              = local.public_subnet_ids[0]
+  vpc_security_group_ids = [aws_security_group.app_server.id]
+
+  # SSH 接続のためのキーペア
+  key_name = aws_key_pair.app_server.key_name
+
+  # EC2 への IAM ロールの割り当て
+  iam_instance_profile = aws_iam_instance_profile.app_server.name
+
+  tags = {
+    Name = "${var.app_name}-app-server"
+  }
+}
+
 resource "aws_security_group" "app_server" {
   name        = "${var.app_name}-app-server-sg"
   description = "Security group for app server"
@@ -49,25 +66,24 @@ resource "aws_key_pair" "app_server" {
   public_key = file(var.public_key_path)
 }
 
-resource "aws_iam_role" "app_server" {
-  name = "${var.app_name}-app-server-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
+resource "aws_eip" "app_server" {
+  instance = aws_instance.app_server.id
+  domain   = "vpc"
 
   tags = {
-    Name = "${var.app_name}-app-server-role"
+    Name = "${var.app_name}-app-server-eip"
   }
+}
+
+resource "aws_iam_instance_profile" "app_server" {
+  name = "${var.app_name}-app-server-profile"
+  role = aws_iam_role.app_server.name
+}
+
+resource "aws_iam_role_policy" "cloudwatch_agent" {
+  name   = "${var.app_name}-cloudwatch-agent-policy"
+  role   = aws_iam_role.app_server.id
+  policy = data.aws_iam_policy_document.cloudwatch_agent.json
 }
 
 data "aws_iam_policy_document" "cloudwatch_agent" {
@@ -84,39 +100,22 @@ data "aws_iam_policy_document" "cloudwatch_agent" {
   }
 }
 
-resource "aws_iam_role_policy" "cloudwatch_agent" {
-  name   = "${var.app_name}-cloudwatch-agent-policy"
-  role   = aws_iam_role.app_server.id
-  policy = data.aws_iam_policy_document.cloudwatch_agent.json
-}
-
-resource "aws_iam_instance_profile" "app_server" {
-  name = "${var.app_name}-app-server-profile"
-  role = aws_iam_role.app_server.name
-}
-
-resource "aws_instance" "app_server" {
-  ami                    = data.aws_ami.amazon_linux_2023.id
-  instance_type          = var.instance_type
-  subnet_id              = local.public_subnet_ids[0]
-  vpc_security_group_ids = [aws_security_group.app_server.id]
-
-  # SSH 接続のためのキーペア
-  key_name = aws_key_pair.app_server.key_name
-
-  # EC2 への IAM ロールの割り当て
-  iam_instance_profile = aws_iam_instance_profile.app_server.name
+resource "aws_iam_role" "app_server" {
+  name               = "${var.app_name}-app-server-role"
+  assume_role_policy = data.aws_iam_policy_document.app_server_assume_role.json
 
   tags = {
-    Name = "${var.app_name}-app-server"
+    Name = "${var.app_name}-app-server-role"
   }
 }
 
-resource "aws_eip" "app_server" {
-  instance = aws_instance.app_server.id
-  domain   = "vpc"
-
-  tags = {
-    Name = "${var.app_name}-app-server-eip"
+data "aws_iam_policy_document" "app_server_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
   }
 }
