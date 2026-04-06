@@ -30,6 +30,26 @@ data "aws_iam_policy_document" "ssm_read" {
   }
 }
 
+resource "aws_iam_role_policy" "s3_deploy_read" {
+  name   = "${var.app_name}-s3-deploy-read-policy"
+  role   = aws_iam_role.app_server.id
+  policy = data.aws_iam_policy_document.s3_deploy_read.json
+}
+
+data "aws_iam_policy_document" "s3_deploy_read" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+    resources = [
+      data.terraform_remote_state.deploy_bucket.outputs.bucket_arn,
+      "${data.terraform_remote_state.deploy_bucket.outputs.bucket_arn}/*",
+    ]
+  }
+}
+
 data "aws_iam_policy_document" "cloudwatch_agent" {
   statement {
     effect = "Allow"

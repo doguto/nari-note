@@ -7,6 +7,15 @@ data "terraform_remote_state" "vpc" {
   }
 }
 
+data "terraform_remote_state" "deploy_bucket" {
+  backend = "s3"
+  config = {
+    bucket = var.state_bucket_name
+    key    = "prod/deploy/bucket/terraform.tfstate"
+    region = var.region
+  }
+}
+
 data "aws_ami" "amazon_linux_2023" {
   most_recent = true
   owners      = ["amazon"]

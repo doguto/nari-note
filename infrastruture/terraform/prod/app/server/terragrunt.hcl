@@ -5,6 +5,7 @@ include "root" {
 dependencies {
   paths = [
     "../../network/vpc",
-    "../../network/gateway"
+    "../../network/gateway",
+    "../../deploy/bucket"
   ]
 }
