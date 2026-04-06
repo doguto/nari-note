@@ -1,11 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-# =============================================================================
-# nari-note-backend デプロイスクリプト
-# .NET バイナリをビルドして S3 にアップロードします
-# =============================================================================
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROJECT_DIR="${REPO_ROOT}/nari-note-backend"
@@ -31,7 +26,6 @@ echo "  S3 Bucket : s3://${S3_BUCKET}"
 echo "  S3 Key    : ${S3_KEY}"
 echo ""
 
-# --- ビルド ---
 echo "[1/3] ビルド中 (runtime: ${RUNTIME})..."
 dotnet publish "${PROJECT_FILE}" \
   --configuration Release \
@@ -52,7 +46,6 @@ fi
 
 echo "[1/3] ビルド完了: $(du -sh "${BINARY_PATH}" | cut -f1)"
 
-# --- S3 アップロード ---
 echo "[2/3] S3 にアップロード中..."
 aws-vault exec "${AWS_VAULT_PROFILE}" -- aws s3 cp "${BINARY_PATH}" "s3://${S3_BUCKET}/${S3_KEY}" \
   --region "${AWS_REGION}" \
