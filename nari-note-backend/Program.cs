@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 if (!builder.Environment.IsDevelopment())
 {
     builder.Configuration.AddSystemsManager("/nari-note/app", optional: false);
+    builder.Configuration.AddSystemsManager("/nari-note/db", optional: false);
 }
 
 // CORS設定

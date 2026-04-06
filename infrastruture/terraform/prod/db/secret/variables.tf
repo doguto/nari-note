@@ -11,3 +11,9 @@ variable "db_password" {
 
   sensitive = true
 }
+
+variable "db_port" {
+  description = "Port number for the RDS instance"
+  type        = string
+  default     = "5432"
+}

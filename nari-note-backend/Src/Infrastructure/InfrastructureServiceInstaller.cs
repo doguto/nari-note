@@ -15,8 +15,14 @@ public static class InfrastructureServiceInstaller
     )
     {
         // Register DbContext
+        var connectionString =
+            $"Host={configuration["host"]};" +
+            $"Port={configuration["port"]};" +
+            $"Database={configuration["name"]};" +
+            $"Username={configuration["username"]};" +
+            $"Password={configuration["password"]}";
         services.AddDbContext<NariNoteDbContext>(
-            options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+            options => options.UseNpgsql(connectionString)
         );
 
         // Register repositories
