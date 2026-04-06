@@ -15,6 +15,9 @@ resource "aws_instance" "app_server" {
   # EC2 への IAM ロールの割り当て
   iam_instance_profile = aws_iam_instance_profile.app_server.name
 
+  user_data                   = file("${path.module}/userdata.sh")
+  user_data_replace_on_change = true
+
   tags = {
     Name = "${var.app_name}-app-server"
   }
