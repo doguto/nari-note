@@ -6,6 +6,7 @@ dependencies {
   paths = [
     "../../network/vpc",
     "../../network/gateway",
-    "../../deploy/bucket"
+    "../../deploy/bucket",
+    "../secret"
   ]
 }
