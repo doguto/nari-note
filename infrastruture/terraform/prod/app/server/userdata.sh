@@ -15,6 +15,19 @@ EOF
 # nginx の自動起動を有効化&起動
 systemctl enable --now nginx
 
+# CloudWatch Agent のインストールと設定
+dnf install -y amazon-cloudwatch-agent
+
+cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<'EOF'
+${cloudwatch_conf}
+EOF
+
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config \
+  -m ec2 \
+  -s \
+  -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
 
 # Application
 dnf install -y aspnetcore-runtime-9.0
