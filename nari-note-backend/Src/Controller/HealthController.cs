@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Controller;
 
@@ -15,6 +16,7 @@ public class HealthController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult> GetHealth()
     {
         var response = await getHealthService.ExecuteAsync();

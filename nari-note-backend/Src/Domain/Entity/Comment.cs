@@ -1,20 +1,25 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
+[Index(nameof(ArticleId))]
+[Index(nameof(UserId))]
+[Index(nameof(ArticleId), nameof(CreatedAt))]
 public class Comment : EntityBase
 {
     [Key]
-    public int Id { get; set; }
+    public CommentId Id { get; set; }
 
     [Required]
     [ForeignKey("User")]
-    public int UserId { get; set; }
+    public UserId UserId { get; set; }
 
     [Required]
     [ForeignKey("Article")]
-    public int ArticleId { get; set; }
+    public ArticleId ArticleId { get; set; }
 
     [Required]
     [MaxLength(1000)]

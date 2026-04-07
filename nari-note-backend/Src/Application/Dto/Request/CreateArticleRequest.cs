@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Filter;
 
 namespace NariNoteBackend.Application.Dto.Request;
 
@@ -11,8 +13,14 @@ public class CreateArticleRequest
     [Required(ErrorMessage = "本文は必須です")]
     public string Body { get; set; } = string.Empty;
     
-    public int AuthorId { get; set; }
+    public UserId AuthorId { get; set; }
     
+    public CourseId? CourseId { get; set; }
+    
+    public int? ArticleOrder { get; set; }
+    
+    [ValidTagNames]
     public List<string> Tags { get; set; } = new();
     public bool IsPublished { get; set; } = false;
+    public DateTime? PublishedAt { get; set; }
 }

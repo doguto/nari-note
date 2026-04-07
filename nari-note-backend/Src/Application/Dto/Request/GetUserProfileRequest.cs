@@ -1,6 +1,8 @@
+using NariNoteBackend.Domain.ValueObject;
+
 namespace NariNoteBackend.Application.Dto.Request;
 
 public class GetUserProfileRequest
 {
-    public int Id { get; set; }
+    public UserId Id { get; set; }
 }

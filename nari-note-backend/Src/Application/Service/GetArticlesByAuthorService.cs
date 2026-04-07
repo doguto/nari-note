@@ -8,12 +8,12 @@ namespace NariNoteBackend.Application.Service;
 public class GetArticlesByAuthorService
 {
     readonly IArticleRepository articleRepository;
-    
+
     public GetArticlesByAuthorService(IArticleRepository articleRepository)
     {
         this.articleRepository = articleRepository;
     }
-    
+
     public async Task<GetArticlesByAuthorResponse> ExecuteAsync(GetArticlesByAuthorRequest request)
     {
         var articles = await articleRepository.FindByAuthorAsync(request.AuthorId);
@@ -28,6 +28,7 @@ public class GetArticlesByAuthorService
             Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
             LikeCount = a.Likes.Count,
             IsPublished = a.IsPublished,
+            PublishedAt = a.PublishedAt,
             CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
         }).ToList();

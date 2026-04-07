@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Repository;
-using NariNoteBackend.Application.Security;
+using NariNoteBackend.Domain.Security;
+using NariNoteBackend.Infrastructure.Database;
 using NariNoteBackend.Infrastructure.Repository;
 using NariNoteBackend.Infrastructure.Security;
 
@@ -10,20 +11,30 @@ public static class InfrastructureServiceInstaller
 {
     public static void AddInfrastructureServices(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration
+    )
     {
         // Register DbContext
+        var connectionString =
+            $"Host={configuration["host"]};" +
+            $"Port={configuration["port"]};" +
+            $"Database={configuration["name"]};" +
+            $"Username={configuration["username"]};" +
+            $"Password={configuration["password"]}";
         services.AddDbContext<NariNoteDbContext>(
-            options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+            options => options.UseNpgsql(connectionString)
         );
 
         // Register repositories
         services.AddScoped<IArticleRepository, ArticleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<ISessionRepository, SessionRepository>();
+        services.AddScoped<ICourseRepository, CourseRepository>();
         services.AddScoped<ILikeRepository, LikeRepository>();
+        services.AddScoped<ICourseLikeRepository, CourseLikeRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
-        
+        services.AddScoped<IFollowRepository, FollowRepository>();
+        services.AddScoped<ITagRepository, TagRepository>();
+
         // Register helpers
         services.AddScoped<IJwtHelper, JwtHelper>();
         services.AddScoped<ICookieOptionsHelper, CookieOptionsHelper>();

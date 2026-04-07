@@ -1,22 +1,25 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
 [Index(nameof(UserId), nameof(ArticleId), IsUnique = true)]
+[Index(nameof(ArticleId))]
+[Index(nameof(UserId), nameof(CreatedAt))]
 public class Like : EntityBase
 {
     [Key]
-    public int Id { get; set; }
+    public LikeId Id { get; set; }
 
     [Required]
     [ForeignKey("User")]
-    public int UserId { get; set; }
+    public UserId UserId { get; set; }
 
     [Required]
     [ForeignKey("Article")]
-    public int ArticleId { get; set; }
+    public ArticleId ArticleId { get; set; }
 
 
     // Navigation Properties

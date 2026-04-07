@@ -1,10 +1,36 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Suspense } from "react";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
+import { AuthProvider } from "@/lib/providers/AuthProvider";
+import { UnauthorizedProvider } from "@/lib/providers/UnauthorizedProvider";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nari-note.com";
 
 export const metadata: Metadata = {
-  title: "なりノート",
-  description: "持続の裁判、ソノビビュー、自我記。知識分全全を譲しよ。う",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "将棋ブログ投稿サイト ～なりノート～",
+    template: "%s | なりノート",
+  },
+  description: "将棋の知識共有プラットフォーム。あなたの将棋の知識を共有し、コミュニティと共に成長しましょう。",
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    url: siteUrl,
+    siteName: "なりノート",
+    title: "将棋ブログ投稿サイト ～なりノート～",
+    description: "将棋の知識共有プラットフォーム。あなたの将棋の知識を共有し、コミュニティと共に成長しましょう。",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "将棋ブログ投稿サイト ～なりノート～",
+    description: "将棋の知識共有プラットフォーム。あなたの将棋の知識を共有し、コミュニティと共に成長しましょう。",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -16,7 +42,13 @@ export default function RootLayout({
     <html lang="ja">
       <body className="antialiased">
         <QueryProvider>
-          {children}
+          <AuthProvider>
+            <Suspense fallback={null}>
+              <UnauthorizedProvider>
+                {children}
+              </UnauthorizedProvider>
+            </Suspense>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

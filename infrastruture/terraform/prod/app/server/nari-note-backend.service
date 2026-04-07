@@ -1,0 +1,16 @@
+[Unit]
+Description=nari-note-backend ASP.NET Core App
+After=network.target
+
+[Service]
+Type=simple
+User=nari-note-backend
+WorkingDirectory=/opt/nari-note-backend
+ExecStart=/opt/nari-note-backend/nari-note-backend
+Restart=always
+RestartSec=5
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://localhost:5000
+
+[Install]
+WantedBy=multi-user.target

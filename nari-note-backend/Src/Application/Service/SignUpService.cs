@@ -1,27 +1,24 @@
-using Microsoft.AspNetCore.Http;
-using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Security;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Domain.Security;
 
 namespace NariNoteBackend.Application.Service;
 
 public class SignUpService
 {
-    readonly IUserRepository userRepository;
-    readonly ISessionRepository sessionRepository;
-    readonly IJwtHelper jwtHelper;
     readonly ICookieOptionsHelper cookieOptionsHelper;
+    readonly IJwtHelper jwtHelper;
+    readonly IUserRepository userRepository;
 
     public SignUpService(
         IUserRepository userRepository,
-        ISessionRepository sessionRepository,
         IJwtHelper jwtHelper,
-        ICookieOptionsHelper cookieOptionsHelper)
+        ICookieOptionsHelper cookieOptionsHelper
+    )
     {
         this.userRepository = userRepository;
-        this.sessionRepository = sessionRepository;
         this.jwtHelper = jwtHelper;
         this.cookieOptionsHelper = cookieOptionsHelper;
     }
@@ -37,30 +34,17 @@ public class SignUpService
         {
             Name = request.Name,
             Email = request.Email,
-            PasswordHash = passwordHash,
+            PasswordHash = passwordHash
         };
 
         var createdUser = await userRepository.CreateAsync(user);
+        var token = jwtHelper.GenerateToken(createdUser.Id, user.Name);
 
-        var sessionKey = jwtHelper.GenerateSessionKey();
-        var token = jwtHelper.GenerateToken(createdUser, sessionKey);
-
-        var session = new Session
-        {
-            UserId = createdUser.Id,
-            SessionKey = sessionKey,
-            ExpiresAt = DateTime.UtcNow.AddHours(jwtHelper.GetExpirationInHours()),
-            CreatedAt = DateTime.UtcNow,
-            User = createdUser
-        };
-        
-        await sessionRepository.CreateAsync(session);
-        
         // HttpOnly Cookieにトークンを設定
         var cookieOptions = cookieOptionsHelper.CreateAuthCookieOptions(
             TimeSpan.FromHours(jwtHelper.GetExpirationInHours()));
         response.Cookies.Append("authToken", token, cookieOptions);
-        
+
         return new AuthResponse
         {
             UserId = createdUser.Id

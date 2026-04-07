@@ -1,24 +1,27 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
 [Index(nameof(FollowerId), nameof(FollowingId), IsUnique = true)]
+[Index(nameof(FollowerId))]
+[Index(nameof(FollowingId))]
 public class Follow : EntityBase
 {
     [Key]
-    public int Id { get; set; }
+    public FollowId Id { get; set; }
 
     [Required]
     [ForeignKey("Follower")]
-    public int FollowerId { get; set; }
+    public UserId FollowerId { get; set; }
 
     [Required]
     [ForeignKey("Following")]
-    public int FollowingId { get; set; }
+    public UserId FollowingId { get; set; }
 
     // Navigation Properties
-    public required User Follower { get; set; }  // フォローする側
-    public required User Following { get; set; }  // フォローされる側
+    public User Follower { get; set; }  // フォローする側
+    public User Following { get; set; }  // フォローされる側
 }

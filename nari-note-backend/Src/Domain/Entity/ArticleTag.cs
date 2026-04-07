@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
@@ -8,17 +9,17 @@ namespace NariNoteBackend.Domain.Entity;
 public class ArticleTag : EntityBase
 {
     [Key]
-    public int Id { get; set; }
+    public ArticleTagId Id { get; set; }
 
     [Required]
     [ForeignKey("Article")]
-    public int ArticleId { get; set; }
+    public ArticleId ArticleId { get; set; }
 
     [Required]
     [ForeignKey("Tag")]
-    public int TagId { get; set; }
+    public TagId TagId { get; set; }
 
     // Navigation Properties
-    public required Article Article { get; set; }
-    public required Tag Tag { get; set; }
+    public Article Article { get; set; }
+    public Tag Tag { get; set; }
 }

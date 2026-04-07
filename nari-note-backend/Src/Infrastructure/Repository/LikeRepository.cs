@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Infrastructure.Repository;
 
@@ -13,7 +15,7 @@ public class LikeRepository : ILikeRepository
         this.context = context;
     }
     
-    public async Task<Like?> FindByUserAndArticleAsync(int userId, int articleId)
+    public async Task<Like?> FindByUserAndArticleAsync(UserId userId, ArticleId articleId)
     {
         return await context.Likes.FirstOrDefaultAsync(l => l.UserId == userId && l.ArticleId == articleId);
     }
@@ -25,12 +27,12 @@ public class LikeRepository : ILikeRepository
         return like;
     }
 
-    public async Task<Like?> FindByIdAsync(int id)
+    public async Task<Like?> FindByIdAsync(LikeId id)
     {
         return await context.Likes.FindAsync(id);
     }
 
-    public async Task<Like> FindForceByIdAsync(int id)
+    public async Task<Like> FindForceByIdAsync(LikeId id)
     {
         var like = await FindByIdAsync(id);
         if (like == null) throw new KeyNotFoundException($"ID: {id} のいいねが見つかりません");
@@ -45,7 +47,7 @@ public class LikeRepository : ILikeRepository
         return entity;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(LikeId id)
     {
         var like = await context.Likes.FindAsync(id);
         if (like == null) return;
@@ -54,8 +56,33 @@ public class LikeRepository : ILikeRepository
         await context.SaveChangesAsync();
     }
 
-    public async Task<int> CountByArticleAsync(int articleId)
+    public async Task<int> CountByArticleAsync(ArticleId articleId)
     {
         return await context.Likes.CountAsync(l => l.ArticleId == articleId);
+    }
+
+    public async Task<List<Article>> FindLikedArticlesByUserAsync(UserId userId)
+    {
+        var articles = await context.Likes
+            .Where(l => l.UserId == userId)
+            .Where(l => l.Article != null)
+            .Include(l => l.Article)
+                .ThenInclude(a => a.Author)
+            .Include(l => l.Article.ArticleTags)
+                .ThenInclude(at => at.Tag)
+            .Include(l => l.Article.Likes)
+            .OrderByDescending(l => l.CreatedAt)
+            .AsSplitQuery()
+            .Select(l => l.Article)
+            .ToListAsync();
+
+        return articles!;
+    }
+
+    public async Task<int> CountLikedArticlesByUserAsync(UserId userId)
+    {
+        return await context.Likes
+            .Where(l => l.UserId == userId)
+            .CountAsync();
     }
 }

@@ -2,27 +2,59 @@
 // Do not edit manually
 
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type UseQueryOptions } from '@tanstack/react-query';
-import { articlesApi, authApi, healthApi, usersApi } from './endpoints';
+import { articlesApi, authApi, coursesApi, healthApi, tagsApi, usersApi } from './endpoints';
 import type {
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
+  CreateCommentRequest,
+  CreateCommentResponse,
+  CreateCourseRequest,
+  CreateCourseResponse,
   DeleteArticleRequest,
-  GetArticleRequest,
-  GetArticleResponse,
+  DeleteCourseRequest,
+  GetArticleContentRequest,
+  GetArticleContentResponse,
   GetArticlesByAuthorRequest,
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
   GetArticlesByTagResponse,
+  GetArticlesRequest,
+  GetArticlesResponse,
+  GetCourseContentRequest,
+  GetCourseContentResponse,
+  GetCoursesByAuthorRequest,
+  GetCoursesByAuthorResponse,
+  GetCoursesRequest,
+  GetCoursesResponse,
+  GetCurrentUserRequest,
+  GetDraftArticlesRequest,
+  GetDraftArticlesResponse,
+  GetFollowersRequest,
+  GetFollowersResponse,
+  GetFollowingsRequest,
+  GetFollowingsResponse,
   GetHealthResponse,
+  GetLikedArticlesRequest,
+  GetLikedArticlesResponse,
+  GetPopularTagsRequest,
+  GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  SearchArticlesRequest,
+  SearchArticlesResponse,
+  SearchCoursesRequest,
+  SearchCoursesResponse,
   SignInRequest,
   SignUpRequest,
+  ToggleFollowRequest,
+  ToggleFollowResponse,
   ToggleLikeRequest,
   ToggleLikeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
+  UpdateCourseRequest,
+  UpdateCourseResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
 } from './types';
@@ -30,21 +62,45 @@ import type {
 // Query Keys
 export const queryKeys = {
   articles: {
-    getArticle: ['articles', 'getArticle'] as const,
+    getArticles: ['articles', 'getArticles'] as const,
+    getArticleContent: ['articles', 'getArticleContent'] as const,
     getArticlesByAuthor: ['articles', 'getArticlesByAuthor'] as const,
     getArticlesByTag: ['articles', 'getArticlesByTag'] as const,
+    getDraftArticles: ['articles', 'getDraftArticles'] as const,
+    searchArticles: ['articles', 'searchArticles'] as const,
   },
   auth: {
+    getCurrentUser: ['auth', 'getCurrentUser'] as const,
+  },
+  courses: {
+    getCourses: ['courses', 'getCourses'] as const,
+    searchCourses: ['courses', 'searchCourses'] as const,
+    getCoursesByAuthor: ['courses', 'getCoursesByAuthor'] as const,
+    getCourseContent: ['courses', 'getCourseContent'] as const,
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
   },
+  tags: {
+    getPopularTags: ['tags', 'getPopularTags'] as const,
+  },
   users: {
     getUserProfile: ['users', 'getUserProfile'] as const,
+    getFollowers: ['users', 'getFollowers'] as const,
+    getFollowings: ['users', 'getFollowings'] as const,
+    getLikedArticles: ['users', 'getLikedArticles'] as const,
   },
 };
 
 // Articles Hooks
+export function useGetArticles(params: GetArticlesRequest, options?: Omit<UseQueryOptions<GetArticlesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticlesResponse>({
+    queryKey: [...queryKeys.articles.getArticles, params],
+    queryFn: () => articlesApi.getArticles(params),
+    ...options,
+  });
+}
+
 export function useCreateArticle(options?: UseMutationOptions<CreateArticleResponse, Error, CreateArticleRequest>) {
   const queryClient = useQueryClient();
   return useMutation<CreateArticleResponse, Error, CreateArticleRequest>({
@@ -57,10 +113,10 @@ export function useCreateArticle(options?: UseMutationOptions<CreateArticleRespo
   });
 }
 
-export function useGetArticle(params: GetArticleRequest, options?: Omit<UseQueryOptions<GetArticleResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<GetArticleResponse>({
-    queryKey: [...queryKeys.articles.getArticle, params],
-    queryFn: () => articlesApi.getArticle(params),
+export function useGetArticleContent(params: GetArticleContentRequest, options?: Omit<UseQueryOptions<GetArticleContentResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticleContentResponse>({
+    queryKey: [...queryKeys.articles.getArticleContent, params],
+    queryFn: () => articlesApi.getArticleContent(params),
     ...options,
   });
 }
@@ -117,6 +173,34 @@ export function useToggleLike(options?: UseMutationOptions<ToggleLikeResponse, E
   });
 }
 
+export function useGetDraftArticles(params: GetDraftArticlesRequest, options?: Omit<UseQueryOptions<GetDraftArticlesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetDraftArticlesResponse>({
+    queryKey: [...queryKeys.articles.getDraftArticles, params],
+    queryFn: () => articlesApi.getDraftArticles(params),
+    ...options,
+  });
+}
+
+export function useSearchArticles(params: SearchArticlesRequest, options?: Omit<UseQueryOptions<SearchArticlesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<SearchArticlesResponse>({
+    queryKey: [...queryKeys.articles.searchArticles, params],
+    queryFn: () => articlesApi.searchArticles(params),
+    ...options,
+  });
+}
+
+export function useCreateComment(options?: UseMutationOptions<CreateCommentResponse, Error, CreateCommentRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<CreateCommentResponse, Error, CreateCommentRequest>({
+    mutationFn: (data) => articlesApi.createComment(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
 // Auth Hooks
 export function useSignUp(options?: UseMutationOptions<AuthResponse, Error, SignUpRequest>) {
   const queryClient = useQueryClient();
@@ -142,11 +226,109 @@ export function useSignIn(options?: UseMutationOptions<AuthResponse, Error, Sign
   });
 }
 
+export function useGetCurrentUser(params: GetCurrentUserRequest, options?: Omit<UseQueryOptions<AuthResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<AuthResponse>({
+    queryKey: [...queryKeys.auth.getCurrentUser, params],
+    queryFn: () => authApi.getCurrentUser(params),
+    ...options,
+  });
+}
+
+export function useLogout(options?: UseMutationOptions<void, Error, void>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, void>({
+    mutationFn: () => authApi.logout(),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+// Courses Hooks
+export function useGetCourses(params: GetCoursesRequest, options?: Omit<UseQueryOptions<GetCoursesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCoursesResponse>({
+    queryKey: [...queryKeys.courses.getCourses, params],
+    queryFn: () => coursesApi.getCourses(params),
+    ...options,
+  });
+}
+
+export function useSearchCourses(params: SearchCoursesRequest, options?: Omit<UseQueryOptions<SearchCoursesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<SearchCoursesResponse>({
+    queryKey: [...queryKeys.courses.searchCourses, params],
+    queryFn: () => coursesApi.searchCourses(params),
+    ...options,
+  });
+}
+
+export function useGetCoursesByAuthor(params: GetCoursesByAuthorRequest, options?: Omit<UseQueryOptions<GetCoursesByAuthorResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCoursesByAuthorResponse>({
+    queryKey: [...queryKeys.courses.getCoursesByAuthor, params],
+    queryFn: () => coursesApi.getCoursesByAuthor(params),
+    ...options,
+  });
+}
+
+export function useCreateCourse(options?: UseMutationOptions<CreateCourseResponse, Error, CreateCourseRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<CreateCourseResponse, Error, CreateCourseRequest>({
+    mutationFn: (data) => coursesApi.createCourse(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useGetCourseContent(params: GetCourseContentRequest, options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCourseContentResponse>({
+    queryKey: [...queryKeys.courses.getCourseContent, params],
+    queryFn: () => coursesApi.getCourseContent(params),
+    ...options,
+  });
+}
+
+export function useDeleteCourse(options?: UseMutationOptions<void, Error, DeleteCourseRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeleteCourseRequest>({
+    mutationFn: (data) => coursesApi.deleteCourse(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useUpdateCourse(options?: UseMutationOptions<UpdateCourseResponse, Error, UpdateCourseRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UpdateCourseResponse, Error, UpdateCourseRequest>({
+    mutationFn: (data) => coursesApi.updateCourse(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
 // Health Hooks
 export function useGetHealth(options?: Omit<UseQueryOptions<GetHealthResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetHealthResponse>({
     queryKey: queryKeys.health.getHealth,
     queryFn: () => healthApi.getHealth(),
+    ...options,
+  });
+}
+
+// Tags Hooks
+export function useGetPopularTags(params: GetPopularTagsRequest, options?: Omit<UseQueryOptions<GetPopularTagsResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetPopularTagsResponse>({
+    queryKey: [...queryKeys.tags.getPopularTags, params],
+    queryFn: () => tagsApi.getPopularTags(params),
     ...options,
   });
 }
@@ -168,6 +350,42 @@ export function useUpdateUserProfile(options?: UseMutationOptions<UpdateUserProf
       queryClient.invalidateQueries({ queryKey: ['users'] });
       options?.onSuccess?.(...args);
     },
+    ...options,
+  });
+}
+
+export function useToggleFollow(options?: UseMutationOptions<ToggleFollowResponse, Error, ToggleFollowRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<ToggleFollowResponse, Error, ToggleFollowRequest>({
+    mutationFn: (data) => usersApi.toggleFollow(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useGetFollowers(params: GetFollowersRequest, options?: Omit<UseQueryOptions<GetFollowersResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetFollowersResponse>({
+    queryKey: [...queryKeys.users.getFollowers, params],
+    queryFn: () => usersApi.getFollowers(params),
+    ...options,
+  });
+}
+
+export function useGetFollowings(params: GetFollowingsRequest, options?: Omit<UseQueryOptions<GetFollowingsResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetFollowingsResponse>({
+    queryKey: [...queryKeys.users.getFollowings, params],
+    queryFn: () => usersApi.getFollowings(params),
+    ...options,
+  });
+}
+
+export function useGetLikedArticles(params: GetLikedArticlesRequest, options?: Omit<UseQueryOptions<GetLikedArticlesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetLikedArticlesResponse>({
+    queryKey: [...queryKeys.users.getLikedArticles, params],
+    queryFn: () => usersApi.getLikedArticles(params),
     ...options,
   });
 }

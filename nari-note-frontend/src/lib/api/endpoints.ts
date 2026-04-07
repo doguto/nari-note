@@ -6,54 +6,102 @@ import type {
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
+  CreateCommentRequest,
+  CreateCommentResponse,
+  CreateCourseRequest,
+  CreateCourseResponse,
   DeleteArticleRequest,
-  GetArticleRequest,
-  GetArticleResponse,
+  DeleteCourseRequest,
+  GetArticleContentRequest,
+  GetArticleContentResponse,
   GetArticlesByAuthorRequest,
   GetArticlesByAuthorResponse,
   GetArticlesByTagRequest,
   GetArticlesByTagResponse,
+  GetArticlesRequest,
+  GetArticlesResponse,
+  GetCourseContentRequest,
+  GetCourseContentResponse,
+  GetCoursesByAuthorRequest,
+  GetCoursesByAuthorResponse,
+  GetCoursesRequest,
+  GetCoursesResponse,
+  GetCurrentUserRequest,
+  GetDraftArticlesRequest,
+  GetDraftArticlesResponse,
+  GetFollowersRequest,
+  GetFollowersResponse,
+  GetFollowingsRequest,
+  GetFollowingsResponse,
   GetHealthResponse,
+  GetLikedArticlesRequest,
+  GetLikedArticlesResponse,
+  GetPopularTagsRequest,
+  GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  SearchArticlesRequest,
+  SearchArticlesResponse,
+  SearchCoursesRequest,
+  SearchCoursesResponse,
   SignInRequest,
   SignUpRequest,
+  ToggleFollowRequest,
+  ToggleFollowResponse,
   ToggleLikeRequest,
   ToggleLikeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
+  UpdateCourseRequest,
+  UpdateCourseResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
 } from './types';
 
 // Articles API
 export const articlesApi = {
+  getArticles: async (data: GetArticlesRequest): Promise<GetArticlesResponse> => {
+    const response = await apiClient.get<GetArticlesResponse>('/api/articles', { params: data });
+    return response;
+  },
   createArticle: async (data: CreateArticleRequest): Promise<CreateArticleResponse> => {
     const response = await apiClient.post<CreateArticleResponse>('/api/articles', data);
-    return response.data;
+    return response;
   },
-  getArticle: async (data: GetArticleRequest): Promise<GetArticleResponse> => {
-    const response = await apiClient.get<GetArticleResponse>(`/api/articles/${data.id}`);
-    return response.data;
+  getArticleContent: async (data: GetArticleContentRequest): Promise<GetArticleContentResponse> => {
+    const response = await apiClient.get<GetArticleContentResponse>(`/api/articles/${data.id}`);
+    return response;
   },
   updateArticle: async (data: UpdateArticleRequest): Promise<UpdateArticleResponse> => {
     const response = await apiClient.put<UpdateArticleResponse>(`/api/articles/${data.id}`, data);
-    return response.data;
+    return response;
   },
   getArticlesByAuthor: async (data: GetArticlesByAuthorRequest): Promise<GetArticlesByAuthorResponse> => {
     const response = await apiClient.get<GetArticlesByAuthorResponse>(`/api/articles/author/${data.authorId}`);
-    return response.data;
+    return response;
   },
   getArticlesByTag: async (data: GetArticlesByTagRequest): Promise<GetArticlesByTagResponse> => {
     const response = await apiClient.get<GetArticlesByTagResponse>(`/api/articles/tag/${data.tagName}`);
-    return response.data;
+    return response;
   },
   deleteArticle: async (data: DeleteArticleRequest): Promise<void> => {
     await apiClient.delete(`/api/articles/${data.id}`);
   },
   toggleLike: async (data: ToggleLikeRequest): Promise<ToggleLikeResponse> => {
     const response = await apiClient.post<ToggleLikeResponse>(`/api/articles/${data.articleId}/like`);
-    return response.data;
+    return response;
+  },
+  getDraftArticles: async (data: GetDraftArticlesRequest): Promise<GetDraftArticlesResponse> => {
+    const response = await apiClient.get<GetDraftArticlesResponse>('/api/articles/drafts', { params: data });
+    return response;
+  },
+  searchArticles: async (data: SearchArticlesRequest): Promise<SearchArticlesResponse> => {
+    const response = await apiClient.get<SearchArticlesResponse>('/api/articles/search', { params: data });
+    return response;
+  },
+  createComment: async (data: CreateCommentRequest): Promise<CreateCommentResponse> => {
+    const response = await apiClient.post<CreateCommentResponse>(`/api/articles/${data.articleId}/comments`, data);
+    return response;
   },
 };
 
@@ -61,11 +109,50 @@ export const articlesApi = {
 export const authApi = {
   signUp: async (data: SignUpRequest): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/api/auth/signup', data);
-    return response.data;
+    return response;
   },
   signIn: async (data: SignInRequest): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/api/auth/signin', data);
-    return response.data;
+    return response;
+  },
+  getCurrentUser: async (data: GetCurrentUserRequest): Promise<AuthResponse> => {
+    const response = await apiClient.get<AuthResponse>('/api/auth/me', { params: data });
+    return response;
+  },
+  logout: async (): Promise<void> => {
+    const response = await apiClient.post<void>('/api/auth/logout');
+    return response;
+  },
+};
+
+// Courses API
+export const coursesApi = {
+  getCourses: async (data: GetCoursesRequest): Promise<GetCoursesResponse> => {
+    const response = await apiClient.get<GetCoursesResponse>('/api/courses', { params: data });
+    return response;
+  },
+  searchCourses: async (data: SearchCoursesRequest): Promise<SearchCoursesResponse> => {
+    const response = await apiClient.get<SearchCoursesResponse>('/api/courses/search', { params: data });
+    return response;
+  },
+  getCoursesByAuthor: async (data: GetCoursesByAuthorRequest): Promise<GetCoursesByAuthorResponse> => {
+    const response = await apiClient.get<GetCoursesByAuthorResponse>(`/api/courses/author/${data.authorId}`);
+    return response;
+  },
+  createCourse: async (data: CreateCourseRequest): Promise<CreateCourseResponse> => {
+    const response = await apiClient.post<CreateCourseResponse>('/api/courses', data);
+    return response;
+  },
+  getCourseContent: async (data: GetCourseContentRequest): Promise<GetCourseContentResponse> => {
+    const response = await apiClient.get<GetCourseContentResponse>(`/api/courses/${data.id}`);
+    return response;
+  },
+  deleteCourse: async (data: DeleteCourseRequest): Promise<void> => {
+    await apiClient.delete(`/api/courses/${data.id}`);
+  },
+  updateCourse: async (data: UpdateCourseRequest): Promise<UpdateCourseResponse> => {
+    const response = await apiClient.put<UpdateCourseResponse>(`/api/courses/${data.id}`, data);
+    return response;
   },
 };
 
@@ -73,7 +160,15 @@ export const authApi = {
 export const healthApi = {
   getHealth: async (): Promise<GetHealthResponse> => {
     const response = await apiClient.get<GetHealthResponse>('/api/health');
-    return response.data;
+    return response;
+  },
+};
+
+// Tags API
+export const tagsApi = {
+  getPopularTags: async (data: GetPopularTagsRequest): Promise<GetPopularTagsResponse> => {
+    const response = await apiClient.get<GetPopularTagsResponse>('/api/tags/popular', { params: data });
+    return response;
   },
 };
 
@@ -81,10 +176,26 @@ export const healthApi = {
 export const usersApi = {
   getUserProfile: async (data: GetUserProfileRequest): Promise<GetUserProfileResponse> => {
     const response = await apiClient.get<GetUserProfileResponse>(`/api/users/${data.id}`);
-    return response.data;
+    return response;
   },
   updateUserProfile: async (data: UpdateUserProfileRequest): Promise<UpdateUserProfileResponse> => {
     const response = await apiClient.put<UpdateUserProfileResponse>('/api/users', data);
-    return response.data;
+    return response;
+  },
+  toggleFollow: async (data: ToggleFollowRequest): Promise<ToggleFollowResponse> => {
+    const response = await apiClient.post<ToggleFollowResponse>(`/api/users/${data.followingId}/follow`);
+    return response;
+  },
+  getFollowers: async (data: GetFollowersRequest): Promise<GetFollowersResponse> => {
+    const response = await apiClient.get<GetFollowersResponse>(`/api/users/${data.userId}/followers`);
+    return response;
+  },
+  getFollowings: async (data: GetFollowingsRequest): Promise<GetFollowingsResponse> => {
+    const response = await apiClient.get<GetFollowingsResponse>(`/api/users/${data.userId}/followings`);
+    return response;
+  },
+  getLikedArticles: async (data: GetLikedArticlesRequest): Promise<GetLikedArticlesResponse> => {
+    const response = await apiClient.get<GetLikedArticlesResponse>(`/api/users/${data.userId}/liked-articles`);
+    return response;
   },
 };

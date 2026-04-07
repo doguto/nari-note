@@ -3,7 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NariNoteBackend.Infrastructure;
+using NariNoteBackend.Infrastructure.Database;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -25,10 +25,10 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<int?>("ArticleOrder")
+                        .HasColumnType("integer");
 
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer");
@@ -38,11 +38,14 @@ namespace NariNoteBackend.Migrations
                         .HasMaxLength(10000)
                         .HasColumnType("character varying(10000)");
 
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsPublished")
-                        .HasColumnType("boolean");
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -56,16 +59,19 @@ namespace NariNoteBackend.Migrations
 
                     b.HasIndex("AuthorId");
 
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("PublishedAt");
+
                     b.ToTable("Articles");
                 });
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.ArticleTag", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ArticleId")
                         .HasColumnType("integer");
@@ -92,10 +98,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Comment", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ArticleId")
                         .HasColumnType("integer");
@@ -120,16 +123,75 @@ namespace NariNoteBackend.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("ArticleId", "CreatedAt");
+
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Course", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.CourseLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("UserId", "CourseId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.ToTable("CourseLikes");
                 });
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Follow", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -145,6 +207,8 @@ namespace NariNoteBackend.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FollowerId");
+
                     b.HasIndex("FollowingId");
 
                     b.HasIndex("FollowerId", "FollowingId")
@@ -156,10 +220,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Like", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ArticleId")
                         .HasColumnType("integer");
@@ -180,16 +241,15 @@ namespace NariNoteBackend.Migrations
                     b.HasIndex("UserId", "ArticleId")
                         .IsUnique();
 
+                    b.HasIndex("UserId", "CreatedAt");
+
                     b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Notification", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ArticleId")
                         .HasColumnType("integer");
@@ -212,51 +272,15 @@ namespace NariNoteBackend.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("UserId", "IsRead", "CreatedAt");
+
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Session", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SessionKey")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SessionKey")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Sessions");
                 });
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Tag", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -280,10 +304,7 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.User", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Bio")
                         .HasMaxLength(500)
@@ -330,7 +351,14 @@ namespace NariNoteBackend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NariNoteBackend.Domain.Entity.Course", "Course")
+                        .WithMany("Articles")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("Author");
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.ArticleTag", b =>
@@ -367,6 +395,36 @@ namespace NariNoteBackend.Migrations
                         .IsRequired();
 
                     b.Navigation("Article");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Course", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
+                        .WithMany("Courses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.CourseLike", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.Course", "Course")
+                        .WithMany("CourseLikes")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
+                        .WithMany("CourseLikes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("User");
                 });
@@ -428,17 +486,6 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Session", b =>
-                {
-                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
-                        .WithMany("Sessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
                 {
                     b.Navigation("ArticleTags");
@@ -446,6 +493,13 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Likes");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Course", b =>
+                {
+                    b.Navigation("Articles");
+
+                    b.Navigation("CourseLikes");
                 });
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Tag", b =>
@@ -459,6 +513,10 @@ namespace NariNoteBackend.Migrations
 
                     b.Navigation("Comments");
 
+                    b.Navigation("CourseLikes");
+
+                    b.Navigation("Courses");
+
                     b.Navigation("Followers");
 
                     b.Navigation("Followings");
@@ -466,8 +524,6 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("Likes");
 
                     b.Navigation("Notifications");
-
-                    b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
         }

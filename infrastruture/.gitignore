@@ -1,0 +1,13 @@
+**/.terraform/*
+
+*.tfstate
+# 例外的にbackendのみS3に置けないのでローカルでGit管理する
+!terraform/backend/*.tfstate
+
+*.terraform.lock.hcl
+*.tfstate.backup
+
+.env
+
+# ClaudeCode を使用すると何故か以下が生成されるのでignore
+bash.exe.stackdump

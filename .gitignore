@@ -1,9 +1,12 @@
 # Personal settings
 .idea/
-.vscode/
 
 # archived source
 archive/
 
 # solution files
 nari-note.sln
+
+# Python
+__pycache__/
+

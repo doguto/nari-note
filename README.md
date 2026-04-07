@@ -1,14 +1,19 @@
 # nari-note
 
-nari-noteは、技術記事の投稿・共有プラットフォームです。
+nari-noteは、将棋記事の投稿・共有プラットフォームです。
 
 ## プロジェクト構成
 
-このプロジェクトは以下の3つのコンポーネントで構成されています：
+このプロジェクトは以下のコンポーネントで構成されています：
 
 - **nari-note-backend** - ASP.NET Core Web API（バックエンド）
+  - [バックエンドREADME](./nari-note-backend/README.md)
+  - [バックエンドドキュメント](./nari-note-backend/Documents/README.md)
 - **nari-note-frontend** - Next.js（フロントエンド）
-- **docs** - プロジェクトドキュメント
+  - [フロントエンドREADME](./nari-note-frontend/README.md)
+  - [フロントエンドドキュメント](./nari-note-frontend/docs/README.md)
+- **docs** - プロジェクト共通ドキュメント
+  - [プロジェクトドキュメント](./docs/README.md)
 
 ## 技術スタック
 
@@ -19,54 +24,18 @@ nari-noteは、技術記事の投稿・共有プラットフォームです。
 - **ORM**: Entity Framework Core 9.0
 
 ### フロントエンド
-- **フレームワーク**: Next.js
+- **フレームワーク**: Next.js 15
 - **言語**: TypeScript
+- **UIライブラリ**: React 19
+- **データフェッチング**: TanStack Query (React Query)
+- **スタイリング**: Tailwind CSS 4
 
 ## ドキュメント
 
-プロジェクトの詳細なドキュメントは [docs](./docs) ディレクトリにあります。
+### 📚 ドキュメント構成
 
-### バックエンド開発者向け
-- [バックエンド実装ガイド](./docs/backend-implementation-guide.md) ⭐
-- [開発ワークフロー](./docs/development-workflow.md) ⭐
-- [アーキテクチャ](./docs/architecture.md)
-- [エラーハンドリング戦略](./docs/error-handling-strategy.md)
-- [ER図](./docs/er-diagram.md)
+プロジェクトのドキュメントは、以下のように整理されています：
 
-## 開発環境のセットアップ
-
-### Docker を使用した開発
-
-Docker Compose を使用して、データベース、バックエンド、フロントエンドを一括で起動できます。
-
-```bash
-# 全てのサービスを起動
-docker compose up
-
-# バックグラウンドで起動する場合
-docker compose up -d
-
-# ログを確認
-docker compose logs -f
-
-# サービスを停止
-docker compose down
-```
-
-#### アクセス先
-- **フロントエンド**: http://localhost:3000
-- **バックエンドAPI**: http://localhost:5243
-- **データベース**: localhost:5432
-
-#### 注意事項
-- 初回起動時は npm install に時間がかかるため、フロントエンドが利用可能になるまで2-3分程度お待ちください
-- node_modules はボリュームマウントでキャッシュされるため、2回目以降の起動は高速です
-
-## 主な機能
-
-- ユーザー登録・ログイン
-- 記事の投稿・編集・削除
-- タグによる記事の分類
-- 記事へのいいね機能
-- ユーザーフォロー機能
-- 通知機能
+- **[バックエンドドキュメント](./nari-note-backend/docs/README.md)** - バックエンド（ASP.NET Core）に関する全てのドキュメント
+- **[フロントエンドドキュメント](./nari-note-frontend/docs/README.md)** - フロントエンド（Next.js）に関する全てのドキュメント
+- **[プロジェクトドキュメント](./docs/README.md)** - プロジェクト全体に関わる共通のドキュメント

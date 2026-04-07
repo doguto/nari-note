@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
@@ -7,7 +8,7 @@ namespace NariNoteBackend.Domain.Entity;
 public class User : EntityBase
 {
     [Key]
-    public int Id { get; set; }
+    public UserId Id { get; set; }
 
     [Required]
     [MaxLength(50)]
@@ -29,8 +30,9 @@ public class User : EntityBase
 
     // Navigation Properties
     public List<Article> Articles { get; set; } = new();
-    public List<Session> Sessions { get; set; } = new();
+    public List<Course> Courses { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
+    public List<CourseLike> CourseLikes { get; set; } = new();
     public List<Comment> Comments { get; set; } = new();
     public List<Follow> Followings { get; set; } = new();  // 自分がフォローしているユーザーとの関係
     public List<Follow> Followers { get; set; } = new();   // 自分をフォローしているユーザーとの関係
