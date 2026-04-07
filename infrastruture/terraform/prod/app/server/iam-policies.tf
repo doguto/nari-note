@@ -15,6 +15,7 @@ data "aws_iam_policy_document" "ssm_read" {
     effect = "Allow"
     actions = [
       "ssm:GetParameter",
+      "ssm:GetParametersByPath",
     ]
     resources = [
       "arn:aws:ssm:*:*:parameter/${var.app_name}/*",
