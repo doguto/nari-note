@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 if (!builder.Environment.IsDevelopment())
 {
     builder.Configuration.AddSystemsManager("/nari-note/app", optional: false);
+    builder.Configuration.AddSystemsManager("/nari-note/db", optional: false);
 }
 
 // CORS設定
@@ -43,12 +44,18 @@ builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
-// 開発環境でのマイグレーション適用とシードデータ投入
+// マイグレーション適用
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<NariNoteDbContext>();
+    await context.Database.MigrateAsync();
+}
+
+// 開発環境でのシードデータ投入
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<NariNoteDbContext>();
-    await context.Database.MigrateAsync();
     await DataSeeder.SeedAsync(context);
 }
 
