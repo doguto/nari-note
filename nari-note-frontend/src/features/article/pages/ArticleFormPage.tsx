@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCreateArticle, useUpdateArticle, useGetArticleContent } from '@/lib/api';
 import { FormPageLayout } from '@/components/molecules';
 import { ArticleFormTemplate } from '../templates/ArticleFormTemplate';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 interface ArticleFormPageProps {
   articleId?: number;
@@ -31,6 +32,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const [validationError, setValidationError] = useState<string>('');
   
   const router = useRouter();
+  const { userId } = useAuth();
   const isEditMode = mode === 'edit' && articleId;
 
   // 編集モード時の記事データ取得
@@ -141,9 +143,10 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         tags: tags,
         isPublished: true,
         publishedAt: publishedAt,
+        authorId: userId!,
       });
     }
-    
+
     setShowPublishDialog(false);
   };
 
@@ -170,6 +173,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         tags: tags,
         isPublished: false,
         publishedAt: undefined,
+        authorId: userId!,
       });
     }
   };
@@ -193,7 +197,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const isWithinLimit = body.length <= maxCharacters;
   const isInitializationComplete = !isEditMode || isInitialized;
   
-  const isFormDisabled = !isInitializationComplete || !hasValidTitle || !hasValidTags || !isWithinLimit;
+  const isFormDisabled = !isInitializationComplete || !hasValidTitle || !hasValidTags || !isWithinLimit || !userId;
   const isLoading = createArticle.isPending || updateArticle.isPending;
 
   const pageTitle = isEditMode ? '記事を編集' : '新規記事作成';
