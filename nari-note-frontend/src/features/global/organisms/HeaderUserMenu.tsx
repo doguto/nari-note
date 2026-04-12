@@ -10,7 +10,7 @@ import { UserAvatar } from '@/components/ui';
 import { User, FileText, BookOpen } from 'lucide-react';
 
 interface HeaderUserMenuProps {
-  userId: string;
+  userId: number;
   userName: string;
   onLogout: () => void;
   isLoggingOut: boolean;
