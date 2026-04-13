@@ -2,8 +2,8 @@ name = "nari-note"
 compatibility_date = "2026-04-08"
 compatibility_flags = ["nodejs_compat"]
 
-main = ".vercel/output/static/_worker.js/index.js"
+main = ".open-next/worker.js"
 
 [assets]
-directory = ".vercel/output/static"
+directory = ".open-next/assets"
 binding = "ASSETS"

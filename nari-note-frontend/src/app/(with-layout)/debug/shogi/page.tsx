@@ -1,6 +1,5 @@
 'use client';
 
-export const runtime = 'edge';
 
 import { ShogiBoard } from '@/lib/next-shogi';
 
