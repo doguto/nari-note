@@ -6,6 +6,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const nextConfig: NextConfig = {
+  transpilePackages: ['react-markdown', 'remark-gfm'],
   async rewrites() {
     // API_URL はビルド時に評価される（Cloudflare Pages のビルド設定で要設定）
     const apiUrl = process.env.API_URL || 'http://localhost:5243';
