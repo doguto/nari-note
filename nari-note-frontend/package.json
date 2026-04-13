@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "latest",
+    "esbuild": "latest",
     "@eslint/eslintrc": "^3",
     "@openapitools/openapi-generator-cli": "^2.18.4",
     "@tailwindcss/postcss": "^4",
