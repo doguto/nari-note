@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { TagArticleListPage } from '@/features/tag/pages';
 

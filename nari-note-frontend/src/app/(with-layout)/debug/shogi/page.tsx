@@ -1,5 +1,6 @@
 'use client';
 
+
 import { ShogiBoard } from '@/lib/next-shogi';
 
 // テスト用のBOD形式盤面データ

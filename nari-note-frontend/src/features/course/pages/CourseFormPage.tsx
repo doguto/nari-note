@@ -22,7 +22,6 @@ export function CourseFormPage(props: CourseFormPageProps) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
   
   const router = useRouter();
   const isEditMode = props.mode === 'edit';
@@ -43,12 +42,10 @@ export function CourseFormPage(props: CourseFormPageProps) {
         // Fallback: redirect to my courses list if ID is not available
         router.push('/courses/my-courses');
       }
-      setIsPublishing(false);
     },
     onError: (error) => {
       console.error('講座の作成に失敗しました:', error);
       alert('講座の作成に失敗しました。もう一度お試しください。');
-      setIsPublishing(false);
     },
   });
 
@@ -56,12 +53,10 @@ export function CourseFormPage(props: CourseFormPageProps) {
     onSuccess: () => {
       setHasUnsavedChanges(false);
       router.push(`/courses/${courseId}`);
-      setIsPublishing(false);
     },
     onError: (error) => {
       console.error('講座の更新に失敗しました:', error);
       alert('講座の更新に失敗しました。もう一度お試しください。');
-      setIsPublishing(false);
     },
   });
 
@@ -139,7 +134,6 @@ export function CourseFormPage(props: CourseFormPageProps) {
       return;
     }
 
-    setIsPublishing(true);
     updateCourse.mutate({
       id: courseId,
       name: name.trim(),

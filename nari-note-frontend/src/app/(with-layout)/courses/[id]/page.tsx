@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { CourseDetailPage } from '@/features/course/pages';
 import { getCourseContent } from '@/lib/api/server';

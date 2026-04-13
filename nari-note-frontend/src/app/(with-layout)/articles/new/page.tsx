@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { AuthGuard } from '@/features/global/organisms';
 import { ArticleFormPage } from '@/features/article/pages';

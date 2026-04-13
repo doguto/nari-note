@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { ArticleDetailPage } from '@/features/article/pages';
 import { getArticleContent } from '@/lib/api/server';

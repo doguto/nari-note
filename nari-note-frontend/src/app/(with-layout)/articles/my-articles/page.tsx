@@ -1,5 +1,6 @@
 'use client';
 
+
 import { AuthGuard } from '@/features/global/organisms';
 import { MyArticlesListPage } from '@/features/article/pages';
 

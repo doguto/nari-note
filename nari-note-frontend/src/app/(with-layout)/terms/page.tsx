@@ -1,3 +1,4 @@
+
 import { TermsPage as TermsPageComponent } from '@/features/legal/pages';
 
 /**
