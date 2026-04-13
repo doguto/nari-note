@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { TermsPage as TermsPageComponent } from '@/features/legal/pages';
 
 /**

@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { HomeListPage } from "@/features/home/pages";
 
 export default function Home() {

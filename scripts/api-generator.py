@@ -2,6 +2,7 @@
 
 import os
 import sys
+import re
 import argparse
 from pathlib import Path
 from typing import List, Dict
@@ -12,6 +13,46 @@ from helpers import (
     parse_csharp_class,
     parse_controller
 )
+
+
+def _mark_path_param_fields_optional(all_endpoints: List[EndpointInfo], class_map: Dict[str, CSharpClass]) -> None:
+    """
+    パスパラメータ（{id} 等）に対応する Request フィールドを optional に設定する。
+
+    例: PUT /api/courses/{id} の UpdateCourseRequest.id を id?: number にする。
+    こうすることで、コンポーネント側で courseId: number | undefined を渡してもエラーにならない。
+    """
+    def to_camel(name: str) -> str:
+        return name[0].lower() + name[1:] if name else name
+
+    for ep in all_endpoints:
+        if not ep.request_type or ep.request_type not in class_map:
+            continue
+
+        path_params = re.findall(r'\{(\w+)\}', ep.path)
+        if not path_params:
+            continue
+
+        req_class = class_map[ep.request_type]
+        # キャメルケース名 -> CSharpProperty のマッピングを構築
+        prop_by_camel: Dict[str, object] = {
+            to_camel(prop.name): prop for prop in req_class.properties
+        }
+
+        for param in path_params:
+            camel_param = to_camel(param)
+
+            # 直接一致（例: {id} -> id プロパティ）
+            if camel_param in prop_by_camel:
+                prop_by_camel[camel_param].is_optional = True  # type: ignore[union-attr]
+                continue
+
+            # {id} のとき、*Id で終わるプロパティが1つだけなら採用
+            if camel_param == 'id':
+                id_props = [p for name, p in prop_by_camel.items() if name.endswith('Id')]
+                if len(id_props) == 1:
+                    id_props[0].is_optional = True  # type: ignore[union-attr]
+
 
 # 設定
 BACKEND_ROOT = Path("nari-note-backend/Src")
@@ -117,6 +158,11 @@ def main():
 
     # テンプレートインスタンスを作成
     class_map = {cls.name: cls for cls in classes}
+
+    # パスパラメータに対応する Request フィールドを optional に設定
+    # （例: PUT /api/courses/{id} の UpdateCourseRequest.id → id?: number）
+    _mark_path_param_fields_optional(all_endpoints, class_map)
+
     types_template = TypesTemplate(value_object_types)
     endpoints_template = EndpointsTemplate(value_object_types, class_map)
     hooks_template = HooksTemplate(value_object_types)
