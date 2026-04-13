@@ -19,7 +19,9 @@ class ServerTemplate(BaseTemplate):
 // Do not edit manually
 // Server-side fetch functions for Next.js Server Components
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import { getEnv } from '../../../utils/env';
+
+const BASE_URL = getEnv('API_URL') || 'http://localhost:5243';
 
 /**
  * サーバーサイド用のfetch関数（共通処理）

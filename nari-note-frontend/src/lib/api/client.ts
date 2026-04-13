@@ -1,7 +1,7 @@
 import axios, { type AxiosResponse, type InternalAxiosRequestConfig, type AxiosRequestConfig } from 'axios';
 import { unauthorizedHandler } from '@/lib/unauthorizedHandler';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5243';
+const API_BASE_URL = '';
 
 // APIクライアントの型定義を拡張
 // インターセプターでresponse.dataを返すため、型を調整
