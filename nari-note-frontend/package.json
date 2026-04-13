@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "pages:build": "npx @cloudflare/next-on-pages && node -e \"require('fs').writeFileSync('.vercel/output/static/.assetsignore', '_worker.js\\n')\"",
+    "pages:build": "next build && npx @opennextjs/cloudflare",
     "preview": "npm run pages:build && wrangler dev",
-    "deploy": "npm run pages:build && wrangler pages deploy .vercel/output/static"
+    "deploy": "npm run pages:build && wrangler deploy"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -38,7 +38,7 @@
     "tippy.js": "^6.3.7"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
+    "@opennextjs/cloudflare": "latest",
     "@eslint/eslintrc": "^3",
     "@openapitools/openapi-generator-cli": "^2.18.4",
     "@tailwindcss/postcss": "^4",

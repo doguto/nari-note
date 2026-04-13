@@ -1,10 +1,5 @@
 import type { NextConfig } from "next";
 
-// Cloudflare Pages ローカル開発時のプラットフォームエミュレーション
-if (process.env.NODE_ENV === 'development') {
-  void import('@cloudflare/next-on-pages/next-dev').then(({ setupDevPlatform }) => setupDevPlatform());
-}
-
 const nextConfig: NextConfig = {
   transpilePackages: ['react-markdown', 'remark-gfm'],
   async rewrites() {
