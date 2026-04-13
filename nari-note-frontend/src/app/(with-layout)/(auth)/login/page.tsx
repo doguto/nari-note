@@ -1,4 +1,3 @@
-export const runtime = 'edge';
 
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 

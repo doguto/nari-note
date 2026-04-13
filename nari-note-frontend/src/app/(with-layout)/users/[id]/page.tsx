@@ -1,6 +1,5 @@
 'use client';
 
-export const runtime = 'edge';
 
 import { useParams } from 'next/navigation';
 import { UserProfilePage } from '@/features/user/pages';

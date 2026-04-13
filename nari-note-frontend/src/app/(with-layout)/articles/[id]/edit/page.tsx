@@ -1,6 +1,5 @@
 'use client';
 
-export const runtime = 'edge';
 
 import { useParams } from 'next/navigation';
 import { AuthGuard } from '@/features/global/organisms';

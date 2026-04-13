@@ -1,4 +1,3 @@
-export const runtime = 'edge';
 
 import { HomeListPage } from "@/features/home/pages";
 
