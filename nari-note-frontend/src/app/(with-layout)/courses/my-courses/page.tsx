@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import type { Metadata } from 'next';
 import { AuthGuard } from '@/features/global/organisms';
 import { MyCoursesListPage } from '@/features/course/pages';

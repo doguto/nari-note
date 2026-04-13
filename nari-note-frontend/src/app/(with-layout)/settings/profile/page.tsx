@@ -1,5 +1,7 @@
 'use client';
 
+export const runtime = 'edge';
+
 import { AuthGuard } from '@/features/global/organisms';
 import { ProfileEditPage } from '@/features/user/pages';
 
