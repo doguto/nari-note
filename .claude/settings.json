@@ -2,13 +2,15 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
-	"Read(nari-note-backend/**)",
-	"Read(nari-note-frontend/**)",
-	"Read(infrastructure/**)"
+      "Read(nari-note-backend/**)",
+      "Read(nari-note-frontend/**)",
+      "Read(infrastructure/**)",
+      "Bash(npm show:*)",
+      "Bash(rtk read:*)"
     ],
     "deny": [
-	"Read(**/.env)",
-	"Read(.secret/**)"
+      "Read(**/.env)",
+      "Read(.secret/**)"
     ]
   }
 }
