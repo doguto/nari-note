@@ -15,12 +15,15 @@ public static class InfrastructureServiceInstaller
     )
     {
         // Register DbContext
+        // GetConnectionString("DefaultConnection") は ConnectionStrings__DefaultConnection 環境変数 / appsettings を参照
+        // 取得できない場合は SSM から読み込んだ個別キーでフォールバック
         var connectionString =
-            $"Host={configuration["host"]};" +
-            $"Port={configuration["port"]};" +
-            $"Database={configuration["name"]};" +
-            $"Username={configuration["username"]};" +
-            $"Password={configuration["password"]}";
+            configuration.GetConnectionString("DefaultConnection")
+            ?? $"Host={configuration["host"]};" +
+               $"Port={configuration["port"]};" +
+               $"Database={configuration["name"]};" +
+               $"Username={configuration["username"]};" +
+               $"Password={configuration["password"]}";
         services.AddDbContext<NariNoteDbContext>(
             options => options.UseNpgsql(connectionString)
         );
