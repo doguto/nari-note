@@ -1,5 +1,6 @@
 # Personal settings
 .idea/
+scripts/.env
 
 # archived source
 archive/

@@ -42,10 +42,17 @@ mkdir -p "$${INSTALL_DIR}"
 aws s3 cp "s3://$${S3_BUCKET}/latest/$${APP_NAME}" "$${INSTALL_DIR}/$${APP_NAME}" \
   --region "$${AWS_REGION}"
 chmod +x "$${INSTALL_DIR}/$${APP_NAME}"
+aws s3 cp "s3://$${S3_BUCKET}/latest/appsettings.Production.json" "$${INSTALL_DIR}/appsettings.Production.json" \
+  --region "$${AWS_REGION}"
 
 # 専用ユーザーを作成
 useradd --system --no-create-home --shell /sbin/nologin "$${APP_NAME}" || true
 chown "$${APP_NAME}:$${APP_NAME}" "$${INSTALL_DIR}/$${APP_NAME}"
+chown "$${APP_NAME}:$${APP_NAME}" "$${INSTALL_DIR}/appsettings.Production.json"
+
+# ログディレクトリを作成
+mkdir -p /var/log/$${APP_NAME}
+chown "$${APP_NAME}:$${APP_NAME}" /var/log/$${APP_NAME}
 
 # systemd サービスを配置
 cat > /etc/systemd/system/$${APP_NAME}.service <<'EOF'
