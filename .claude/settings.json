@@ -6,6 +6,7 @@
       "Read(nari-note-frontend/**)",
       "Read(infrastructure/**)",
       "Bash(npm show:*)",
+      "Bash(rtk tsc:*)",
       "Bash(rtk read:*)"
     ],
     "deny": [
