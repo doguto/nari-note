@@ -14,6 +14,12 @@
             "log_group_name": "/${app_name}/nginx/error",
             "log_stream_name": "{instance_id}",
             "timezone": "UTC"
+          },
+          {
+            "file_path": "/var/log/nari-note-backend/app*.log",
+            "log_group_name": "/${app_name}/app",
+            "log_stream_name": "{instance_id}",
+            "timezone": "UTC"
           }
         ]
       }
