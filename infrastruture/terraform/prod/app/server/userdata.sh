@@ -12,6 +12,28 @@ cat > /etc/nginx/conf.d/nari-note-backend.conf <<'EOF'
 ${nginx_conf_file}
 EOF
 
+# Cloudflare Origin 証明書を SSM から取得して設置 (nginx 起動前に必要)
+mkdir -p /etc/nginx/ssl
+chmod 700 /etc/nginx/ssl
+
+aws ssm get-parameter \
+  --name "/${app_name}/nginx/cloudflare-origin-cert" \
+  --with-decryption \
+  --query "Parameter.Value" \
+  --output text \
+  --region ap-northeast-1 \
+  > /etc/nginx/ssl/cloudflare-origin.crt
+
+aws ssm get-parameter \
+  --name "/${app_name}/nginx/cloudflare-origin-key" \
+  --with-decryption \
+  --query "Parameter.Value" \
+  --output text \
+  --region ap-northeast-1 \
+  > /etc/nginx/ssl/cloudflare-origin.key
+
+chmod 600 /etc/nginx/ssl/cloudflare-origin.key
+
 # nginx の自動起動を有効化&起動
 systemctl enable --now nginx
 

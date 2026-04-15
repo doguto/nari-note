@@ -25,3 +25,4 @@ head_sampling_rate = 1
 
 [vars]
 NEXTJS_ENV = "production"
+API_URL = "https://api.nari-note.com"
