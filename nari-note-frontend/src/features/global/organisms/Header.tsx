@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLogout } from '@/lib/api';
 import { HeaderLogo } from './HeaderLogo';
 import { HeaderNav } from './HeaderNav';
+import { HeaderNavMobile } from './HeaderNavMobile';
 import { HeaderUserMenu } from './HeaderUserMenu';
 import { HeaderAuthButtons } from './HeaderAuthButtons';
 
@@ -39,6 +40,7 @@ export function Header() {
       {/* Bottom row: Navigation menu with dark background */}
       <div className="bg-brand-text border-b border-brand-text-dark shadow-sm">
         <div className="w-11/12 mx-auto px-4 py-2.5 flex items-center justify-center relative">
+          {/* Desktop: centered navigation */}
           <HeaderNav />
 
           <div className="flex items-center gap-4 absolute right-4">
@@ -59,6 +61,9 @@ export function Header() {
             )}
           </div>
         </div>
+
+        {/* Mobile: horizontally scrollable navigation row */}
+        <HeaderNavMobile />
       </div>
     </header>
   );
