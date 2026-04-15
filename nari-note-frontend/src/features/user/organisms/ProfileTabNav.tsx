@@ -54,13 +54,13 @@ export function ProfileTabNav({
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="border-b border-gray-200">
-        <nav className="flex gap-8 px-6">
+        <nav className="flex gap-6 sm:gap-8 px-4 sm:px-6 overflow-x-auto">
           {tabContext === 'content' ? (
             <>
               {/* コンテンツタブ（記事/いいね/フォロー中のタグ） */}
               <button
                 onClick={() => onTabChange('articles')}
-                className={`py-4 border-b-2 ${
+                className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
                   activeTab === 'articles'
                     ? 'border-brand-primary text-brand-text font-medium'
                     : 'border-transparent text-gray-600 hover:text-brand-text'
@@ -70,7 +70,7 @@ export function ProfileTabNav({
               </button>
               <button
                 onClick={() => onTabChange('likes')}
-                className={`py-4 border-b-2 ${
+                className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
                   activeTab === 'likes'
                     ? 'border-brand-primary text-brand-text font-medium'
                     : 'border-transparent text-gray-600 hover:text-brand-text'
@@ -80,7 +80,7 @@ export function ProfileTabNav({
               </button>
               <button
                 onClick={() => onTabChange('following-tags')}
-                className={`py-4 border-b-2 ${
+                className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
                   activeTab === 'following-tags'
                     ? 'border-brand-primary text-brand-text font-medium'
                     : 'border-transparent text-gray-600 hover:text-brand-text'
@@ -94,7 +94,7 @@ export function ProfileTabNav({
               {/* フォロータブ（フォロワー/フォロー中） */}
               <button
                 onClick={() => onTabChange('followers')}
-                className={`py-4 border-b-2 ${
+                className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
                   activeTab === 'followers'
                     ? 'border-brand-primary text-brand-text font-medium'
                     : 'border-transparent text-gray-600 hover:text-brand-text'
@@ -104,7 +104,7 @@ export function ProfileTabNav({
               </button>
               <button
                 onClick={() => onTabChange('followings')}
-                className={`py-4 border-b-2 ${
+                className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
                   activeTab === 'followings'
                     ? 'border-brand-primary text-brand-text font-medium'
                     : 'border-transparent text-gray-600 hover:text-brand-text'
@@ -118,7 +118,7 @@ export function ProfileTabNav({
       </div>
 
       {/* タブコンテンツ */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {activeTab === 'articles' && (
           <ArticleList
             articles={articlesData?.articles}
