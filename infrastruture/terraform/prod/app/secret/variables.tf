@@ -1,3 +1,17 @@
+variable "cloudflare_origin_cert" {
+  description = "Cloudflare Origin Certificate (PEM format)"
+  type        = string
+  sensitive   = true
+  default     = "TMP"
+}
+
+variable "cloudflare_origin_key" {
+  description = "Cloudflare Origin Certificate private key (PEM format)"
+  type        = string
+  sensitive   = true
+  default     = "TMP"
+}
+
 variable "jwt_secret" {
   description = "JWT secret key for token signing (minimum 32 characters)"
   type        = string
