@@ -4,7 +4,9 @@
 
 import { getEnv } from '../../../utils/env';
 
-const BASE_URL = getEnv('API_URL') || 'http://localhost:5243';
+function getBaseUrl(): string {
+  return getEnv('API_URL') || 'http://localhost:5243';
+}
 
 /**
  * サーバーサイド用のfetch関数（共通処理）
@@ -63,7 +65,7 @@ import type {
 
 // Articles Server Functions
 export async function getArticles(params: GetArticlesRequest): Promise<GetArticlesResponse> {
-  const url = new URL('/api/articles', BASE_URL);
+  const url = new URL('/api/articles', getBaseUrl());
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       url.searchParams.append(key, String(value));
@@ -74,25 +76,25 @@ export async function getArticles(params: GetArticlesRequest): Promise<GetArticl
 }
 
 export async function getArticleContent(params: GetArticleContentRequest): Promise<GetArticleContentResponse> {
-  const url = `${BASE_URL}/api/articles/${params.id}`;
+  const url = `${getBaseUrl()}/api/articles/${params.id}`;
 
   return serverFetch<GetArticleContentResponse>(url);
 }
 
 export async function getArticlesByAuthor(params: GetArticlesByAuthorRequest): Promise<GetArticlesByAuthorResponse> {
-  const url = `${BASE_URL}/api/articles/author/${params.authorId}`;
+  const url = `${getBaseUrl()}/api/articles/author/${params.authorId}`;
 
   return serverFetch<GetArticlesByAuthorResponse>(url);
 }
 
 export async function getArticlesByTag(params: GetArticlesByTagRequest): Promise<GetArticlesByTagResponse> {
-  const url = `${BASE_URL}/api/articles/tag/${params.tagName}`;
+  const url = `${getBaseUrl()}/api/articles/tag/${params.tagName}`;
 
   return serverFetch<GetArticlesByTagResponse>(url);
 }
 
 export async function getDraftArticles(params: GetDraftArticlesRequest): Promise<GetDraftArticlesResponse> {
-  const url = new URL('/api/articles/drafts', BASE_URL);
+  const url = new URL('/api/articles/drafts', getBaseUrl());
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       url.searchParams.append(key, String(value));
@@ -103,7 +105,7 @@ export async function getDraftArticles(params: GetDraftArticlesRequest): Promise
 }
 
 export async function searchArticles(params: SearchArticlesRequest): Promise<SearchArticlesResponse> {
-  const url = new URL('/api/articles/search', BASE_URL);
+  const url = new URL('/api/articles/search', getBaseUrl());
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       url.searchParams.append(key, String(value));
@@ -115,7 +117,7 @@ export async function searchArticles(params: SearchArticlesRequest): Promise<Sea
 
 // Auth Server Functions
 export async function getCurrentUser(params: GetCurrentUserRequest): Promise<AuthResponse> {
-  const url = new URL('/api/auth/me', BASE_URL);
+  const url = new URL('/api/auth/me', getBaseUrl());
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       url.searchParams.append(key, String(value));
@@ -127,7 +129,7 @@ export async function getCurrentUser(params: GetCurrentUserRequest): Promise<Aut
 
 // Courses Server Functions
 export async function getCourses(params: GetCoursesRequest): Promise<GetCoursesResponse> {
-  const url = new URL('/api/courses', BASE_URL);
+  const url = new URL('/api/courses', getBaseUrl());
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       url.searchParams.append(key, String(value));
@@ -138,7 +140,7 @@ export async function getCourses(params: GetCoursesRequest): Promise<GetCoursesR
 }
 
 export async function searchCourses(params: SearchCoursesRequest): Promise<SearchCoursesResponse> {
-  const url = new URL('/api/courses/search', BASE_URL);
+  const url = new URL('/api/courses/search', getBaseUrl());
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       url.searchParams.append(key, String(value));
@@ -149,27 +151,27 @@ export async function searchCourses(params: SearchCoursesRequest): Promise<Searc
 }
 
 export async function getCoursesByAuthor(params: GetCoursesByAuthorRequest): Promise<GetCoursesByAuthorResponse> {
-  const url = `${BASE_URL}/api/courses/author/${params.authorId}`;
+  const url = `${getBaseUrl()}/api/courses/author/${params.authorId}`;
 
   return serverFetch<GetCoursesByAuthorResponse>(url);
 }
 
 export async function getCourseContent(params: GetCourseContentRequest): Promise<GetCourseContentResponse> {
-  const url = `${BASE_URL}/api/courses/${params.id}`;
+  const url = `${getBaseUrl()}/api/courses/${params.id}`;
 
   return serverFetch<GetCourseContentResponse>(url);
 }
 
 // Health Server Functions
 export async function getHealth(): Promise<GetHealthResponse> {
-  const url = `${BASE_URL}/api/health`;
+  const url = `${getBaseUrl()}/api/health`;
 
   return serverFetch<GetHealthResponse>(url);
 }
 
 // Tags Server Functions
 export async function getPopularTags(params: GetPopularTagsRequest): Promise<GetPopularTagsResponse> {
-  const url = new URL('/api/tags/popular', BASE_URL);
+  const url = new URL('/api/tags/popular', getBaseUrl());
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       url.searchParams.append(key, String(value));
@@ -181,25 +183,25 @@ export async function getPopularTags(params: GetPopularTagsRequest): Promise<Get
 
 // Users Server Functions
 export async function getUserProfile(params: GetUserProfileRequest): Promise<GetUserProfileResponse> {
-  const url = `${BASE_URL}/api/users/${params.id}`;
+  const url = `${getBaseUrl()}/api/users/${params.id}`;
 
   return serverFetch<GetUserProfileResponse>(url);
 }
 
 export async function getFollowers(params: GetFollowersRequest): Promise<GetFollowersResponse> {
-  const url = `${BASE_URL}/api/users/${params.userId}/followers`;
+  const url = `${getBaseUrl()}/api/users/${params.userId}/followers`;
 
   return serverFetch<GetFollowersResponse>(url);
 }
 
 export async function getFollowings(params: GetFollowingsRequest): Promise<GetFollowingsResponse> {
-  const url = `${BASE_URL}/api/users/${params.userId}/followings`;
+  const url = `${getBaseUrl()}/api/users/${params.userId}/followings`;
 
   return serverFetch<GetFollowingsResponse>(url);
 }
 
 export async function getLikedArticles(params: GetLikedArticlesRequest): Promise<GetLikedArticlesResponse> {
-  const url = `${BASE_URL}/api/users/${params.userId}/liked-articles`;
+  const url = `${getBaseUrl()}/api/users/${params.userId}/liked-articles`;
 
   return serverFetch<GetLikedArticlesResponse>(url);
 }
