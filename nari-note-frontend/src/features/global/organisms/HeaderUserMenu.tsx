@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { UserAvatar } from '@/components/ui';
-import { User, FileText, BookOpen } from 'lucide-react';
+import { User, FileText, BookOpen, LogOut } from 'lucide-react';
 
 interface HeaderUserMenuProps {
   userId: number;
@@ -77,16 +77,18 @@ export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: Hea
               <span>マイ講座一覧</span>
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-brand-text-dark" />
+          <DropdownMenuItem
+            onClick={onLogout}
+            disabled={isLoggingOut}
+            className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
+            style={{ fontFamily: 'serif' }}
+          >
+            <LogOut className="w-4 h-4" />
+            <span>{isLoggingOut ? 'ログアウト中...' : 'ログアウト'}</span>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <button
-        onClick={onLogout}
-        disabled={isLoggingOut}
-        className="text-white hover:text-brand-primary transition-colors text-sm"
-        style={{ fontFamily: 'serif' }}
-      >
-        {isLoggingOut ? 'ログアウト中...' : 'ログアウト'}
-      </button>
     </>
   );
 }
