@@ -4,7 +4,7 @@ set -e
 # パッケージの更新
 dnf update -y
 
-# nginx
+# == nginx ==
 dnf install -y nginx
 
 # nginx のリバースプロキシ設定を配置
@@ -37,7 +37,7 @@ chmod 600 /etc/nginx/ssl/cloudflare-origin.key
 # nginx の自動起動を有効化&起動
 systemctl enable --now nginx
 
-# CloudWatch Agent のインストールと設定
+# == CloudWatch Agent ==
 dnf install -y amazon-cloudwatch-agent
 
 cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<'EOF'
@@ -51,7 +51,7 @@ EOF
   -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 
 
-# Application
+# == Application ==
 dnf install -y aspnetcore-runtime-9.0
 
 # S3 からバイナリを取得
