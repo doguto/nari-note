@@ -1,3 +1,15 @@
+resource "aws_ssm_parameter" "cloudflare_origin_cert" {
+  name  = "/${var.app_name}/nginx/cloudflare-origin-cert"
+  type  = "SecureString"
+  value = var.cloudflare_origin_cert
+}
+
+resource "aws_ssm_parameter" "cloudflare_origin_key" {
+  name  = "/${var.app_name}/nginx/cloudflare-origin-key"
+  type  = "SecureString"
+  value = var.cloudflare_origin_key
+}
+
 resource "aws_ssm_parameter" "jwt_secret" {
   name  = "/${var.app_name}/app/Jwt/Secret"
   type  = "SecureString"

@@ -21,7 +21,9 @@ class ServerTemplate(BaseTemplate):
 
 import { getEnv } from '../../../utils/env';
 
-const BASE_URL = getEnv('API_URL') || 'http://localhost:5243';
+function getBaseUrl(): string {
+  return getEnv('API_URL') || 'http://localhost:5243';
+}
 
 /**
  * サーバーサイド用のfetch関数（共通処理）
@@ -108,13 +110,13 @@ import type {"""
         # URLの構築
         if path_params and request_type != "void":
             # パスパラメータがある場合: url_expressionは`/api/articles/${params.id}`のような形式
-            # バッククォートを除去して、BASE_URLと結合
+            # バッククォートを除去して、getBaseUrl()と結合
             url_path = url_expression.strip('`')
-            lines.append(f"  const url = `${{BASE_URL}}{url_path}`;")
+            lines.append(f"  const url = `${{getBaseUrl()}}{url_path}`;")
         elif request_type != "void":
             # クエリパラメータを構築
             url_path = url_expression.strip("'")
-            lines.append(f"  const url = new URL('{url_path}', BASE_URL);")
+            lines.append(f"  const url = new URL('{url_path}', getBaseUrl());")
             lines.append("  Object.entries(params).forEach(([key, value]) => {")
             lines.append("    if (value !== undefined && value !== null) {")
             lines.append("      url.searchParams.append(key, String(value));")
@@ -123,7 +125,7 @@ import type {"""
         else:
             # パラメータなし
             url_path = url_expression.strip("'")
-            lines.append(f"  const url = `${{BASE_URL}}{url_path}`;")
+            lines.append(f"  const url = `${{getBaseUrl()}}{url_path}`;")
 
         # 共通のfetch関数を呼び出し
         lines.append("")

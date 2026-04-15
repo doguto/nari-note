@@ -15,13 +15,6 @@ export function HeaderAuthButtons() {
       >
         ログイン
       </Link>
-      <Link
-        href="/signup"
-        className="px-3 py-1 bg-brand-primary text-white rounded hover:bg-brand-primary-hover transition-colors text-sm"
-        style={{ fontFamily: 'serif' }}
-      >
-        新規登録
-      </Link>
     </>
   );
 }
