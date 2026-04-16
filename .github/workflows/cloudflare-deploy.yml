@@ -1,0 +1,16 @@
+name: Cloudflare Workers Deploy
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare Workers deploy hook
+        run: |
+          curl --fail -X POST "${{ secrets.CLOUDFLARE_DEPLOY_HOOK_URL }}"
