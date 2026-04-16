@@ -32,3 +32,6 @@ public partial struct TagId;
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct UserId;
 
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct EmailVerificationId;
+
