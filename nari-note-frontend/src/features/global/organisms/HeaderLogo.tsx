@@ -1,3 +1,4 @@
+import { Hexagon } from 'lucide-react';
 import Link from 'next/link';
 
 /**
@@ -11,7 +12,7 @@ export function HeaderLogo() {
       <div className="w-11/12 mx-auto px-4 py-1">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
           <div className="w-7 h-7 bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold text-sm">
-            将
+            <Hexagon />
           </div>
           <span className="text-sm font-bold text-brand-text" style={{ fontFamily: 'serif' }}>
             将棋ブログ投稿サイト ～なりノート～

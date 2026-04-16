@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { Label } from '@/components/ui/label';
 import { CharacterCounter, NarinoteMarkdown } from '@/components/molecules';
+import { CheckCircle } from 'lucide-react';
 
 const PREVIEW_PLACEHOLDER = '*プレビューがここに表示されます*';
 
@@ -65,16 +66,11 @@ const MARKDOWN_COMMANDS: Command[] = [
   { trigger: 'code', label: '``` コード', insert: '```\n\n```', description: 'コードブロックを挿入' },
   { trigger: 'quote', label: '> 引用', insert: '> ', description: '引用ブロックを挿入' },
   { trigger: 'hr', label: '--- 水平線', insert: '\n---\n', description: '水平線を挿入' },
-  { trigger: 'board', label: '🎮 将棋盤面', insert: `\n${BOARD_TEMPLATE}\n`, description: '将棋盤面を挿入（平手初期配置）' },
-  { trigger: 'board-empty', label: '🎮 空の盤面', insert: `\n${BOARD_EMPTY_TEMPLATE}\n`, description: '空の将棋盤面を挿入' },
+  { trigger: 'board', label: '将棋盤面', insert: `\n${BOARD_TEMPLATE}\n`, description: '将棋盤面を挿入（平手初期配置）' },
+  { trigger: 'board-empty', label: '空の盤面', insert: `\n${BOARD_EMPTY_TEMPLATE}\n`, description: '空の将棋盤面を挿入' },
 ];
 
-/**
- * MarkdownEditor - Molecule Component
- * 
- * Markdown記法で入力し、リアルタイムでレンダリング表示するエディタ
- * スラッシュコマンドでMarkdown記法を簡単に挿入可能
- */
+
 export function MarkdownEditor({
   value,
   onChange,
@@ -91,21 +87,18 @@ export function MarkdownEditor({
   const characterCount = value.length;
   const isOverLimit = characterCount > maxCharacters;
 
-  // Filter commands based on search query
   const filteredCommands = MARKDOWN_COMMANDS.filter(cmd =>
     cmd.trigger.toLowerCase().includes(commandFilter.toLowerCase()) ||
     cmd.label.toLowerCase().includes(commandFilter.toLowerCase()) ||
     cmd.description.toLowerCase().includes(commandFilter.toLowerCase())
   );
 
-  // Calculate cursor position in pixels
   const getCursorPosition = (textarea: HTMLTextAreaElement, cursorPos: number) => {
     const textBeforeCursor = textarea.value.substring(0, cursorPos);
     const lines = textBeforeCursor.split('\n');
     const currentLineIndex = lines.length - 1;
     const currentLineText = lines[currentLineIndex];
-    
-    // Create a temporary element to measure text width
+
     const tempSpan = document.createElement('span');
     tempSpan.style.font = window.getComputedStyle(textarea).font;
     tempSpan.style.whiteSpace = 'pre';
@@ -117,10 +110,8 @@ export function MarkdownEditor({
     const textWidth = tempSpan.offsetWidth;
     document.body.removeChild(tempSpan);
     
-    // Calculate line height
     const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
-    
-    // Get textarea padding
+
     const paddingLeft = parseInt(window.getComputedStyle(textarea).paddingLeft) || 0;
     const paddingTop = parseInt(window.getComputedStyle(textarea).paddingTop) || 0;
     
@@ -315,8 +306,8 @@ export function MarkdownEditor({
         </div>
       </div>
 
-      <p className="text-xs text-gray-500">
-        💡 Markdown記法を直接入力できます（例: <code className="bg-gray-100 px-1 rounded">## 見出し</code>）。
+      <p className="text-xs text-gray-500 inline-block">
+        <CheckCircle size={16} /> Markdown記法を直接入力できます（例: <code className="bg-gray-100 px-1 rounded">## 見出し</code>）。
         または <code className="bg-gray-100 px-1 rounded">/</code> を入力してコマンドメニューを開いてください。
       </p>
     </div>
