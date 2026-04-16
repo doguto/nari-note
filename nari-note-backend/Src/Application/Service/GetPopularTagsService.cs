@@ -16,9 +16,7 @@ public class GetPopularTagsService
 
     public async Task<GetPopularTagsResponse> ExecuteAsync(GetPopularTagsRequest request)
     {
-        var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
-        
-        var tags = await tagRepository.GetPopularTagsAsync(oneMonthAgo, 5);
+        var tags = await tagRepository.GetPopularTagsAsync(DateTime.UtcNow.AddMonths(-3), 5);
         
         return new GetPopularTagsResponse
         {

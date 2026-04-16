@@ -1,10 +1,10 @@
 import { ArticleCard } from '@/components/molecules';
 import { EmptyState } from '@/components/ui';
-import type { GetArticlesResponse } from '@/lib/api/types';
+import type { GetArticlesByTagResponse } from '@/lib/api/types';
 
 interface TagArticleListTemplateProps {
   tag: string;
-  articles: NonNullable<GetArticlesResponse['articles']>;
+  articles: GetArticlesByTagResponse['articles'];
 }
 
 /**

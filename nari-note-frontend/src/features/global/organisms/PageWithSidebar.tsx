@@ -6,12 +6,6 @@ interface PageWithSidebarProps {
   maxWidth?: 'wide' | 'full';
 }
 
-/**
- * PageWithSidebar - Organism Component
- * 
- * メインコンテンツとサイドバーを含むページレイアウトを提供
- * 記事一覧ページなどで使用
- */
 export function PageWithSidebar({ children, maxWidth = 'full' }: PageWithSidebarProps) {
   const widthClass = maxWidth === 'full' ? 'w-full' : 'w-4/5';
   
