@@ -37,8 +37,8 @@ export function MyArticlesListTemplate({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">マイ記事一覧</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-3xl font-bold text-gray-900">マイ記事一覧</h1>
         <Button
           onClick={onNewArticle}
           className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
@@ -51,10 +51,10 @@ export function MyArticlesListTemplate({
       {/* タブナビゲーション */}
       <div className="bg-white rounded-lg shadow">
         <div className="border-b border-gray-200">
-          <nav className="flex gap-8 px-6">
+          <nav className="flex gap-6 sm:gap-8 px-4 sm:px-6 overflow-x-auto">
             <button
               onClick={() => onTabChange('published')}
-              className={`py-4 border-b-2 ${
+              className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'published'
                   ? 'border-[var(--brand-primary)] text-[var(--brand-text)] font-medium'
                   : 'border-transparent text-gray-600 hover:text-[var(--brand-text)]'
@@ -64,7 +64,7 @@ export function MyArticlesListTemplate({
             </button>
             <button
               onClick={() => onTabChange('drafts')}
-              className={`py-4 border-b-2 ${
+              className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'drafts'
                   ? 'border-[var(--brand-primary)] text-[var(--brand-text)] font-medium'
                   : 'border-transparent text-gray-600 hover:text-[var(--brand-text)]'
@@ -76,7 +76,7 @@ export function MyArticlesListTemplate({
         </div>
 
         {/* タブコンテンツ */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {displayArticles.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-gray-500 text-lg mb-6">{emptyMessage}</p>
