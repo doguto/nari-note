@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useGetPopularTags } from '@/lib/api/hooks';
+import { TagIcon } from 'lucide-react';
 
 /**
  * サイドバーコンポーネント
@@ -19,7 +20,7 @@ export function Sidebar() {
           <h3 className="text-lg font-bold" style={{ fontFamily: 'serif' }}>
             トレンド
           </h3>
-          <span className="text-2xl">🔥</span>
+          <TagIcon className="w-4 h-4" />
         </div>
         <div className="space-y-2">
           {isLoading && (
@@ -32,7 +33,7 @@ export function Sidebar() {
             <div className="text-sm text-gray-300">タグがありません</div>
           )}
           {!isLoading && !isError && tagsData?.tags?.map((tag) => (
-            <Link 
+            <Link
               key={tag.name}
               href={`/tags/${tag.name}`}
               className="block text-sm hover:text-brand-primary cursor-pointer transition-colors"

@@ -4,12 +4,6 @@ import { useState, useMemo } from 'react';
 import { useGetArticles, useGetCourses } from '@/lib/api';
 import { HomeListTemplate } from '../templates';
 
-/**
- * HomeListPage - Page Component
- * 
- * ホーム画面のビジネスロジックを担当するページコンポーネント
- * データフェッチング、状態管理、イベントハンドリングを行い、Templateにpropsを渡す
- */
 export function HomeListPage() {
   const [activeTab, setActiveTab] = useState<'articles' | 'courses'>('articles');
   

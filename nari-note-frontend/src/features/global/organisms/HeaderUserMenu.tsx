@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserAvatar } from '@/components/ui';
 import { User, FileText, BookOpen, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface HeaderUserMenuProps {
   userId: number;
@@ -26,8 +27,8 @@ export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: Hea
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button
-            className="flex items-center gap-2 text-white hover:text-brand-primary transition-colors text-sm"
+          <Button
+            className="flex items-center gap-2 bg-brand-text text-white hover:bg-brand-text-hover transition-colors text-sm"
             style={{ fontFamily: 'serif' }}
           >
             <UserAvatar username={userName} size="sm" />
@@ -40,7 +41,7 @@ export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: Hea
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
-          </button>
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
@@ -49,11 +50,11 @@ export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: Hea
           <DropdownMenuItem asChild>
             <Link
               href={`/users/${userId}`}
-              className="cursor-pointer hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
+              className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
               style={{ fontFamily: 'serif' }}
             >
               <User className="w-4 h-4" />
-              <span className="text-white">マイページ</span>
+              <span>マイページ</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-brand-text-dark" />
