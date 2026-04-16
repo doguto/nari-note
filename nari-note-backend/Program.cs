@@ -5,14 +5,15 @@ using NariNoteBackend.Application.Service;
 using NariNoteBackend.Infrastructure;
 using NariNoteBackend.Infrastructure.Database;
 using NariNoteBackend.Middleware;
+using Resend;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 if (!builder.Environment.IsDevelopment())
 {
-    builder.Configuration.AddSystemsManager("/nari-note/app", optional: false);
-    builder.Configuration.AddSystemsManager("/nari-note/db", optional: false);
+    builder.Configuration.AddSystemsManager("/nari-note/app", false);
+    builder.Configuration.AddSystemsManager("/nari-note/db", false);
 }
 
 // CORS設定
@@ -30,6 +31,12 @@ builder.Services.AddCors(options =>
 // Serilogの設定をsettings.jsonから取り込み
 builder.Host.UseSerilog((context, configuration) => { configuration.ReadFrom.Configuration(context.Configuration); });
 
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(o => { o.ApiToken = builder.Configuration["resend_api_token"]!; });
+builder.Services.AddTransient<IResend, ResendClient>();
+
+// ValueObject の設定
 builder.Services.AddControllers(options => { options.ModelBinderProviders.Insert(0, new ValueObjectModelBinderProvider()); })
        .AddJsonOptions(options =>
        {
