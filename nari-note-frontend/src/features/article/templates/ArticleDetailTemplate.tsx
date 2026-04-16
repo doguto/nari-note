@@ -100,9 +100,9 @@ export function ArticleDetailTemplate({
             onClick={onLikeClick}
             disabled={isLikePending}
           />
-          <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
+          <Button className="px-4 py-3 border text-black bg-white border-gray-300 rounded hover:bg-gray-50">
             ストック
-          </button>
+          </Button>
         </div>
       </div>
 

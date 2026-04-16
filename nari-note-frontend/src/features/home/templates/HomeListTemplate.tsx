@@ -16,12 +16,6 @@ interface HomeListTemplateProps {
   onRetryCourses: () => void;
 }
 
-/**
- * HomeListTemplate - Template Component
- * 
- * ホーム画面のUI構成とレイアウトを担当
- * タブを使って記事と講座を切り替える
- */
 export function HomeListTemplate({
   activeTab,
   onTabChange,

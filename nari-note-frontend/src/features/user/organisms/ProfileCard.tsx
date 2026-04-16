@@ -27,28 +27,44 @@ export function ProfileCard({
   onFollowClick,
 }: ProfileCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-start gap-6">
+    <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+      <div className="flex items-start gap-4 sm:gap-6">
         <UserAvatar
           username={user.username || 'Unknown User'}
           size="xl"
         />
 
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold text-brand-text mb-2">
-            {user.username || 'Unknown User'}
-          </h1>
-          <p className="text-gray-600 mb-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2 mb-1 sm:mb-2">
+            <h1 className="text-lg sm:text-3xl font-bold text-brand-text">
+              {user.username || 'Unknown User'}
+            </h1>
+            <div className="flex-shrink-0">
+              {isOwnProfile ? (
+                <Link href="/settings/profile">
+                  <Button variant="outline" size="sm">プロフィール編集</Button>
+                </Link>
+              ) : (
+                <FollowButton
+                  isFollowing={user.isFollowing || false}
+                  onClick={onFollowClick}
+                  disabled={isFollowPending}
+                />
+              )}
+            </div>
+          </div>
+
+          <p className="text-gray-600 text-sm mb-3 sm:mb-4">
             @{user.username || 'unknown'}
           </p>
 
           {user.bio && (
-            <p className="text-gray-700 mb-4">
+            <p className="text-gray-700 text-sm sm:text-base mb-3 sm:mb-4">
               {user.bio}
             </p>
           )}
 
-          <div className="flex gap-6 text-sm text-gray-600">
+          <div className="flex flex-wrap gap-4 sm:gap-6 text-sm text-gray-600">
             <button
               onClick={onArticlesClick}
               className="hover:opacity-70 transition-opacity cursor-pointer"
@@ -68,20 +84,6 @@ export function ProfileCard({
             />
           </div>
         </div>
-
-        {isOwnProfile ? (
-          <Link href="/settings/profile">
-            <Button variant="outline">
-              プロフィール編集
-            </Button>
-          </Link>
-        ) : (
-          <FollowButton
-            isFollowing={user.isFollowing || false}
-            onClick={onFollowClick}
-            disabled={isFollowPending}
-          />
-        )}
       </div>
     </div>
   );

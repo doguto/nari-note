@@ -1,3 +1,5 @@
+import { HeartIcon } from "lucide-react";
+
 interface LikeButtonProps {
   isLiked: boolean;
   likeCount: number;
@@ -16,14 +18,10 @@ export function LikeButton({ isLiked, likeCount, onClick, disabled = false }: Li
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex items-center gap-2 px-4 py-2 rounded transition-colors ${
-        isLiked
-          ? 'bg-pink-500 text-white hover:bg-pink-600'
-          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className="flex items-center px-4 py-2 border text-black bg-white border-gray-300 rounded hover:bg-gray-50"
     >
-      <span>{isLiked ? '❤️' : '🤍'}</span>
-      <span>{likeCount}</span>
+      <span>{isLiked ? <HeartIcon className="text-red-500" /> : <HeartIcon className="text-gray-400" />}</span>
+      <span className="ml-1">{likeCount}</span>
     </button>
   );
 }

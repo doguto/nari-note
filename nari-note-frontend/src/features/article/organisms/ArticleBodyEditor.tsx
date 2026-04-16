@@ -6,11 +6,6 @@ interface ArticleBodyEditorProps {
   maxCharacters?: number;
 }
 
-/**
- * ArticleBodyEditor - Molecule Component
- * 
- * 記事本文エディター（Markdown形式でリアルタイムプレビュー付き）
- */
 export function ArticleBodyEditor({
   value,
   onChange,
