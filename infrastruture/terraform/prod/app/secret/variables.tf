@@ -27,3 +27,9 @@ variable "jwt_audience" {
   description = "JWT audience (e.g. https://example.com)"
   type        = string
 }
+
+variable "resend_api_key" {
+  description = "Resend API key for sending emails"
+  type        = string
+  sensitive   = true
+}
