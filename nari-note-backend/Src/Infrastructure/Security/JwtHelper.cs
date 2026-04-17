@@ -76,7 +76,7 @@ public class JwtHelper : IJwtHelper
         var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub);
         if (userIdClaim == null) return null;
 
-        if (int.TryParse(userIdClaim.Value, out var userIdValue)) return UserId.From(userIdValue);
+        if (Guid.TryParse(userIdClaim.Value, out var userIdValue)) return UserId.From(userIdValue);
 
         return null;
     }

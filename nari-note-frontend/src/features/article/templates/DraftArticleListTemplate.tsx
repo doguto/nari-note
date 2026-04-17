@@ -6,9 +6,9 @@ import { ArticleDto } from '@/lib/api/types';
 
 interface DraftArticleListTemplateProps {
   articles: ArticleDto[];
-  deletingId: number | null;
+  deletingId: string | null;
   onNewArticle: () => void;
-  onDelete: (id: number, title: string) => void;
+  onDelete: (id: string, title: string) => void;
 }
 
 /**

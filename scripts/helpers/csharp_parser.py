@@ -7,9 +7,9 @@ from typing import List, Dict, Tuple, Optional
 from models import CSharpProperty, CSharpClass, EndpointInfo
 
 
-def load_value_object_types(value_object_file: Path) -> set[str]:
-    """Load ValueObject types from C# file."""
-    value_object_types = set()
+def load_value_object_types(value_object_file: Path) -> Dict[str, str]:
+    """Load ValueObject types from C# file. Returns mapping of struct name -> TypeScript type."""
+    value_object_types: Dict[str, str] = {}
 
     if not value_object_file.exists():
         print(f"⚠️  ValueObject file not found: {value_object_file}")
@@ -17,11 +17,14 @@ def load_value_object_types(value_object_file: Path) -> set[str]:
 
     try:
         content = value_object_file.read_text(encoding='utf-8')
-        # [ValueObject<int>(Conversions.EfCoreValueConverter)] public partial struct XxxId; のパターンを探す
-        pattern = r'\[ValueObject<\w+>(?:\([^)]+\))?\]\s+public\s+partial\s+struct\s+(\w+);'
+        # [ValueObject<Guid>(Conversions.EfCoreValueConverter)] public partial struct XxxId; のパターンを探す
+        # 基底型（Guid or int など）も取得して TS 型を決定する
+        pattern = r'\[ValueObject<(\w+)>(?:\([^)]+\))?\]\s+public\s+partial\s+struct\s+(\w+);'
         for match in re.finditer(pattern, content):
-            type_name = match.group(1)
-            value_object_types.add(type_name)
+            underlying_type = match.group(1)  # e.g. "Guid", "int"
+            type_name = match.group(2)         # e.g. "UserId"
+            ts_type = 'string' if underlying_type == 'Guid' else 'number'
+            value_object_types[type_name] = ts_type
 
         if value_object_types:
             print(f"📦 Loaded {len(value_object_types)} ValueObject types: {', '.join(sorted(value_object_types))}")
@@ -31,7 +34,7 @@ def load_value_object_types(value_object_file: Path) -> set[str]:
     return value_object_types
 
 
-def csharp_type_to_typescript(csharp_type: str, value_object_types: set[str]) -> tuple[str, bool]:
+def csharp_type_to_typescript(csharp_type: str, value_object_types: Dict[str, str]) -> tuple[str, bool]:
     """Convert C# type to TypeScript type.
 
     Returns:
@@ -53,9 +56,9 @@ def csharp_type_to_typescript(csharp_type: str, value_object_types: set[str]) ->
     is_nullable = csharp_type.endswith('?')
     base_type = csharp_type.rstrip('?')
 
-    # ValueObject型をnumberに変換
+    # ValueObject型を基底型に応じた TS 型に変換（Guid → string, int → number）
     if base_type in value_object_types:
-        return 'number', is_nullable
+        return value_object_types[base_type], is_nullable
 
     # Dictionary<TKey, TValue> を Record<K, V> に変換
     dict_match = re.match(r'Dictionary<(.+),\s*(.+)>', base_type)

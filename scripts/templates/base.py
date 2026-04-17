@@ -11,7 +11,7 @@ from models import EndpointInfo
 class BaseTemplate(ABC):
     """テンプレート生成の基底クラス"""
 
-    def __init__(self, value_object_types: set[str]):
+    def __init__(self, value_object_types: Dict[str, str]):
         self.value_object_types = value_object_types
 
     @abstractmethod

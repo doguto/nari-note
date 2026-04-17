@@ -4,7 +4,7 @@ import { UserAvatar } from '@/components/ui';
 
 interface CourseDetailHeaderProps {
   courseName: string;
-  userId: number;
+  userId: string;
   userName: string;
   likeCount: number;
   articleCount: number;

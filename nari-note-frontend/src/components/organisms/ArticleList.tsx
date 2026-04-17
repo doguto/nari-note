@@ -52,10 +52,10 @@ export function ArticleList({
       {articlesWithId.map((article) => (
         <ArticleCard
           key={article.id}
-          id={article.id as number}
+          id={article.id as string}
           title={article.title ?? ''}
           author={article.authorName ?? ''}
-          authorId={article.authorId ?? 0}
+          authorId={article.authorId ?? ''}
           tags={article.tags ?? []}
           likeCount={article.likeCount ?? 0}
           date={article.createdAt ? new Date(article.createdAt).toLocaleDateString('ja-JP') : ''}

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { UserAvatar } from '@/components/ui';
 
 interface ArticleAuthorInfoProps {
-  authorId: number;
+  authorId: string;
   authorName: string;
   createdAt?: string;
 }

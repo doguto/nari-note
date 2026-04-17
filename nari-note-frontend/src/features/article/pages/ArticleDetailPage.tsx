@@ -6,7 +6,7 @@ import { ArticleDetailTemplate } from '../templates/ArticleDetailTemplate';
 import { Comment } from '@/types/comment';
 
 interface ArticleDetailPageProps {
-  articleId: number;
+  articleId: string;
 }
 
 /**
@@ -36,7 +36,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   // APIから取得したコメントをComment型に変換
   const comments: Comment[] = (article?.comments || []).map(c => ({
     id: c.id || 0,
-    userId: c.userId || 0,
+    userId: c.userId || '',
     userName: c.userName || '',
     message: c.message || '',
     createdAt: c.createdAt || '',

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Pencil, Eye, Heart } from 'lucide-react';
 
 interface PublishedArticleCardProps {
-  id: number;
+  id: string;
   title: string;
   publishedAt: string;
   likeCount?: number;

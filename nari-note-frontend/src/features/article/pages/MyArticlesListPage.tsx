@@ -18,10 +18,10 @@ export function MyArticlesListPage() {
   const router = useRouter();
   const { userId } = useAuth();
   const [activeTab, setActiveTab] = useState<'published' | 'drafts'>('published');
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-  
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const { data, isLoading, error, refetch } = useGetArticlesByAuthor(
-    { authorId: userId || 0 },
+    { authorId: userId || '' },
     { enabled: !!userId }
   );
   
@@ -37,7 +37,7 @@ export function MyArticlesListPage() {
     },
   });
 
-  const handleDelete = (id: number, title: string) => {
+  const handleDelete = (id: string, title: string) => {
     if (window.confirm(`「${title}」を削除してもよろしいですか？`)) {
       setDeletingId(id);
       deleteArticle.mutate({ id });

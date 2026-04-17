@@ -12,7 +12,7 @@ import { ArticleFormPage } from '@/features/article/pages';
  */
 export default function EditArticlePage() {
   const params = useParams();
-  const articleId = Number(params.id);
+  const articleId = params.id as string;
 
   return (
     <AuthGuard redirectPath={`/articles/${params.id}/edit`}>

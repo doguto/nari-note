@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: CoursePageProps): Promise<Met
   const { id } = await params;
 
   try {
-    const course = await getCourseContent({ id: Number(id) });
+    const course = await getCourseContent({ id });
     const description = `${course.userName}による将棋コース「${course.name}」。${course.articles.length}本の記事を収録。`;
 
     return {
@@ -31,5 +31,5 @@ export async function generateMetadata({ params }: CoursePageProps): Promise<Met
 export default async function CourseDetailPageRoute({ params }: CoursePageProps) {
   const { id } = await params;
 
-  return <CourseDetailPage courseId={Number(id)} />;
+  return <CourseDetailPage courseId={id} />;
 }
