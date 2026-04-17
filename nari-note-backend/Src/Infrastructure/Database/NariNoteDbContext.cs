@@ -20,6 +20,7 @@ public class NariNoteDbContext : DbContext
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Follow> Follows { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<EmailVerification> EmailVerifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -294,6 +295,23 @@ public class NariNoteDbContext : DbContext
              .HasVogenConversion();
 
             x.Property(cl => cl.CourseId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<EmailVerification>(x =>
+        {
+            x.HasOne(ev => ev.User)
+             .WithMany(u => u.EmailVerifications)
+             .HasForeignKey(ev => ev.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(ev => ev.Id)
+             .HasValueGenerator<EmailVerificationIdValueGenerator>();
+
+            x.Property(ev => ev.Id)
+             .HasVogenConversion();
+
+            x.Property(ev => ev.UserId)
              .HasVogenConversion();
         });
     }

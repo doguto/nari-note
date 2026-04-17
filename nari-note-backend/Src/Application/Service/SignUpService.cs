@@ -1,29 +1,29 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
-using NariNoteBackend.Domain.Security;
 
 namespace NariNoteBackend.Application.Service;
 
 public class SignUpService
 {
-    readonly ICookieOptionsHelper cookieOptionsHelper;
-    readonly IJwtHelper jwtHelper;
+    readonly IEmailHelper emailHelper;
+    readonly IEmailVerificationRepository emailVerificationRepository;
     readonly IUserRepository userRepository;
 
     public SignUpService(
         IUserRepository userRepository,
-        IJwtHelper jwtHelper,
-        ICookieOptionsHelper cookieOptionsHelper
+        IEmailVerificationRepository emailVerificationRepository,
+        IEmailHelper emailHelper
     )
     {
         this.userRepository = userRepository;
-        this.jwtHelper = jwtHelper;
-        this.cookieOptionsHelper = cookieOptionsHelper;
+        this.emailVerificationRepository = emailVerificationRepository;
+        this.emailHelper = emailHelper;
     }
 
-    public async Task<AuthResponse> ExecuteAsync(SignUpRequest request, HttpResponse response)
+    public async Task<AuthResponse> ExecuteAsync(SignUpRequest request)
     {
         var existingUser = await userRepository.FindByEmailAsync(request.Email);
         if (existingUser != null) throw new ArgumentException("このメールアドレスは既に使用されています");
@@ -38,12 +38,17 @@ public class SignUpService
         };
 
         var createdUser = await userRepository.CreateAsync(user);
-        var token = jwtHelper.GenerateToken(createdUser.Id, user.Name);
 
-        // HttpOnly Cookieにトークンを設定
-        var cookieOptions = cookieOptionsHelper.CreateAuthCookieOptions(
-            TimeSpan.FromHours(jwtHelper.GetExpirationInHours()));
-        response.Cookies.Append("authToken", token, cookieOptions);
+        var guid = Guid.NewGuid();
+        var emailVerification = new EmailVerification
+        {
+            UserId = createdUser.Id,
+            Token = guid.ToString(),
+            ExpiresAt = DateTime.UtcNow.AddHours(24)
+        };
+        await emailVerificationRepository.CreateAsync(emailVerification);
+
+        await emailHelper.SendAsync(EmailMessageStore.SignupMessage(request.Email, guid));
 
         return new AuthResponse
         {

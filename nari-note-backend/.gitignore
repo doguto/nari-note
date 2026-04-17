@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Local secrets (never commit)
+secret.json
+
 # User-specific files
 *.rsuser
 *.suo
