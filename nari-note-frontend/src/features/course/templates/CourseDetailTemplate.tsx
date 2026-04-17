@@ -5,12 +5,7 @@ interface CourseDetailTemplateProps {
   course: GetCourseContentResponse;
 }
 
-/**
- * CourseDetailTemplate - Template Component
- * 
- * 講座詳細ページのUI構成とレイアウトを担当
- * Organismを組み合わせてレスポンシブなUIを構築
- */
+
 export function CourseDetailTemplate({ course }: CourseDetailTemplateProps) {
   return (
     <div className="max-w-4xl mx-auto">

@@ -14,12 +14,7 @@ interface ArticleSearchTemplateProps {
   onSearch: () => void;
 }
 
-/**
- * ArticleSearchTemplate - Template Component
- * 
- * 記事検索ページのUI構成とレイアウトを担当
- * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
- */
+
 export function ArticleSearchTemplate({
   keyword,
   searchKeyword,

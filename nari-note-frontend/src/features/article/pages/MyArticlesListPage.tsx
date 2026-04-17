@@ -6,19 +6,15 @@ import { useAuth } from '@/lib/providers/AuthProvider';
 import { useGetArticlesByAuthor, useDeleteArticle } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PageWithSidebar } from '@/features/global/organisms';
+import { DeleteConfirmModal } from '@/components/molecules/DeleteConfirmModal';
 import { MyArticlesListTemplate } from '../templates/MyArticlesListTemplate';
 
-/**
- * MyArticlesListPage - Page Component
- * 
- * マイ記事一覧ページのロジックを管理するコンポーネント
- * データフェッチング、状態管理、ビジネスロジックを担当
- */
 export function MyArticlesListPage() {
   const router = useRouter();
   const { userId } = useAuth();
   const [activeTab, setActiveTab] = useState<'published' | 'drafts'>('published');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null);
 
   const { data, isLoading, error, refetch } = useGetArticlesByAuthor(
     { authorId: userId || '' },
@@ -37,11 +33,19 @@ export function MyArticlesListPage() {
     },
   });
 
-  const handleDelete = (id: string, title: string) => {
-    if (window.confirm(`「${title}」を削除してもよろしいですか？`)) {
-      setDeletingId(id);
-      deleteArticle.mutate({ id });
-    }
+  const handleDeleteRequest = (id: string, title: string) => {
+    setPendingDelete({ id, title });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!pendingDelete) return;
+    setDeletingId(pendingDelete.id);
+    setPendingDelete(null);
+    deleteArticle.mutate({ id: pendingDelete.id });
+  };
+
+  const handleCancelDelete = () => {
+    setPendingDelete(null);
   };
 
   const handleNewArticle = () => {
@@ -74,7 +78,13 @@ export function MyArticlesListPage() {
         deletingId={deletingId}
         onTabChange={setActiveTab}
         onNewArticle={handleNewArticle}
-        onDelete={handleDelete}
+        onDelete={handleDeleteRequest}
+      />
+      <DeleteConfirmModal
+        open={pendingDelete !== null}
+        articleTitle={pendingDelete?.title ?? ''}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
     </PageWithSidebar>
   );

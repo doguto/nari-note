@@ -44,11 +44,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const createArticle = useCreateArticle({
     onSuccess: (data) => {
       setHasUnsavedChanges(false);
-      if (isPublishing) {
-        router.push(`/articles/${data.id}`);
-      } else {
-        router.push(`/articles/drafts`);
-      }
+      router.push(`/articles/${data.id}`);
       setIsPublishing(false);
     },
     onError: (error) => {
