@@ -50,6 +50,6 @@ public static class InfrastructureServiceInstaller
         services.AddHttpClient<ResendClient>();
         services.Configure<ResendClientOptions>(o => { o.ApiToken = configuration["resend_api_token"]!; });
         services.AddTransient<IResend, ResendClient>();
-        services.AddScoped<IEmailGateway, ResendEmailGateway>();
+        services.AddScoped<IEmailHelper, ResendEmailHelper>();
     }
 }

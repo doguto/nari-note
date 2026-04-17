@@ -14,6 +14,10 @@ if (!builder.Environment.IsDevelopment())
     builder.Configuration.AddSystemsManager("/nari-note/app", false);
     builder.Configuration.AddSystemsManager("/nari-note/db", false);
 }
+else
+{
+    builder.Configuration.AddJsonFile("secret.json", optional: true, reloadOnChange: false);
+}
 
 // CORS設定
 builder.Services.AddCors(options =>

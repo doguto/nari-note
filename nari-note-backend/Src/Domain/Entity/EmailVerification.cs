@@ -10,7 +10,7 @@ public class EmailVerification : EntityBase
     [Key]
     public EmailVerificationId Id { get; set; }
 
-    public UserId UserId { get; set; }
+    public required UserId UserId { get; set; }
 
     [Required]
     [MaxLength(64)]

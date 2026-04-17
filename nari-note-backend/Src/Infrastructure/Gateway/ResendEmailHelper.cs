@@ -5,11 +5,11 @@ using ResendMessage = Resend.EmailMessage;
 
 namespace NariNoteBackend.Infrastructure.Gateway;
 
-public class ResendEmailGateway : IEmailGateway
+public class ResendEmailHelper : IEmailHelper
 {
     readonly IResend resend;
 
-    public ResendEmailGateway(IResend resend)
+    public ResendEmailHelper(IResend resend)
     {
         this.resend = resend;
     }

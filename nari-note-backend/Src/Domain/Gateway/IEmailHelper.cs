@@ -1,6 +1,6 @@
 namespace NariNoteBackend.Domain.Gateway;
 
-public interface IEmailGateway
+public interface IEmailHelper
 {
     Task SendAsync(EmailMessage message);
 }
