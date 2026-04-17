@@ -24,22 +24,22 @@ namespace NariNoteBackend.Migrations
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<int?>("ArticleOrder")
                         .HasColumnType("integer");
 
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Body")
                         .IsRequired()
                         .HasMaxLength(10000)
                         .HasColumnType("character varying(10000)");
 
-                    b.Property<int?>("CourseId")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("CourseId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -73,14 +73,14 @@ namespace NariNoteBackend.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ArticleId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("TagId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -100,8 +100,8 @@ namespace NariNoteBackend.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ArticleId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -114,8 +114,8 @@ namespace NariNoteBackend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -130,8 +130,8 @@ namespace NariNoteBackend.Migrations
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Course", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -147,8 +147,8 @@ namespace NariNoteBackend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -164,8 +164,8 @@ namespace NariNoteBackend.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
-                    b.Property<int>("CourseId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -173,8 +173,8 @@ namespace NariNoteBackend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -210,8 +210,8 @@ namespace NariNoteBackend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -231,11 +231,11 @@ namespace NariNoteBackend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("FollowerId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("FollowerId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("FollowingId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("FollowingId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -257,8 +257,8 @@ namespace NariNoteBackend.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ArticleId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -266,8 +266,8 @@ namespace NariNoteBackend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -286,8 +286,8 @@ namespace NariNoteBackend.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ArticleId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -298,8 +298,8 @@ namespace NariNoteBackend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -314,8 +314,8 @@ namespace NariNoteBackend.Migrations
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Tag", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -338,8 +338,8 @@ namespace NariNoteBackend.Migrations
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.User", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Bio")
                         .HasMaxLength(500)

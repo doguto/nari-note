@@ -18,7 +18,6 @@ public static class DataSeeder
         {
             new()
             {
-                Id = UserId.From(1),
                 Name = "羽生九段ファン",
                 Email = "habu-fan@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
@@ -28,7 +27,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = UserId.From(2),
                 Name = "振り飛車党",
                 Email = "furibisha@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
@@ -38,7 +36,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = UserId.From(3),
                 Name = "詰将棋作家",
                 Email = "tsume@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
@@ -48,7 +45,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = UserId.From(4),
                 Name = "初心者将棋部",
                 Email = "beginner@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
@@ -64,14 +60,14 @@ public static class DataSeeder
         // タグ作成
         var tags = new List<Tag>
         {
-            new() { Id = TagId.From(1), Name = "居飛車", CreatedAt = DateTime.UtcNow.AddDays(-30) },
-            new() { Id = TagId.From(2), Name = "振り飛車", CreatedAt = DateTime.UtcNow.AddDays(-30) },
-            new() { Id = TagId.From(3), Name = "詰将棋", CreatedAt = DateTime.UtcNow.AddDays(-28) },
-            new() { Id = TagId.From(4), Name = "戦法", CreatedAt = DateTime.UtcNow.AddDays(-25) },
-            new() { Id = TagId.From(5), Name = "初心者向け", CreatedAt = DateTime.UtcNow.AddDays(-25) },
-            new() { Id = TagId.From(6), Name = "棋譜解説", CreatedAt = DateTime.UtcNow.AddDays(-20) },
-            new() { Id = TagId.From(7), Name = "プロ棋戦", CreatedAt = DateTime.UtcNow.AddDays(-15) },
-            new() { Id = TagId.From(8), Name = "終盤", CreatedAt = DateTime.UtcNow.AddDays(-10) }
+            new() { Name = "居飛車", CreatedAt = DateTime.UtcNow.AddDays(-30) },
+            new() { Name = "振り飛車", CreatedAt = DateTime.UtcNow.AddDays(-30) },
+            new() { Name = "詰将棋", CreatedAt = DateTime.UtcNow.AddDays(-28) },
+            new() { Name = "戦法", CreatedAt = DateTime.UtcNow.AddDays(-25) },
+            new() { Name = "初心者向け", CreatedAt = DateTime.UtcNow.AddDays(-25) },
+            new() { Name = "棋譜解説", CreatedAt = DateTime.UtcNow.AddDays(-20) },
+            new() { Name = "プロ棋戦", CreatedAt = DateTime.UtcNow.AddDays(-15) },
+            new() { Name = "終盤", CreatedAt = DateTime.UtcNow.AddDays(-10) }
         };
 
         context.Tags.AddRange(tags);
@@ -82,7 +78,6 @@ public static class DataSeeder
         {
             new()
             {
-                Id = ArticleId.From(1),
                 Title = "初心者のための棒銀戦法入門",
                 Body =
                     "棒銀は、初心者が最初に覚えるべき戦法の一つです。\n\n## 棒銀とは\n銀将を棒のようにまっすぐ進めて攻める戦法です。シンプルながら破壊力抜群！\n\n## 基本の駒組み\n1. ▲２六歩 △８四歩\n2. ▲２五歩 △８五歩\n3. ▲７八金 △３二金\n4. ▲３八銀 → ▲２七銀 → ▲２六銀\n\n## ポイント\n- 飛車先の歩を伸ばしてから銀を繰り出す\n- 相手の角頭（８七の地点）を狙う\n\nまずは棒銀をマスターして、将棋の基本を身につけましょう！",
@@ -93,7 +88,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = ArticleId.From(2),
                 Title = "四間飛車の基本と美濃囲い",
                 Body =
                     "四間飛車は振り飛車の基本形です。美濃囲いとセットで覚えましょう。\n\n## 四間飛車とは\n飛車を４筋（左から４番目）に振る戦法です。\n\n## 美濃囲いの組み方\n1. ▲６八玉\n2. ▲７八玉\n3. ▲５八金右\n4. ▲９八香（穴熊にする場合）\n\n## 四間飛車のメリット\n- 駒組みが覚えやすい\n- カウンター狙いの戦い方ができる\n- 美濃囲いが堅い\n\n振り飛車党を目指すなら、まず四間飛車から始めましょう！",
@@ -104,7 +98,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = ArticleId.From(3),
                 Title = "５手詰めの解き方のコツ",
                 Body =
                     "詰将棋は終盤力を鍛える最高のトレーニングです。\n\n## ５手詰めを解くコツ\n\n### 1. 王手の種類を確認\n- 駒を打つ王手\n- 駒を動かす王手\n- 両王手\n\n### 2. 玉の逃げ道を塞ぐ\n詰ますためには、まず玉の退路を断つことが重要です。\n\n### 3. 捨て駒を恐れない\n派手な捨て駒から始まる詰みが多いです。\n\n## おすすめの詰将棋本\n- 「３手詰ハンドブック」\n- 「５手詰ハンドブック」\n\n毎日コツコツ解くことが上達の近道です！",
@@ -115,7 +108,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = ArticleId.From(4),
                 Title = "矢倉戦法の歴史と現代での評価",
                 Body =
                     "矢倉は「将棋の純文学」と呼ばれる格調高い戦法です。\n\n## 矢倉の歴史\n江戸時代から指されている伝統的な戦法で、長らく「相居飛車の王道」とされてきました。\n\n## 矢倉囲いの特徴\n- 上部に強い\n- 組み上がるまでに手数がかかる\n- 相矢倉では互いに攻め合いになりやすい\n\n## 現代での評価\n近年はソフト研究により急戦矢倉や雁木が増え、従来の矢倉は減少傾向にあります。\nしかし、矢倉の考え方を知ることは将棋の基礎力向上に役立ちます。\n\n一度は本格的な相矢倉を指してみてください！",
@@ -126,7 +118,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = ArticleId.From(5),
                 Title = "王位戦第5局の感想 - 藤井竜王の終盤力",
                 Body =
                     "先日行われた王位戦第5局を振り返ります。\n\n## 対局概要\n藤井竜王の先手番で、戦型は角換わり腰掛け銀に。\n\n## 見どころ\n中盤で挑戦者が優勢を築きましたが、藤井竜王の粘り強い指し回しが光りました。\n\n## 終盤のハイライト\n87手目の▲5五角が勝負を決めた一手。この手を境に形勢が逆転しました。\n読み筋を外された挑戦者は時間に追われ、最後は即詰みに討ち取られました。\n\n## まとめ\n改めて藤井竜王の終盤力の凄さを実感した一局でした。\n詰将棋で鍛えた読みの力が存分に発揮されていましたね。",
@@ -137,7 +128,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = ArticleId.From(6),
                 Title = "角換わりの最新定跡",
                 Body =
                     "角換わりは相居飛車の代表的な戦型です。\n\n## 角換わりとは\n序盤で角を交換し、その後の展開を競う戦型です。\n\n## 主な形\n- 腰掛け銀\n- 早繰り銀\n- 棒銀\n\n## 最近のトレンド\n近年はAI研究により、従来の定跡が大きく変化しています。\n特に先手の▲4五桂速攻が注目されています。\n\n角換わりを極めて、相居飛車を得意戦法にしましょう!",
@@ -148,7 +138,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = ArticleId.From(7),
                 Title = "三間飛車で勝つための心得",
                 Body =
                     "三間飛車は振り飛車の中でも攻撃的な戦法です。\n\n## 三間飛車の特徴\n飛車を3筋に振り、積極的に仕掛けていく戦法です。\n\n## 基本的な攻め筋\n1. 石田流に組む\n2. ▲3五歩から仕掛ける\n3. 角交換を狙う\n\n## 囲いの選択\n- 美濃囲い(基本形)\n- 穴熊(じっくり戦う場合)\n- 金無双(速攻の場合)\n\n## まとめ\n三間飛車は攻めの将棋を楽しみたい方におすすめです!",
@@ -159,7 +148,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = ArticleId.From(8),
                 Title = "初心者が覚えるべき3つの格言",
                 Body =
                     "将棋には先人の知恵が詰まった格言があります。\n\n## 1. 王様は下段に落とせ\n詰ますためには、相手玉を下段に追い込むことが重要です。\n\n## 2. 玉の早逃げ八手の得\n危険を感じたら、早めに玉を逃がすことが大切です。\n攻め合いで後手を引かないようにしましょう。\n\n## 3. 桂馬は端に追え\n桂馬は前にしか進めないため、端に追い詰めると活用しづらくなります。\n\n## おわりに\n格言を意識することで、考え方の幅が広がります。\nまずはこの3つを実戦で使ってみてください!",
@@ -170,7 +158,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = ArticleId.From(9),
                 Title = "実戦詰将棋:3手詰めにチャレンジ",
                 Body =
                     "実戦でよく現れる3手詰めを解いてみましょう。\n\n## 問題\n持ち駒: 金\n\n```\n  9   8   7   6   5   4   3   2   1\n┌───────────────────┐\n│ v玉 ・ ・ │一\n│ 銀 金 ・ │二\n│ ・ ・ ・ │三\n└───────────────────┘\n```\n\n## ヒント\n持ち駒の金をどこに打つか考えてみましょう。\n玉の逃げ道を塞ぐことがポイントです。\n\n## 解答\n▲1一金 △9二玉 ▲8二金まで\n\n基本的な形なので、実戦で見逃さないようにしましょう!",
@@ -181,7 +168,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = ArticleId.From(10),
                 Title = "将棋ソフトを使った棋力向上法",
                 Body =
                     "将棋ソフトを活用して効率的に上達する方法を紹介します。\n\n## おすすめの将棋ソフト\n- 将棋ぶらうざQ(無料)\n- 技巧(オープンソース)\n- elmo(強豪ソフト)\n\n## 活用方法\n\n### 1. 棋譜解析\n自分の対局をソフトで検討し、悪手を見つけます。\nどこで形勢が傾いたか確認しましょう。\n\n### 2. 定跡の確認\n最新の定跡をソフトで調べることができます。\n\n### 3. 詰みの確認\n終盤で詰みを逃した場面を検証できます。\n\n## 注意点\nソフトに頼りすぎず、自分で考える力を大切にしましょう。\nソフトの評価値だけでなく、なぜその手が良いのか理解することが重要です。",
@@ -302,7 +288,6 @@ public static class DataSeeder
         {
             new()
             {
-                Id = CourseId.From(1),
                 Name = "初心者のための将棋入門",
                 UserId = users[3].Id,
                 PublishedAt = DateTime.UtcNow.AddDays(-10),
@@ -311,7 +296,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = CourseId.From(2),
                 Name = "居飛車戦法マスター講座",
                 UserId = users[0].Id,
                 PublishedAt = DateTime.UtcNow.AddDays(-8),
@@ -320,7 +304,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = CourseId.From(3),
                 Name = "振り飛車完全攻略",
                 UserId = users[1].Id,
                 PublishedAt = DateTime.UtcNow.AddDays(-6),
@@ -329,7 +312,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = CourseId.From(4),
                 Name = "詰将棋で学ぶ終盤力",
                 UserId = users[2].Id,
                 PublishedAt = null, // 未公開講座
