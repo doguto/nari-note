@@ -1,7 +1,9 @@
 import { PublishSettingsDialog } from '@/features/article/organisms/PublishSettingsDialog';
+import { CourseArticleDto } from '@/lib/api/types';
 import {
   CourseTitleInput,
   CourseFormActions,
+  CourseArticleEditList,
 } from '../organisms';
 
 interface CourseFormTemplateProps {
@@ -10,6 +12,8 @@ interface CourseFormTemplateProps {
   isLoading: boolean;
   isFormDisabled: boolean;
   isEditMode: boolean;
+  courseId?: string;
+  articles?: CourseArticleDto[];
   onNameChange: (value: string) => void;
   onSave: () => void;
   onOpenPublishSettings: () => void;
@@ -17,18 +21,15 @@ interface CourseFormTemplateProps {
   onPublishDialogChange: (open: boolean) => void;
 }
 
-/**
- * CourseFormTemplate - Template Component
- * 
- * 講座作成・編集フォームのUI構成とレイアウトを担当
- * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
- */
+
 export function CourseFormTemplate({
   name,
   showPublishDialog,
   isLoading,
   isFormDisabled,
   isEditMode,
+  courseId,
+  articles,
   onNameChange,
   onSave,
   onOpenPublishSettings,
@@ -40,7 +41,7 @@ export function CourseFormTemplate({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-lg p-6">
       <CourseFormActions
         onSave={onSave}
         onOpenPublishSettings={onOpenPublishSettings}
@@ -58,6 +59,10 @@ export function CourseFormTemplate({
           onPublish={onPublish}
           isLoading={isLoading}
         />
+      )}
+
+      {isEditMode && articles && courseId && (
+        <CourseArticleEditList articles={articles} courseId={courseId} />
       )}
     </form>
   );

@@ -12,12 +12,7 @@ interface MyCoursesListTemplateProps {
   onEdit: (id: string) => void;
 }
 
-/**
- * MyCoursesListTemplate - Template Component
- * 
- * マイ講座一覧ページのUI構成とレイアウトを担当
- * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
- */
+
 export function MyCoursesListTemplate({
   courses,
   deletingId,

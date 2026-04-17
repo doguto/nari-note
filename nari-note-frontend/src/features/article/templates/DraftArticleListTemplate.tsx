@@ -11,12 +11,7 @@ interface DraftArticleListTemplateProps {
   onDelete: (id: string, title: string) => void;
 }
 
-/**
- * DraftArticleListTemplate - Template Component
- * 
- * 下書き記事一覧ページのUI構成とレイアウトを担当
- * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
- */
+
 export function DraftArticleListTemplate({
   articles,
   deletingId,

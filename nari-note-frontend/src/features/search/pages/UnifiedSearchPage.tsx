@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSearchArticles, useSearchCourses } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { UnifiedSearchTemplate } from '../templates/UnifiedSearchTemplate';
 
 /**
@@ -76,7 +77,8 @@ export function UnifiedSearchPage() {
   }
 
   return (
-    <UnifiedSearchTemplate
+    <PageWithSidebar>
+      <UnifiedSearchTemplate
       keyword={keyword}
       searchKeyword={searchKeyword}
       hasSearched={hasSearched}
@@ -86,6 +88,7 @@ export function UnifiedSearchPage() {
       courses={coursesWithId}
       onKeywordChange={setKeyword}
       onSearch={handleSearch}
-    />
+      />
+    </PageWithSidebar>
   );
 }

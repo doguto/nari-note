@@ -2,6 +2,7 @@
 
 import { useGetArticleContent, useToggleLike } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { ArticleDetailTemplate } from '../templates/ArticleDetailTemplate';
 import { Comment } from '@/types/comment';
 
@@ -9,12 +10,6 @@ interface ArticleDetailPageProps {
   articleId: string;
 }
 
-/**
- * ArticleDetailPage - Page Component
- * 
- * 記事詳細ページのロジックを管理するコンポーネント
- * データフェッチング、状態管理、ビジネスロジックを担当
- */
 export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const { userId } = useAuth();
   const { data: article, isLoading, error, refetch } = useGetArticleContent({ id: articleId });
@@ -46,7 +41,8 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const isOwnArticle = userId === article?.authorId;
 
   return (
-    <ArticleDetailTemplate
+    <PageWithSidebar>
+      <ArticleDetailTemplate
       isLoading={isLoading}
       error={error}
       article={article}
@@ -56,6 +52,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
       onRetry={refetch}
       onLikeClick={handleLikeClick}
       onCommentSuccess={handleCommentSuccess}
-    />
+      />
+    </PageWithSidebar>
   );
 }

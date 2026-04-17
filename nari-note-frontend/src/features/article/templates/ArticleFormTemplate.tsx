@@ -29,12 +29,7 @@ interface ArticleFormTemplateProps {
   onPublishDialogChange: (open: boolean) => void;
 }
 
-/**
- * ArticleFormTemplate - Template Component
- * 
- * 記事作成・編集フォームのUI構成とレイアウトを担当
- * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
- */
+
 export function ArticleFormTemplate({
   title,
   body,
@@ -72,7 +67,7 @@ export function ArticleFormTemplate({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className="space-y-6 bg-white rounded-lg p-6">
       {validationError && <ErrorAlert message={validationError} />}
       
       <ArticleFormActions

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSearchArticles } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { ArticleSearchTemplate } from '../templates/ArticleSearchTemplate';
 
 /**
@@ -49,7 +50,8 @@ export function ArticleSearchPage() {
   }
 
   return (
-    <ArticleSearchTemplate
+    <PageWithSidebar>
+      <ArticleSearchTemplate
       keyword={keyword}
       searchKeyword={searchKeyword}
       hasSearched={hasSearched}
@@ -57,6 +59,7 @@ export function ArticleSearchPage() {
       articles={articlesWithId}
       onKeywordChange={setKeyword}
       onSearch={handleSearch}
-    />
+      />
+    </PageWithSidebar>
   );
 }

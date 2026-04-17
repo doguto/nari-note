@@ -21,12 +21,6 @@ interface ArticleDetailTemplateProps {
   onCommentSuccess: () => void;
 }
 
-/**
- * ArticleDetailTemplate - Template Component
- *
- * 記事詳細ページのUI構成とレイアウトを担当
- * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
- */
 export function ArticleDetailTemplate({
   isLoading,
   error,
@@ -40,30 +34,23 @@ export function ArticleDetailTemplate({
 }: ArticleDetailTemplateProps) {
   if (isLoading) {
     return (
-      <PageWithSidebar>
-        <LoadingSpinner text="記事を読み込み中..." />
-      </PageWithSidebar>
+      <LoadingSpinner text="記事を読み込み中..." />
     );
   }
 
   if (error) {
     return (
-      <PageWithSidebar>
-        <ErrorMessage message="記事の取得に失敗しました" onRetry={onRetry} />
-      </PageWithSidebar>
+      <ErrorMessage message="記事の取得に失敗しました" onRetry={onRetry} />
     );
   }
 
   if (!article) {
     return (
-      <PageWithSidebar>
-        <ErrorMessage message="記事が見つかりません" />
-      </PageWithSidebar>
+      <ErrorMessage message="記事が見つかりません" />
     );
   }
 
   return (
-    <PageWithSidebar>
     <article className="bg-white rounded-lg shadow-lg p-8">
       {article.courseId && article.courseName && (
         <CourseBreadcrumb courseId={article.courseId} courseName={article.courseName} />
@@ -124,6 +111,5 @@ export function ArticleDetailTemplate({
         <CommentForm articleId={article.id!} onSuccess={onCommentSuccess} />
       </div>
     </article>
-    </PageWithSidebar>
   );
 }

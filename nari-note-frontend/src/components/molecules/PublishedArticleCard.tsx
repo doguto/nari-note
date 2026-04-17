@@ -2,13 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Pencil, Eye, Heart } from 'lucide-react';
+import { Pencil, Eye, Heart, Trash2 } from 'lucide-react';
 
 interface PublishedArticleCardProps {
   id: string;
   title: string;
   publishedAt: string;
   likeCount?: number;
+  onDelete?: () => void;
 }
 
 /**
@@ -22,6 +23,7 @@ export function PublishedArticleCard({
   title,
   publishedAt,
   likeCount = 0,
+  onDelete,
 }: PublishedArticleCardProps) {
   const router = useRouter();
 
@@ -76,6 +78,17 @@ export function PublishedArticleCard({
             <Pencil className="w-4 h-4 mr-1" />
             編集
           </Button>
+          {onDelete && (
+            <Button
+              onClick={onDelete}
+              variant="outline"
+              size="sm"
+              className="border-red-500 text-red-500 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              削除
+            </Button>
+          )}
         </div>
       </div>
     </div>

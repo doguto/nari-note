@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCreateArticle, useUpdateArticle, useGetArticleContent } from '@/lib/api';
-import { FormPageLayout } from '@/components/molecules';
+import { PageWithoutSidebar } from '@/features/global/organisms';
 import { ArticleFormTemplate } from '../templates/ArticleFormTemplate';
 import { useAuth } from '@/lib/providers/AuthProvider';
 
 interface ArticleFormPageProps {
   articleId?: string;
   mode?: 'create' | 'edit';
+  courseId?: string;
 }
 
 /**
@@ -21,7 +22,7 @@ interface ArticleFormPageProps {
  * @param articleId - 編集モード時の記事ID
  * @param mode - 'create' または 'edit' (デフォルト: 'create')
  */
-export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageProps = {}) {
+export function ArticleFormPage({ articleId, mode = 'create', courseId }: ArticleFormPageProps = {}) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -44,11 +45,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const createArticle = useCreateArticle({
     onSuccess: (data) => {
       setHasUnsavedChanges(false);
-      if (isPublishing) {
-        router.push(`/articles/${data.id}`);
-      } else {
-        router.push(`/articles/drafts`);
-      }
+      router.push(`/articles/${data.id}`);
       setIsPublishing(false);
     },
     onError: (error) => {
@@ -144,6 +141,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         isPublished: true,
         publishedAt: publishedAt,
         authorId: userId!,
+        courseId: courseId,
       });
     }
 
@@ -174,6 +172,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         isPublished: false,
         publishedAt: undefined,
         authorId: userId!,
+        courseId: courseId,
       });
     }
   };
@@ -216,7 +215,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const contentError = getContentError();
 
   return (
-    <FormPageLayout title={pageTitle} description={pageDescription}>
+    <PageWithoutSidebar title={pageTitle}>
       <ArticleFormTemplate
         title={title}
         body={body}
@@ -238,6 +237,6 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         onPublish={handlePublish}
         onPublishDialogChange={setShowPublishDialog}
       />
-    </FormPageLayout>
+    </PageWithoutSidebar>
   );
 }

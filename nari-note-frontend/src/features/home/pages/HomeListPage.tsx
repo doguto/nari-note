@@ -2,12 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import { useGetArticles, useGetCourses } from '@/lib/api';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { HomeListTemplate } from '../templates';
 
 export function HomeListPage() {
   const [activeTab, setActiveTab] = useState<'articles' | 'courses'>('articles');
-  
-  // クライアントサイドでデータをフェッチ
+
   const { 
     data: articlesData, 
     isLoading: isLoadingArticles, 
@@ -38,7 +38,8 @@ export function HomeListPage() {
   );
 
   return (
-    <HomeListTemplate
+    <PageWithSidebar>
+      <HomeListTemplate
       activeTab={activeTab}
       onTabChange={setActiveTab}
       articles={articlesWithId}
@@ -49,6 +50,7 @@ export function HomeListPage() {
       coursesError={coursesError}
       onRetryArticles={refetchArticles}
       onRetryCourses={refetchCourses}
-    />
+      />
+    </PageWithSidebar>
   );
 }

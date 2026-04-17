@@ -1,7 +1,7 @@
 'use client';
 
 import { useGetArticles } from '@/lib/api';
-import { MainContentSection } from '@/features/global/organisms';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { HomeArticleListTemplate } from '../templates/HomeArticleListTemplate';
 
 /**
@@ -17,13 +17,13 @@ export function HomeArticleListPage() {
   const articlesWithId = data?.articles?.filter((article) => article.id !== null && article.id !== undefined) || [];
 
   return (
-    <MainContentSection title="新着記事">
+    <PageWithSidebar title="新着記事">
       <HomeArticleListTemplate
         articles={articlesWithId}
         isLoading={isLoading}
         error={error}
         onRetry={refetch}
       />
-    </MainContentSection>
+    </PageWithSidebar>
   );
 }

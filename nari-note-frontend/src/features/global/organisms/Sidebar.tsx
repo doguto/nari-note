@@ -4,17 +4,11 @@ import Link from 'next/link';
 import { useGetPopularTags } from '@/lib/api/hooks';
 import { TagIcon } from 'lucide-react';
 
-/**
- * サイドバーコンポーネント
- * 
- * トレンドタグと注目の記事を表示します。
- */
 export function Sidebar() {
   const { data: tagsData, isLoading, isError } = useGetPopularTags({});
 
   return (
     <aside className="lg:w-1/5 hidden lg:block">
-      {/* トレンドセクション */}
       <div className="bg-brand-text rounded-lg p-4 text-white mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold" style={{ fontFamily: 'serif' }}>

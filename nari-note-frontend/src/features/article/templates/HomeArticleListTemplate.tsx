@@ -9,12 +9,7 @@ interface HomeArticleListTemplateProps {
   onRetry?: () => void;
 }
 
-/**
- * HomeArticleListTemplate - Template Component
- * 
- * ホーム画面の記事一覧のUI構成とレイアウトを担当
- * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
- */
+
 export function HomeArticleListTemplate({ articles, isLoading, error, onRetry }: HomeArticleListTemplateProps) {
   if (isLoading) {
     return <LoadingSpinner text="記事を読み込み中..." />;

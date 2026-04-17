@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCreateCourse, useUpdateCourse, useGetCourseContent } from '@/lib/api';
+import { useCreateCourse, useUpdateCourse, useGetCourseContentForEdit } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
-import { FormPageLayout } from '@/components/molecules';
+import { PageWithoutSidebar } from '@/features/global/organisms';
 import { CourseFormTemplate } from '../templates/CourseFormTemplate';
 
 type CourseFormPageProps =
@@ -27,8 +27,8 @@ export function CourseFormPage(props: CourseFormPageProps) {
   const isEditMode = props.mode === 'edit';
   const courseId = isEditMode ? props.courseId : undefined;
   
-  // 編集モード時の講座データ取得
-  const { data: course, isLoading: isLoadingCourse, error: courseError, refetch } = useGetCourseContent(
+  // 編集モード時の講座データ取得（下書き記事を含む）
+  const { data: course, isLoading: isLoadingCourse, error: courseError, refetch } = useGetCourseContentForEdit(
     { id: courseId || '' },
     { enabled: !!isEditMode }
   );
@@ -182,19 +182,21 @@ export function CourseFormPage(props: CourseFormPageProps) {
   const pageDescription = '講座を作成して、関連する記事をシリーズとしてまとめることができます。';
 
   return (
-    <FormPageLayout title={pageTitle} description={pageDescription}>
+    <PageWithoutSidebar title={pageTitle}>
       <CourseFormTemplate
         name={name}
         showPublishDialog={showPublishDialog}
         isLoading={isLoading}
         isFormDisabled={isFormDisabled}
         isEditMode={!!isEditMode}
+        courseId={isEditMode ? courseId : undefined}
+        articles={isEditMode ? course?.articles : undefined}
         onNameChange={setName}
         onSave={handleSave}
         onOpenPublishSettings={handleOpenPublishSettings}
         onPublish={handlePublish}
         onPublishDialogChange={setShowPublishDialog}
       />
-    </FormPageLayout>
+    </PageWithoutSidebar>
   );
 }

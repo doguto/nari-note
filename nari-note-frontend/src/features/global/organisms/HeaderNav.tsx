@@ -1,10 +1,6 @@
 import Link from 'next/link';
 
-/**
- * ヘッダーナビゲーションコンポーネント
- *
- * ホーム・記事を探す・記事を投稿・講座を作成のリンクを表示します。
- */
+
 export function HeaderNav() {
   return (
     <nav className="hidden md:flex items-center gap-12">
