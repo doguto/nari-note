@@ -180,6 +180,11 @@ export interface GetCoursesByAuthorResponse {
   totalCount: number;
 }
 
+export interface GetMyCoursesResponse {
+  courses: CourseDto[];
+  totalCount: number;
+}
+
 export interface GetCoursesRequest {
   limit: number;
   offset: number;

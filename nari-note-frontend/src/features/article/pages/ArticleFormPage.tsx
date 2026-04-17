@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/providers/AuthProvider';
 interface ArticleFormPageProps {
   articleId?: string;
   mode?: 'create' | 'edit';
+  courseId?: string;
 }
 
 /**
@@ -21,7 +22,7 @@ interface ArticleFormPageProps {
  * @param articleId - 編集モード時の記事ID
  * @param mode - 'create' または 'edit' (デフォルト: 'create')
  */
-export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageProps = {}) {
+export function ArticleFormPage({ articleId, mode = 'create', courseId }: ArticleFormPageProps = {}) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -140,6 +141,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         isPublished: true,
         publishedAt: publishedAt,
         authorId: userId!,
+        courseId: courseId,
       });
     }
 
@@ -170,6 +172,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         isPublished: false,
         publishedAt: undefined,
         authorId: userId!,
+        courseId: courseId,
       });
     }
   };

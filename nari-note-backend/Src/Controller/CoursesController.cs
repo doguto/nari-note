@@ -16,6 +16,7 @@ public class CoursesController : ApplicationController
     readonly GetCourseContentService getCourseContentService;
     readonly GetCoursesService getCoursesService;
     readonly GetCoursesByAuthorService getCoursesByAuthorService;
+    readonly GetMyCoursesService getMyCoursesService;
     readonly SearchCoursesService searchCoursesService;
     readonly UpdateCourseService updateCourseService;
 
@@ -25,6 +26,7 @@ public class CoursesController : ApplicationController
         UpdateCourseService updateCourseService,
         GetCoursesService getCoursesService,
         GetCoursesByAuthorService getCoursesByAuthorService,
+        GetMyCoursesService getMyCoursesService,
         GetCourseContentService getCourseContentService,
         SearchCoursesService searchCoursesService
     )
@@ -35,6 +37,7 @@ public class CoursesController : ApplicationController
         this.getCourseContentService = getCourseContentService;
         this.getCoursesService = getCoursesService;
         this.getCoursesByAuthorService = getCoursesByAuthorService;
+        this.getMyCoursesService = getMyCoursesService;
         this.searchCoursesService = searchCoursesService;
     }
 
@@ -55,6 +58,14 @@ public class CoursesController : ApplicationController
     public async Task<ActionResult<SearchCoursesResponse>> SearchCourses([FromQuery] SearchCoursesRequest request)
     {
         var response = await searchCoursesService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpGet("my")]
+    [RequireAuth]
+    public async Task<ActionResult<GetMyCoursesResponse>> GetMyCourses()
+    {
+        var response = await getMyCoursesService.ExecuteAsync(UserId!.Value);
         return Ok(response);
     }
 
@@ -82,6 +93,15 @@ public class CoursesController : ApplicationController
     {
         var request = new GetCourseContentRequest { Id = id };
         var response = await getCourseContentService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpGet("{id}/for-edit")]
+    [RequireAuth]
+    public async Task<ActionResult<GetCourseContentResponse>> GetCourseContentForEdit(CourseId id)
+    {
+        var request = new GetCourseContentRequest { Id = id };
+        var response = await getCourseContentService.ExecuteForEditAsync(UserId!.Value, request);
         return Ok(response);
     }
 

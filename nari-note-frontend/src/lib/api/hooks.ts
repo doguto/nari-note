@@ -25,6 +25,7 @@ import type {
   GetCourseContentResponse,
   GetCoursesByAuthorRequest,
   GetCoursesByAuthorResponse,
+  GetMyCoursesResponse,
   GetCoursesRequest,
   GetCoursesResponse,
   GetCurrentUserRequest,
@@ -77,7 +78,9 @@ export const queryKeys = {
     getCourses: ['courses', 'getCourses'] as const,
     searchCourses: ['courses', 'searchCourses'] as const,
     getCoursesByAuthor: ['courses', 'getCoursesByAuthor'] as const,
+    getMyCourses: ['courses', 'getMyCourses'] as const,
     getCourseContent: ['courses', 'getCourseContent'] as const,
+    getCourseContentForEdit: ['courses', 'getCourseContentForEdit'] as const,
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
@@ -284,6 +287,14 @@ export function useGetCoursesByAuthor(params: GetCoursesByAuthorRequest, options
   });
 }
 
+export function useGetMyCourses(options?: Omit<UseQueryOptions<GetMyCoursesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetMyCoursesResponse>({
+    queryKey: queryKeys.courses.getMyCourses,
+    queryFn: () => coursesApi.getMyCourses(),
+    ...options,
+  });
+}
+
 export function useCreateCourse(options?: UseMutationOptions<CreateCourseResponse, Error, CreateCourseRequest>) {
   const queryClient = useQueryClient();
   return useMutation<CreateCourseResponse, Error, CreateCourseRequest>({
@@ -300,6 +311,14 @@ export function useGetCourseContent(params: GetCourseContentRequest, options?: O
   return useQuery<GetCourseContentResponse>({
     queryKey: [...queryKeys.courses.getCourseContent, params],
     queryFn: () => coursesApi.getCourseContent(params),
+    ...options,
+  });
+}
+
+export function useGetCourseContentForEdit(params: GetCourseContentRequest, options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCourseContentResponse>({
+    queryKey: [...queryKeys.courses.getCourseContentForEdit, params],
+    queryFn: () => coursesApi.getCourseContentForEdit(params),
     ...options,
   });
 }
