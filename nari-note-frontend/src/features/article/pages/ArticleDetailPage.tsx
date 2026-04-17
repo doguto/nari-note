@@ -9,12 +9,6 @@ interface ArticleDetailPageProps {
   articleId: string;
 }
 
-/**
- * ArticleDetailPage - Page Component
- * 
- * 記事詳細ページのロジックを管理するコンポーネント
- * データフェッチング、状態管理、ビジネスロジックを担当
- */
 export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const { userId } = useAuth();
   const { data: article, isLoading, error, refetch } = useGetArticleContent({ id: articleId });

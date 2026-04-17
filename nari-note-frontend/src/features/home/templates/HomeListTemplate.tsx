@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArticleList, CourseList } from '../organisms';
-import { MainContentSection } from '@/features/global/organisms';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { ArticleDto, CourseDto } from '@/lib/api/types';
 
 interface HomeListTemplateProps {
@@ -29,7 +29,7 @@ export function HomeListTemplate({
   onRetryCourses,
 }: HomeListTemplateProps) {
   return (
-    <MainContentSection title="">
+    <PageWithSidebar>
       <Tabs 
         value={activeTab} 
         onValueChange={(value) => onTabChange(value as 'articles' | 'courses')}
@@ -58,6 +58,6 @@ export function HomeListTemplate({
           />
         </TabsContent>
       </Tabs>
-    </MainContentSection>
+    </PageWithSidebar>
   );
 }

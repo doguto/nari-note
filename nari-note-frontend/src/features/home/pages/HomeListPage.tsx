@@ -6,8 +6,7 @@ import { HomeListTemplate } from '../templates';
 
 export function HomeListPage() {
   const [activeTab, setActiveTab] = useState<'articles' | 'courses'>('articles');
-  
-  // クライアントサイドでデータをフェッチ
+
   const { 
     data: articlesData, 
     isLoading: isLoadingArticles, 
