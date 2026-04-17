@@ -4,4 +4,5 @@ export { MainLayout } from './MainLayout';
 export { Sidebar } from './Sidebar';
 export { HeroSection } from './HeroSection';
 export { PageWithSidebar } from './PageWithSidebar';
+export { PageWithoutSidebar } from './PageWithoutSidebar';
 export { AuthGuard } from './AuthGuard';

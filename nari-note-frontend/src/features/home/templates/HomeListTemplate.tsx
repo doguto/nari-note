@@ -29,35 +29,33 @@ export function HomeListTemplate({
   onRetryCourses,
 }: HomeListTemplateProps) {
   return (
-    <PageWithSidebar>
-      <Tabs 
-        value={activeTab} 
-        onValueChange={(value) => onTabChange(value as 'articles' | 'courses')}
-        className="w-full"
-      >
-        <TabsList className="grid w-full max-w-md mx-auto mb-6 grid-cols-2">
-          <TabsTrigger value="articles">新着記事</TabsTrigger>
-          <TabsTrigger value="courses">講座一覧</TabsTrigger>
-        </TabsList>
+    <Tabs 
+      value={activeTab} 
+      onValueChange={(value) => onTabChange(value as 'articles' | 'courses')}
+      className="w-full"
+    >
+      <TabsList className="grid w-full max-w-md mx-auto mb-6 grid-cols-2">
+        <TabsTrigger value="articles">新着記事</TabsTrigger>
+        <TabsTrigger value="courses">講座一覧</TabsTrigger>
+      </TabsList>
 
-        <TabsContent value="articles">
-          <ArticleList
-            articles={articles}
-            isLoading={isLoadingArticles}
-            error={articlesError}
-            onRetry={onRetryArticles}
-          />
-        </TabsContent>
-        
-        <TabsContent value="courses">
-          <CourseList
-            courses={courses}
-            isLoading={isLoadingCourses}
-            error={coursesError}
-            onRetry={onRetryCourses}
-          />
-        </TabsContent>
-      </Tabs>
-    </PageWithSidebar>
+      <TabsContent value="articles">
+        <ArticleList
+          articles={articles}
+          isLoading={isLoadingArticles}
+          error={articlesError}
+          onRetry={onRetryArticles}
+        />
+      </TabsContent>
+      
+      <TabsContent value="courses">
+        <CourseList
+          courses={courses}
+          isLoading={isLoadingCourses}
+          error={coursesError}
+          onRetry={onRetryCourses}
+        />
+      </TabsContent>
+    </Tabs>
   );
 }

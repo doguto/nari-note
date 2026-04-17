@@ -1,3 +1,4 @@
+import { PageWithoutSidebar } from '@/features/global/organisms';
 import { TermsTemplate } from '../templates/TermsTemplate';
 
 /**
@@ -6,5 +7,9 @@ import { TermsTemplate } from '../templates/TermsTemplate';
  * 利用規約ページ
  */
 export function TermsPage() {
-  return <TermsTemplate />;
+  return (
+    <PageWithoutSidebar>
+      <TermsTemplate />
+    </PageWithoutSidebar>
+  );
 }

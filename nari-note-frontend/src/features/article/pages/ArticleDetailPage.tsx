@@ -2,6 +2,7 @@
 
 import { useGetArticleContent, useToggleLike } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { PageWithSidebar } from '@/features/global/organisms';
 import { ArticleDetailTemplate } from '../templates/ArticleDetailTemplate';
 import { Comment } from '@/types/comment';
 
@@ -40,7 +41,8 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const isOwnArticle = userId === article?.authorId;
 
   return (
-    <ArticleDetailTemplate
+    <PageWithSidebar>
+      <ArticleDetailTemplate
       isLoading={isLoading}
       error={error}
       article={article}
@@ -50,6 +52,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
       onRetry={refetch}
       onLikeClick={handleLikeClick}
       onCommentSuccess={handleCommentSuccess}
-    />
+      />
+    </PageWithSidebar>
   );
 }
