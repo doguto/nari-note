@@ -32,6 +32,7 @@ public static class InfrastructureServiceInstaller
         );
 
         // Register repositories
+        services.AddScoped<IEmailVerificationRepository, EmailVerificationRepository>();
         services.AddScoped<IArticleRepository, ArticleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ICourseRepository, CourseRepository>();

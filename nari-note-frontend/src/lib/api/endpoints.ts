@@ -56,6 +56,7 @@ import type {
   UpdateCourseResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
+  VerifyEmailRequest,
 } from './types';
 
 // Articles API
@@ -117,6 +118,10 @@ export const authApi = {
   },
   getCurrentUser: async (data: GetCurrentUserRequest): Promise<AuthResponse> => {
     const response = await apiClient.get<AuthResponse>('/api/auth/me', { params: data });
+    return response;
+  },
+  verifyEmail: async (data: VerifyEmailRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>('/api/auth/verify-email', data);
     return response;
   },
   logout: async (): Promise<void> => {

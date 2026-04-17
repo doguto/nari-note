@@ -57,6 +57,7 @@ import type {
   UpdateCourseResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
+  VerifyEmailRequest,
 } from './types';
 
 // Query Keys
@@ -230,6 +231,18 @@ export function useGetCurrentUser(params: GetCurrentUserRequest, options?: Omit<
   return useQuery<AuthResponse>({
     queryKey: [...queryKeys.auth.getCurrentUser, params],
     queryFn: () => authApi.getCurrentUser(params),
+    ...options,
+  });
+}
+
+export function useVerifyEmail(options?: UseMutationOptions<AuthResponse, Error, VerifyEmailRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<AuthResponse, Error, VerifyEmailRequest>({
+    mutationFn: (data) => authApi.verifyEmail(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      options?.onSuccess?.(...args);
+    },
     ...options,
   });
 }

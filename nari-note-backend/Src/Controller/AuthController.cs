@@ -14,18 +14,21 @@ public class AuthController : ApplicationController
     readonly LogoutService logoutService;
     readonly SignInService signInService;
     readonly SignUpService signUpService;
+    readonly VerifyEmailService verifyEmailService;
 
     public AuthController(
         SignUpService signUpService,
         SignInService signInService,
         GetCurrentUserService getCurrentUserService,
-        LogoutService logoutService
+        LogoutService logoutService,
+        VerifyEmailService verifyEmailService
     )
     {
         this.signUpService = signUpService;
         this.signInService = signInService;
         this.getCurrentUserService = getCurrentUserService;
         this.logoutService = logoutService;
+        this.verifyEmailService = verifyEmailService;
     }
 
     [HttpPost("signup")]
@@ -52,6 +55,15 @@ public class AuthController : ApplicationController
     {
         var request = new GetCurrentUserRequest();
         var response = await getCurrentUserService.ExecuteAsync(request, UserId, UserName);
+        return Ok(response);
+    }
+
+    [HttpPost("verify-email")]
+    [AllowAnonymous]
+    [ValidateModelState]
+    public async Task<ActionResult<AuthResponse>> VerifyEmail([FromBody] VerifyEmailRequest request)
+    {
+        var response = await verifyEmailService.ExecuteAsync(request, Response);
         return Ok(response);
     }
 

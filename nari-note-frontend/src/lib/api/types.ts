@@ -355,3 +355,7 @@ export interface UpdateUserProfileRequest {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdateUserProfileResponse {
 }
+
+export interface VerifyEmailRequest {
+  token: string;
+}
