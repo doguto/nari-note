@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCreateCourse, useUpdateCourse, useGetCourseContent } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
-import { FormPageLayout } from '@/components/molecules';
+import { PageWithoutSidebar } from '@/features/global/organisms';
 import { CourseFormTemplate } from '../templates/CourseFormTemplate';
 
 type CourseFormPageProps =
@@ -182,7 +182,7 @@ export function CourseFormPage(props: CourseFormPageProps) {
   const pageDescription = '講座を作成して、関連する記事をシリーズとしてまとめることができます。';
 
   return (
-    <FormPageLayout title={pageTitle} description={pageDescription}>
+    <PageWithoutSidebar title={pageTitle}>
       <CourseFormTemplate
         name={name}
         showPublishDialog={showPublishDialog}
@@ -195,6 +195,6 @@ export function CourseFormPage(props: CourseFormPageProps) {
         onPublish={handlePublish}
         onPublishDialogChange={setShowPublishDialog}
       />
-    </FormPageLayout>
+    </PageWithoutSidebar>
   );
 }

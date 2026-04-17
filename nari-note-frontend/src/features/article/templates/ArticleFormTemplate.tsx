@@ -72,7 +72,7 @@ export function ArticleFormTemplate({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className="space-y-6 bg-white rounded-lg p-6">
       {validationError && <ErrorAlert message={validationError} />}
       
       <ArticleFormActions

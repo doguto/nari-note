@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCreateArticle, useUpdateArticle, useGetArticleContent } from '@/lib/api';
-import { FormPageLayout } from '@/components/molecules';
+import { PageWithoutSidebar } from '@/features/global/organisms';
 import { ArticleFormTemplate } from '../templates/ArticleFormTemplate';
 import { useAuth } from '@/lib/providers/AuthProvider';
 
@@ -216,7 +216,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
   const contentError = getContentError();
 
   return (
-    <FormPageLayout title={pageTitle} description={pageDescription}>
+    <PageWithoutSidebar title={pageTitle}>
       <ArticleFormTemplate
         title={title}
         body={body}
@@ -238,6 +238,6 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
         onPublish={handlePublish}
         onPublishDialogChange={setShowPublishDialog}
       />
-    </FormPageLayout>
+    </PageWithoutSidebar>
   );
 }

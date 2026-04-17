@@ -9,12 +9,7 @@ import { HeaderNavMobile } from './HeaderNavMobile';
 import { HeaderUserMenu } from './HeaderUserMenu';
 import { HeaderAuthButtons } from './HeaderAuthButtons';
 
-/**
- * ヘッダーコンポーネント
- *
- * 全ページ共通のヘッダー。
- * ロゴ、ナビゲーション、ユーザーメニューを表示します。
- */
+
 export function Header() {
   const [isMounted, setIsMounted] = useState(false);
   const { userId, userName, isLoggedIn, isLoading, refetch } = useAuth();
