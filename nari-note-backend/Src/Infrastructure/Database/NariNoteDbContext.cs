@@ -15,6 +15,7 @@ public class NariNoteDbContext : DbContext
     public DbSet<Course> Courses { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<ArticleTag> ArticleTags { get; set; }
+    public DbSet<Kifu> Kifus { get; set; }
     public DbSet<Like> Likes { get; set; }
     public DbSet<CourseLike> CourseLikes { get; set; }
     public DbSet<Comment> Comments { get; set; }
@@ -313,6 +314,14 @@ public class NariNoteDbContext : DbContext
 
             x.Property(ev => ev.UserId)
              .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<Kifu>(x =>
+        {
+            x.HasOne(k => k.Article)
+             .WithMany(a => a.Kifus)
+             .HasForeignKey(k => k.ArticleId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
