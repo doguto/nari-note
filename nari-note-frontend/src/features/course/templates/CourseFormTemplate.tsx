@@ -1,7 +1,9 @@
 import { PublishSettingsDialog } from '@/features/article/organisms/PublishSettingsDialog';
+import { CourseArticleDto } from '@/lib/api/types';
 import {
   CourseTitleInput,
   CourseFormActions,
+  CourseArticleEditList,
 } from '../organisms';
 
 interface CourseFormTemplateProps {
@@ -10,6 +12,8 @@ interface CourseFormTemplateProps {
   isLoading: boolean;
   isFormDisabled: boolean;
   isEditMode: boolean;
+  courseId?: string;
+  articles?: CourseArticleDto[];
   onNameChange: (value: string) => void;
   onSave: () => void;
   onOpenPublishSettings: () => void;
@@ -24,6 +28,8 @@ export function CourseFormTemplate({
   isLoading,
   isFormDisabled,
   isEditMode,
+  courseId,
+  articles,
   onNameChange,
   onSave,
   onOpenPublishSettings,
@@ -53,6 +59,10 @@ export function CourseFormTemplate({
           onPublish={onPublish}
           isLoading={isLoading}
         />
+      )}
+
+      {isEditMode && articles && courseId && (
+        <CourseArticleEditList articles={articles} courseId={courseId} />
       )}
     </form>
   );

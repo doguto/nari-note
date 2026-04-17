@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import { useGetCourses, useDeleteCourse } from '@/lib/api';
+import { useGetMyCourses, useDeleteCourse } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PageWithSidebar } from '@/features/global/organisms';
 import { MyCoursesListTemplate } from '../templates/MyCoursesListTemplate';
@@ -19,8 +19,7 @@ export function MyCoursesListPage() {
   const { userId } = useAuth();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   
-  const { data, isLoading, error, refetch } = useGetCourses(
-    { limit: 100, offset: 0 },
+  const { data, isLoading, error, refetch } = useGetMyCourses(
     { enabled: !!userId }
   );
   
@@ -64,8 +63,7 @@ export function MyCoursesListPage() {
     );
   }
 
-  // Filter courses by current user
-  const myCourses = data?.courses?.filter(course => course.userId === userId) || [];
+  const myCourses = data?.courses || [];
 
   return (
     <PageWithSidebar>

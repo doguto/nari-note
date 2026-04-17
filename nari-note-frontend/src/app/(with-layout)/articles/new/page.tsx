@@ -10,10 +10,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function NewArticlePage() {
-  return(
+export default async function NewArticlePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ courseId?: string }>;
+}) {
+  const { courseId } = await searchParams;
+
+  return (
     <AuthGuard redirectPath='/articles/new'>
-      <ArticleFormPage />
+      <ArticleFormPage courseId={courseId} />
     </AuthGuard>
   );
 }
