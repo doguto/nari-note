@@ -15,12 +15,7 @@ interface MyArticlesListTemplateProps {
   onDelete: (id: string, title: string) => void;
 }
 
-/**
- * MyArticlesListTemplate - Template Component
- * 
- * マイ記事一覧ページのUI構成とレイアウトを担当
- * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
- */
+
 export function MyArticlesListTemplate({
   activeTab,
   publishedArticles,
@@ -98,6 +93,7 @@ export function MyArticlesListTemplate({
                     title={article.title ?? '無題'}
                     publishedAt={article.publishedAt ?? ''}
                     likeCount={article.likeCount ?? 0}
+                    onDelete={() => onDelete(article.id!, article.title ?? '無題')}
                   />
                 ))
               ) : (

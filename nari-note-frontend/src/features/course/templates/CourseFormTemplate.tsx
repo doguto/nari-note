@@ -17,12 +17,7 @@ interface CourseFormTemplateProps {
   onPublishDialogChange: (open: boolean) => void;
 }
 
-/**
- * CourseFormTemplate - Template Component
- * 
- * 講座作成・編集フォームのUI構成とレイアウトを担当
- * Organism/Moleculeを組み合わせてレスポンシブなUIを構築
- */
+
 export function CourseFormTemplate({
   name,
   showPublishDialog,

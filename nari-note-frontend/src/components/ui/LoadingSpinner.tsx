@@ -3,12 +3,6 @@ interface LoadingSpinnerProps {
   text?: string;
 }
 
-/**
- * LoadingSpinner - Atom Component
- * 
- * ローディング表示の最小単位コンポーネント
- * データ取得中などに表示するローディングインジケーター
- */
 export function LoadingSpinner({ size = 'md', text = '読み込み中...' }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'h-4 w-4',
@@ -17,7 +11,7 @@ export function LoadingSpinner({ size = 'md', text = '読み込み中...' }: Loa
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-8">
+    <div className="flex flex-col items-center justify-center py-8 px-10">
       <div 
         className={`animate-spin rounded-full border-b-2 border-brand-primary ${sizeClasses[size]}`}
         role="status"
