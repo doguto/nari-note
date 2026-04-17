@@ -6,10 +6,10 @@ import Link from 'next/link';
 
 interface MyCoursesListTemplateProps {
   courses: CourseDto[];
-  deletingId: number | null;
+  deletingId: string | null;
   onNewCourse: () => void;
-  onDelete: (id: number, name: string) => void;
-  onEdit: (id: number) => void;
+  onDelete: (id: string, name: string) => void;
+  onEdit: (id: string) => void;
 }
 
 /**

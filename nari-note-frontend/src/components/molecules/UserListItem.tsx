@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { UserAvatar } from '@/components/ui';
 
 interface UserListItemProps {
-  userId: number;
+  userId: string;
   username: string;
   profileImage?: string;
 }

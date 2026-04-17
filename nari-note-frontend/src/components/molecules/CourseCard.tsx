@@ -3,9 +3,9 @@ import { Heart, BookOpen } from 'lucide-react';
 import { UserAvatarLink } from '@/components/molecules';
 
 interface CourseCardProps {
-  id: number;
+  id: string;
   name: string;
-  userId: number;
+  userId: string;
   userName: string;
   articleCount: number;
   likeCount: number;

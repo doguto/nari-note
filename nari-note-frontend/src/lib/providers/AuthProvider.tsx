@@ -4,7 +4,7 @@ import { createContext, useContext, ReactNode } from 'react';
 import { useGetCurrentUser } from '@/lib/api';
 
 interface AuthContextType {
-  userId: number | null;
+  userId: string | null;
   userName: string | null;
   isLoggedIn: boolean;
   isLoading: boolean;

@@ -3,10 +3,10 @@
 
 
 export interface ArticleDto {
-  id: number;
+  id: string;
   title: string;
   body: string;
-  authorId: number;
+  authorId: string;
   authorName: string;
   tags: string[];
   likeCount: number;
@@ -17,31 +17,31 @@ export interface ArticleDto {
 }
 
 export interface AuthResponse {
-  userId?: number;
+  userId?: string;
   userName?: string;
 }
 
 export interface CommentDto {
   id: number;
-  userId: number;
+  userId: string;
   userName: string;
   message: string;
   createdAt: string;
 }
 
 export interface CourseArticleDto {
-  id: number;
+  id: string;
   title: string;
   articleOrder?: number;
   isPublished: boolean;
 }
 
 export interface CourseDto {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   userName?: string;
   name: string;
-  articleIds: number[];
+  articleIds: string[];
   articleNames: string[];
   likeCount: number;
   isPublished: boolean;
@@ -51,8 +51,8 @@ export interface CourseDto {
 export interface CreateArticleRequest {
   title: string;
   body: string;
-  authorId: number;
-  courseId?: number;
+  authorId: string;
+  courseId?: string;
   articleOrder?: number;
   tags: string[];
   isPublished: boolean;
@@ -60,12 +60,12 @@ export interface CreateArticleRequest {
 }
 
 export interface CreateArticleResponse {
-  id: number;
+  id: string;
   createdAt: string;
 }
 
 export interface CreateCommentRequest {
-  articleId?: number;
+  articleId?: string;
   message: string;
 }
 
@@ -83,11 +83,11 @@ export interface CreateCourseResponse {
 }
 
 export interface DeleteArticleRequest {
-  id?: number;
+  id?: string;
 }
 
 export interface DeleteCourseRequest {
-  id?: number;
+  id?: string;
 }
 
 export interface ErrorResponse {
@@ -97,20 +97,20 @@ export interface ErrorResponse {
 }
 
 export interface FollowerUserDto {
-  id: number;
+  id: string;
   username: string;
   profileImage?: string;
 }
 
 export interface GetArticleContentRequest {
-  id?: number;
+  id?: string;
 }
 
 export interface GetArticleContentResponse {
-  id: number;
+  id: string;
   title: string;
   body: string;
-  authorId: number;
+  authorId: string;
   authorName: string;
   tags: string[];
   likeCount: number;
@@ -120,16 +120,16 @@ export interface GetArticleContentResponse {
   createdAt: string;
   updatedAt: string;
   comments: CommentDto[];
-  courseId?: number;
+  courseId?: string;
   courseName?: string;
 }
 
 export interface GetArticlesByAuthorRequest {
-  authorId?: number;
+  authorId?: string;
 }
 
 export interface GetArticlesByAuthorResponse {
-  authorId: number;
+  authorId: string;
   authorName: string;
   articles: ArticleDto[];
   totalCount: number;
@@ -154,13 +154,13 @@ export interface GetArticlesResponse {
 }
 
 export interface GetCourseContentRequest {
-  id?: number;
+  id?: string;
 }
 
 export interface GetCourseContentResponse {
-  id: number;
+  id: string;
   name: string;
-  userId: number;
+  userId: string;
   userName: string;
   likeCount: number;
   isPublished: boolean;
@@ -170,11 +170,11 @@ export interface GetCourseContentResponse {
 }
 
 export interface GetCoursesByAuthorRequest {
-  authorId?: number;
+  authorId?: string;
 }
 
 export interface GetCoursesByAuthorResponse {
-  authorId: number;
+  authorId: string;
   authorName: string;
   courses: CourseDto[];
   totalCount: number;
@@ -203,7 +203,7 @@ export interface GetDraftArticlesResponse {
 }
 
 export interface GetFollowersRequest {
-  userId?: number;
+  userId?: string;
 }
 
 export interface GetFollowersResponse {
@@ -211,7 +211,7 @@ export interface GetFollowersResponse {
 }
 
 export interface GetFollowingsRequest {
-  userId?: number;
+  userId?: string;
 }
 
 export interface GetFollowingsResponse {
@@ -224,11 +224,11 @@ export interface GetHealthResponse {
 }
 
 export interface GetLikedArticlesRequest {
-  userId?: number;
+  userId?: string;
 }
 
 export interface GetLikedArticlesResponse {
-  userId: number;
+  userId: string;
   articles: ArticleDto[];
   totalCount: number;
 }
@@ -242,11 +242,11 @@ export interface GetPopularTagsResponse {
 }
 
 export interface GetUserProfileRequest {
-  id?: number;
+  id?: string;
 }
 
 export interface GetUserProfileResponse {
-  id: number;
+  id: string;
   username: string;
   bio?: string;
   createdAt: string;
@@ -302,7 +302,7 @@ export interface TagDto {
 }
 
 export interface ToggleFollowRequest {
-  followingId?: number;
+  followingId?: string;
 }
 
 export interface ToggleFollowResponse {
@@ -311,7 +311,7 @@ export interface ToggleFollowResponse {
 }
 
 export interface ToggleLikeRequest {
-  articleId?: number;
+  articleId?: string;
 }
 
 export interface ToggleLikeResponse {
@@ -320,7 +320,7 @@ export interface ToggleLikeResponse {
 }
 
 export interface UpdateArticleRequest {
-  id?: number;
+  id?: string;
   title?: string;
   body?: string;
   tags?: string[];
@@ -330,19 +330,19 @@ export interface UpdateArticleRequest {
 }
 
 export interface UpdateArticleResponse {
-  id: number;
+  id: string;
   updatedAt: string;
 }
 
 export interface UpdateCourseRequest {
-  id?: number;
+  id?: string;
   name?: string;
   isPublished?: boolean;
   publishedAt?: string;
 }
 
 export interface UpdateCourseResponse {
-  id: number;
+  id: string;
   updatedAt: string;
 }
 

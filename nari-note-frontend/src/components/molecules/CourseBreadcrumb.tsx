@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { BookOpen, ChevronRight } from 'lucide-react';
 
 interface CourseBreadcrumbProps {
-  courseId: number;
+  courseId: string;
   courseName: string;
 }
 

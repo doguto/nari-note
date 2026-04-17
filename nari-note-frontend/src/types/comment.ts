@@ -4,7 +4,7 @@
 
 export interface Comment {
   id: number;
-  userId: number;
+  userId: string;
   userName: string;
   message: string;
   createdAt: string;

@@ -6,7 +6,7 @@ import { PageWithSidebar } from '@/features/global/organisms';
 import { CourseDetailTemplate } from '../templates';
 
 interface CourseDetailPageProps {
-  courseId: number;
+  courseId: string;
 }
 
 /**

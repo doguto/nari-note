@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 
 interface FollowersModalProps {
-  userId: number;
+  userId: string;
   isOpen: boolean;
   onClose: () => void;
 }

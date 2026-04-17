@@ -11,7 +11,7 @@ import { User, FileText, BookOpen, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface HeaderUserMenuProps {
-  userId: number;
+  userId: string;
   userName: string;
   onLogout: () => void;
   isLoggingOut: boolean;

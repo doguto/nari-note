@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useCreateComment } from '@/lib/api';
 
 interface CommentFormProps {
-  articleId: number;
+  articleId: string;
   onSuccess?: () => void;
 }
 

@@ -6,7 +6,7 @@ import { UserProfilePage } from '@/features/user/pages';
 
 export default function UserProfilePageRoute() {
   const params = useParams();
-  const userId = Number(params.id);
+  const userId = params.id as string;
 
   return <UserProfilePage userId={userId} />;
 }

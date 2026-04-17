@@ -9,7 +9,7 @@ import { CourseFormTemplate } from '../templates/CourseFormTemplate';
 
 type CourseFormPageProps =
   | { mode: 'create' }
-  | { mode: 'edit'; courseId: number };
+  | { mode: 'edit'; courseId: string };
 
 /**
  * CourseFormPage - Page Component
@@ -29,7 +29,7 @@ export function CourseFormPage(props: CourseFormPageProps) {
   
   // 編集モード時の講座データ取得
   const { data: course, isLoading: isLoadingCourse, error: courseError, refetch } = useGetCourseContent(
-    { id: courseId || 0 },
+    { id: courseId || '' },
     { enabled: !!isEditMode }
   );
   

@@ -39,7 +39,7 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
 
   // ユーザー情報取得 (initialUserDataがない場合のみフェッチ)
   const { data: fetchedUser, isLoading, error: loadError, refetch } = useGetUserProfile(
-    { id: userId || 0 },
+    { id: userId || '' },
     { enabled: !!userId && !initialUserData }
   );
 

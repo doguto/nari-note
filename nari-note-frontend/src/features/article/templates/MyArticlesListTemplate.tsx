@@ -9,10 +9,10 @@ interface MyArticlesListTemplateProps {
   activeTab: 'published' | 'drafts';
   publishedArticles: ArticleDto[];
   draftArticles: ArticleDto[];
-  deletingId: number | null;
+  deletingId: string | null;
   onTabChange: (tab: 'published' | 'drafts') => void;
   onNewArticle: () => void;
-  onDelete: (id: number, title: string) => void;
+  onDelete: (id: string, title: string) => void;
 }
 
 /**

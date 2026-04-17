@@ -8,7 +8,7 @@ import { ArticleFormTemplate } from '../templates/ArticleFormTemplate';
 import { useAuth } from '@/lib/providers/AuthProvider';
 
 interface ArticleFormPageProps {
-  articleId?: number;
+  articleId?: string;
   mode?: 'create' | 'edit';
 }
 
@@ -37,7 +37,7 @@ export function ArticleFormPage({ articleId, mode = 'create' }: ArticleFormPageP
 
   // 編集モード時の記事データ取得
   const { data: article, isLoading: isLoadingArticle, error: articleError, refetch } = useGetArticleContent(
-    { id: articleId || 0 },
+    { id: articleId || '' },
     { enabled: !!isEditMode }
   );
   
