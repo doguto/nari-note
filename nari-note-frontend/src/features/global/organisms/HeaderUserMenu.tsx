@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,6 +7,14 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { UserAvatar } from '@/components/ui';
 import { User, FileText, BookOpen, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,14 +26,46 @@ interface HeaderUserMenuProps {
   isLoggingOut: boolean;
 }
 
-/**
- * ヘッダーユーザーメニューコンポーネント
- *
- * ログイン時のマイページドロップダウンメニューとログアウトボタンを表示します。
- */
+
 export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: HeaderUserMenuProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleLogoutConfirm = () => {
+    setIsModalOpen(false);
+    onLogout();
+  };
+
   return (
     <>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: 'serif' }}>ログアウトしますか？</DialogTitle>
+            <DialogDescription style={{ fontFamily: 'serif' }}>
+              ログアウトするとマイページへのアクセスには再度ログインが必要です。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setIsModalOpen(false)}
+              disabled={isLoggingOut}
+              style={{ fontFamily: 'serif' }}
+            >
+              キャンセル
+            </Button>
+            <Button
+              onClick={handleLogoutConfirm}
+              disabled={isLoggingOut}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              style={{ fontFamily: 'serif' }}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              {isLoggingOut ? 'ログアウト中...' : 'ログアウト'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -80,7 +121,7 @@ export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: Hea
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-brand-text-dark" />
           <DropdownMenuItem
-            onClick={onLogout}
+            onClick={() => setIsModalOpen(true)}
             disabled={isLoggingOut}
             className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
             style={{ fontFamily: 'serif' }}
