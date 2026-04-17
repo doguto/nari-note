@@ -1,4 +1,5 @@
-﻿using NariNoteBackend.Domain.Entity;
+﻿using Microsoft.EntityFrameworkCore;
+using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Infrastructure.Database;
@@ -46,6 +47,14 @@ public class KifuRepository : IKifuRepository
         if (kifu == null) return;
 
         context.Kifus.Remove(kifu);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task ReplaceAllByArticleIdAsync(ArticleId articleId, List<Kifu> kifus)
+    {
+        var existing = await context.Kifus.Where(k => k.ArticleId == articleId).ToListAsync();
+        context.Kifus.RemoveRange(existing);
+        context.Kifus.AddRange(kifus);
         await context.SaveChangesAsync();
     }
 }

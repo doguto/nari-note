@@ -25,7 +25,6 @@ import type {
   GetCourseContentResponse,
   GetCoursesByAuthorRequest,
   GetCoursesByAuthorResponse,
-  GetMyCoursesResponse,
   GetCoursesRequest,
   GetCoursesResponse,
   GetCurrentUserRequest,
@@ -38,6 +37,7 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
+  GetMyCoursesResponse,
   GetPopularTagsRequest,
   GetPopularTagsResponse,
   GetUserProfileRequest,
@@ -77,8 +77,8 @@ export const queryKeys = {
   courses: {
     getCourses: ['courses', 'getCourses'] as const,
     searchCourses: ['courses', 'searchCourses'] as const,
-    getCoursesByAuthor: ['courses', 'getCoursesByAuthor'] as const,
     getMyCourses: ['courses', 'getMyCourses'] as const,
+    getCoursesByAuthor: ['courses', 'getCoursesByAuthor'] as const,
     getCourseContent: ['courses', 'getCourseContent'] as const,
     getCourseContentForEdit: ['courses', 'getCourseContentForEdit'] as const,
   },
@@ -279,18 +279,18 @@ export function useSearchCourses(params: SearchCoursesRequest, options?: Omit<Us
   });
 }
 
-export function useGetCoursesByAuthor(params: GetCoursesByAuthorRequest, options?: Omit<UseQueryOptions<GetCoursesByAuthorResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<GetCoursesByAuthorResponse>({
-    queryKey: [...queryKeys.courses.getCoursesByAuthor, params],
-    queryFn: () => coursesApi.getCoursesByAuthor(params),
-    ...options,
-  });
-}
-
 export function useGetMyCourses(options?: Omit<UseQueryOptions<GetMyCoursesResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetMyCoursesResponse>({
     queryKey: queryKeys.courses.getMyCourses,
     queryFn: () => coursesApi.getMyCourses(),
+    ...options,
+  });
+}
+
+export function useGetCoursesByAuthor(params: GetCoursesByAuthorRequest, options?: Omit<UseQueryOptions<GetCoursesByAuthorResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCoursesByAuthorResponse>({
+    queryKey: [...queryKeys.courses.getCoursesByAuthor, params],
+    queryFn: () => coursesApi.getCoursesByAuthor(params),
     ...options,
   });
 }
@@ -315,10 +315,10 @@ export function useGetCourseContent(params: GetCourseContentRequest, options?: O
   });
 }
 
-export function useGetCourseContentForEdit(params: GetCourseContentRequest, options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetCourseContentForEdit(options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetCourseContentResponse>({
-    queryKey: [...queryKeys.courses.getCourseContentForEdit, params],
-    queryFn: () => coursesApi.getCourseContentForEdit(params),
+    queryKey: queryKeys.courses.getCourseContentForEdit,
+    queryFn: () => coursesApi.getCourseContentForEdit(),
     ...options,
   });
 }

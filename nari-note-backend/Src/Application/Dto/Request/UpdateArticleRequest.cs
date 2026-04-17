@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using NariNoteBackend.Application.Dto;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Filter;
 
@@ -15,6 +16,7 @@ public class UpdateArticleRequest
     public string? Body { get; set; }
     [ValidTagNames]
     public List<string>? Tags { get; set; }
+    public List<KifuDto>? Kifus { get; set; }
     public bool? IsPublished { get; set; }
     public DateTime? PublishedAt { get; set; }
     public int? ArticleOrder { get; set; }

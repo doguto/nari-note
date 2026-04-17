@@ -2,6 +2,7 @@ using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -9,13 +10,16 @@ public class CreateArticleService
 {
     readonly IArticleRepository articleRepository;
     readonly ICourseRepository courseRepository;
+    readonly IKifuRepository kifuRepository;
 
     public CreateArticleService(
         IArticleRepository articleRepository,
-        ICourseRepository courseRepository)
+        ICourseRepository courseRepository,
+        IKifuRepository kifuRepository)
     {
         this.articleRepository = articleRepository;
         this.courseRepository = courseRepository;
+        this.kifuRepository = kifuRepository;
     }
 
     public async Task<CreateArticleResponse> ExecuteAsync(CreateArticleRequest request)
@@ -53,10 +57,20 @@ public class CreateArticleService
 
         var created = await articleRepository.CreateAsync(article);
 
-        // タグと一緒に記事を更新（1回のDB操作に統合）
         if (request.Tags.Count > 0)
         {
             await articleRepository.UpdateWithTagAsync(created, request.Tags);
+        }
+
+        if (request.Kifus.Count > 0)
+        {
+            var kifus = request.Kifus.Select(k => new Kifu
+            {
+                ArticleId = created.Id,
+                KifuText = k.KifuText,
+                SortOrder = k.SortOrder
+            }).ToList();
+            await kifuRepository.ReplaceAllByArticleIdAsync(created.Id, kifus);
         }
 
         return new CreateArticleResponse

@@ -10,6 +10,7 @@ public class ArticleDto
     public UserId AuthorId { get; set; }
     public required string AuthorName { get; set; }
     public List<string> Tags { get; set; } = new();
+    public List<KifuDto> Kifus { get; set; } = new();
     public int LikeCount { get; set; }
     public bool IsPublished { get; set; }
     public DateTime? PublishedAt { get; set; }

@@ -5,4 +5,5 @@ namespace NariNoteBackend.Domain.Repository;
 
 public interface IKifuRepository : IRepository<Kifu, KifuId>
 {
+    Task ReplaceAllByArticleIdAsync(ArticleId articleId, List<Kifu> kifus);
 }

@@ -9,6 +9,7 @@ export interface ArticleDto {
   authorId: string;
   authorName: string;
   tags: string[];
+  kifus: KifuDto[];
   likeCount: number;
   isPublished: boolean;
   publishedAt?: string;
@@ -55,6 +56,7 @@ export interface CreateArticleRequest {
   courseId?: string;
   articleOrder?: number;
   tags: string[];
+  kifus: KifuDto[];
   isPublished: boolean;
   publishedAt?: string;
 }
@@ -180,11 +182,6 @@ export interface GetCoursesByAuthorResponse {
   totalCount: number;
 }
 
-export interface GetMyCoursesResponse {
-  courses: CourseDto[];
-  totalCount: number;
-}
-
 export interface GetCoursesRequest {
   limit: number;
   offset: number;
@@ -238,6 +235,11 @@ export interface GetLikedArticlesResponse {
   totalCount: number;
 }
 
+export interface GetMyCoursesResponse {
+  courses: CourseDto[];
+  totalCount: number;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface GetPopularTagsRequest {
 }
@@ -264,6 +266,11 @@ export interface GetUserProfileResponse {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface HealthCheckRequest {
+}
+
+export interface KifuDto {
+  kifuText: string;
+  sortOrder: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -329,6 +336,7 @@ export interface UpdateArticleRequest {
   title?: string;
   body?: string;
   tags?: string[];
+  kifus?: KifuDto[];
   isPublished?: boolean;
   publishedAt?: string;
   articleOrder?: number;
