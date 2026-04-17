@@ -322,6 +322,15 @@ public class NariNoteDbContext : DbContext
              .WithMany(a => a.Kifus)
              .HasForeignKey(k => k.ArticleId)
              .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(k => k.Id)
+             .HasValueGenerator<KifuIdValueGenerator>();
+
+            x.Property(k => k.Id)
+             .HasVogenConversion();
+
+            x.Property(k => k.ArticleId)
+             .HasVogenConversion();
         });
     }
 }
