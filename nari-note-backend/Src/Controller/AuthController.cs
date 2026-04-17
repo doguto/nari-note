@@ -36,7 +36,7 @@ public class AuthController : ApplicationController
     [ValidateModelState]
     public async Task<ActionResult<AuthResponse>> SignUp([FromBody] SignUpRequest request)
     {
-        var response = await signUpService.ExecuteAsync(request, Response);
+        var response = await signUpService.ExecuteAsync(request);
         return Ok(response);
     }
 

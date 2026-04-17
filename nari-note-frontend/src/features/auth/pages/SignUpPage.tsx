@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useSignUp } from '@/lib/api';
-import { useAuth } from '@/lib/providers/AuthProvider';
 import { AuthPageLayout } from '@/components/molecules';
 import { SignUpTemplate } from '../templates/SignUpTemplate';
 
@@ -15,20 +13,16 @@ import { SignUpTemplate } from '../templates/SignUpTemplate';
  * バックエンドとの通信等の非UIロジックを持つ
  */
 export function SignUpPage() {
-  const router = useRouter();
-  const { refetch } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState<string>();
-  
+  const [isCompleted, setIsCompleted] = useState(false);
+
   const signUpMutation = useSignUp({
-    onSuccess: (data) => {
-      if (data.userId) {
-        refetch();
-      }
-      router.push('/');
+    onSuccess: () => {
+      setIsCompleted(true);
     },
     onError: (err) => {
       if (err instanceof Error) {
@@ -104,6 +98,7 @@ export function SignUpPage() {
         passwordConfirm={passwordConfirm}
         error={error}
         isLoading={signUpMutation.isPending}
+        isCompleted={isCompleted}
         onNameChange={setName}
         onEmailChange={setEmail}
         onPasswordChange={setPassword}
