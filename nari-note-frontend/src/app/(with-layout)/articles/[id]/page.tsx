@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const { id } = await params;
 
   try {
-    const article = await getArticleContent({ id: Number(id) });
+    const article = await getArticleContent({ id });
     const plainText = article.body.replace(/<[^>]+>/g, '');
     const description = plainText.slice(0, 160);
 
@@ -35,5 +35,5 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 export default async function ArticleDetailPageRoute({ params }: ArticlePageProps) {
   const { id } = await params;
 
-  return <ArticleDetailPage articleId={Number(id)} />;
+  return <ArticleDetailPage articleId={id} />;
 }

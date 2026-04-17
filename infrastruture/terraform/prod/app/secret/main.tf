@@ -27,3 +27,9 @@ resource "aws_ssm_parameter" "jwt_audience" {
   type  = "String"
   value = var.jwt_audience
 }
+
+resource "aws_ssm_parameter" "resend_api_key" {
+  name  = "/${var.app_name}/app/resend_api_token"
+  type  = "SecureString"
+  value = var.resend_api_key
+}

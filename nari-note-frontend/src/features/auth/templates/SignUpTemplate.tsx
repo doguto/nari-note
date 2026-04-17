@@ -10,6 +10,7 @@ interface SignUpTemplateProps {
   passwordConfirm: string;
   error?: string;
   isLoading: boolean;
+  isCompleted?: boolean;
   onNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
@@ -30,12 +31,35 @@ export function SignUpTemplate({
   passwordConfirm,
   error,
   isLoading,
+  isCompleted,
   onNameChange,
   onEmailChange,
   onPasswordChange,
   onPasswordConfirmChange,
   onSubmit,
 }: SignUpTemplateProps) {
+  if (isCompleted) {
+    return (
+      <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-lg px-10 py-12 text-center">
+        <FormTitle>登録完了</FormTitle>
+        <div className="mt-6 space-y-4">
+          <p className="text-gray-700">
+            確認メールを送信しました。
+          </p>
+          <p className="text-sm text-gray-500">
+            <span className="font-medium text-gray-700">{email}</span> 宛にメールをお送りしました。
+            メールボックスをご確認の上、記載のリンクからメールアドレスを認証してください。
+          </p>
+        </div>
+        <div className="mt-8">
+          <Link href="/login" className="text-sm text-brand-primary hover:underline">
+            ログインページへ
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-lg px-10 py-12">
       <FormTitle>新規登録</FormTitle>

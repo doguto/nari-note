@@ -8,7 +8,7 @@ import { PageWithSidebar } from '@/features/global/organisms';
 import { UserProfileTemplate } from '../templates/UserProfileTemplate';
 
 interface UserProfilePageProps {
-  userId: number;
+  userId: string;
 }
 
 /**

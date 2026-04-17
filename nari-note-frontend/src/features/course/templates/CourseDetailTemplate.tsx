@@ -16,7 +16,7 @@ export function CourseDetailTemplate({ course }: CourseDetailTemplateProps) {
     <div className="max-w-4xl mx-auto">
       <CourseDetailHeader
         courseName={course.name || '無題の講座'}
-        userId={course.userId || 0}
+        userId={course.userId || ''}
         userName={course.userName || '不明なユーザー'}
         likeCount={course.likeCount || 0}
         articleCount={course.articles?.length || 0}

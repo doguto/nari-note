@@ -3,10 +3,10 @@ import { Heart } from 'lucide-react';
 import { UserAvatarLink } from '@/components/molecules';
 
 interface ArticleCardProps {
-  id: number;
+  id: string;
   title: string;
   author: string;
-  authorId: number;
+  authorId: string;
   tags: string[];
   likeCount: number;
   date: string;

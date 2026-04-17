@@ -28,6 +28,8 @@ public class User : EntityBase
     [MaxLength(255)]
     public required string PasswordHash { get; set; }
 
+    public bool IsEmailVerified { get; set; } = false;
+
     // Navigation Properties
     public List<Article> Articles { get; set; } = new();
     public List<Course> Courses { get; set; } = new();
@@ -37,4 +39,5 @@ public class User : EntityBase
     public List<Follow> Followings { get; set; } = new();  // 自分がフォローしているユーザーとの関係
     public List<Follow> Followers { get; set; } = new();   // 自分をフォローしているユーザーとの関係
     public List<Notification> Notifications { get; set; } = new();
+    public List<EmailVerification> EmailVerifications { get; set; } = new();
 }

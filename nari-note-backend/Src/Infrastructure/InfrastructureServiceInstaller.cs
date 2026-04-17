@@ -1,9 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Infrastructure.Database;
+using NariNoteBackend.Infrastructure.Gateway;
 using NariNoteBackend.Infrastructure.Repository;
 using NariNoteBackend.Infrastructure.Security;
+using Resend;
 
 namespace NariNoteBackend.Infrastructure;
 
@@ -20,15 +23,16 @@ public static class InfrastructureServiceInstaller
         var connectionString =
             configuration.GetConnectionString("DefaultConnection")
             ?? $"Host={configuration["host"]};" +
-               $"Port={configuration["port"]};" +
-               $"Database={configuration["name"]};" +
-               $"Username={configuration["username"]};" +
-               $"Password={configuration["password"]}";
+            $"Port={configuration["port"]};" +
+            $"Database={configuration["name"]};" +
+            $"Username={configuration["username"]};" +
+            $"Password={configuration["password"]}";
         services.AddDbContext<NariNoteDbContext>(
             options => options.UseNpgsql(connectionString)
         );
 
         // Register repositories
+        services.AddScoped<IEmailVerificationRepository, EmailVerificationRepository>();
         services.AddScoped<IArticleRepository, ArticleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ICourseRepository, CourseRepository>();
@@ -41,5 +45,12 @@ public static class InfrastructureServiceInstaller
         // Register helpers
         services.AddScoped<IJwtHelper, JwtHelper>();
         services.AddScoped<ICookieOptionsHelper, CookieOptionsHelper>();
+
+        // Register gateways
+        services.AddOptions();
+        services.AddHttpClient<ResendClient>();
+        services.Configure<ResendClientOptions>(o => { o.ApiToken = configuration["resend_api_token"]!; });
+        services.AddTransient<IResend, ResendClient>();
+        services.AddScoped<IEmailHelper, ResendEmailHelper>();
     }
 }

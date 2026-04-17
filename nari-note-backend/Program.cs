@@ -11,8 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 if (!builder.Environment.IsDevelopment())
 {
-    builder.Configuration.AddSystemsManager("/nari-note/app", optional: false);
-    builder.Configuration.AddSystemsManager("/nari-note/db", optional: false);
+    builder.Configuration.AddSystemsManager("/nari-note/app", false);
+    builder.Configuration.AddSystemsManager("/nari-note/db", false);
+}
+else
+{
+    builder.Configuration.AddJsonFile("secret.json", optional: true, reloadOnChange: false);
 }
 
 // CORS設定
@@ -30,6 +34,7 @@ builder.Services.AddCors(options =>
 // Serilogの設定をsettings.jsonから取り込み
 builder.Host.UseSerilog((context, configuration) => { configuration.ReadFrom.Configuration(context.Configuration); });
 
+// ValueObject の設定
 builder.Services.AddControllers(options => { options.ModelBinderProviders.Insert(0, new ValueObjectModelBinderProvider()); })
        .AddJsonOptions(options =>
        {

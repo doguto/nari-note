@@ -17,7 +17,7 @@ import { MyCoursesListTemplate } from '../templates/MyCoursesListTemplate';
 export function MyCoursesListPage() {
   const router = useRouter();
   const { userId } = useAuth();
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   const { data, isLoading, error, refetch } = useGetCourses(
     { limit: 100, offset: 0 },
@@ -36,7 +36,7 @@ export function MyCoursesListPage() {
     },
   });
 
-  const handleDelete = (id: number, name: string) => {
+  const handleDelete = (id: string, name: string) => {
     if (window.confirm(`「${name}」を削除してもよろしいですか？`)) {
       setDeletingId(id);
       deleteCourse.mutate({ id });
@@ -47,7 +47,7 @@ export function MyCoursesListPage() {
     router.push('/courses/new');
   };
 
-  const handleEdit = (id: number) => {
+  const handleEdit = (id: string) => {
     router.push(`/courses/${id}/edit`);
   };
 

@@ -15,7 +15,7 @@ import { DraftArticleListTemplate } from '../templates/DraftArticleListTemplate'
  */
 export function DraftArticleListPage() {
   const router = useRouter();
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   const { data, isLoading, error, refetch } = useGetDraftArticles({});
   
@@ -31,7 +31,7 @@ export function DraftArticleListPage() {
     },
   });
 
-  const handleDelete = (id: number, title: string) => {
+  const handleDelete = (id: string, title: string) => {
     if (window.confirm(`「${title}」を削除してもよろしいですか？`)) {
       setDeletingId(id);
       deleteArticle.mutate({ id });

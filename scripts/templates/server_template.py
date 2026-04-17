@@ -10,7 +10,7 @@ from .base import BaseTemplate
 class ServerTemplate(BaseTemplate):
     """server.ts生成用テンプレート（GETエンドポイントのみ）"""
 
-    def __init__(self, value_object_types: set[str], class_map: Dict[str, CSharpClass]):
+    def __init__(self, value_object_types: Dict[str, str], class_map: Dict[str, CSharpClass]):
         super().__init__(value_object_types)
         self.class_map = class_map
 

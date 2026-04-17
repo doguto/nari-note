@@ -6,7 +6,7 @@ import { UserAvatar } from '@/components/ui';
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 
 interface UserAvatarLinkProps {
-  userId: number;
+  userId: string;
   username: string;
   profileImage?: string;
   size?: AvatarSize;

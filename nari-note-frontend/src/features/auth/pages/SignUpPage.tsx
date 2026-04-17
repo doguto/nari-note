@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useSignUp } from '@/lib/api';
-import { useAuth } from '@/lib/providers/AuthProvider';
 import { AuthPageLayout } from '@/components/molecules';
 import { SignUpTemplate } from '../templates/SignUpTemplate';
 
@@ -15,20 +13,16 @@ import { SignUpTemplate } from '../templates/SignUpTemplate';
  * バックエンドとの通信等の非UIロジックを持つ
  */
 export function SignUpPage() {
-  const router = useRouter();
-  const { refetch } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState<string>();
-  
+  const [isCompleted, setIsCompleted] = useState(false);
+
   const signUpMutation = useSignUp({
-    onSuccess: (data) => {
-      if (data.userId) {
-        refetch();
-      }
-      router.push('/');
+    onSuccess: () => {
+      setIsCompleted(true);
     },
     onError: (err) => {
       if (err instanceof Error) {
@@ -63,26 +57,6 @@ export function SignUpPage() {
       return;
     }
 
-    if (!/[a-z]/.test(password)) {
-      setError('パスワードは英小文字（a-z）を1文字以上含む必要があります');
-      return;
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      setError('パスワードは英大文字（A-Z）を1文字以上含む必要があります');
-      return;
-    }
-
-    if (!/\d/.test(password)) {
-      setError('パスワードは数字（0-9）を1文字以上含む必要があります');
-      return;
-    }
-
-    if (!/[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>/?]/.test(password)) {
-      setError('パスワードは記号（!@#$%^&*等）を1文字以上含む必要があります');
-      return;
-    }
-
     if (password !== passwordConfirm) {
       setError('パスワードが一致しません');
       return;
@@ -104,6 +78,7 @@ export function SignUpPage() {
         passwordConfirm={passwordConfirm}
         error={error}
         isLoading={signUpMutation.isPending}
+        isCompleted={isCompleted}
         onNameChange={setName}
         onEmailChange={setEmail}
         onPasswordChange={setPassword}
