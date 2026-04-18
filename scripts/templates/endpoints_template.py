@@ -87,7 +87,14 @@ import type {"""
         # API関数を生成
         send_body = ep.has_body_param or (not path_params and request_type != "void")
 
-        if request_type == "void":
+        # request_type が void でもパスパラメータがある場合はインライン型を使用
+        if request_type == "void" and path_params:
+            inline_type = "{ " + ", ".join(f"{p}: string" for p in path_params) + " }"
+            effective_request_type = inline_type
+        else:
+            effective_request_type = request_type
+
+        if effective_request_type == "void":
             lines.append(f"  {func_name}: async (): Promise<{response_type}> => {{")
             if ep.method == "DELETE":
                 lines.append(f"    await apiClient.delete({url_expression});")
@@ -98,7 +105,7 @@ import type {"""
                 lines.append(f"    const response = await apiClient.{ep.method.lower()}<{response_type}>({url_expression});")
                 lines.append("    return response;")
         else:
-            lines.append(f"  {func_name}: async (data: {request_type}): Promise<{response_type}> => {{")
+            lines.append(f"  {func_name}: async (data: {effective_request_type}): Promise<{response_type}> => {{")
             if ep.method == "DELETE":
                 lines.append(f"    await apiClient.delete({url_expression});")
             elif ep.method == "GET":

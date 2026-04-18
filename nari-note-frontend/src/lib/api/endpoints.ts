@@ -157,7 +157,7 @@ export const coursesApi = {
     const response = await apiClient.get<GetCourseContentResponse>(`/api/courses/${data.id}`);
     return response;
   },
-  getCourseContentForEdit: async (): Promise<GetCourseContentResponse> => {
+  getCourseContentForEdit: async (data: { id: string }): Promise<GetCourseContentResponse> => {
     const response = await apiClient.get<GetCourseContentResponse>(`/api/courses/${data.id}/for-edit`);
     return response;
   },
