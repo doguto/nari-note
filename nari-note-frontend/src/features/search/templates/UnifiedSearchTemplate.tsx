@@ -1,8 +1,15 @@
+import { useState } from 'react';
 import { SearchBar } from '@/components/molecules';
 import { ArticleCard, CourseCard } from '@/components/molecules';
 import { EmptyState } from '@/components/ui';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ArticleThumbnailDto, CourseDto } from '@/lib/api/types';
 
 interface UnifiedSearchTemplateProps {
@@ -29,23 +36,40 @@ export function UnifiedSearchTemplate({
   onKeywordChange,
   onSearch,
 }: UnifiedSearchTemplateProps) {
+  const [activeTab, setActiveTab] = useState<'articles' | 'courses'>('articles');
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className='flex justify-center w-full max-w-2xl mx-auto'>
         <SearchBar
-          value={keyword} 
+          value={keyword}
           onChange={onKeywordChange}
           onSearch={onSearch}
         />
       </div>
 
-      <Tabs defaultValue="articles" className="flex flex-col gap-6">
-        <TabsList className="flex flex-row w-full max-w-2xl mx-auto">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'articles' | 'courses')} className="flex flex-col gap-6">
+        {/* モバイル: カスタムドロップダウン */}
+        <div className="block md:hidden w-full max-w-2xl mx-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex w-full items-center justify-between rounded-md border border-brand-border bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring">
+              {activeTab === 'articles' ? '記事' : '講座'}
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent style={{ width: 'var(--radix-dropdown-menu-trigger-width)' }}>
+              <DropdownMenuItem onSelect={() => setActiveTab('articles')}>記事</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setActiveTab('courses')}>講座</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* デスクトップ: Tabs */}
+        <TabsList className="hidden md:flex w-full max-w-2xl mx-auto">
           <TabsTrigger value="articles" className="flex-1">記事</TabsTrigger>
           <TabsTrigger value="courses" className="flex-1">講座</TabsTrigger>
         </TabsList>
 
-        <div className="flex-1">
+        <div className="w-full max-w-2xl mx-auto">
           <TabsContent value="articles">
             {!hasSearched && (
               <EmptyState
