@@ -6,6 +6,14 @@ import { useCreateArticle, useUpdateArticle, useGetArticleContent } from '@/lib/
 import { PageWithoutSidebar } from '@/features/global/organisms';
 import { ArticleFormTemplate } from '../templates/ArticleFormTemplate';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import type { KifuDto } from '@/lib/api/types';
+import type { KifuItem } from '../types/kifu';
+
+const toKifuDtos = (items: KifuItem[]): KifuDto[] =>
+  items.map((item, i) => ({ name: item.name, kifuText: item.text, sortOrder: i }));
+
+const fromKifuDtos = (dtos: KifuDto[]): KifuItem[] =>
+  [...dtos].sort((a, b) => a.sortOrder - b.sortOrder).map((dto) => ({ name: dto.name, text: dto.kifuText }));
 
 interface ArticleFormPageProps {
   articleId?: string;
@@ -13,22 +21,17 @@ interface ArticleFormPageProps {
   courseId?: string;
 }
 
-/**
- * ArticleFormPage - Page Component
- * 
- * 記事作成・編集ページのロジックを管理するコンポーネント
- * データフェッチング、状態管理、ビジネスロジックを担当
- * 
- * @param articleId - 編集モード時の記事ID
- * @param mode - 'create' または 'edit' (デフォルト: 'create')
- */
+
 export function ArticleFormPage({ articleId, mode = 'create', courseId }: ArticleFormPageProps = {}) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+  const [kifuList, setKifuList] = useState<KifuItem[]>([]);
+  const [editingKifuIndex, setEditingKifuIndex] = useState<number | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [showKifuDialog, setShowKifuDialog] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [validationError, setValidationError] = useState<string>('');
   
@@ -71,9 +74,10 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
   // 編集モード時のデータ初期化
   useEffect(() => {
     if (isEditMode && article && !isInitialized) {
-      setTitle(article.title || '');
-      setBody(article.body || '');
-      setTags(article.tags || []);
+      setTitle(article.article.title || '');
+      setBody(article.article.body || '');
+      setTags(article.article.tags || []);
+      setKifuList(fromKifuDtos(article.article.kifus || []));
       setIsInitialized(true);
     }
   }, [isEditMode, article, isInitialized]);
@@ -130,6 +134,7 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
         title: title.trim(),
         body: body,
         tags: tags,
+        kifus: toKifuDtos(kifuList),
         isPublished: true,
         publishedAt: publishedAt,
       });
@@ -138,6 +143,7 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
         title: title.trim(),
         body: body,
         tags: tags,
+        kifus: toKifuDtos(kifuList),
         isPublished: true,
         publishedAt: publishedAt,
         authorId: userId!,
@@ -161,14 +167,16 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
         title: title.trim(),
         body: body,
         tags: tags,
-        isPublished: article?.isPublished || false,
-        publishedAt: article?.publishedAt,
+        kifus: toKifuDtos(kifuList),
+        isPublished: article?.article?.isPublished || false,
+        publishedAt: article?.article?.publishedAt,
       });
     } else {
       createArticle.mutate({
         title: title.trim(),
         body: body,
         tags: tags,
+        kifus: toKifuDtos(kifuList),
         isPublished: false,
         publishedAt: undefined,
         authorId: userId!,
@@ -179,6 +187,30 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+  };
+
+  const handleKifuConfirm = (kifu: KifuItem) => {
+    if (editingKifuIndex !== null) {
+      setKifuList((prev) => prev.map((item, i) => (i === editingKifuIndex ? kifu : item)));
+    } else {
+      setKifuList((prev) => [...prev, kifu]);
+    }
+    setEditingKifuIndex(null);
+  };
+
+  const handleKifuDelete = (index: number) => {
+    setKifuList((prev) => prev.filter((_, i) => i !== index));
+    if (editingKifuIndex === index) setEditingKifuIndex(null);
+  };
+
+  const handleKifuEdit = (index: number) => {
+    setEditingKifuIndex(index);
+    setShowKifuDialog(true);
+  };
+
+  const handleKifuDialogChange = (open: boolean) => {
+    setShowKifuDialog(open);
+    if (!open) setEditingKifuIndex(null);
   };
 
   const handleOpenPublishSettings = () => {
@@ -220,8 +252,11 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
         title={title}
         body={body}
         tags={tags}
+        kifuList={kifuList}
+        editingKifuIndex={editingKifuIndex}
         maxCharacters={maxCharacters}
         showPublishDialog={showPublishDialog}
+        showKifuDialog={showKifuDialog}
         isLoading={isLoading}
         isFormDisabled={isFormDisabled}
         isLoadingContent={isLoadingContent}
@@ -231,11 +266,15 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
         onTitleChange={setTitle}
         onBodyChange={setBody}
         onTagsChange={setTags}
+        onKifuConfirm={handleKifuConfirm}
+        onKifuEdit={handleKifuEdit}
+        onKifuDelete={handleKifuDelete}
         onSave={handleSave}
         onSubmit={handleSubmit}
         onOpenPublishSettings={handleOpenPublishSettings}
         onPublish={handlePublish}
         onPublishDialogChange={setShowPublishDialog}
+        onKifuDialogChange={handleKifuDialogChange}
       />
     </PageWithoutSidebar>
   );

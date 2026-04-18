@@ -1,6 +1,6 @@
 'use client';
 
-import { ShogiBoard as NextShogiBoard } from '@/lib/next-shogi';
+import { ShogiBoard as NextShogiBoard } from '@/lib/kif-player';
 
 interface ShogiBoardProps {
   /**

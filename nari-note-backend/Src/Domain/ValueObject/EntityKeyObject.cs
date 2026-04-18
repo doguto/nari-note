@@ -18,7 +18,13 @@ public partial struct CourseId;
 public partial struct CourseLikeId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct EmailVerificationId;
+
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct FollowId;
+
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct KifuId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct LikeId;
@@ -31,7 +37,3 @@ public partial struct TagId;
 
 [ValueObject<Guid>(Conversions.EfCoreValueConverter)]
 public partial struct UserId;
-
-[ValueObject<int>(Conversions.EfCoreValueConverter)]
-public partial struct EmailVerificationId;
-

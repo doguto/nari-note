@@ -18,17 +18,15 @@ public class GetLikedArticlesService
     {
         var articles = await likeRepository.FindLikedArticlesByUserAsync(request.UserId);
 
-        var articleDtos = articles.Select(a => new ArticleDto
+        var articleDtos = articles.Select(a => new ArticleThumbnailDto
         {
             Id = a.Id,
             Title = a.Title,
-            Body = a.Body,
             AuthorId = a.AuthorId,
             AuthorName = a.Author.Name,
             Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
             LikeCount = a.Likes.Count,
             IsPublished = a.IsPublished,
-            CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
         }).ToList();
 

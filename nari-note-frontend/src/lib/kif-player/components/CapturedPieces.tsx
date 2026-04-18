@@ -1,7 +1,7 @@
 'use client';
 
-import type { CapturedPiece, PieceOwner, BoardSize } from '../types';
 import { cn } from '@/lib/utils';
+import type { CapturedPiece, PieceOwner, BoardSize } from '../types';
 
 interface CapturedPiecesProps {
   pieces: CapturedPiece[];
@@ -10,33 +10,17 @@ interface CapturedPiecesProps {
   size?: BoardSize;
 }
 
-/**
- * サイズに応じたテキストクラスを返す
- */
 function getSizeClass(size: BoardSize = 'md'): string {
   switch (size) {
-    case 'sm':
-      return 'text-xs';
-    case 'lg':
-      return 'text-lg';
-    case 'md':
-    default:
-      return 'text-sm';
+    case 'sm': return 'text-xs';
+    case 'lg': return 'text-lg';
+    default:   return 'text-sm';
   }
 }
 
-/**
- * 持駒を表示するコンポーネント
- */
-export function CapturedPieces({
-  pieces,
-  owner,
-  playerName,
-  size = 'md',
-}: CapturedPiecesProps) {
+export function CapturedPieces({ pieces, owner, playerName, size = 'md' }: CapturedPiecesProps) {
   const sizeClass = getSizeClass(size);
-  const label = owner === 'sente' ? '先手' : '後手';
-  const displayName = playerName || label;
+  const displayName = playerName || (owner === 'sente' ? '先手' : '後手');
 
   return (
     <div className={cn('flex items-center gap-2 py-2 font-serif', sizeClass)}>
@@ -48,9 +32,7 @@ export function CapturedPieces({
           {pieces.map((piece, index) => (
             <span key={index} className="text-black">
               {piece.type}
-              {piece.count > 1 && (
-                <span className="ml-0.5 text-gray-600">×{piece.count}</span>
-              )}
+              {piece.count > 1 && <span className="ml-0.5 text-gray-600">×{piece.count}</span>}
             </span>
           ))}
         </div>

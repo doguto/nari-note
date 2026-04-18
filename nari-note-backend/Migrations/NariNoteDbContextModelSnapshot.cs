@@ -252,6 +252,40 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("Follows");
                 });
 
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Kifu", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("KifuText")
+                        .IsRequired()
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.ToTable("Kifus");
+                });
+
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Like", b =>
                 {
                     b.Property<int>("Id")
@@ -497,6 +531,17 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("Following");
                 });
 
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Kifu", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.Article", "Article")
+                        .WithMany("Kifus")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+                });
+
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Like", b =>
                 {
                     b.HasOne("NariNoteBackend.Domain.Entity.Article", "Article")
@@ -540,6 +585,8 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("ArticleTags");
 
                     b.Navigation("Comments");
+
+                    b.Navigation("Kifus");
 
                     b.Navigation("Likes");
                 });

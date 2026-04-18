@@ -1,9 +1,9 @@
 import { ArticleCard } from '@/components/molecules';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
-import type { ArticleDto } from '@/lib/api';
+import type { ArticleThumbnailDto } from '@/lib/api';
 
 interface ArticleListProps {
-  articles?: ArticleDto[];
+  articles?: ArticleThumbnailDto[];
   isLoading: boolean;
   error: Error | null;
   onRetry: () => void;
@@ -58,7 +58,7 @@ export function ArticleList({
           authorId={article.authorId ?? ''}
           tags={article.tags ?? []}
           likeCount={article.likeCount ?? 0}
-          date={article.createdAt ? new Date(article.createdAt).toLocaleDateString('ja-JP') : ''}
+          date={article.updatedAt ? new Date(article.updatedAt).toLocaleDateString('ja-JP') : ''}
         />
       ))}
     </div>

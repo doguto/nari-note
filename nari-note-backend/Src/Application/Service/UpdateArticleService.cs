@@ -1,5 +1,6 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Extension;
@@ -10,13 +11,16 @@ public class UpdateArticleService
 {
     readonly IArticleRepository articleRepository;
     readonly ICourseRepository courseRepository;
+    readonly IKifuRepository kifuRepository;
 
     public UpdateArticleService(
         IArticleRepository articleRepository,
-        ICourseRepository courseRepository)
+        ICourseRepository courseRepository,
+        IKifuRepository kifuRepository)
     {
         this.articleRepository = articleRepository;
         this.courseRepository = courseRepository;
+        this.kifuRepository = kifuRepository;
     }
 
     public async Task<UpdateArticleResponse> ExecuteAsync(UserId userId, UpdateArticleRequest request)
@@ -61,8 +65,19 @@ public class UpdateArticleService
 
         article.UpdatedAt = DateTime.UtcNow;
 
-        // タグと一緒に記事を更新（1回のDB操作に統合）
         await articleRepository.UpdateWithTagAsync(article, request.Tags);
+
+        if (request.Kifus != null)
+        {
+            var kifus = request.Kifus.Select(k => new Kifu
+            {
+                ArticleId = article.Id,
+                Name = k.Name,
+                KifuText = k.KifuText,
+                SortOrder = k.SortOrder
+            }).ToList();
+            await kifuRepository.ReplaceAllByArticleIdAsync(article.Id, kifus);
+        }
 
         return new UpdateArticleResponse
         {

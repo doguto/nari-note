@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using NariNoteBackend.Application.Dto;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Filter;
 
@@ -21,6 +22,7 @@ public class CreateArticleRequest
     
     [ValidTagNames]
     public List<string> Tags { get; set; } = new();
+    public List<KifuDto> Kifus { get; set; } = new();
     public bool IsPublished { get; set; } = false;
     public DateTime? PublishedAt { get; set; }
 }

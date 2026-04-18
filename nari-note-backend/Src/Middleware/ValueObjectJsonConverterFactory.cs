@@ -13,7 +13,9 @@ public class ValueObjectJsonConverterFactory : JsonConverterFactory
                typeToConvert == typeof(CommentId) ||
                typeToConvert == typeof(CourseId) ||
                typeToConvert == typeof(CourseLikeId) ||
+               typeToConvert == typeof(EmailVerificationId) ||
                typeToConvert == typeof(FollowId) ||
+               typeToConvert == typeof(KifuId) ||
                typeToConvert == typeof(LikeId) ||
                typeToConvert == typeof(NotificationId) ||
                typeToConvert == typeof(TagId) ||
@@ -32,8 +34,12 @@ public class ValueObjectJsonConverterFactory : JsonConverterFactory
             return new ValueObjectJsonConverter<CourseId>();
         if (typeToConvert == typeof(CourseLikeId))
             return new ValueObjectJsonConverter<CourseLikeId>();
+        if (typeToConvert == typeof(EmailVerificationId))
+            return new ValueObjectJsonConverter<EmailVerificationId>();
         if (typeToConvert == typeof(FollowId))
             return new ValueObjectJsonConverter<FollowId>();
+        if (typeToConvert == typeof(KifuId))
+            return new ValueObjectJsonConverter<KifuId>();
         if (typeToConvert == typeof(LikeId))
             return new ValueObjectJsonConverter<LikeId>();
         if (typeToConvert == typeof(NotificationId))
@@ -53,17 +59,18 @@ public class ValueObjectJsonConverter<T> : JsonConverter<T>
     {
         if (reader.TokenType == JsonTokenType.Number)
         {
-            var value = reader.GetInt32();
-            var fromMethod = typeToConvert.GetMethod("From", new[] { typeof(int) });
-            if (fromMethod != null)
-                return (T)fromMethod.Invoke(null, new object[] { value })!;
+            var intValue = reader.GetInt32();
+            var fromInt = typeToConvert.GetMethod("From", new[] { typeof(int) });
+            if (fromInt != null)
+                return (T)fromInt.Invoke(null, new object[] { intValue })!;
         }
-        else if (reader.TokenType == JsonTokenType.String)
+
+        if (reader.TokenType == JsonTokenType.String)
         {
-            var value = reader.GetGuid();
-            var fromMethod = typeToConvert.GetMethod("From", new[] { typeof(Guid) });
-            if (fromMethod != null)
-                return (T)fromMethod.Invoke(null, new object[] { value })!;
+            var strValue = reader.GetString()!;
+            var fromGuid = typeToConvert.GetMethod("From", new[] { typeof(Guid) });
+            if (fromGuid != null && Guid.TryParse(strValue, out var guid))
+                return (T)fromGuid.Invoke(null, new object[] { guid })!;
         }
 
         throw new JsonException($"Unable to deserialize {typeToConvert.Name}");
@@ -76,11 +83,17 @@ public class ValueObjectJsonConverter<T> : JsonConverter<T>
             throw new JsonException($"Unable to serialize {typeof(T).Name}");
 
         var rawValue = valueProperty.GetValue(value)!;
-        if (rawValue is Guid guidValue)
-            writer.WriteStringValue(guidValue);
-        else if (rawValue is int intValue)
-            writer.WriteNumberValue(intValue);
-        else
-            throw new JsonException($"Unable to serialize {typeof(T).Name}: unsupported type {rawValue.GetType().Name}");
+        switch (rawValue)
+        {
+            case int intValue:
+                writer.WriteNumberValue(intValue);
+                break;
+            case Guid guidValue:
+                writer.WriteStringValue(guidValue);
+                break;
+            default:
+                writer.WriteStringValue(rawValue.ToString());
+                break;
+        }
     }
 }

@@ -2,14 +2,14 @@ import { SearchBar } from '@/components/molecules';
 import { ArticleCard } from '@/components/molecules';
 import { EmptyState } from '@/components/ui';
 import { Search } from 'lucide-react';
-import { ArticleDto } from '@/lib/api/types';
+import { ArticleThumbnailDto } from '@/lib/api/types';
 
 interface ArticleSearchTemplateProps {
   keyword: string;
   searchKeyword: string;
   hasSearched: boolean;
   hasResults: boolean;
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
   onKeywordChange: (keyword: string) => void;
   onSearch: () => void;
 }
@@ -75,10 +75,10 @@ export function ArticleSearchTemplate({
                 authorId={article.authorId ?? 0}
                 tags={article.tags ?? []}
                 likeCount={article.likeCount ?? 0}
-                date={article.publishedAt 
-                  ? new Date(article.publishedAt).toLocaleDateString('ja-JP') 
-                  : article.createdAt 
-                    ? new Date(article.createdAt).toLocaleDateString('ja-JP') 
+                date={article.publishedAt
+                  ? new Date(article.publishedAt).toLocaleDateString('ja-JP')
+                  : article.updatedAt
+                    ? new Date(article.updatedAt).toLocaleDateString('ja-JP')
                     : ''
                 }
               />
