@@ -1,5 +1,7 @@
 # nari-note
 
+[![Frontend Deploy](https://github.com/doguto/nari-note/actions/workflows/cloudflare-deploy.yml/badge.svg)](https://github.com/doguto/nari-note/actions/workflows/cloudflare-deploy.yml)
+
 nari-noteは、将棋記事の投稿・共有プラットフォームです。
 
 ## プロジェクト構成
