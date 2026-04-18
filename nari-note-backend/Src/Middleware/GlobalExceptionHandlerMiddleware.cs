@@ -29,6 +29,8 @@ public class GlobalExceptionHandlerMiddleware
         catch (Exception ex)
         {
             logger.LogError(ex, ex.Message);
+            SentrySdk.CaptureMessage($"[GlobalExceptionHandler] {ex.Message}", SentryLevel.Error);
+
             var response = BuildErrorResponse(ex);
             httpContext.Response.StatusCode = response.StatusCode;
             httpContext.Response.ContentType = "application/json";
