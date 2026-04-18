@@ -58,10 +58,10 @@ export function ArticleDetailTemplate({
 
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-4xl font-bold text-brand-text">
-          {article.title}
+          {article.article.title}
         </h1>
         {isOwnArticle && (
-          <Link href={`/articles/${article.id}/edit`}>
+          <Link href={`/articles/${article.article.id}/edit`}>
             <Button
               variant="outline"
               className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-bg-light)]"
@@ -75,15 +75,15 @@ export function ArticleDetailTemplate({
 
       <div className="flex items-center gap-6 mb-8 pb-6 border-b border-gray-200">
         <ArticleAuthorInfo
-          authorId={article.authorId!}
-          authorName={article.authorName || 'Unknown Author'}
-          createdAt={article.createdAt}
+          authorId={article.article.authorId}
+          authorName={article.article.authorName}
+          createdAt={article.article.createdAt}
         />
 
         <div className="flex items-center gap-4 ml-auto">
           <LikeButton
             isLiked={article.isLiked || false}
-            likeCount={article.likeCount || 0}
+            likeCount={article.article.likeCount}
             onClick={onLikeClick}
             disabled={isLikePending}
           />
@@ -94,11 +94,11 @@ export function ArticleDetailTemplate({
       </div>
 
       <div className="prose prose-lg max-w-none mb-8 text-gray-800 leading-relaxed">
-        <NarinoteMarkdown content={article.body || ''} />
+        <NarinoteMarkdown content={article.article.body} />
       </div>
 
-      {article.tags && article.tags.length > 0 && (
-        <ArticleTagList tags={article.tags} />
+      {article.article.tags && article.article.tags.length > 0 && (
+        <ArticleTagList tags={article.article.tags} />
       )}
 
       {/* コメント一覧 */}
@@ -108,7 +108,7 @@ export function ArticleDetailTemplate({
 
       {/* コメント投稿フォーム */}
       <div className="mt-8">
-        <CommentForm articleId={article.id!} onSuccess={onCommentSuccess} />
+        <CommentForm articleId={article.article.id} onSuccess={onCommentSuccess} />
       </div>
     </article>
   );

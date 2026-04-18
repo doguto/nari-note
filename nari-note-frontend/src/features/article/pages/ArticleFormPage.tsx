@@ -71,9 +71,9 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
   // 編集モード時のデータ初期化
   useEffect(() => {
     if (isEditMode && article && !isInitialized) {
-      setTitle(article.title || '');
-      setBody(article.body || '');
-      setTags(article.tags || []);
+      setTitle(article.article.title || '');
+      setBody(article.article.body || '');
+      setTags(article.article.tags || []);
       setIsInitialized(true);
     }
   }, [isEditMode, article, isInitialized]);
@@ -161,8 +161,8 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
         title: title.trim(),
         body: body,
         tags: tags,
-        isPublished: article?.isPublished || false,
-        publishedAt: article?.publishedAt,
+        isPublished: article?.article?.isPublished || false,
+        publishedAt: article?.article?.publishedAt,
       });
     } else {
       createArticle.mutate({

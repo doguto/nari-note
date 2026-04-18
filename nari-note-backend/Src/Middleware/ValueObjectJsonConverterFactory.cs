@@ -59,12 +59,18 @@ public class ValueObjectJsonConverter<T> : JsonConverter<T>
     {
         if (reader.TokenType == JsonTokenType.Number)
         {
-            var value = reader.GetInt32();
-            var fromMethod = typeToConvert.GetMethod("From", new[] { typeof(int) });
-            if (fromMethod != null)
-            {
-                return (T)fromMethod.Invoke(null, new object[] { value })!;
-            }
+            var intValue = reader.GetInt32();
+            var fromInt = typeToConvert.GetMethod("From", new[] { typeof(int) });
+            if (fromInt != null)
+                return (T)fromInt.Invoke(null, new object[] { intValue })!;
+        }
+
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            var strValue = reader.GetString()!;
+            var fromGuid = typeToConvert.GetMethod("From", new[] { typeof(Guid) });
+            if (fromGuid != null && Guid.TryParse(strValue, out var guid))
+                return (T)fromGuid.Invoke(null, new object[] { guid })!;
         }
 
         throw new JsonException($"Unable to deserialize {typeToConvert.Name}");
@@ -73,14 +79,21 @@ public class ValueObjectJsonConverter<T> : JsonConverter<T>
     public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
     {
         var valueProperty = typeof(T).GetProperty("Value");
-        if (valueProperty != null)
-        {
-            var intValue = (int)valueProperty.GetValue(value)!;
-            writer.WriteNumberValue(intValue);
-        }
-        else
-        {
+        if (valueProperty == null)
             throw new JsonException($"Unable to serialize {typeof(T).Name}");
+
+        var rawValue = valueProperty.GetValue(value)!;
+        switch (rawValue)
+        {
+            case int intValue:
+                writer.WriteNumberValue(intValue);
+                break;
+            case Guid guidValue:
+                writer.WriteStringValue(guidValue);
+                break;
+            default:
+                writer.WriteStringValue(rawValue.ToString());
+                break;
         }
     }
 }

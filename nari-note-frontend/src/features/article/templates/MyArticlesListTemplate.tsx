@@ -3,12 +3,12 @@ import { PublishedArticleCard } from '@/components/molecules/PublishedArticleCar
 import { LoadingSpinner } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { ArticleDto } from '@/lib/api/types';
+import { ArticleThumbnailDto } from '@/lib/api/types';
 
 interface MyArticlesListTemplateProps {
   activeTab: 'published' | 'drafts';
-  publishedArticles: ArticleDto[];
-  draftArticles: ArticleDto[];
+  publishedArticles: ArticleThumbnailDto[];
+  draftArticles: ArticleThumbnailDto[];
   deletingId: string | null;
   onTabChange: (tab: 'published' | 'drafts') => void;
   onNewArticle: () => void;

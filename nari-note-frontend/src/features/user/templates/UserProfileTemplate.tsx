@@ -1,6 +1,6 @@
 import { ProfileCard } from '../organisms/ProfileCard';
 import { ProfileTabNav } from '../organisms/ProfileTabNav';
-import type { GetUserProfileResponse, GetArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
+import type { GetUserProfileResponse, GetArticlesByAuthorResponse, GetLikedArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
 interface UserProfileTemplateProps {
   // ユーザー情報
@@ -12,8 +12,8 @@ interface UserProfileTemplateProps {
   tabContext: 'content' | 'follow';
 
   // コンテンツデータ
-  articlesData?: GetArticlesResponse;
-  likedArticlesData?: GetArticlesResponse;
+  articlesData?: GetArticlesByAuthorResponse;
+  likedArticlesData?: GetLikedArticlesResponse;
   followersData?: GetFollowersResponse;
   followingsData?: GetFollowingsResponse;
 
