@@ -34,7 +34,8 @@ axiosInstance.interceptors.response.use(
       // モーダルを表示
       unauthorizedHandler.trigger();
     }
-    return Promise.reject(error);
+    const serverMessage = error.response?.data?.message;
+    return Promise.reject(serverMessage ? new Error(serverMessage) : error);
   }
 );
 
