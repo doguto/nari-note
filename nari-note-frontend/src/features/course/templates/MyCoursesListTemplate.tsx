@@ -5,25 +5,35 @@ import { CourseDto } from '@/lib/api/types';
 import Link from 'next/link';
 
 interface MyCoursesListTemplateProps {
-  courses: CourseDto[];
+  activeTab: 'published' | 'drafts';
+  publishedCourses: CourseDto[];
+  draftCourses: CourseDto[];
   deletingId: string | null;
+  onTabChange: (tab: 'published' | 'drafts') => void;
   onNewCourse: () => void;
   onDelete: (id: string, name: string) => void;
   onEdit: (id: string) => void;
 }
 
-
 export function MyCoursesListTemplate({
-  courses,
+  activeTab,
+  publishedCourses,
+  draftCourses,
   deletingId,
+  onTabChange,
   onNewCourse,
   onDelete,
   onEdit,
 }: MyCoursesListTemplateProps) {
+  const displayCourses = activeTab === 'published' ? publishedCourses : draftCourses;
+  const emptyMessage = activeTab === 'published'
+    ? '公開済みの講座がありません'
+    : '下書きの講座がありません';
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">マイ講座一覧</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-3xl font-bold text-gray-900">マイ講座一覧</h1>
         <Button
           onClick={onNewCourse}
           className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
@@ -34,11 +44,38 @@ export function MyCoursesListTemplate({
       </div>
 
       <div className="bg-white rounded-lg shadow">
-        <div className="p-6">
-          {courses.length === 0 ? (
+        <div className="border-b border-gray-200">
+          <nav className="flex gap-6 sm:gap-8 px-4 sm:px-6 overflow-x-auto">
+            <Button
+              variant="ghost"
+              onClick={() => onTabChange('published')}
+              className={`py-5 border-b-2 whitespace-nowrap flex-shrink-0 rounded-none bg-transparent hover:bg-transparent ${
+                activeTab === 'published'
+                  ? 'border-[var(--brand-primary)] text-[var(--brand-text)] font-medium'
+                  : 'border-transparent text-gray-600 hover:text-[var(--brand-text)]'
+              }`}
+            >
+              公開済み ({publishedCourses.length})
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => onTabChange('drafts')}
+              className={`py-5 border-b-2 whitespace-nowrap flex-shrink-0 rounded-none bg-transparent hover:bg-transparent ${
+                activeTab === 'drafts'
+                  ? 'border-[var(--brand-primary)] text-[var(--brand-text)] font-medium'
+                  : 'border-transparent text-gray-600 hover:text-[var(--brand-text)]'
+              }`}
+            >
+              下書き ({draftCourses.length})
+            </Button>
+          </nav>
+        </div>
+
+        <div className="p-4 sm:p-6">
+          {displayCourses.length === 0 ? (
             <div className="text-center py-16">
               <BookOpen className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500 text-lg mb-6">講座がありません</p>
+              <p className="text-gray-500 text-lg mb-6">{emptyMessage}</p>
               <Button
                 onClick={onNewCourse}
                 className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
@@ -49,7 +86,7 @@ export function MyCoursesListTemplate({
             </div>
           ) : (
             <div className="space-y-4">
-              {courses.map((course) => (
+              {displayCourses.map((course) => (
                 <div
                   key={course.id}
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
