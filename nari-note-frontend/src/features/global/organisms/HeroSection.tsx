@@ -1,9 +1,4 @@
-/**
- * HeroSection - Organism Component
- * 
- * ホームページのヒーローセクションを表示するコンポーネント
- * タイトルとサブタイトルを含む
- */
+
 export function HeroSection() {
   return (
     <section className="w-11/12 mx-auto px-4 py-16 text-center">

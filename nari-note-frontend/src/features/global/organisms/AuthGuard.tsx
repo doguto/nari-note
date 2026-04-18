@@ -9,15 +9,7 @@ interface AuthGuardProps {
   redirectPath: string;
 }
 
-/**
- * AuthGuard - Organism Component
- *
- * 認証が必要なページをラップするコンポーネント
- * 認証チェックとローディング状態の表示を統一的に処理する
- *
- * @param children - 認証後に表示するコンテンツ
- * @param redirectPath - ログイン後にリダイレクトするパス
- */
+
 export function AuthGuard({ children, redirectPath }: AuthGuardProps) {
   const { isLoggedIn, isLoading } = useRequireAuth(redirectPath);
   const [isMounted, setIsMounted] = useState(false);
