@@ -1,25 +1,24 @@
 using NariNoteBackend.Application.Dto;
-using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Service;
 
-public class GetArticlesByAuthorService
+public class GetMyArticlesService
 {
     readonly IArticleRepository articleRepository;
 
-    public GetArticlesByAuthorService(IArticleRepository articleRepository)
+    public GetMyArticlesService(IArticleRepository articleRepository)
     {
         this.articleRepository = articleRepository;
     }
 
-    public async Task<GetArticlesByAuthorResponse> ExecuteAsync(GetArticlesByAuthorRequest request)
+    public async Task<GetMyArticlesResponse> ExecuteAsync(UserId authorId)
     {
-        var articles = await articleRepository.FindByAuthorAsync(request.AuthorId);
-        var publishedArticles = articles.Where(a => a.IsPublished).ToList();
+        var articles = await articleRepository.FindByAuthorAsync(authorId);
 
-        var articleDtos = publishedArticles.Select(a => new ArticleThumbnailDto
+        var articleDtos = articles.Select(a => new ArticleThumbnailDto
         {
             Id = a.Id,
             Title = a.Title,
@@ -32,12 +31,10 @@ public class GetArticlesByAuthorService
             UpdatedAt = a.UpdatedAt
         }).ToList();
 
-        return new GetArticlesByAuthorResponse
+        return new GetMyArticlesResponse
         {
-            AuthorId = request.AuthorId,
-            AuthorName = publishedArticles.FirstOrDefault()?.Author.Name ?? "",
             Articles = articleDtos,
-            TotalCount = publishedArticles.Count
+            TotalCount = articles.Count
         };
     }
 }

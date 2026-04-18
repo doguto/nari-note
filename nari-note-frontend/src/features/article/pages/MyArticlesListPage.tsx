@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import { useGetArticlesByAuthor, useDeleteArticle } from '@/lib/api';
+import { useGetMyArticles, useDeleteArticle } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PageWithSidebar } from '@/features/global/organisms';
 import { DeleteConfirmModal } from '@/components/molecules/DeleteConfirmModal';
@@ -16,10 +16,7 @@ export function MyArticlesListPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null);
 
-  const { data, isLoading, error, refetch } = useGetArticlesByAuthor(
-    { authorId: userId || '' },
-    { enabled: !!userId }
-  );
+  const { data, isLoading, error, refetch } = useGetMyArticles({ enabled: !!userId });
   
   const deleteArticle = useDeleteArticle({
     onSuccess: () => {
