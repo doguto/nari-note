@@ -7,13 +7,7 @@ import { useAuth } from '@/lib/providers/AuthProvider';
 import { AuthPageLayout } from '@/components/molecules';
 import { LoginTemplate } from '../templates/LoginTemplate';
 
-/**
- * LoginPage - Page Component
- * 
- * ログインページのロジックに責任を持つ
- * UIには一切責任を持たない
- * バックエンドとの通信等の非UIロジックを持つ
- */
+
 export function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();

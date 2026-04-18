@@ -5,13 +5,7 @@ import { useSignUp } from '@/lib/api';
 import { AuthPageLayout } from '@/components/molecules';
 import { SignUpTemplate } from '../templates/SignUpTemplate';
 
-/**
- * SignUpPage - Page Component
- * 
- * サインアップページのロジックに責任を持つ
- * UIには一切責任を持たない
- * バックエンドとの通信等の非UIロジックを持つ
- */
+
 export function SignUpPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

@@ -18,12 +18,7 @@ interface SignUpTemplateProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
-/**
- * SignUpTemplate - Template Component
- * 
- * サインアップページのUI構成に責任を持つ
- * レスポンシブ対応とレイアウトを担当
- */
+
 export function SignUpTemplate({
   name,
   email,
@@ -74,7 +69,7 @@ export function SignUpTemplate({
         <PasswordField
           value={password}
           onChange={onPasswordChange}
-          helperText="8文字以上・英大文字・英小文字・数字・記号をそれぞれ含む必要があります"
+          helperText="8文字以上の必要があります"
         />
         
         <PasswordField
