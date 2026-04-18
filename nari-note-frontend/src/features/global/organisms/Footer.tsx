@@ -19,9 +19,9 @@ export function Footer() {
             <Link href="/terms" className="text-gray-400 hover:text-brand-primary transition-colors">
               利用規約
             </Link>
-            <a href="#" className="text-gray-400 hover:text-brand-primary transition-colors">
+            <Link href="/privacy-policy" className="text-gray-400 hover:text-brand-primary transition-colors">
               プライバシーポリシー
-            </a>
+            </Link>
             <a href="#" className="text-gray-400 hover:text-brand-primary transition-colors">
               お問い合わせ
             </a>
