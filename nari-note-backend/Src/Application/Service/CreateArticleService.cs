@@ -68,6 +68,7 @@ public class CreateArticleService
             var kifus = request.Kifus.Select(k => new Kifu
             {
                 ArticleId = created.Id,
+                Name = k.Name,
                 KifuText = k.KifuText,
                 SortOrder = k.SortOrder
             }).ToList();

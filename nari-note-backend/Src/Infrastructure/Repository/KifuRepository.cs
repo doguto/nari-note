@@ -63,6 +63,7 @@ public class KifuRepository : IKifuRepository
             for (var i = 0; i < kifus.Count; i++)
             {
                 updateKifus[i] = existing[i];
+                updateKifus[i].Name = kifus[i].Name;
                 updateKifus[i].KifuText = kifus[i].KifuText;
                 updateKifus[i].SortOrder = kifus[i].SortOrder;
             }
@@ -77,6 +78,7 @@ public class KifuRepository : IKifuRepository
 
             for (var i = 0; i < existing.Count; i++)
             {
+                existing[i].Name = kifus[i].Name;
                 existing[i].KifuText = kifus[i].KifuText;
                 existing[i].SortOrder = kifus[i].SortOrder;
             }

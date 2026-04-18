@@ -12,6 +12,8 @@ import { getBoardAtMove } from '../utils/simulator';
 interface KifPlayerProps {
   kifText: string;
   defaultMoveNumber?: number;
+  moveNumber?: number;
+  onMoveChange?: (move: number) => void;
   className?: string;
   size?: BoardSize;
   showCapturedPieces?: boolean;
@@ -21,12 +23,21 @@ interface KifPlayerProps {
 export function KifPlayer({
   kifText,
   defaultMoveNumber = 0,
+  moveNumber,
+  onMoveChange,
   className,
   size = 'md',
   showCapturedPieces = true,
   showPlayerNames = false,
 }: KifPlayerProps) {
-  const [currentMove, setCurrentMove] = useState(defaultMoveNumber);
+  const [internalMove, setInternalMove] = useState(defaultMoveNumber);
+  const currentMove = moveNumber !== undefined ? moveNumber : internalMove;
+
+  const setCurrentMove = (updater: number | ((prev: number) => number)) => {
+    const next = typeof updater === 'function' ? updater(currentMove) : updater;
+    if (moveNumber === undefined) setInternalMove(next);
+    onMoveChange?.(next);
+  };
 
   const game = useMemo(() => {
     try {

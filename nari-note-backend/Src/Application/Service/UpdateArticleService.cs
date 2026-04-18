@@ -72,6 +72,7 @@ public class UpdateArticleService
             var kifus = request.Kifus.Select(k => new Kifu
             {
                 ArticleId = article.Id,
+                Name = k.Name,
                 KifuText = k.KifuText,
                 SortOrder = k.SortOrder
             }).ToList();

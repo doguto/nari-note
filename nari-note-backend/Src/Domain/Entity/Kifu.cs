@@ -12,6 +12,10 @@ public class Kifu : EntityBase
     public required ArticleId ArticleId { get; set; }
 
     [Required]
+    [MaxLength(100)]
+    public required string Name { get; set; }
+
+    [Required]
     [MaxLength(4096)]
     public required string KifuText { get; set; }
 

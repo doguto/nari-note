@@ -94,7 +94,7 @@ export function ArticleDetailTemplate({
       </div>
 
       <div className="prose prose-lg max-w-none mb-8 text-gray-800 leading-relaxed">
-        <NarinoteMarkdown content={article.article.body} />
+        <NarinoteMarkdown content={article.article.body} kifuList={article.article.kifus} />
       </div>
 
       {article.article.tags && article.article.tags.length > 0 && (

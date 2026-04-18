@@ -12,6 +12,8 @@ interface MarkdownEditorProps {
   onChange: (value: string) => void;
   maxCharacters?: number;
   placeholder?: string;
+  onKifuEmbed?: (insertFn: (name: string, move: number) => void) => void;
+  kifuList?: Array<{ name: string; kifuText: string }>;
 }
 
 interface Command {
@@ -19,6 +21,7 @@ interface Command {
   label: string;
   insert: string;
   description: string;
+  type?: 'insert' | 'kifu';
 }
 
 // BOD形式の平手初期配置テンプレート
@@ -68,6 +71,7 @@ const MARKDOWN_COMMANDS: Command[] = [
   { trigger: 'hr', label: '--- 水平線', insert: '\n---\n', description: '水平線を挿入' },
   { trigger: 'board', label: '将棋盤面', insert: `\n${BOARD_TEMPLATE}\n`, description: '将棋盤面を挿入（平手初期配置）' },
   { trigger: 'board-empty', label: '空の盤面', insert: `\n${BOARD_EMPTY_TEMPLATE}\n`, description: '空の将棋盤面を挿入' },
+  { trigger: 'kifu', label: '棋譜プレイヤー', insert: '', description: '棋譜プレイヤーを埋め込む', type: 'kifu' },
 ];
 
 
@@ -76,6 +80,8 @@ export function MarkdownEditor({
   onChange,
   maxCharacters = 65535,
   placeholder = '本文を入力してください... 「/」でコマンドメニューを開きます',
+  onKifuEmbed,
+  kifuList = [],
 }: MarkdownEditorProps) {
   const [showCommands, setShowCommands] = useState(false);
   const [commandFilter, setCommandFilter] = useState('');
@@ -87,11 +93,14 @@ export function MarkdownEditor({
   const characterCount = value.length;
   const isOverLimit = characterCount > maxCharacters;
 
-  const filteredCommands = MARKDOWN_COMMANDS.filter(cmd =>
-    cmd.trigger.toLowerCase().includes(commandFilter.toLowerCase()) ||
-    cmd.label.toLowerCase().includes(commandFilter.toLowerCase()) ||
-    cmd.description.toLowerCase().includes(commandFilter.toLowerCase())
-  );
+  const filteredCommands = MARKDOWN_COMMANDS.filter(cmd => {
+    if (cmd.type === 'kifu' && !onKifuEmbed) return false;
+    return (
+      cmd.trigger.toLowerCase().includes(commandFilter.toLowerCase()) ||
+      cmd.label.toLowerCase().includes(commandFilter.toLowerCase()) ||
+      cmd.description.toLowerCase().includes(commandFilter.toLowerCase())
+    );
+  });
 
   const getCursorPosition = (textarea: HTMLTextAreaElement, cursorPos: number) => {
     const textBeforeCursor = textarea.value.substring(0, cursorPos);
@@ -161,22 +170,31 @@ export function MarkdownEditor({
     const cursorPos = textarea.selectionStart || 0;
     const textBeforeCursor = value.substring(0, cursorPos);
     const textAfterCursor = value.substring(cursorPos);
-    
-    // Find and remove the slash command trigger
     const lastSlashIndex = textBeforeCursor.lastIndexOf('/');
     const beforeSlash = value.substring(0, lastSlashIndex);
-    
-    // Insert the markdown syntax
-    const newValue = beforeSlash + command.insert + textAfterCursor;
-    onChange(newValue);
-    
+
     setShowCommands(false);
     setCommandFilter('');
-    
-    // Set cursor position after inserted text
+
+    if (command.type === 'kifu' && onKifuEmbed) {
+      onKifuEmbed((name: string, move: number) => {
+        const embedBlock = `\n\`\`\`kifu\n${name}_${move}\n\`\`\`\n`;
+        const newValue = beforeSlash + embedBlock + textAfterCursor;
+        onChange(newValue);
+        setTimeout(() => {
+          const newCursorPos = beforeSlash.length + embedBlock.length;
+          textarea.setSelectionRange(newCursorPos, newCursorPos);
+          textarea.focus();
+        }, 0);
+      });
+      return;
+    }
+
+    const newValue = beforeSlash + command.insert + textAfterCursor;
+    onChange(newValue);
+
     setTimeout(() => {
       const newCursorPos = beforeSlash.length + command.insert.length;
-      // For code blocks, position cursor between the opening and closing fences
       if (command.trigger === 'code') {
         const cursorPosInsideCodeBlock = beforeSlash.length + command.insert.indexOf('\n') + 1;
         textarea.setSelectionRange(cursorPosInsideCodeBlock, cursorPosInsideCodeBlock);
@@ -301,7 +319,7 @@ export function MarkdownEditor({
         {/* Live Preview */}
         <div className="border border-gray-300 rounded-lg p-4 bg-white overflow-y-auto min-h-[70vh]">
           <div className="prose prose-sm max-w-none">
-            <NarinoteMarkdown content={value || PREVIEW_PLACEHOLDER} />
+            <NarinoteMarkdown content={value || PREVIEW_PLACEHOLDER} kifuList={kifuList} />
           </div>
         </div>
       </div>

@@ -45,7 +45,7 @@ public class GetArticleContentService
                 AuthorId = article.AuthorId,
                 AuthorName = article.Author.Name,
                 Tags = article.ArticleTags.Select(x => x.Tag.Name).ToList(),
-                Kifus = article.Kifus.Select(x => new KifuDto { KifuText = x.KifuText, SortOrder = x.SortOrder })
+                Kifus = article.Kifus.Select(x => new KifuDto { Name = x.Name, KifuText = x.KifuText, SortOrder = x.SortOrder })
                                .ToList(),
                 LikeCount = article.LikeCount,
                 IsPublished = article.IsPublished,

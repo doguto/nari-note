@@ -271,6 +271,7 @@ export interface HealthCheckRequest {
 }
 
 export interface KifuDto {
+  name: string;
   kifuText: string;
   sortOrder: number;
 }
