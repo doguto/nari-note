@@ -1,10 +1,6 @@
 import Link from 'next/link';
 
-/**
- * モバイル用ヘッダーナビゲーションコンポーネント
- *
- * スマホ画面でのみ表示される横スクロール対応のナビゲーションバーです。
- */
+
 export function HeaderNavMobile() {
   return (
     <nav className="md:hidden overflow-x-auto border-t border-brand-text-dark">
