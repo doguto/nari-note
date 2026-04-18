@@ -43,34 +43,34 @@ export function MyArticlesListTemplate({
         </Button>
       </div>
 
-      {/* タブナビゲーション */}
       <div className="bg-white rounded-lg shadow">
         <div className="border-b border-gray-200">
           <nav className="flex gap-6 sm:gap-8 px-4 sm:px-6 overflow-x-auto">
-            <button
+            <Button
+              variant="ghost"
               onClick={() => onTabChange('published')}
-              className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
+              className={`py-5 border-b-2 whitespace-nowrap flex-shrink-0 rounded-none bg-transparent hover:bg-transparent ${
                 activeTab === 'published'
                   ? 'border-[var(--brand-primary)] text-[var(--brand-text)] font-medium'
                   : 'border-transparent text-gray-600 hover:text-[var(--brand-text)]'
               }`}
             >
               公開済み ({publishedArticles.length})
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
               onClick={() => onTabChange('drafts')}
-              className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
+              className={`py-5 border-b-2 whitespace-nowrap flex-shrink-0 rounded-none bg-transparent hover:bg-transparent ${
                 activeTab === 'drafts'
                   ? 'border-[var(--brand-primary)] text-[var(--brand-text)] font-medium'
                   : 'border-transparent text-gray-600 hover:text-[var(--brand-text)]'
               }`}
             >
               下書き ({draftArticles.length})
-            </button>
+            </Button>
           </nav>
         </div>
 
-        {/* タブコンテンツ */}
         <div className="p-4 sm:p-6">
           {displayArticles.length === 0 ? (
             <div className="text-center py-16">
@@ -91,6 +91,7 @@ export function MyArticlesListTemplate({
                     key={article.id}
                     id={article.id!}
                     title={article.title ?? '無題'}
+                    tags={article.tags}
                     publishedAt={article.publishedAt ?? ''}
                     likeCount={article.likeCount ?? 0}
                     onDelete={() => onDelete(article.id!, article.title ?? '無題')}
@@ -102,6 +103,7 @@ export function MyArticlesListTemplate({
                     key={article.id}
                     id={article.id!}
                     title={article.title ?? '無題'}
+                    tags={article.tags}
                     updatedAt={article.updatedAt ?? ''}
                     onDelete={() => onDelete(article.id!, article.title ?? '無題')}
                   />

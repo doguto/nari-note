@@ -87,7 +87,9 @@ export function MarkdownEditor({
   const [commandFilter, setCommandFilter] = useState('');
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [commandMenuPosition, setCommandMenuPosition] = useState({ top: 0, left: 0 });
+  const [mobileShowPreview, setMobileShowPreview] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const commandsRef = useRef<HTMLDivElement>(null);
 
   const characterCount = value.length;
@@ -130,12 +132,23 @@ export function MarkdownEditor({
     };
   };
 
+  const syncPreviewScroll = () => {
+    const textarea = textareaRef.current;
+    const preview = previewRef.current;
+    if (!textarea || !preview) return;
+    const scrollableHeight = textarea.scrollHeight - textarea.clientHeight;
+    if (scrollableHeight <= 0) return;
+    const ratio = textarea.scrollTop / scrollableHeight;
+    preview.scrollTop = ratio * (preview.scrollHeight - preview.clientHeight);
+  };
+
   // Handle text change
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     const cursorPos = e.target.selectionStart || 0;
     
     onChange(newValue);
+    requestAnimationFrame(syncPreviewScroll);
 
     // Check for slash command
     const textBeforeCursor = newValue.substring(0, cursorPos);
@@ -272,14 +285,37 @@ export function MarkdownEditor({
         </p>
       )}
 
-      <div className="grid grid-cols-2 gap-4 items-stretch">
+      {/* Mobile preview toggle */}
+      <div className="flex md:hidden border border-gray-200 rounded-lg overflow-hidden mb-2">
+        <button
+          type="button"
+          onClick={() => setMobileShowPreview(false)}
+          className={`flex-1 py-2 text-sm font-medium transition-colors ${
+            !mobileShowPreview ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          エディタ
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileShowPreview(true)}
+          className={`flex-1 py-2 text-sm font-medium transition-colors ${
+            mobileShowPreview ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          プレビュー
+        </button>
+      </div>
+
+      <div className="md:grid md:grid-cols-2 md:gap-4 md:items-stretch">
         {/* Editor Input */}
-        <div className="relative flex flex-col">
+        <div className={`relative flex flex-col ${mobileShowPreview ? 'hidden md:flex' : ''}`}>
           <textarea
             ref={textareaRef}
             id="markdown-editor"
             value={value}
             onChange={handleChange}
+            onScroll={syncPreviewScroll}
             onKeyDown={(e) => {
               handleKeyDown(e);
               handleTab(e);
@@ -317,7 +353,12 @@ export function MarkdownEditor({
         </div>
 
         {/* Live Preview */}
-        <div className="border border-gray-300 rounded-lg p-4 bg-white overflow-y-auto min-h-[70vh]">
+        <div
+          ref={previewRef}
+          className={`border border-gray-300 rounded-lg p-4 bg-white overflow-y-auto min-h-[70vh] ${
+            mobileShowPreview ? '' : 'hidden md:block'
+          }`}
+        >
           <div className="prose prose-sm max-w-none">
             <NarinoteMarkdown content={value || PREVIEW_PLACEHOLDER} kifuList={kifuList} />
           </div>

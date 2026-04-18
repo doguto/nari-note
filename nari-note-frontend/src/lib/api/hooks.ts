@@ -315,10 +315,10 @@ export function useGetCourseContent(params: GetCourseContentRequest, options?: O
   });
 }
 
-export function useGetCourseContentForEdit(options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetCourseContentForEdit(params: { id: string }, options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetCourseContentResponse>({
-    queryKey: queryKeys.courses.getCourseContentForEdit,
-    queryFn: () => coursesApi.getCourseContentForEdit(),
+    queryKey: [...queryKeys.courses.getCourseContentForEdit, params],
+    queryFn: () => coursesApi.getCourseContentForEdit(params),
     ...options,
   });
 }

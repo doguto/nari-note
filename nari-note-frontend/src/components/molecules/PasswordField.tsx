@@ -9,11 +9,7 @@ interface PasswordFieldProps {
   helperText?: string;
 }
 
-/**
- * PasswordField - Molecule Component
- * 
- * パスワード入力フィールド
- */
+
 export function PasswordField({
   value,
   onChange,

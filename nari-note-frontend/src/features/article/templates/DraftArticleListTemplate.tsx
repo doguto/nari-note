@@ -49,6 +49,7 @@ export function DraftArticleListTemplate({
               key={article.id}
               id={article.id!}
               title={article.title ?? '無題'}
+              tags={article.tags ?? []}
               updatedAt={article.updatedAt ?? ''}
               onDelete={() => onDelete(article.id!, article.title ?? '無題')}
             />

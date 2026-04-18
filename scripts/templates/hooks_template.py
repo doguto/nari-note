@@ -104,7 +104,14 @@ import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type Us
         return_type = ep.response_type or "void"
         request_type = ep.request_type or "void"
 
-        if request_type == "void":
+        # request_type が void でもパスパラメータがある場合はインライン型を使用
+        path_params = self._extract_path_params(ep.path)
+        if request_type == "void" and path_params:
+            effective_request_type = "{ " + ", ".join(f"{p}: string" for p in path_params) + " }"
+        else:
+            effective_request_type = request_type
+
+        if effective_request_type == "void":
             lines.append(f"export function {hook_name}(options?: Omit<UseQueryOptions<{return_type}>, 'queryKey' | 'queryFn'>) {{")
             lines.append(f"  return useQuery<{return_type}>({{")
             lines.append(f"    queryKey: queryKeys.{controller}.{func_name},")
@@ -113,7 +120,7 @@ import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type Us
             lines.append("  });")
             lines.append("}")
         else:
-            lines.append(f"export function {hook_name}(params: {request_type}, options?: Omit<UseQueryOptions<{return_type}>, 'queryKey' | 'queryFn'>) {{")
+            lines.append(f"export function {hook_name}(params: {effective_request_type}, options?: Omit<UseQueryOptions<{return_type}>, 'queryKey' | 'queryFn'>) {{")
             lines.append(f"  return useQuery<{return_type}>({{")
             lines.append(f"    queryKey: [...queryKeys.{controller}.{func_name}, params],")
             lines.append(f"    queryFn: () => {controller}Api.{func_name}(params),")

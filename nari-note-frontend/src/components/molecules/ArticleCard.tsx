@@ -12,12 +12,7 @@ interface ArticleCardProps {
   date: string;
 }
 
-/**
- * ArticleCard - Molecule Component
- * 
- * 記事カード表示コンポーネント
- * ホーム画面などで記事の概要を表示します
- */
+
 export function ArticleCard({
   id,
   title,

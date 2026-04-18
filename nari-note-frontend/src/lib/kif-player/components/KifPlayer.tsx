@@ -8,6 +8,7 @@ import { Board } from './Board';
 import { CapturedPieces } from './CapturedPieces';
 import { parseKif } from '../utils/parseKif';
 import { getBoardAtMove } from '../utils/simulator';
+import { ROW_LABELS } from '../constants';
 
 interface KifPlayerProps {
   kifText: string;
@@ -72,7 +73,14 @@ export function KifPlayer({
           size={size}
         />
       )}
-      <Board board={parsed.board} size={size} />
+      <Board
+        board={parsed.board}
+        size={size}
+        highlightCell={currentMove > 0 ? {
+          colIndex: 9 - game.moves[currentMove - 1].toCol,
+          rowIndex: game.moves[currentMove - 1].toRow - 1,
+        } : undefined}
+      />
       {showCapturedPieces && (
         <CapturedPieces
           pieces={parsed.captured.sente}
@@ -90,7 +98,11 @@ export function KifPlayer({
           ←
         </Button>
         <span className="text-sm tabular-nums min-w-[10rem] text-center select-none">
-          {currentMove === 0 ? '初期配置' : `${currentMove}手目 / ${totalMoves}手中`}
+          {currentMove === 0 ? '初期配置' : (() => {
+            const m = game.moves[currentMove - 1];
+            const coord = m.isSameSquare ? '同' : `${m.toCol}${ROW_LABELS[m.toRow - 1]}`;
+            return <>{currentMove}手目　{coord}<strong className="font-bold">{m.piece}</strong>{m.isPromote ? '成' : ''}</>;
+          })()}
         </span>
         <Button
           onClick={() => setCurrentMove((m) => Math.min(totalMoves, m + 1))}

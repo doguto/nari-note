@@ -42,7 +42,7 @@ export function TagArticleListTemplate({ tag, articles }: TagArticleListTemplate
               authorId={article.authorId ?? 0}
               tags={article.tags ?? []}
               likeCount={article.likeCount ?? 0}
-              date={article.createdAt ? new Date(article.createdAt).toLocaleDateString('ja-JP') : ''}
+              date={article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('ja-JP') : article.updatedAt ? new Date(article.updatedAt).toLocaleDateString('ja-JP') : ''}
             />
           ))}
         </div>

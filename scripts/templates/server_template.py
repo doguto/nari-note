@@ -95,22 +95,29 @@ import type {"""
         if path_params:
             url_path = ep.path
             for param in path_params:
-                resolved_param = self._resolve_path_param(param, request_type, self.class_map)
-                url_path = url_path.replace(f'{{{param}}}', f'${{params.{resolved_param}}}')
+                if request_type != "void":
+                    resolved_param = self._resolve_path_param(param, request_type, self.class_map)
+                    url_path = url_path.replace(f'{{{param}}}', f'${{params.{resolved_param}}}')
+                else:
+                    # request_typeがvoidの場合、パスパラメータを直接引数として使用
+                    url_path = url_path.replace(f'{{{param}}}', f'${{{param}}}')
             url_expression = f"`{url_path}`"
         else:
             url_expression = f"'{ep.path}'"
 
         # 関数シグネチャ
-        if request_type == "void":
+        if path_params and request_type == "void":
+            # パスパラメータのみ: 個別引数として生成（例: id: string）
+            param_list = ", ".join(f"{p}: string" for p in path_params)
+            lines.append(f"export async function {func_name}({param_list}): Promise<{response_type}> {{")
+        elif request_type == "void":
             lines.append(f"export async function {func_name}(): Promise<{response_type}> {{")
         else:
             lines.append(f"export async function {func_name}(params: {request_type}): Promise<{response_type}> {{")
 
         # URLの構築
-        if path_params and request_type != "void":
-            # パスパラメータがある場合: url_expressionは`/api/articles/${params.id}`のような形式
-            # バッククォートを除去して、getBaseUrl()と結合
+        if path_params:
+            # パスパラメータがある場合: バッククォートで囲まれたurl_expressionを使う
             url_path = url_expression.strip('`')
             lines.append(f"  const url = `${{getBaseUrl()}}{url_path}`;")
         elif request_type != "void":
