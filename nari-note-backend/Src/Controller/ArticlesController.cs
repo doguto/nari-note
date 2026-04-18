@@ -19,6 +19,7 @@ public class ArticlesController : ApplicationController
     readonly GetArticlesByTagService getArticlesByTagService;
     readonly GetArticlesService getArticlesService;
     readonly GetDraftArticlesService getDraftArticlesService;
+    readonly GetMyArticlesService getMyArticlesService;
     readonly SearchArticlesService searchArticlesService;
     readonly ToggleLikeService toggleLikeService;
     readonly UpdateArticleService updateArticleService;
@@ -34,7 +35,8 @@ public class ArticlesController : ApplicationController
         ToggleLikeService toggleLikeService,
         GetDraftArticlesService getDraftArticlesService,
         SearchArticlesService searchArticlesService,
-        CreateCommentService createCommentService
+        CreateCommentService createCommentService,
+        GetMyArticlesService getMyArticlesService
     )
     {
         this.createArticleService = createArticleService;
@@ -48,6 +50,7 @@ public class ArticlesController : ApplicationController
         this.getDraftArticlesService = getDraftArticlesService;
         this.searchArticlesService = searchArticlesService;
         this.createCommentService = createCommentService;
+        this.getMyArticlesService = getMyArticlesService;
     }
 
     [HttpGet]
@@ -126,6 +129,14 @@ public class ArticlesController : ApplicationController
             ArticleId = id
         };
         var response = await toggleLikeService.ExecuteAsync(UserId!.Value, request);
+        return Ok(response);
+    }
+
+    [HttpGet("my")]
+    [RequireAuth]
+    public async Task<ActionResult<GetMyArticlesResponse>> GetMyArticles()
+    {
+        var response = await getMyArticlesService.ExecuteAsync(UserId!.Value);
         return Ok(response);
     }
 

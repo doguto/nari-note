@@ -237,6 +237,11 @@ export interface GetLikedArticlesResponse {
   totalCount: number;
 }
 
+export interface GetMyArticlesResponse {
+  articles: ArticleThumbnailDto[];
+  totalCount: number;
+}
+
 export interface GetMyCoursesResponse {
   courses: CourseDto[];
   totalCount: number;

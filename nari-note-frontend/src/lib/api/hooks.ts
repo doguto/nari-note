@@ -37,6 +37,7 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
+  GetMyArticlesResponse,
   GetMyCoursesResponse,
   GetPopularTagsRequest,
   GetPopularTagsResponse,
@@ -68,6 +69,7 @@ export const queryKeys = {
     getArticleContent: ['articles', 'getArticleContent'] as const,
     getArticlesByAuthor: ['articles', 'getArticlesByAuthor'] as const,
     getArticlesByTag: ['articles', 'getArticlesByTag'] as const,
+    getMyArticles: ['articles', 'getMyArticles'] as const,
     getDraftArticles: ['articles', 'getDraftArticles'] as const,
     searchArticles: ['articles', 'searchArticles'] as const,
   },
@@ -173,6 +175,14 @@ export function useToggleLike(options?: UseMutationOptions<ToggleLikeResponse, E
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       options?.onSuccess?.(...args);
     },
+    ...options,
+  });
+}
+
+export function useGetMyArticles(options?: Omit<UseQueryOptions<GetMyArticlesResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetMyArticlesResponse>({
+    queryKey: queryKeys.articles.getMyArticles,
+    queryFn: () => articlesApi.getMyArticles(),
     ...options,
   });
 }
