@@ -6,6 +6,7 @@ import type { Piece as PieceData, BoardSize } from '../types';
 interface PieceProps {
   piece: PieceData;
   size?: BoardSize;
+  isHighlighted?: boolean;
 }
 
 function getSizeClasses(size: BoardSize = 'md') {
@@ -16,20 +17,26 @@ function getSizeClasses(size: BoardSize = 'md') {
   }
 }
 
-export function Piece({ piece, size = 'md' }: PieceProps) {
+export function Piece({ piece, size = 'md', isHighlighted = false }: PieceProps) {
   const { container, text } = getSizeClasses(size);
   return (
     <div
       className={cn(
         'flex items-center justify-center',
         'border border-gray-700 bg-white',
-        'font-serif font-bold text-black',
         container,
-        text,
         piece.owner === 'gote' && 'rotate-180'
       )}
     >
-      {piece.type}
+      <span
+        className={cn(
+          'font-serif text-black',
+          text,
+          isHighlighted ? 'font-black scale-115' : 'font-bold',
+        )}
+      >
+        {piece.type}
+      </span>
     </div>
   );
 }
