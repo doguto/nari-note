@@ -17,12 +17,7 @@ interface UnifiedSearchTemplateProps {
   onSearch: () => void;
 }
 
-/**
- * UnifiedSearchTemplate - Template Component
- * 
- * 統合検索ページ（記事・講座）のUI構成とレイアウトを担当
- * Tabs を使用して記事検索と講座検索を切り替え可能
- */
+
 export function UnifiedSearchTemplate({
   keyword,
   searchKeyword,
@@ -36,19 +31,18 @@ export function UnifiedSearchTemplate({
 }: UnifiedSearchTemplateProps) {
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className='flex justify-center w-full max-w-2xl mx-auto mb-8'>
+      <div className='flex justify-center w-full max-w-2xl mx-auto'>
         <SearchBar
           value={keyword} 
           onChange={onKeywordChange}
           onSearch={onSearch}
         />
       </div>
-      
-      {/* タブを左に縦並びで配置 */}
-      <Tabs defaultValue="articles" className="flex flex-col md:flex-row gap-6">
-        <TabsList className="flex flex-col md:flex-col h-fit md:w-48 gap-2">
-          <TabsTrigger value="articles" className="w-full justify-start">記事</TabsTrigger>
-          <TabsTrigger value="courses" className="w-full justify-start">講座</TabsTrigger>
+
+      <Tabs defaultValue="articles" className="flex flex-col gap-6">
+        <TabsList className="flex flex-row w-full max-w-2xl mx-auto">
+          <TabsTrigger value="articles" className="flex-1">記事</TabsTrigger>
+          <TabsTrigger value="courses" className="flex-1">講座</TabsTrigger>
         </TabsList>
 
         <div className="flex-1">
