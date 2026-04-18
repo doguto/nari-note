@@ -38,7 +38,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   }));
 
   // 自分の記事かどうかを判定
-  const isOwnArticle = userId === article?.authorId;
+  const isOwnArticle = userId === article?.article?.authorId;
 
   return (
     <PageWithSidebar>

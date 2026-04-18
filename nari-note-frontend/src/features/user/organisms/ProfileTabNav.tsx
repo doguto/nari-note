@@ -1,12 +1,12 @@
 import { ArticleList } from '@/components/organisms';
 import { UserFollowersList } from './UserFollowersList';
-import type { GetArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
+import type { GetArticlesByAuthorResponse, GetLikedArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
 interface ProfileTabNavProps {
   activeTab: string;
   tabContext: 'content' | 'follow';
-  articlesData?: GetArticlesResponse;
-  likedArticlesData?: GetArticlesResponse;
+  articlesData?: GetArticlesByAuthorResponse;
+  likedArticlesData?: GetLikedArticlesResponse;
   followersData?: GetFollowersResponse;
   followingsData?: GetFollowingsResponse;
   isArticlesLoading: boolean;

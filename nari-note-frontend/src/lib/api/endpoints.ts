@@ -24,7 +24,6 @@ import type {
   GetCourseContentResponse,
   GetCoursesByAuthorRequest,
   GetCoursesByAuthorResponse,
-  GetMyCoursesResponse,
   GetCoursesRequest,
   GetCoursesResponse,
   GetCurrentUserRequest,
@@ -37,6 +36,7 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
+  GetMyCoursesResponse,
   GetPopularTagsRequest,
   GetPopularTagsResponse,
   GetUserProfileRequest,
@@ -141,12 +141,12 @@ export const coursesApi = {
     const response = await apiClient.get<SearchCoursesResponse>('/api/courses/search', { params: data });
     return response;
   },
-  getCoursesByAuthor: async (data: GetCoursesByAuthorRequest): Promise<GetCoursesByAuthorResponse> => {
-    const response = await apiClient.get<GetCoursesByAuthorResponse>(`/api/courses/author/${data.authorId}`);
-    return response;
-  },
   getMyCourses: async (): Promise<GetMyCoursesResponse> => {
     const response = await apiClient.get<GetMyCoursesResponse>('/api/courses/my');
+    return response;
+  },
+  getCoursesByAuthor: async (data: GetCoursesByAuthorRequest): Promise<GetCoursesByAuthorResponse> => {
+    const response = await apiClient.get<GetCoursesByAuthorResponse>(`/api/courses/author/${data.authorId}`);
     return response;
   },
   createCourse: async (data: CreateCourseRequest): Promise<CreateCourseResponse> => {
@@ -157,7 +157,7 @@ export const coursesApi = {
     const response = await apiClient.get<GetCourseContentResponse>(`/api/courses/${data.id}`);
     return response;
   },
-  getCourseContentForEdit: async (data: GetCourseContentRequest): Promise<GetCourseContentResponse> => {
+  getCourseContentForEdit: async (): Promise<GetCourseContentResponse> => {
     const response = await apiClient.get<GetCourseContentResponse>(`/api/courses/${data.id}/for-edit`);
     return response;
   },

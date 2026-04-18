@@ -31,6 +31,7 @@ public class ArticleRepository : IArticleRepository
                             .Include(a => a.ArticleTags)
                             .ThenInclude(at => at.Tag)
                             .Include(a => a.Likes)
+                            .Include(a => a.Kifus)
                             .FirstOrDefaultAsync(a => a.Id == id);
     }
 

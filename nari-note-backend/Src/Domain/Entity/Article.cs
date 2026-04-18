@@ -40,6 +40,8 @@ public class Article : EntityBase
     public List<Comment> Comments { get; set; } = new();
     public int LikeCount => Likes.Count;
 
+    public List<Kifu> Kifus { get; set; } = new();
+
     public bool IsPublished => PublishedAt.HasValue;
 
     // Domain Logic

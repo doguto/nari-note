@@ -53,6 +53,7 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
+  GetMyCoursesResponse,
   GetPopularTagsRequest,
   GetPopularTagsResponse,
   GetUserProfileRequest,
@@ -150,6 +151,12 @@ export async function searchCourses(params: SearchCoursesRequest): Promise<Searc
   return serverFetch<SearchCoursesResponse>(url.toString());
 }
 
+export async function getMyCourses(): Promise<GetMyCoursesResponse> {
+  const url = `${getBaseUrl()}/api/courses/my`;
+
+  return serverFetch<GetMyCoursesResponse>(url);
+}
+
 export async function getCoursesByAuthor(params: GetCoursesByAuthorRequest): Promise<GetCoursesByAuthorResponse> {
   const url = `${getBaseUrl()}/api/courses/author/${params.authorId}`;
 
@@ -158,6 +165,12 @@ export async function getCoursesByAuthor(params: GetCoursesByAuthorRequest): Pro
 
 export async function getCourseContent(params: GetCourseContentRequest): Promise<GetCourseContentResponse> {
   const url = `${getBaseUrl()}/api/courses/${params.id}`;
+
+  return serverFetch<GetCourseContentResponse>(url);
+}
+
+export async function getCourseContentForEdit(): Promise<GetCourseContentResponse> {
+  const url = `${getBaseUrl()}/api/courses/${params.id}/for-edit`;
 
   return serverFetch<GetCourseContentResponse>(url);
 }
