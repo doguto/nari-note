@@ -29,21 +29,16 @@ export function Header() {
 
   return (
     <header>
-      {/* Top row: Site title with ochre/tan background */}
       <HeaderLogo />
 
-      {/* Bottom row: Navigation menu with dark background */}
       <div className="bg-brand-text border-b border-brand-text-dark shadow-sm">
-        <div className="w-11/12 mx-auto px-4 py-2.5 flex items-center justify-center relative">
-          {/* Desktop: centered navigation */}
+        <div className="w-11/12 mx-auto px-4 py-2.5 flex items-center justify-end md:justify-center relative">
           <HeaderNav />
 
-          <div className="flex items-center gap-4 absolute right-4">
+          <div className="flex items-center gap-4 md:absolute md:right-4">
             {!isMounted || isLoading ? (
-              // ローディング中またはマウント前はスケルトン表示
               <div className="w-24 h-6 bg-brand-text-dark rounded animate-pulse" />
             ) : isLoggedIn ? (
-              // ログイン時: マイページメニューとログアウトボタン
               <HeaderUserMenu
                 userId={userId!}
                 userName={userName!}
@@ -51,13 +46,11 @@ export function Header() {
                 isLoggingOut={logoutMutation.isPending}
               />
             ) : (
-              // 未ログイン時: ログイン・新規登録ボタン
               <HeaderAuthButtons />
             )}
           </div>
         </div>
 
-        {/* Mobile: horizontally scrollable navigation row */}
         <HeaderNavMobile />
       </div>
     </header>
