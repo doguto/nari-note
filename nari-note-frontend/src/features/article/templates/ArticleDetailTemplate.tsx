@@ -87,9 +87,6 @@ export function ArticleDetailTemplate({
             onClick={onLikeClick}
             disabled={isLikePending}
           />
-          <Button className="px-4 py-3 border text-black bg-white border-gray-300 rounded hover:bg-gray-50">
-            ストック
-          </Button>
         </div>
       </div>
 
