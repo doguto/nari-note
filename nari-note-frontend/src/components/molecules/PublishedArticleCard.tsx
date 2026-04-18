@@ -2,25 +2,28 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Pencil, Eye, Heart, Trash2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Pencil, Eye, Heart, Trash2, MoreVertical } from 'lucide-react';
 
 interface PublishedArticleCardProps {
   id: string;
   title: string;
+  tags: string[];
   publishedAt: string;
   likeCount?: number;
   onDelete?: () => void;
 }
 
-/**
- * PublishedArticleCard - Molecule Component
- * 
- * 公開済み記事のカード表示コンポーネント
- * タイトル、公開日時、いいね数、表示・編集ボタンを表示
- */
+
 export function PublishedArticleCard({
   id,
   title,
+  tags,
   publishedAt,
   likeCount = 0,
   onDelete,
@@ -42,53 +45,54 @@ export function PublishedArticleCard({
   });
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <h3 
+    <div className="bg-white rounded-lg p-5 border border-gray-200 hover:shadow-lg hover:border-brand-primary/30 transition-all duration-200">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-2">
+          <h3
             onClick={handleView}
-            className="text-xl font-bold text-gray-900 mb-2 cursor-pointer hover:text-[var(--brand-primary)] transition-colors truncate"
+            className="text-lg font-bold text-gray-800 cursor-pointer hover:text-brand-primary transition-colors"
           >
             {title}
           </h3>
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span>公開日: {formattedDate}</span>
-            <span className="flex items-center gap-1">
-              <Heart className="w-4 h-4" />
-              {likeCount}
-            </span>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleView}>
+                <Eye className="w-4 h-4 mr-2" />
+                表示
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleEdit}>
+                <Pencil className="w-4 h-4 mr-2" />
+                編集
+              </DropdownMenuItem>
+              {onDelete && (
+                <DropdownMenuItem onClick={onDelete} className="text-red-500 focus:text-red-500">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  削除
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <div className="flex gap-2 flex-shrink-0">
-          <Button
-            onClick={handleView}
-            variant="outline"
-            size="sm"
-            className="border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            <Eye className="w-4 h-4 mr-1" />
-            表示
-          </Button>
-          <Button
-            onClick={handleEdit}
-            variant="outline"
-            size="sm"
-            className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-bg-light)]"
-          >
-            <Pencil className="w-4 h-4 mr-1" />
-            編集
-          </Button>
-          {onDelete && (
-            <Button
-              onClick={onDelete}
-              variant="outline"
-              size="sm"
-              className="border-red-500 text-red-500 hover:bg-red-50"
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              削除
-            </Button>
-          )}
+        {tags.length > 0 && (
+          <div className="flex gap-2 flex-wrap">
+            {tags.map((tag) => (
+              <span key={tag} className="bg-brand-primary/10 text-brand-primary rounded-full px-3 py-1 text-xs font-medium">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-4 text-sm text-gray-500 items-center">
+          <span className="flex items-center gap-1">
+            <Heart className="w-4 h-4" />
+            {likeCount}
+          </span>
+          <span>{formattedDate}</span>
         </div>
       </div>
     </div>

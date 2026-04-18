@@ -8,7 +8,7 @@ interface PageWithSidebarProps {
 
 export function PageWithSidebar({ children, title }: PageWithSidebarProps) {
   return (
-    <div className="sm:w-full md:w-11/12 w-5/6 mx-auto px-4 py-8 flex justify-center">
+    <div className="w-full md:w-11/12 mx-auto px-4 py-8 flex justify-center">
       <div className="flex gap-8 w-full">
         <div className="lg:w-1/6 hidden lg:block shrink-0" aria-hidden="true" />
         <main className="flex-1 max-w-4xl">

@@ -6,23 +6,20 @@ import { useAuth } from '@/lib/providers/AuthProvider';
 import { useGetMyCourses, useDeleteCourse } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PageWithSidebar } from '@/features/global/organisms';
+import { DeleteConfirmModal } from '@/components/molecules/DeleteConfirmModal';
 import { MyCoursesListTemplate } from '../templates/MyCoursesListTemplate';
 
-/**
- * MyCoursesListPage - Page Component
- * 
- * マイ講座一覧ページのロジックを管理するコンポーネント
- * データフェッチング、状態管理、ビジネスロジックを担当
- */
 export function MyCoursesListPage() {
   const router = useRouter();
   const { userId } = useAuth();
+  const [activeTab, setActiveTab] = useState<'published' | 'drafts'>('published');
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+
   const { data, isLoading, error, refetch } = useGetMyCourses(
     { enabled: !!userId }
   );
-  
+
   const deleteCourse = useDeleteCourse({
     onSuccess: () => {
       setDeletingId(null);
@@ -35,11 +32,19 @@ export function MyCoursesListPage() {
     },
   });
 
-  const handleDelete = (id: string, name: string) => {
-    if (window.confirm(`「${name}」を削除してもよろしいですか？`)) {
-      setDeletingId(id);
-      deleteCourse.mutate({ id });
-    }
+  const handleDeleteRequest = (id: string, name: string) => {
+    setPendingDelete({ id, name });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!pendingDelete) return;
+    setDeletingId(pendingDelete.id);
+    setPendingDelete(null);
+    deleteCourse.mutate({ id: pendingDelete.id });
+  };
+
+  const handleCancelDelete = () => {
+    setPendingDelete(null);
   };
 
   const handleNewCourse = () => {
@@ -56,23 +61,34 @@ export function MyCoursesListPage() {
 
   if (error) {
     return (
-      <ErrorMessage 
-        message="講座の取得に失敗しました" 
+      <ErrorMessage
+        message="講座の取得に失敗しました"
         onRetry={refetch}
       />
     );
   }
 
-  const myCourses = data?.courses || [];
+  const allCourses = data?.courses || [];
+  const publishedCourses = allCourses.filter(course => course.isPublished);
+  const draftCourses = allCourses.filter(course => !course.isPublished);
 
   return (
     <PageWithSidebar>
       <MyCoursesListTemplate
-        courses={myCourses}
-        onDelete={handleDelete}
+        activeTab={activeTab}
+        publishedCourses={publishedCourses}
+        draftCourses={draftCourses}
+        deletingId={deletingId}
+        onTabChange={setActiveTab}
+        onDelete={handleDeleteRequest}
         onEdit={handleEdit}
         onNewCourse={handleNewCourse}
-        deletingId={deletingId}
+      />
+      <DeleteConfirmModal
+        open={pendingDelete !== null}
+        articleTitle={pendingDelete?.name ?? ''}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
     </PageWithSidebar>
   );
