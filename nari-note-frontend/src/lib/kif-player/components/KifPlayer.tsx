@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { BoardSize } from '@/lib/next-shogi/types';
-import { Board } from '@/lib/next-shogi/components/Board';
-import { CapturedPieces } from '@/lib/next-shogi/components/CapturedPieces';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import type { BoardSize } from '../types';
+import { Board } from './Board';
+import { CapturedPieces } from './CapturedPieces';
 import { parseKif } from '../utils/parseKif';
 import { getBoardAtMove } from '../utils/simulator';
 
@@ -23,7 +24,7 @@ export function KifPlayer({
   className,
   size = 'md',
   showCapturedPieces = true,
-  showPlayerNames = true,
+  showPlayerNames = false,
 }: KifPlayerProps) {
   const [currentMove, setCurrentMove] = useState(defaultMoveNumber);
 
@@ -70,25 +71,23 @@ export function KifPlayer({
         />
       )}
       <div className="flex items-center gap-3 mt-1">
-        <button
+        <Button
           onClick={() => setCurrentMove((m) => Math.max(0, m - 1))}
           disabled={currentMove === 0}
-          className="px-3 py-1 rounded border text-sm disabled:opacity-30 hover:bg-gray-100 transition-colors"
           aria-label="前の手"
         >
           ←
-        </button>
+        </Button>
         <span className="text-sm tabular-nums min-w-[10rem] text-center select-none">
           {currentMove === 0 ? '初期配置' : `${currentMove}手目 / ${totalMoves}手中`}
         </span>
-        <button
+        <Button
           onClick={() => setCurrentMove((m) => Math.min(totalMoves, m + 1))}
           disabled={currentMove === totalMoves}
-          className="px-3 py-1 rounded border text-sm disabled:opacity-30 hover:bg-gray-100 transition-colors"
           aria-label="次の手"
         >
           →
-        </button>
+        </Button>
       </div>
     </div>
   );

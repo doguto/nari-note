@@ -1,4 +1,4 @@
-import type { BoardState, Piece } from '@/lib/next-shogi/types';
+import type { BoardState, Piece, PieceType } from '../types';
 
 const s = (type: Piece['type']): Piece => ({ type, owner: 'sente' });
 const g = (type: Piece['type']): Piece => ({ type, owner: 'gote' });
@@ -17,3 +17,8 @@ export const INITIAL_BOARD: BoardState = [
   [_,       s('角'), _,       _,       _,       _,       _,       s('飛'), _      ],
   [s('香'), s('桂'), s('銀'), s('金'), s('玉'), s('金'), s('銀'), s('桂'), s('香')],
 ];
+
+export const ROW_LABELS = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
+export const COLUMN_LABELS = ['9', '8', '7', '6', '5', '4', '3', '2', '1'];
+
+export const PIECE_ORDER: PieceType[] = ['飛', '角', '金', '銀', '桂', '香', '歩'];

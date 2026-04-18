@@ -1,4 +1,4 @@
-import type { PieceType } from '@/lib/next-shogi/types';
+import type { PieceType } from '../types';
 import type { KifGame, KifMove } from '../types';
 
 const FULL_WIDTH_TO_NUM: Record<string, number> = {
@@ -49,7 +49,6 @@ export function parseKif(kifText: string): KifGame {
     if (!numMatch) continue;
 
     const afterNum = line.slice(numMatch[0].length).trimStart();
-
     if (TERMINAL_KEYWORDS.some((kw) => afterNum.startsWith(kw))) break;
 
     const m = MOVE_RE.exec(line);

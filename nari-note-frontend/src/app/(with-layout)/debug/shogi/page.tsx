@@ -187,9 +187,6 @@ export default function ShogiDebugPage() {
           <h2 className="text-2xl font-bold mb-4 text-gray-800">
             KIF棋譜プレイヤー
           </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            ← → ボタンで手を進めて盤面を確認できますわ。
-          </p>
           <KifPlayer kifText={sampleKif} defaultMoveNumber={0} size="md" />
         </section>
 

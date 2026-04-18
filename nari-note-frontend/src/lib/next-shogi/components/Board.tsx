@@ -11,9 +11,7 @@ interface BoardProps {
   className?: string;
 }
 
-/**
- * サイズに応じたクラスを返す
- */
+
 function getSizeClasses(size: BoardSize = 'md'): {
   cell: string;
   label: string;
