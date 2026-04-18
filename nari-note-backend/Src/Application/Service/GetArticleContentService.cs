@@ -3,7 +3,6 @@ using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
-using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -38,19 +37,23 @@ public class GetArticleContentService
 
         return new GetArticleContentResponse
         {
-            Id = article.Id,
-            Title = article.Title,
-            Body = article.Body,
-            AuthorId = article.AuthorId,
-            AuthorName = article.Author?.Name ?? "",
-            Tags = article.ArticleTags.Select(at => at.Tag?.Name ?? string.Empty)
-                          .Where(name => !name.IsNullOrEmpty()).ToList(),
-            LikeCount = article.LikeCount,
+            Article = new ArticleDto
+            {
+                Id = article.Id,
+                Title = article.Title,
+                Body = article.Body,
+                AuthorId = article.AuthorId,
+                AuthorName = article.Author.Name,
+                Tags = article.ArticleTags.Select(x => x.Tag.Name).ToList(),
+                Kifus = article.Kifus.Select(x => new KifuDto { KifuText = x.KifuText, SortOrder = x.SortOrder })
+                               .ToList(),
+                LikeCount = article.LikeCount,
+                IsPublished = article.IsPublished,
+                PublishedAt = article.PublishedAt,
+                CreatedAt = article.CreatedAt,
+                UpdatedAt = article.UpdatedAt
+            },
             IsLiked = isLiked,
-            IsPublished = article.IsPublished,
-            PublishedAt = article.PublishedAt,
-            CreatedAt = article.CreatedAt,
-            UpdatedAt = article.UpdatedAt,
             CourseId = article.CourseId,
             CourseName = article.Course?.Name,
             Comments = comments

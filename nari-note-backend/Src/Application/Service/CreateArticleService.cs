@@ -2,7 +2,6 @@ using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
-using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -15,12 +14,14 @@ public class CreateArticleService
     public CreateArticleService(
         IArticleRepository articleRepository,
         ICourseRepository courseRepository,
-        IKifuRepository kifuRepository)
+        IKifuRepository kifuRepository
+    )
     {
         this.articleRepository = articleRepository;
         this.courseRepository = courseRepository;
         this.kifuRepository = kifuRepository;
     }
+
 
     public async Task<CreateArticleResponse> ExecuteAsync(CreateArticleRequest request)
     {
@@ -28,7 +29,7 @@ public class CreateArticleService
         if (request.CourseId.HasValue)
         {
             var course = await courseRepository.FindForceByIdAsync(request.CourseId.Value);
-            
+
             if (course.UserId != request.AuthorId)
             {
                 throw new UnauthorizedAccessException("この講座に記事を追加する権限がありません");

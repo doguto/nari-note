@@ -17,6 +17,18 @@ export interface ArticleDto {
   updatedAt: string;
 }
 
+export interface ArticleThumbnailDto {
+  id: string;
+  title: string;
+  authorId: string;
+  authorName: string;
+  tags: string[];
+  likeCount: number;
+  isPublished: boolean;
+  publishedAt?: string;
+  updatedAt: string;
+}
+
 export interface AuthResponse {
   userId?: string;
   userName?: string;
@@ -109,18 +121,8 @@ export interface GetArticleContentRequest {
 }
 
 export interface GetArticleContentResponse {
-  id: string;
-  title: string;
-  body: string;
-  authorId: string;
-  authorName: string;
-  tags: string[];
-  likeCount: number;
+  article: ArticleDto;
   isLiked: boolean;
-  isPublished: boolean;
-  publishedAt?: string;
-  createdAt: string;
-  updatedAt: string;
   comments: CommentDto[];
   courseId?: string;
   courseName?: string;
@@ -133,7 +135,7 @@ export interface GetArticlesByAuthorRequest {
 export interface GetArticlesByAuthorResponse {
   authorId: string;
   authorName: string;
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
   totalCount: number;
 }
 
@@ -142,7 +144,7 @@ export interface GetArticlesByTagRequest {
 }
 
 export interface GetArticlesByTagResponse {
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
 }
 
 export interface GetArticlesRequest {
@@ -231,7 +233,7 @@ export interface GetLikedArticlesRequest {
 
 export interface GetLikedArticlesResponse {
   userId: string;
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
   totalCount: number;
 }
 
@@ -284,7 +286,7 @@ export interface SearchArticlesRequest {
 }
 
 export interface SearchArticlesResponse {
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
 }
 
 export interface SearchCoursesRequest {
