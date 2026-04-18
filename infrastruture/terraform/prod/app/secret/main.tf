@@ -33,3 +33,9 @@ resource "aws_ssm_parameter" "resend_api_key" {
   type  = "SecureString"
   value = var.resend_api_key
 }
+
+resource "aws_ssm_parameter" "sentry_dsn" {
+  name  = "/${var.app_name}/app/sentry_dsn"
+  type  = "SecureString"
+  value = var.sentry_dsn
+}

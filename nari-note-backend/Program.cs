@@ -16,8 +16,15 @@ if (!builder.Environment.IsDevelopment())
 }
 else
 {
-    builder.Configuration.AddJsonFile("secret.json", optional: true, reloadOnChange: false);
+    builder.Configuration.AddJsonFile("secret.json", true, false);
 }
+
+// Sentry設定
+builder.WebHost.UseSentry(o =>
+{
+    o.Dsn = builder.Configuration["sentry_dsn"];
+    o.Debug = builder.Environment.IsDevelopment();
+});
 
 // CORS設定
 builder.Services.AddCors(options =>
