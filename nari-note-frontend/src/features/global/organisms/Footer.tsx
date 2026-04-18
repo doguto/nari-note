@@ -1,10 +1,6 @@
 import Link from 'next/link';
 
-/**
- * フッターコンポーネント
- *
- * 全ページ共通のフッター。
- */
+
 export function Footer() {
   return (
     <footer className="bg-brand-text text-white py-8">
