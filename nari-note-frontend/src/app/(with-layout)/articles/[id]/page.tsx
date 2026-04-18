@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const { id } = await params;
 
   try {
-    const article = await getArticleContent({ id });
+    const { article } = await getArticleContent({ id });
     const plainText = article.body.replace(/<[^>]+>/g, '');
     const description = plainText.slice(0, 160);
 

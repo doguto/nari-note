@@ -170,7 +170,7 @@ export async function getCourseContent(params: GetCourseContentRequest): Promise
 }
 
 export async function getCourseContentForEdit(): Promise<GetCourseContentResponse> {
-  const url = `${getBaseUrl()}/api/courses/${params.id}/for-edit`;
+  const url = `${getBaseUrl()}`/api/courses/${params.id}/for-edit``;
 
   return serverFetch<GetCourseContentResponse>(url);
 }
