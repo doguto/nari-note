@@ -36,6 +36,7 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
+  GetMyArticlesResponse,
   GetMyCoursesResponse,
   GetPopularTagsRequest,
   GetPopularTagsResponse,
@@ -91,6 +92,10 @@ export const articlesApi = {
   },
   toggleLike: async (data: ToggleLikeRequest): Promise<ToggleLikeResponse> => {
     const response = await apiClient.post<ToggleLikeResponse>(`/api/articles/${data.articleId}/like`);
+    return response;
+  },
+  getMyArticles: async (): Promise<GetMyArticlesResponse> => {
+    const response = await apiClient.get<GetMyArticlesResponse>('/api/articles/my');
     return response;
   },
   getDraftArticles: async (data: GetDraftArticlesRequest): Promise<GetDraftArticlesResponse> => {

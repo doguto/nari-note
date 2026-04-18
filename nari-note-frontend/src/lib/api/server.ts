@@ -53,6 +53,7 @@ import type {
   GetHealthResponse,
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
+  GetMyArticlesResponse,
   GetMyCoursesResponse,
   GetPopularTagsRequest,
   GetPopularTagsResponse,
@@ -92,6 +93,12 @@ export async function getArticlesByTag(params: GetArticlesByTagRequest): Promise
   const url = `${getBaseUrl()}/api/articles/tag/${params.tagName}`;
 
   return serverFetch<GetArticlesByTagResponse>(url);
+}
+
+export async function getMyArticles(): Promise<GetMyArticlesResponse> {
+  const url = `${getBaseUrl()}/api/articles/my`;
+
+  return serverFetch<GetMyArticlesResponse>(url);
 }
 
 export async function getDraftArticles(params: GetDraftArticlesRequest): Promise<GetDraftArticlesResponse> {

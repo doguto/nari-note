@@ -16,6 +16,7 @@ public static class ApplicationServiceInstaller
         services.AddScoped<GetArticlesService>();
         services.AddScoped<GetCoursesService>();
         services.AddScoped<GetArticlesByAuthorService>();
+        services.AddScoped<GetMyArticlesService>();
         services.AddScoped<GetCoursesByAuthorService>();
         services.AddScoped<GetMyCoursesService>();
         services.AddScoped<GetArticlesByTagService>();
