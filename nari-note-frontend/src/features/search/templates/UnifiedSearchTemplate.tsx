@@ -3,7 +3,7 @@ import { ArticleCard, CourseCard } from '@/components/molecules';
 import { EmptyState } from '@/components/ui';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Search } from 'lucide-react';
-import { ArticleDto, CourseDto } from '@/lib/api/types';
+import { ArticleThumbnailDto, CourseDto } from '@/lib/api/types';
 
 interface UnifiedSearchTemplateProps {
   keyword: string;
@@ -11,7 +11,7 @@ interface UnifiedSearchTemplateProps {
   hasSearched: boolean;
   hasArticleResults: boolean;
   hasCourseResults: boolean;
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
   courses: CourseDto[];
   onKeywordChange: (keyword: string) => void;
   onSearch: () => void;
@@ -87,10 +87,10 @@ export function UnifiedSearchTemplate({
                       authorId={article.authorId ?? 0}
                       tags={article.tags ?? []}
                       likeCount={article.likeCount ?? 0}
-                      date={article.publishedAt 
-                        ? new Date(article.publishedAt).toLocaleDateString('ja-JP') 
-                        : article.createdAt 
-                          ? new Date(article.createdAt).toLocaleDateString('ja-JP') 
+                      date={article.publishedAt
+                        ? new Date(article.publishedAt).toLocaleDateString('ja-JP')
+                        : article.updatedAt
+                          ? new Date(article.updatedAt).toLocaleDateString('ja-JP')
                           : ''
                       }
                     />
