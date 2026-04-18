@@ -1,7 +1,6 @@
 'use client';
 
-import { ShogiBoard } from '@/lib/next-shogi';
-import { KifPlayer } from '@/lib/kif-player';
+import { ShogiBoard, KifPlayer } from '@/lib/kif-player';
 
 const sampleKif = `先手：kutotsuki 1級
 後手：gogo050505 1級

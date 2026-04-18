@@ -1,6 +1,5 @@
-export { KifPlayer, Board, Piece, CapturedPieces } from './components';
-export { parseKif } from './utils/parseKif';
-export { getBoardAtMove } from './utils/simulator';
+export { KifPlayer, ShogiBoard, Board, Piece, CapturedPieces } from './components';
+export { parseKif, getBoardAtMove, parseBOD, parseCapturedPieces } from './utils';
 export type {
   KifMove,
   KifGame,
