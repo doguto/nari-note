@@ -1,0 +1,95 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import type { BoardSize } from '@/lib/next-shogi/types';
+import { Board } from '@/lib/next-shogi/components/Board';
+import { CapturedPieces } from '@/lib/next-shogi/components/CapturedPieces';
+import { cn } from '@/lib/utils';
+import { parseKif } from '../utils/parseKif';
+import { getBoardAtMove } from '../utils/simulator';
+
+interface KifPlayerProps {
+  kifText: string;
+  defaultMoveNumber?: number;
+  className?: string;
+  size?: BoardSize;
+  showCapturedPieces?: boolean;
+  showPlayerNames?: boolean;
+}
+
+export function KifPlayer({
+  kifText,
+  defaultMoveNumber = 0,
+  className,
+  size = 'md',
+  showCapturedPieces = true,
+  showPlayerNames = true,
+}: KifPlayerProps) {
+  const [currentMove, setCurrentMove] = useState(defaultMoveNumber);
+
+  const game = useMemo(() => {
+    try {
+      return parseKif(kifText);
+    } catch {
+      return null;
+    }
+  }, [kifText]);
+
+  const parsed = useMemo(() => {
+    if (!game) return null;
+    return getBoardAtMove(game, currentMove);
+  }, [game, currentMove]);
+
+  if (!game || !parsed) {
+    return (
+      <div className={cn('p-4 bg-red-50 border border-red-200 rounded', className)}>
+        <p className="text-red-700 text-sm">棋譜の読み込みに失敗しました。</p>
+      </div>
+    );
+  }
+
+  const totalMoves = game.moves.length;
+
+  return (
+    <div className={cn('inline-flex flex-col items-center gap-2', className)}>
+      {showCapturedPieces && (
+        <CapturedPieces
+          pieces={parsed.captured.gote}
+          owner="gote"
+          playerName={showPlayerNames ? parsed.gotePlayer : undefined}
+          size={size}
+        />
+      )}
+      <Board board={parsed.board} size={size} />
+      {showCapturedPieces && (
+        <CapturedPieces
+          pieces={parsed.captured.sente}
+          owner="sente"
+          playerName={showPlayerNames ? parsed.sentePlayer : undefined}
+          size={size}
+        />
+      )}
+      <div className="flex items-center gap-3 mt-1">
+        <button
+          onClick={() => setCurrentMove((m) => Math.max(0, m - 1))}
+          disabled={currentMove === 0}
+          className="px-3 py-1 rounded border text-sm disabled:opacity-30 hover:bg-gray-100 transition-colors"
+          aria-label="前の手"
+        >
+          ←
+        </button>
+        <span className="text-sm tabular-nums min-w-[10rem] text-center select-none">
+          {currentMove === 0 ? '初期配置' : `${currentMove}手目 / ${totalMoves}手中`}
+        </span>
+        <button
+          onClick={() => setCurrentMove((m) => Math.min(totalMoves, m + 1))}
+          disabled={currentMove === totalMoves}
+          className="px-3 py-1 rounded border text-sm disabled:opacity-30 hover:bg-gray-100 transition-colors"
+          aria-label="次の手"
+        >
+          →
+        </button>
+      </div>
+    </div>
+  );
+}
