@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
   DropdownMenu,
@@ -29,10 +30,12 @@ interface HeaderUserMenuProps {
 
 export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: HeaderUserMenuProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   const handleLogoutConfirm = () => {
     setIsModalOpen(false);
     onLogout();
+    router.push('/');
   };
 
   return (
