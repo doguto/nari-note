@@ -64,3 +64,22 @@ data "aws_iam_policy_document" "cloudwatch_agent" {
     resources = ["*"]
   }
 }
+
+resource "aws_iam_role_policy" "s3_images_write" {
+  name   = "${var.app_name}-s3-images-write-policy"
+  role   = aws_iam_role.app_server.id
+  policy = data.aws_iam_policy_document.s3_images_write.json
+}
+
+data "aws_iam_policy_document" "s3_images_write" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:DeleteObject",
+    ]
+    resources = [
+      "${data.terraform_remote_state.images_storage.outputs.bucket_arn}/*",
+    ]
+  }
+}
