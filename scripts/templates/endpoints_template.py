@@ -94,7 +94,14 @@ import type {"""
         else:
             effective_request_type = request_type
 
-        if effective_request_type == "void":
+        if ep.is_form_file:
+            param_name = ep.form_file_param
+            lines.append(f"  {func_name}: async ({param_name}: File): Promise<{response_type}> => {{")
+            lines.append(f"    const formData = new FormData();")
+            lines.append(f"    formData.append('{param_name}', {param_name});")
+            lines.append(f"    const response = await apiClient.{ep.method.lower()}<{response_type}>({url_expression}, formData);")
+            lines.append("    return response;")
+        elif effective_request_type == "void":
             lines.append(f"  {func_name}: async (): Promise<{response_type}> => {{")
             if ep.method == "DELETE":
                 lines.append(f"    await apiClient.delete({url_expression});")
