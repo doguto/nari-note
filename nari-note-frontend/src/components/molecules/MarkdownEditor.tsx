@@ -26,6 +26,8 @@ interface Command {
 }
 
 const MARKDOWN_COMMANDS: Command[] = [
+  { trigger: 'board-editor', label: '盤面エディタ', insert: '', description: '盤面を自由に編集して挿入', type: 'board-editor' },
+  { trigger: 'kifu', label: '棋譜盤面', insert: '', description: '棋譜から盤面を埋め込む', type: 'kifu' },
   { trigger: 'h1', label: '# 見出し1', insert: '# ', description: '大見出しを挿入' },
   { trigger: 'h2', label: '## 見出し2', insert: '## ', description: '中見出しを挿入' },
   { trigger: 'h3', label: '### 見出し3', insert: '### ', description: '小見出しを挿入' },
@@ -34,8 +36,6 @@ const MARKDOWN_COMMANDS: Command[] = [
   { trigger: 'code', label: '``` コード', insert: '```\n\n```', description: 'コードブロックを挿入' },
   { trigger: 'quote', label: '> 引用', insert: '> ', description: '引用ブロックを挿入' },
   { trigger: 'hr', label: '--- 水平線', insert: '\n---\n', description: '水平線を挿入' },
-  { trigger: 'board-editor', label: '盤面エディタ', insert: '', description: '盤面を自由に編集して挿入', type: 'board-editor' },
-  { trigger: 'kifu', label: '棋譜盤面', insert: '', description: '棋譜から盤面を埋め込む', type: 'kifu' },
 ];
 
 
@@ -288,7 +288,6 @@ export function MarkdownEditor({
       </div>
 
       <div className="md:grid md:grid-cols-2 md:gap-4 md:items-stretch">
-        {/* Editor Input */}
         <div className={`relative flex flex-col ${mobileShowPreview ? 'hidden md:flex' : ''}`}>
           <textarea
             ref={textareaRef}
@@ -304,7 +303,6 @@ export function MarkdownEditor({
             className="w-full flex-1 min-h-[70vh] p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono text-sm resize-y"
           />
 
-          {/* Command Menu */}
           {showCommands && filteredCommands.length > 0 && (
             <div
               ref={commandsRef}
@@ -332,7 +330,6 @@ export function MarkdownEditor({
           )}
         </div>
 
-        {/* Live Preview */}
         <div
           ref={previewRef}
           className={`border border-gray-300 rounded-lg p-4 bg-white overflow-y-auto min-h-[70vh] ${

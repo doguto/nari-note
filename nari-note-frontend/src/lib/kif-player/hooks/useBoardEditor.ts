@@ -44,11 +44,27 @@ export function useBoardEditor(): BoardEditorState {
   }, []);
 
   const clearBoard = useCallback(() => {
+    let newSente: CapturedPiece[] = [...senteCaptured];
+    let newGote:  CapturedPiece[] = [...goteCaptured];
+
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        const piece = board[r][c];
+        if (!piece) continue;
+        const capturedType = (DEMOTE_MAP[piece.type] ?? piece.type) as PieceType;
+        if (piece.owner === 'sente') {
+          newSente = addToCaptured(newSente, capturedType);
+        } else {
+          newGote = addToCaptured(newGote, capturedType);
+        }
+      }
+    }
+
     setBoard(Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => null)));
-    setSenteCaptured([]);
-    setGoteCaptured([]);
+    setSenteCaptured(newSente);
+    setGoteCaptured(newGote);
     setSelected(null);
-  }, []);
+  }, [board, senteCaptured, goteCaptured]);
 
   const handleBoardClick = useCallback((row: number, col: number) => {
     const piece = board[row][col];
