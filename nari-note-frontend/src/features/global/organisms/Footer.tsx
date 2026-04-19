@@ -8,7 +8,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-center md:text-left">
             <p className="text-sm text-gray-400">
-              © 2024 なりノート
+              © 2026 なりノート
             </p>
           </div>
           <div className="flex gap-6 text-sm">
@@ -18,9 +18,10 @@ export function Footer() {
             <Link href="/privacy-policy" className="text-gray-400 hover:text-brand-primary transition-colors">
               プライバシーポリシー
             </Link>
-            <a href="#" className="text-gray-400 hover:text-brand-primary transition-colors">
+            {/* TODO: お問い合わせフォームの作成 */}
+            {/* <a href="#" className="text-gray-400 hover:text-brand-primary transition-colors">
               お問い合わせ
-            </a>
+            </a> */}
           </div>
         </div>
       </div>

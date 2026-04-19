@@ -36,7 +36,7 @@ export function HomeListTemplate({
     >
       <TabsList className="grid w-full max-w-md mx-auto mb-6 grid-cols-2">
         <TabsTrigger value="articles">新着記事</TabsTrigger>
-        <TabsTrigger value="courses">講座一覧</TabsTrigger>
+        <TabsTrigger value="courses">新着講座</TabsTrigger>
       </TabsList>
 
       <TabsContent value="articles">
