@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useUpdatePassword } from '@/lib/api';
 import { PasswordEditTemplate } from '../templates/PasswordEditTemplate';
 
+
 export function PasswordEditPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');

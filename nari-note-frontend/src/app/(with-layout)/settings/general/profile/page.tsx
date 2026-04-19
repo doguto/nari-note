@@ -1,7 +1,7 @@
 'use client';
 
 import { AuthGuard } from '@/features/global/organisms';
-import { ProfileEditPage } from '@/features/user/pages';
+import { ProfileEditPage } from '@/features/settings/pages';
 
 export default function SettingsProfilePage() {
   return (

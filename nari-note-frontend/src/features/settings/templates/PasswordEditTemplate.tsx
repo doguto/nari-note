@@ -34,7 +34,7 @@ export function PasswordEditTemplate({
   onSubmit,
 }: PasswordEditTemplateProps) {
   return (
-    <div className="max-w-md">
+    <div className="max-w-2xl bg-white rounded-lg p-6">
       <FormTitle>パスワード変更</FormTitle>
       {successMessage && <SuccessAlert message={successMessage} />}
       {generalError && <ErrorAlert message={generalError} />}

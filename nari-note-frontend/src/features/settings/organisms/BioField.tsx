@@ -9,15 +9,9 @@ interface BioFieldProps {
   maxLength?: number;
 }
 
-/**
- * BioField - Molecule Component
- * 
- * 自己紹介文入力フィールド
- * 250文字以内
- */
-export function BioField({ 
-  value, 
-  onChange, 
+export function BioField({
+  value,
+  onChange,
   error,
   required = false,
   maxLength = 250,

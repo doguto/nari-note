@@ -3,21 +3,17 @@ import { ProfileTabNav } from '../organisms/ProfileTabNav';
 import type { GetUserProfileResponse, GetArticlesByAuthorResponse, GetLikedArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
 interface UserProfileTemplateProps {
-  // ユーザー情報
   user: GetUserProfileResponse;
   isOwnProfile: boolean;
 
-  // タブ状態
   activeTab: string;
   tabContext: 'content' | 'follow';
 
-  // コンテンツデータ
   articlesData?: GetArticlesByAuthorResponse;
   likedArticlesData?: GetLikedArticlesResponse;
   followersData?: GetFollowersResponse;
   followingsData?: GetFollowingsResponse;
 
-  // ローディング・エラー状態
   isArticlesLoading: boolean;
   isLikedArticlesLoading: boolean;
   isFollowersLoading: boolean;
@@ -28,10 +24,8 @@ interface UserProfileTemplateProps {
   followersError: Error | null;
   followingsError: Error | null;
 
-  // フォローボタン状態
   isFollowPending: boolean;
 
-  // イベントハンドラ
   onTabChange: (tab: string) => void;
   onArticlesClick: () => void;
   onFollowClick: () => void;
@@ -41,12 +35,7 @@ interface UserProfileTemplateProps {
   onFollowingsRetry: () => void;
 }
 
-/**
- * UserProfileTemplate - Template Component
- *
- * ユーザープロフィールページのUI構成を担当するテンプレートコンポーネント
- * レイアウトとコンポーネント配置を定義
- */
+
 export function UserProfileTemplate({
   user,
   isOwnProfile,

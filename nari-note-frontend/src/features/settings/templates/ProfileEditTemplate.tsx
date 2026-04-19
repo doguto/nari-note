@@ -1,30 +1,23 @@
 import { Button } from '@/components/ui/button';
 import { FormTitle, ErrorAlert } from '@/components/ui';
-import { 
-  UsernameField, 
-  BioField, 
-  ProfileImageUpload 
+import {
+  UsernameField,
+  BioField,
+  ProfileImageUpload,
 } from '../organisms';
 
 interface ProfileEditTemplateProps {
-  // フォーム値
   username: string;
   bio: string;
-  
-  // エラー
   errors: {
     username?: string;
     bio?: string;
     profileImage?: string;
   };
   generalError?: string;
-  
-  // 状態
   hasChanges: boolean;
   isSubmitting: boolean;
   showCancelConfirm: boolean;
-  
-  // イベントハンドラ
   onUsernameChange: (value: string) => void;
   onBioChange: (value: string) => void;
   onImageSelect: (file: File) => void;
@@ -35,12 +28,6 @@ interface ProfileEditTemplateProps {
   onCancelConfirmClose: () => void;
 }
 
-/**
- * ProfileEditTemplate - Template Component
- * 
- * プロフィール編集ページのUI構成を担当するテンプレートコンポーネント
- * レイアウトとコンポーネント配置を定義
- */
 export function ProfileEditTemplate({
   username,
   bio,
@@ -59,7 +46,7 @@ export function ProfileEditTemplate({
   onCancelConfirmClose,
 }: ProfileEditTemplateProps) {
   return (
-    <div>
+    <div className="max-w-2xl bg-white rounded-lg p-6">
       <FormTitle>プロフィール編集</FormTitle>
 
       {generalError && <ErrorAlert message={generalError} />}
@@ -104,7 +91,6 @@ export function ProfileEditTemplate({
         </div>
       </form>
 
-      {/* キャンセル確認モーダル */}
       {showCancelConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
