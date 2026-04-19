@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
-import { PageWithoutSidebar } from '@/features/global/organisms';
 import { useGetUserProfile, useUpdateUserProfile } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import type { GetUserProfileResponse } from '@/lib/api/types';
@@ -152,8 +151,7 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
   }
 
   return (
-    <PageWithoutSidebar title="プロフィール編集">
-      <ProfileEditTemplate
+    <ProfileEditTemplate
         username={username}
         bio={bio}
         errors={errors}
@@ -169,7 +167,6 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
         onCancel={handleCancel}
         onConfirmCancel={handleConfirmCancel}
         onCancelConfirmClose={() => setShowCancelConfirm(false)}
-      />
-    </PageWithoutSidebar>
+    />
   );
 }
