@@ -34,7 +34,7 @@ public class ForgotPasswordService
         var passwordResetToken = new PasswordResetToken
         {
             UserId = user.Id,
-            Token = tokenGuid.ToString("N"),
+            Token = tokenGuid.ToString(),
             ExpiresAt = DateTime.UtcNow.AddHours(1),
         };
 
