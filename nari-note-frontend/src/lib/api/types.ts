@@ -277,6 +277,7 @@ export interface GetUserProfileResponse {
   isFollowing: boolean;
   articleCount: number;
   likedArticleCount: number;
+  iconUrl?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -401,6 +402,10 @@ export interface UpdateUserProfileRequest {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdateUserProfileResponse {
+}
+
+export interface UploadUserIconResponse {
+  iconUrl: string;
 }
 
 export interface VerifyEmailRequest {

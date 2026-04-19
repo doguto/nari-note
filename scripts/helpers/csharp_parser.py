@@ -157,12 +157,20 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
         has_body_param = False
         has_path_params = bool(re.findall(r'\{(\w+)\}', route or ""))
 
+        is_form_file = False
+        form_file_param = "file"
         if parameters:
             # [FromBody] XxxRequest のパターンを探す
             from_body_match = re.search(r'\[FromBody\]\s+(\w+Request)\s+\w+', parameters)
             if from_body_match:
                 request_type = from_body_match.group(1)
                 has_body_param = True
+
+            # IFormFile パラメータを探す
+            form_file_match = re.search(r'IFormFile\s+(\w+)', parameters)
+            if form_file_match:
+                is_form_file = True
+                form_file_param = form_file_match.group(1)
 
         # メソッド名からRequest/Response型を推測
         inferred_request = f"{function_name}Request"
@@ -203,7 +211,9 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
                 request_type=request_type,
                 response_type=response_type,
                 controller_name=controller_name,
-                has_body_param=has_body_param
+                has_body_param=has_body_param,
+                is_form_file=is_form_file,
+                form_file_param=form_file_param,
             ))
         else:
             skipped_methods.append(f"{function_name} (no response type found)")

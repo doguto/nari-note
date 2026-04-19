@@ -14,7 +14,8 @@ public static class InfrastructureServiceInstaller
 {
     public static void AddInfrastructureServices(
         this IServiceCollection services,
-        IConfiguration configuration
+        IConfiguration configuration,
+        IWebHostEnvironment env
     )
     {
         // Register DbContext
@@ -54,5 +55,9 @@ public static class InfrastructureServiceInstaller
         services.Configure<ResendClientOptions>(o => { o.ApiToken = configuration["resend_api_token"]!; });
         services.AddTransient<IResend, ResendClient>();
         services.AddScoped<IEmailHelper, ResendEmailHelper>();
+        if (env.IsDevelopment())
+            services.AddScoped<IImageStorageGateway, LocalImageStorageGateway>();
+        else
+            services.AddScoped<IImageStorageGateway, S3ImageStorageGateway>();
     }
 }

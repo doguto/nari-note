@@ -64,6 +64,7 @@ import type {
   UpdatePasswordResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
+  UploadUserIconResponse,
   VerifyEmailRequest,
 } from './types';
 
@@ -213,6 +214,12 @@ export const tagsApi = {
 export const usersApi = {
   getUserProfile: async (data: GetUserProfileRequest): Promise<GetUserProfileResponse> => {
     const response = await apiClient.get<GetUserProfileResponse>(`/api/users/${data.id}`);
+    return response;
+  },
+  uploadUserIcon: async (file: File): Promise<UploadUserIconResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<UploadUserIconResponse>('/api/users/icon', formData);
     return response;
   },
   updateUserProfile: async (data: UpdateUserProfileRequest): Promise<UpdateUserProfileResponse> => {
