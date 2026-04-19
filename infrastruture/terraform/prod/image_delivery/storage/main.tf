@@ -28,3 +28,9 @@ resource "aws_s3_bucket_public_access_block" "images" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+resource "aws_ssm_parameter" "images_bucket_name" {
+  name  = "/${var.app_name}/app/S3/ImagesBucketName"
+  type  = "String"
+  value = aws_s3_bucket.images.bucket
+}

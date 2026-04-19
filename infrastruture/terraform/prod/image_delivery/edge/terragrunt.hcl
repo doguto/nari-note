@@ -4,6 +4,7 @@ include "root" {
 
 dependencies {
   paths = [
-    "../storage"
+    "../storage",
+    "../cert"
   ]
 }

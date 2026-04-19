@@ -1,5 +1,6 @@
 locals {
   storage_state = data.terraform_remote_state.storage
+  cert_state    = data.terraform_remote_state.cert
 }
 
 # CloudFront OAC（Origin Access Control）
@@ -14,6 +15,7 @@ resource "aws_cloudfront_distribution" "images" {
   enabled     = true
   price_class = "PriceClass_200"
   comment     = "${var.app_name} images"
+  aliases     = ["image.nari-note.com"]
 
   origin {
     domain_name              = local.storage_state.outputs.bucket_regional_domain_name
@@ -47,12 +49,20 @@ resource "aws_cloudfront_distribution" "images" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn      = local.cert_state.outputs.certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   tags = {
     Name = "${var.app_name}-images-cf"
   }
+}
+
+resource "aws_ssm_parameter" "cloudfront_domain" {
+  name  = "/${var.app_name}/app/CloudFront/ImagesDomain"
+  type  = "String"
+  value = "image.nari-note.com"
 }
 
 # S3 バケットポリシー: CloudFront OAC のみ読み取り許可
