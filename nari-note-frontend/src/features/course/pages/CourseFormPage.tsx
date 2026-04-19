@@ -11,12 +11,7 @@ type CourseFormPageProps =
   | { mode: 'create' }
   | { mode: 'edit'; courseId: string };
 
-/**
- * CourseFormPage - Page Component
- * 
- * 講座作成・編集ページのロジックを管理するコンポーネント
- * データフェッチング、状態管理、ビジネスロジックを担当
- */
+
 export function CourseFormPage(props: CourseFormPageProps) {
   const [name, setName] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
