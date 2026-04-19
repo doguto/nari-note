@@ -41,7 +41,7 @@ export function CourseCard({
           </span>
           <h3 className="text-lg font-bold text-gray-800">{name}</h3>
         </div>
-        <UserAvatarLink userId={userId} username={userName} profileImage={userIconImageUrl} size="sm" />
+        <UserAvatarLink userId={userId} username={userName} userIconImageUrl={userIconImageUrl} size="sm" />
         <div className="flex gap-4 text-sm text-gray-500 items-center">
           <span className="flex items-center gap-1">
             <BookOpen className="w-4 h-4" />

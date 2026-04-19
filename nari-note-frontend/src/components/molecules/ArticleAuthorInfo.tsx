@@ -19,7 +19,7 @@ export function ArticleAuthorInfo({ authorId, authorName, userIconImageUrl, crea
       href={`/users/${authorId}`}
       className="flex items-center gap-3 hover:opacity-80 transition-opacity"
     >
-      <UserAvatar username={authorName} profileImage={userIconImageUrl} size="md" />
+      <UserAvatar username={authorName} userIconImageUrl={userIconImageUrl} size="md" />
       <div>
         <div className="font-medium text-brand-text">{authorName}</div>
         <div className="text-sm text-gray-500">
