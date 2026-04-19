@@ -7,19 +7,12 @@ interface UsernameFieldProps {
   required?: boolean;
 }
 
-/**
- * UsernameField - Molecule Component
- * 
- * ユーザー名（username）入力フィールド
- * 英数字とアンダースコアのみ使用可能、3文字以上
- */
-export function UsernameField({ 
-  value, 
-  onChange, 
+export function UsernameField({
+  value,
+  onChange,
   error,
   required = true,
 }: UsernameFieldProps) {
-  // error は FormField に渡すのではなく、親コンポーネントで表示される想定
   return (
     <div className="space-y-2">
       <FormField

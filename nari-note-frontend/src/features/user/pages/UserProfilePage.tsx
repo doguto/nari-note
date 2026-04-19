@@ -11,12 +11,7 @@ interface UserProfilePageProps {
   userId: string;
 }
 
-/**
- * UserProfilePage - Page Component
- * 
- * ユーザープロフィールページのビジネスロジックを担当するページコンポーネント
- * データフェッチング、状態管理、イベントハンドリングを行い、Templateにpropsを渡す
- */
+
 export function UserProfilePage({ userId }: UserProfilePageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();

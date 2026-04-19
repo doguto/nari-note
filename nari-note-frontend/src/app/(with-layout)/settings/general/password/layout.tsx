@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -8,6 +7,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SettingsProfileLayout({ children }: { children: React.ReactNode }) {
+export default function SettingsPasswordLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

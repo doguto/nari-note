@@ -12,6 +12,8 @@ import type {
   CreateCourseResponse,
   DeleteArticleRequest,
   DeleteCourseRequest,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   GetArticleContentRequest,
   GetArticleContentResponse,
   GetArticlesByAuthorRequest,
@@ -42,6 +44,8 @@ import type {
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SearchCoursesRequest,
@@ -56,6 +60,8 @@ import type {
   UpdateArticleResponse,
   UpdateCourseRequest,
   UpdateCourseResponse,
+  UpdatePasswordRequest,
+  UpdatePasswordResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
   VerifyEmailRequest,
@@ -128,6 +134,18 @@ export const authApi = {
   },
   verifyEmail: async (data: VerifyEmailRequest): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/api/auth/verify-email', data);
+    return response;
+  },
+  updatePassword: async (data: UpdatePasswordRequest): Promise<UpdatePasswordResponse> => {
+    const response = await apiClient.put<UpdatePasswordResponse>('/api/auth/password', data);
+    return response;
+  },
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> => {
+    const response = await apiClient.post<ForgotPasswordResponse>('/api/auth/forgot-password', data);
+    return response;
+  },
+  resetPassword: async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+    const response = await apiClient.post<ResetPasswordResponse>('/api/auth/reset-password', data);
     return response;
   },
   logout: async (): Promise<void> => {

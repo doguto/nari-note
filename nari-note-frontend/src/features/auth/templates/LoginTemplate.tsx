@@ -38,7 +38,13 @@ export function LoginTemplate({
         <EmailField value={email} onChange={onEmailChange} />
         
         <PasswordField value={password} onChange={onPasswordChange} />
-        
+
+        <div className="text-right -mt-2">
+          <Link href="/forgot-password" className="text-sm text-brand-primary hover:underline">
+            パスワードをお忘れの方
+          </Link>
+        </div>
+
         <Button
           type="submit"
           disabled={isLoading}

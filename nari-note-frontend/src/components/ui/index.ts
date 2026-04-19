@@ -12,3 +12,4 @@ export { EmptyState } from './EmptyState';
 export { ErrorMessage } from './ErrorMessage';
 export { SearchInput } from './SearchInput';
 export { UserAvatar } from './UserAvatar';
+export { SuccessAlert } from './SuccessAlert';

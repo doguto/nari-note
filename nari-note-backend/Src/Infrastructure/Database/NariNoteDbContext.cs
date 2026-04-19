@@ -22,6 +22,7 @@ public class NariNoteDbContext : DbContext
     public DbSet<Follow> Follows { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<EmailVerification> EmailVerifications { get; set; }
+    public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -313,6 +314,23 @@ public class NariNoteDbContext : DbContext
              .HasVogenConversion();
 
             x.Property(ev => ev.UserId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<PasswordResetToken>(x =>
+        {
+            x.HasOne(prt => prt.User)
+             .WithMany()
+             .HasForeignKey(prt => prt.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(prt => prt.Id)
+             .HasValueGenerator<PasswordResetTokenIdValueGenerator>();
+
+            x.Property(prt => prt.Id)
+             .HasVogenConversion();
+
+            x.Property(prt => prt.UserId)
              .HasVogenConversion();
         });
 
