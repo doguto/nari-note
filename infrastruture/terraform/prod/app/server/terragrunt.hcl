@@ -7,6 +7,7 @@ dependencies {
     "../../network/vpc",
     "../../network/gateway",
     "../../deploy/bucket",
-    "../secret"
+    "../secret",
+    "../../image_delivery/storage"
   ]
 }
