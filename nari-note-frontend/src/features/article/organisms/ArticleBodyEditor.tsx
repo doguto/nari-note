@@ -9,6 +9,7 @@ interface ArticleBodyEditorProps {
   onChange: (value: string) => void;
   maxCharacters?: number;
   kifuList?: KifuItem[];
+  onKifuAdd?: (kifu: KifuItem) => void;
 }
 
 export function ArticleBodyEditor({
@@ -16,20 +17,38 @@ export function ArticleBodyEditor({
   onChange,
   maxCharacters = 65535,
   kifuList = [],
+  onKifuAdd,
 }: ArticleBodyEditorProps) {
   const [showEmbedDialog, setShowEmbedDialog]           = useState(false);
   const [showBoardEditorDialog, setShowBoardEditorDialog] = useState(false);
   const insertFnRef      = useRef<((name: string, move: number) => void) | null>(null);
+  const insertBODFnRef   = useRef<((bod: string) => void) | null>(null);
   const boardInsertFnRef = useRef<((bod: string) => void) | null>(null);
 
-  const handleKifuEmbed = (insertFn: (name: string, move: number) => void) => {
-    insertFnRef.current = insertFn;
+  const handleKifuEmbed = (insertKifuFn: (name: string, move: number) => void, insertBODFn: (bod: string) => void) => {
+    insertFnRef.current    = insertKifuFn;
+    insertBODFnRef.current = insertBODFn;
     setShowEmbedDialog(true);
   };
 
   const handleEmbedConfirm = (kifu: KifuItem, move: number) => {
     insertFnRef.current?.(kifu.name, move);
-    insertFnRef.current = null;
+    insertFnRef.current    = null;
+    insertBODFnRef.current = null;
+  };
+
+  const handleEmbedConfirmBOD = (bod: string) => {
+    insertBODFnRef.current?.(bod);
+    insertFnRef.current    = null;
+    insertBODFnRef.current = null;
+  };
+
+  const handleSaveAsKifu = (name: string, kifText: string) => {
+    const kifu: KifuItem = { name, text: kifText };
+    onKifuAdd?.(kifu);
+    insertFnRef.current?.(name, 0);
+    insertFnRef.current    = null;
+    insertBODFnRef.current = null;
   };
 
   const handleBoardEditor = (insertFn: (bod: string) => void) => {
@@ -57,7 +76,10 @@ export function ArticleBodyEditor({
         open={showEmbedDialog}
         onOpenChange={setShowEmbedDialog}
         kifuList={kifuList}
+        kifuCount={kifuList.length}
         onConfirm={handleEmbedConfirm}
+        onConfirmBOD={handleEmbedConfirmBOD}
+        onSaveAsKifu={handleSaveAsKifu}
       />
       <BoardEditorDialog
         open={showBoardEditorDialog}

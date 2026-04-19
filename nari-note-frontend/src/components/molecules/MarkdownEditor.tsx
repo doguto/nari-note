@@ -12,7 +12,7 @@ interface MarkdownEditorProps {
   onChange: (value: string) => void;
   maxCharacters?: number;
   placeholder?: string;
-  onKifuEmbed?: (insertFn: (name: string, move: number) => void) => void;
+  onKifuEmbed?: (insertKifuFn: (name: string, move: number) => void, insertBODFn: (bod: string) => void) => void;
   onBoardEditor?: (insertFn: (bod: string) => void) => void;
   kifuList?: Array<{ name: string; kifuText: string }>;
 }
@@ -156,7 +156,7 @@ export function MarkdownEditor({
     setCommandFilter('');
 
     if (command.type === 'kifu' && onKifuEmbed) {
-      onKifuEmbed((name: string, move: number) => {
+      const insertKifuFn = (name: string, move: number) => {
         const embedBlock = `\n\`\`\`kifu\n${name}_${move}\n\`\`\`\n`;
         const newValue = beforeSlash + embedBlock + textAfterCursor;
         onChange(newValue);
@@ -165,7 +165,18 @@ export function MarkdownEditor({
           textarea.setSelectionRange(newCursorPos, newCursorPos);
           textarea.focus();
         }, 0);
-      });
+      };
+      const insertBODFn = (bod: string) => {
+        const embedBlock = `\n\`\`\`bod\n${bod}\n\`\`\`\n`;
+        const newValue = beforeSlash + embedBlock + textAfterCursor;
+        onChange(newValue);
+        setTimeout(() => {
+          const newCursorPos = beforeSlash.length + embedBlock.length;
+          textarea.setSelectionRange(newCursorPos, newCursorPos);
+          textarea.focus();
+        }, 0);
+      };
+      onKifuEmbed(insertKifuFn, insertBODFn);
       return;
     }
 

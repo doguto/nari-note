@@ -28,6 +28,7 @@ export interface BoardEditorState {
   isSelectedBoard: (row: number, col: number) => boolean;
   isSelectedHand: (owner: PieceOwner, type: PieceType) => boolean;
   generateCurrentBOD: () => string;
+  initializeBoard: (board: BoardState, sente: CapturedPiece[], gote: CapturedPiece[]) => void;
 }
 
 export function useBoardEditor(): BoardEditorState {
@@ -168,6 +169,13 @@ export function useBoardEditor(): BoardEditorState {
     generateBOD(board, senteCaptured, goteCaptured),
   [board, senteCaptured, goteCaptured]);
 
+  const initializeBoard = useCallback((newBoard: BoardState, sente: CapturedPiece[], gote: CapturedPiece[]) => {
+    setBoard(deepCopyBoard(newBoard));
+    setSenteCaptured([...sente.map(p => ({ ...p }))]);
+    setGoteCaptured([...gote.map(p => ({ ...p }))]);
+    setSelected(null);
+  }, []);
+
   return {
     board,
     senteCaptured,
@@ -181,5 +189,6 @@ export function useBoardEditor(): BoardEditorState {
     isSelectedBoard,
     isSelectedHand,
     generateCurrentBOD,
+    initializeBoard,
   };
 }
