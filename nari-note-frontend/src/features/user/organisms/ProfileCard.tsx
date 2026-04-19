@@ -26,7 +26,7 @@ export function ProfileCard({
       <div className="flex items-start gap-4 sm:gap-6">
         <UserAvatar
           username={user.username || 'Unknown User'}
-          profileImage={user.profileImage}
+          profileImage={user.iconUrl}
           size="xl"
         />
 
