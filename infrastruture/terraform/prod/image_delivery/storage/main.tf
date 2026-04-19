@@ -30,7 +30,7 @@ resource "aws_s3_bucket_public_access_block" "images" {
 }
 
 resource "aws_ssm_parameter" "images_bucket_name" {
-  name  = "/${var.app_name}/app/S3/ImagesBucketName"
+  name  = "/${var.app_name}/app/image_delivery_bucket_name"
   type  = "String"
   value = aws_s3_bucket.images.bucket
 }

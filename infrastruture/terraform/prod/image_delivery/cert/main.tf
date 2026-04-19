@@ -17,13 +17,3 @@ resource "aws_acm_certificate" "images" {
     Name = "${var.app_name}-images-cert"
   }
 }
-
-# apply 実行中に Cloudflare へ CNAME を追加するまで待機する
-resource "aws_acm_certificate_validation" "images" {
-  provider        = aws.us_east_1
-  certificate_arn = aws_acm_certificate.images.arn
-
-  timeouts {
-    create = "10m"
-  }
-}

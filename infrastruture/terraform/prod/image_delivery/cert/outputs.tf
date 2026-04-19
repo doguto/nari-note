@@ -1,6 +1,6 @@
 output "certificate_arn" {
   description = "ARN of the ACM certificate (us-east-1)"
-  value       = aws_acm_certificate_validation.images.certificate_arn
+  value       = aws_acm_certificate.images.arn
 }
 
 output "domain_validation_options" {

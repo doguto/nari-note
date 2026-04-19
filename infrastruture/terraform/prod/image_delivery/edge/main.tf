@@ -60,7 +60,7 @@ resource "aws_cloudfront_distribution" "images" {
 }
 
 resource "aws_ssm_parameter" "cloudfront_domain" {
-  name  = "/${var.app_name}/app/CloudFront/ImagesDomain"
+  name  = "/${var.app_name}/app/image_delivery_domain"
   type  = "String"
   value = "image.nari-note.com"
 }
