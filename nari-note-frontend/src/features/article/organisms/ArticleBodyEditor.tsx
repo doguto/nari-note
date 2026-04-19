@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { MarkdownEditor } from '@/components/molecules/MarkdownEditor';
 import { KifuEmbedDialog } from './KifuEmbedDialog';
+import { BoardEditorDialog } from './BoardEditorDialog';
 import type { KifuItem } from '../types/kifu';
 
 interface ArticleBodyEditorProps {
@@ -16,8 +17,10 @@ export function ArticleBodyEditor({
   maxCharacters = 65535,
   kifuList = [],
 }: ArticleBodyEditorProps) {
-  const [showEmbedDialog, setShowEmbedDialog] = useState(false);
-  const insertFnRef = useRef<((name: string, move: number) => void) | null>(null);
+  const [showEmbedDialog, setShowEmbedDialog]           = useState(false);
+  const [showBoardEditorDialog, setShowBoardEditorDialog] = useState(false);
+  const insertFnRef      = useRef<((name: string, move: number) => void) | null>(null);
+  const boardInsertFnRef = useRef<((bod: string) => void) | null>(null);
 
   const handleKifuEmbed = (insertFn: (name: string, move: number) => void) => {
     insertFnRef.current = insertFn;
@@ -29,6 +32,16 @@ export function ArticleBodyEditor({
     insertFnRef.current = null;
   };
 
+  const handleBoardEditor = (insertFn: (bod: string) => void) => {
+    boardInsertFnRef.current = insertFn;
+    setShowBoardEditorDialog(true);
+  };
+
+  const handleBoardEditorConfirm = (bod: string) => {
+    boardInsertFnRef.current?.(bod);
+    boardInsertFnRef.current = null;
+  };
+
   return (
     <>
       <MarkdownEditor
@@ -37,6 +50,7 @@ export function ArticleBodyEditor({
         maxCharacters={maxCharacters}
         placeholder="本文を入力してください... 「/」でコマンドメニューを開きます"
         onKifuEmbed={kifuList.length > 0 ? handleKifuEmbed : undefined}
+        onBoardEditor={handleBoardEditor}
         kifuList={kifuList.map((k) => ({ name: k.name, kifuText: k.text }))}
       />
       <KifuEmbedDialog
@@ -44,6 +58,11 @@ export function ArticleBodyEditor({
         onOpenChange={setShowEmbedDialog}
         kifuList={kifuList}
         onConfirm={handleEmbedConfirm}
+      />
+      <BoardEditorDialog
+        open={showBoardEditorDialog}
+        onOpenChange={setShowBoardEditorDialog}
+        onConfirm={handleBoardEditorConfirm}
       />
     </>
   );

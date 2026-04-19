@@ -13,6 +13,7 @@ interface MarkdownEditorProps {
   maxCharacters?: number;
   placeholder?: string;
   onKifuEmbed?: (insertFn: (name: string, move: number) => void) => void;
+  onBoardEditor?: (insertFn: (bod: string) => void) => void;
   kifuList?: Array<{ name: string; kifuText: string }>;
 }
 
@@ -21,44 +22,8 @@ interface Command {
   label: string;
   insert: string;
   description: string;
-  type?: 'insert' | 'kifu';
+  type?: 'insert' | 'kifu' | 'board-editor';
 }
-
-// BOD形式の平手初期配置テンプレート
-const BOARD_TEMPLATE = `\`\`\`bod
-後手の持駒：なし
-  ９ ８ ７ ６ ５ ４ ３ ２ １
-+---------------------------+
-|v香v桂v銀v金v玉v金v銀v桂v香|一
-| ・v飛 ・ ・ ・ ・ ・v角 ・|二
-|v歩v歩v歩v歩v歩v歩v歩v歩v歩|三
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|四
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|五
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|六
-| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七
-| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八
-| 香 桂 銀 金 玉 金 銀 桂 香|九
-+---------------------------+
-先手の持駒：なし
-\`\`\``;
-
-// BOD形式の空盤面テンプレート
-const BOARD_EMPTY_TEMPLATE = `\`\`\`bod
-後手の持駒：なし
-  ９ ８ ７ ６ ５ ４ ３ ２ １
-+---------------------------+
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|一
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|二
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|三
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|四
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|五
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|六
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|七
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|八
-| ・ ・ ・ ・ ・ ・ ・ ・ ・|九
-+---------------------------+
-先手の持駒：なし
-\`\`\``;
 
 const MARKDOWN_COMMANDS: Command[] = [
   { trigger: 'h1', label: '# 見出し1', insert: '# ', description: '大見出しを挿入' },
@@ -69,9 +34,8 @@ const MARKDOWN_COMMANDS: Command[] = [
   { trigger: 'code', label: '``` コード', insert: '```\n\n```', description: 'コードブロックを挿入' },
   { trigger: 'quote', label: '> 引用', insert: '> ', description: '引用ブロックを挿入' },
   { trigger: 'hr', label: '--- 水平線', insert: '\n---\n', description: '水平線を挿入' },
-  { trigger: 'board', label: '将棋盤面', insert: `\n${BOARD_TEMPLATE}\n`, description: '将棋盤面を挿入（平手初期配置）' },
-  { trigger: 'board-empty', label: '空の盤面', insert: `\n${BOARD_EMPTY_TEMPLATE}\n`, description: '空の将棋盤面を挿入' },
-  { trigger: 'kifu', label: '棋譜プレイヤー', insert: '', description: '棋譜プレイヤーを埋め込む', type: 'kifu' },
+  { trigger: 'board-editor', label: '盤面エディタ', insert: '', description: '盤面を自由に編集して挿入', type: 'board-editor' },
+  { trigger: 'kifu', label: '棋譜盤面', insert: '', description: '棋譜から盤面を埋め込む', type: 'kifu' },
 ];
 
 
@@ -81,6 +45,7 @@ export function MarkdownEditor({
   maxCharacters = 65535,
   placeholder = '本文を入力してください... 「/」でコマンドメニューを開きます',
   onKifuEmbed,
+  onBoardEditor,
   kifuList = [],
 }: MarkdownEditorProps) {
   const [showCommands, setShowCommands] = useState(false);
@@ -97,6 +62,7 @@ export function MarkdownEditor({
 
   const filteredCommands = MARKDOWN_COMMANDS.filter(cmd => {
     if (cmd.type === 'kifu' && !onKifuEmbed) return false;
+    if (cmd.type === 'board-editor' && !onBoardEditor) return false;
     return (
       cmd.trigger.toLowerCase().includes(commandFilter.toLowerCase()) ||
       cmd.label.toLowerCase().includes(commandFilter.toLowerCase()) ||
@@ -192,6 +158,20 @@ export function MarkdownEditor({
     if (command.type === 'kifu' && onKifuEmbed) {
       onKifuEmbed((name: string, move: number) => {
         const embedBlock = `\n\`\`\`kifu\n${name}_${move}\n\`\`\`\n`;
+        const newValue = beforeSlash + embedBlock + textAfterCursor;
+        onChange(newValue);
+        setTimeout(() => {
+          const newCursorPos = beforeSlash.length + embedBlock.length;
+          textarea.setSelectionRange(newCursorPos, newCursorPos);
+          textarea.focus();
+        }, 0);
+      });
+      return;
+    }
+
+    if (command.type === 'board-editor' && onBoardEditor) {
+      onBoardEditor((bod: string) => {
+        const embedBlock = `\n\`\`\`bod\n${bod}\n\`\`\`\n`;
         const newValue = beforeSlash + embedBlock + textAfterCursor;
         onChange(newValue);
         setTimeout(() => {

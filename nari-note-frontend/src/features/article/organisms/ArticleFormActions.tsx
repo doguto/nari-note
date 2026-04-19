@@ -7,11 +7,7 @@ interface ArticleFormActionsProps {
   isDisabled: boolean;
 }
 
-/**
- * ArticleFormActions - Molecule Component
- * 
- * 記事フォームのアクションボタン群（保存・投稿設定）
- */
+
 export function ArticleFormActions({
   onSave,
   onOpenPublishSettings,
