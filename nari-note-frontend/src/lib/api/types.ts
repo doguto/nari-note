@@ -8,6 +8,7 @@ export interface ArticleDto {
   body: string;
   authorId: string;
   authorName: string;
+  authorProfileImage?: string;
   tags: string[];
   kifus: KifuDto[];
   likeCount: number;
@@ -22,6 +23,7 @@ export interface ArticleThumbnailDto {
   title: string;
   authorId: string;
   authorName: string;
+  authorProfileImage?: string;
   tags: string[];
   likeCount: number;
   isPublished: boolean;
@@ -32,12 +34,14 @@ export interface ArticleThumbnailDto {
 export interface AuthResponse {
   userId?: string;
   userName?: string;
+  profileImage?: string;
 }
 
 export interface CommentDto {
   id: number;
   userId: string;
   userName: string;
+  userProfileImage?: string;
   message: string;
   createdAt: string;
 }
@@ -53,6 +57,7 @@ export interface CourseDto {
   id: string;
   userId: string;
   userName?: string;
+  userProfileImage?: string;
   name: string;
   articleIds: string[];
   articleNames: string[];
@@ -174,6 +179,7 @@ export interface GetCourseContentResponse {
   name: string;
   userId: string;
   userName: string;
+  userProfileImage?: string;
   likeCount: number;
   isPublished: boolean;
   publishedAt?: string;

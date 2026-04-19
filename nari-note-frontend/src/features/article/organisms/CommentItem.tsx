@@ -25,7 +25,7 @@ export function CommentItem({ comment }: CommentItemProps) {
   return (
     <div className="bg-gray-50 rounded-lg p-4 mb-3">
       <div className="flex items-start gap-3">
-        <UserAvatar username={comment.userName || 'Unknown'} size="sm" />
+        <UserAvatar username={comment.userName || 'Unknown'} profileImage={comment.userProfileImage} size="sm" />
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-medium text-brand-text">{comment.userName}</span>
