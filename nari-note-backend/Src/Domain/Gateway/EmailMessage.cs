@@ -26,4 +26,17 @@ public static class EmailMessageStore
             EmailTemplate.SignupVerificationText(url)
         );
     }
+
+    public static EmailMessage ForgotPasswordMessage(string to, Guid guid)
+    {
+        var url = $"https://nari-note.com/reset-password?token={guid}";
+
+        return new EmailMessage(
+            From,
+            [to],
+            "【なりノート】パスワードの再設定",
+            EmailTemplate.PasswordResetHtml(url),
+            EmailTemplate.PasswordResetText(url)
+        );
+    }
 }

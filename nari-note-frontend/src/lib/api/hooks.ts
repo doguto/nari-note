@@ -13,6 +13,8 @@ import type {
   CreateCourseResponse,
   DeleteArticleRequest,
   DeleteCourseRequest,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   GetArticleContentRequest,
   GetArticleContentResponse,
   GetArticlesByAuthorRequest,
@@ -43,6 +45,8 @@ import type {
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SearchCoursesRequest,
@@ -266,6 +270,30 @@ export function useUpdatePassword(options?: UseMutationOptions<UpdatePasswordRes
   const queryClient = useQueryClient();
   return useMutation<UpdatePasswordResponse, Error, UpdatePasswordRequest>({
     mutationFn: (data) => authApi.updatePassword(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useForgotPassword(options?: UseMutationOptions<ForgotPasswordResponse, Error, ForgotPasswordRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<ForgotPasswordResponse, Error, ForgotPasswordRequest>({
+    mutationFn: (data) => authApi.forgotPassword(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useResetPassword(options?: UseMutationOptions<ResetPasswordResponse, Error, ResetPasswordRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<ResetPasswordResponse, Error, ResetPasswordRequest>({
+    mutationFn: (data) => authApi.resetPassword(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);

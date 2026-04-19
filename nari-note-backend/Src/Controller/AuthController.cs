@@ -10,8 +10,10 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class AuthController : ApplicationController
 {
+    readonly ForgotPasswordService forgotPasswordService;
     readonly GetCurrentUserService getCurrentUserService;
     readonly LogoutService logoutService;
+    readonly ResetPasswordService resetPasswordService;
     readonly SignInService signInService;
     readonly SignUpService signUpService;
     readonly UpdatePasswordService updatePasswordService;
@@ -23,7 +25,9 @@ public class AuthController : ApplicationController
         GetCurrentUserService getCurrentUserService,
         LogoutService logoutService,
         VerifyEmailService verifyEmailService,
-        UpdatePasswordService updatePasswordService
+        UpdatePasswordService updatePasswordService,
+        ForgotPasswordService forgotPasswordService,
+        ResetPasswordService resetPasswordService
     )
     {
         this.signUpService = signUpService;
@@ -32,6 +36,8 @@ public class AuthController : ApplicationController
         this.logoutService = logoutService;
         this.verifyEmailService = verifyEmailService;
         this.updatePasswordService = updatePasswordService;
+        this.forgotPasswordService = forgotPasswordService;
+        this.resetPasswordService = resetPasswordService;
     }
 
     [HttpPost("signup")]
@@ -76,6 +82,24 @@ public class AuthController : ApplicationController
     public async Task<ActionResult<UpdatePasswordResponse>> UpdatePassword([FromBody] UpdatePasswordRequest request)
     {
         var response = await updatePasswordService.ExecuteAsync(UserId!.Value, request);
+        return Ok(response);
+    }
+
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    [ValidateModelState]
+    public async Task<ActionResult<ForgotPasswordResponse>> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        var response = await forgotPasswordService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    [ValidateModelState]
+    public async Task<ActionResult<ResetPasswordResponse>> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var response = await resetPasswordService.ExecuteAsync(request);
         return Ok(response);
     }
 

@@ -42,6 +42,7 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<IFollowRepository, FollowRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IKifuRepository, KifuRepository>();
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 
         // Register helpers
         services.AddScoped<IJwtHelper, JwtHelper>();

@@ -116,6 +116,14 @@ export interface FollowerUserDto {
   profileImage?: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ForgotPasswordResponse {
+}
+
 export interface GetArticleContentRequest {
   id?: string;
 }
@@ -283,6 +291,15 @@ export interface KifuDto {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface LogoutRequest {
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ResetPasswordResponse {
 }
 
 export interface SearchArticlesRequest {

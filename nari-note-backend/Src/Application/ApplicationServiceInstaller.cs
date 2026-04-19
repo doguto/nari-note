@@ -41,5 +41,7 @@ public static class ApplicationServiceInstaller
         services.AddScoped<GetFollowingsService>();
         services.AddScoped<GetLikedArticlesService>();
         services.AddScoped<GetPopularTagsService>();
+        services.AddScoped<ForgotPasswordService>();
+        services.AddScoped<ResetPasswordService>();
     }
 }
