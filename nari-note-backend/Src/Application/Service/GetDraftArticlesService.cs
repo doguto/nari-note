@@ -25,6 +25,7 @@ public class GetDraftArticlesService
             Body = a.Body,
             AuthorId = a.AuthorId,
             AuthorName = a.Author.Name,
+            AuthorProfileImage = a.Author.ProfileImage,
             Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
             LikeCount = 0, // 下書きにはLikeが存在しない
             IsPublished = a.IsPublished,

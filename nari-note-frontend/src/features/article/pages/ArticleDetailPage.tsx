@@ -33,6 +33,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
     id: c.id || 0,
     userId: c.userId || '',
     userName: c.userName || '',
+    userProfileImage: c.userProfileImage,
     message: c.message || '',
     createdAt: c.createdAt || '',
   }));

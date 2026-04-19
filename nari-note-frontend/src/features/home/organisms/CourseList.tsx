@@ -42,6 +42,7 @@ export function CourseList({ courses, isLoading, error, onRetry }: CourseListPro
           name={course.name ?? ''}
           userId={course.userId ?? 0}
           userName={course.userName ?? '不明なユーザー'}
+          userProfileImage={course.userProfileImage}
           articleCount={course.articleIds?.length ?? 0}
           likeCount={course.likeCount ?? 0}
         />
