@@ -427,10 +427,10 @@ export function useGetUserProfile(params: GetUserProfileRequest, options?: Omit<
   });
 }
 
-export function useUploadUserIcon(options?: UseMutationOptions<UploadUserIconResponse, Error, void>) {
+export function useUploadUserIcon(options?: UseMutationOptions<UploadUserIconResponse, Error, File>) {
   const queryClient = useQueryClient();
-  return useMutation<UploadUserIconResponse, Error, void>({
-    mutationFn: () => usersApi.uploadUserIcon(),
+  return useMutation<UploadUserIconResponse, Error, File>({
+    mutationFn: (file) => usersApi.uploadUserIcon(file),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       options?.onSuccess?.(...args);
