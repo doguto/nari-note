@@ -51,7 +51,7 @@ builder.Services.AddControllers(options => { options.ModelBinderProviders.Insert
 
 builder.Services.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
 
-builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
 builder.Services.AddApplicationServices();
 
 var app = builder.Build();

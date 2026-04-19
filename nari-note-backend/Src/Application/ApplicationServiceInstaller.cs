@@ -43,5 +43,6 @@ public static class ApplicationServiceInstaller
         services.AddScoped<GetPopularTagsService>();
         services.AddScoped<ForgotPasswordService>();
         services.AddScoped<ResetPasswordService>();
+        services.AddScoped<UploadUserIconService>();
     }
 }

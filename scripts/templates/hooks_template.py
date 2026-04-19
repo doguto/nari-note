@@ -132,16 +132,27 @@ import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type Us
 
     def _generate_mutation_hook(self, ep: EndpointInfo, hook_name: str, func_name: str, controller: str) -> List[str]:
         """Mutationフックを生成"""
-        request_type = ep.request_type or "void"
         response_type = ep.response_type or "void"
 
-        mutation_fn = f"{controller}Api.{func_name}()" if request_type == "void" else f"{controller}Api.{func_name}(data)"
+        if ep.is_form_file:
+            param_name = ep.form_file_param
+            request_type = "File"
+            mutation_fn_prefix = f"({param_name}) => "
+            mutation_fn_call = f"{controller}Api.{func_name}({param_name})"
+        else:
+            request_type = ep.request_type or "void"
+            if request_type == "void":
+                mutation_fn_prefix = "() => "
+                mutation_fn_call = f"{controller}Api.{func_name}()"
+            else:
+                mutation_fn_prefix = "(data) => "
+                mutation_fn_call = f"{controller}Api.{func_name}(data)"
 
         return [
             f"export function {hook_name}(options?: UseMutationOptions<{response_type}, Error, {request_type}>) {{",
             "  const queryClient = useQueryClient();",
             f"  return useMutation<{response_type}, Error, {request_type}>({{",
-            f"    mutationFn: {'() => ' if request_type == 'void' else '(data) => '}{mutation_fn},",
+            f"    mutationFn: {mutation_fn_prefix}{mutation_fn_call},",
             "    onSuccess: (...args) => {",
             f"      queryClient.invalidateQueries({{ queryKey: ['{controller}'] }});",
             "      options?.onSuccess?.(...args);",

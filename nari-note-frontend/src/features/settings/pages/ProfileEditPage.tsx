@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
-import { useGetUserProfile, useUpdateUserProfile } from '@/lib/api';
+import { useGetUserProfile, useUpdateUserProfile, useUploadUserIcon } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import type { GetUserProfileResponse } from '@/lib/api/types';
 import { ProfileEditTemplate } from '../templates/ProfileEditTemplate';
@@ -35,6 +35,8 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
   );
 
   const user = initialUserData || fetchedUser;
+
+  const uploadIcon = useUploadUserIcon();
 
   const updateProfile = useUpdateUserProfile({
     onSuccess: () => {
@@ -93,12 +95,22 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
       return;
     }
 
-    // TODO: Implement image upload processing later
-    updateProfile.mutate({
-      name: username,
-      bio: bio || undefined,
-      profileImage: undefined,
-    });
+    try {
+      if (profileImage) {
+        await uploadIcon.mutateAsync(profileImage);
+      }
+      updateProfile.mutate({
+        name: username,
+        bio: bio || undefined,
+        profileImage: undefined,
+      });
+    } catch (err) {
+      if (err instanceof Error) {
+        setGeneralError(err.message || 'アイコンのアップロードに失敗しました');
+      } else {
+        setGeneralError('アイコンのアップロードに失敗しました');
+      }
+    }
   };
 
   const handleCancel = () => {
@@ -141,7 +153,7 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
       errors={errors}
       generalError={generalError}
       hasChanges={hasChanges}
-      isSubmitting={updateProfile.isPending}
+      isSubmitting={updateProfile.isPending || uploadIcon.isPending}
       showCancelConfirm={showCancelConfirm}
       onUsernameChange={setUsername}
       onBioChange={setBio}

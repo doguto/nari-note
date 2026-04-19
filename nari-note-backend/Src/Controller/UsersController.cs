@@ -16,6 +16,7 @@ public class UsersController : ApplicationController
     readonly GetUserProfileService getUserProfileService;
     readonly ToggleFollowService toggleFollowService;
     readonly UpdateUserProfileService updateUserProfileService;
+    readonly UploadUserIconService uploadUserIconService;
 
     public UsersController(
         GetUserProfileService getUserProfileService,
@@ -23,7 +24,8 @@ public class UsersController : ApplicationController
         ToggleFollowService toggleFollowService,
         GetFollowersService getFollowersService,
         GetFollowingsService getFollowingsService,
-        GetLikedArticlesService getLikedArticlesService
+        GetLikedArticlesService getLikedArticlesService,
+        UploadUserIconService uploadUserIconService
     )
     {
         this.getUserProfileService = getUserProfileService;
@@ -32,6 +34,7 @@ public class UsersController : ApplicationController
         this.getFollowersService = getFollowersService;
         this.getFollowingsService = getFollowingsService;
         this.getLikedArticlesService = getLikedArticlesService;
+        this.uploadUserIconService = uploadUserIconService;
     }
 
     [HttpGet("{id}")]
@@ -42,6 +45,14 @@ public class UsersController : ApplicationController
 
         // 認証済みの場合は現在のユーザーIDを渡す
         var response = await getUserProfileService.ExecuteAsync(request, UserId);
+        return Ok(response);
+    }
+
+    [HttpPost("icon")]
+    [RequireAuth]
+    public async Task<ActionResult> UploadUserIcon(IFormFile file)
+    {
+        var response = await uploadUserIconService.ExecuteAsync(UserId!.Value, file);
         return Ok(response);
     }
 

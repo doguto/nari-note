@@ -65,6 +65,7 @@ import type {
   UpdatePasswordResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
+  UploadUserIconResponse,
   VerifyEmailRequest,
 } from './types';
 
@@ -422,6 +423,18 @@ export function useGetUserProfile(params: GetUserProfileRequest, options?: Omit<
   return useQuery<GetUserProfileResponse>({
     queryKey: [...queryKeys.users.getUserProfile, params],
     queryFn: () => usersApi.getUserProfile(params),
+    ...options,
+  });
+}
+
+export function useUploadUserIcon(options?: UseMutationOptions<UploadUserIconResponse, Error, File>) {
+  const queryClient = useQueryClient();
+  return useMutation<UploadUserIconResponse, Error, File>({
+    mutationFn: (file) => usersApi.uploadUserIcon(file),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      options?.onSuccess?.(...args);
+    },
     ...options,
   });
 }

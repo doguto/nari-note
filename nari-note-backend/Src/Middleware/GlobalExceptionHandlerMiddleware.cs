@@ -3,6 +3,7 @@ using System.Net;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Extension;
+using Sentry;
 
 namespace NariNoteBackend.Middleware;
 

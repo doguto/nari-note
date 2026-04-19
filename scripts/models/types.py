@@ -28,3 +28,5 @@ class EndpointInfo:
     response_type: Optional[str]
     controller_name: str
     has_body_param: bool = False  # [FromBody]パラメータがあるかどうか
+    is_form_file: bool = False    # IFormFileパラメータがあるかどうか
+    form_file_param: str = "file" # IFormFileパラメータ名
