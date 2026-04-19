@@ -6,5 +6,5 @@ public class FollowerUserDto
 {
     public UserId Id { get; set; }
     public required string Username { get; set; }
-    public string? ProfileImage { get; set; }
+    public string? UserIconImageUrl { get; set; }
 }

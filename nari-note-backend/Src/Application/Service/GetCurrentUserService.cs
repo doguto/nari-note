@@ -1,19 +1,33 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Service;
 
 public class GetCurrentUserService
 {
-    public Task<AuthResponse> ExecuteAsync(GetCurrentUserRequest request, UserId? currentUserId, string? userName)
+    readonly IUserRepository userRepository;
+
+    public GetCurrentUserService(IUserRepository userRepository)
     {
-        var response = new AuthResponse
+        this.userRepository = userRepository;
+    }
+
+    public async Task<AuthResponse> ExecuteAsync(GetCurrentUserRequest request, UserId? currentUserId, string? userName)
+    {
+        string? profileImage = null;
+        if (currentUserId.HasValue)
+        {
+            var user = await userRepository.FindByIdAsync(currentUserId.Value);
+            profileImage = user?.ProfileImage;
+        }
+
+        return new AuthResponse
         {
             UserId = currentUserId,
-            UserName = userName
+            UserName = userName,
+            UserIconImageUrl = profileImage
         };
-
-        return Task.FromResult(response);
     }
 }

@@ -13,6 +13,7 @@ export function CourseDetailTemplate({ course }: CourseDetailTemplateProps) {
         courseName={course.name || '無題の講座'}
         userId={course.userId || ''}
         userName={course.userName || '不明なユーザー'}
+        userIconImageUrl={course.userIconImageUrl}
         likeCount={course.likeCount || 0}
         articleCount={course.articles?.length || 0}
         createdAt={course.createdAt}

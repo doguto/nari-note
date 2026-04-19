@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
 import { UnauthorizedProvider } from "@/lib/providers/UnauthorizedProvider";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nari-note.com";
 
@@ -52,6 +53,8 @@ export default function RootLayout({
           </AuthProvider>
         </QueryProvider>
       </body>
+      {/* 漏洩しても問題ないのでそのまま平文 */}
+      <GoogleAnalytics gaId="G-293Z66RW8T" />
     </html>
   );
 }

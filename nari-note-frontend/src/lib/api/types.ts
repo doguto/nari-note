@@ -8,6 +8,7 @@ export interface ArticleDto {
   body: string;
   authorId: string;
   authorName: string;
+  userIconImageUrl?: string;
   tags: string[];
   kifus: KifuDto[];
   likeCount: number;
@@ -22,6 +23,7 @@ export interface ArticleThumbnailDto {
   title: string;
   authorId: string;
   authorName: string;
+  userIconImageUrl?: string;
   tags: string[];
   likeCount: number;
   isPublished: boolean;
@@ -32,12 +34,14 @@ export interface ArticleThumbnailDto {
 export interface AuthResponse {
   userId?: string;
   userName?: string;
+  userIconImageUrl?: string;
 }
 
 export interface CommentDto {
   id: number;
   userId: string;
   userName: string;
+  userIconImageUrl?: string;
   message: string;
   createdAt: string;
 }
@@ -53,6 +57,7 @@ export interface CourseDto {
   id: string;
   userId: string;
   userName?: string;
+  userIconImageUrl?: string;
   name: string;
   articleIds: string[];
   articleNames: string[];
@@ -113,7 +118,7 @@ export interface ErrorResponse {
 export interface FollowerUserDto {
   id: string;
   username: string;
-  profileImage?: string;
+  userIconImageUrl?: string;
 }
 
 export interface ForgotPasswordRequest {
@@ -174,6 +179,7 @@ export interface GetCourseContentResponse {
   name: string;
   userId: string;
   userName: string;
+  userIconImageUrl?: string;
   likeCount: number;
   isPublished: boolean;
   publishedAt?: string;
@@ -277,7 +283,7 @@ export interface GetUserProfileResponse {
   isFollowing: boolean;
   articleCount: number;
   likedArticleCount: number;
-  iconUrl?: string;
+  userIconImageUrl?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -396,7 +402,7 @@ export interface UpdatePasswordResponse {
 
 export interface UpdateUserProfileRequest {
   name?: string;
-  profileImage?: string;
+  userIconImageUrl?: string;
   bio?: string;
 }
 
@@ -405,7 +411,7 @@ export interface UpdateUserProfileResponse {
 }
 
 export interface UploadUserIconResponse {
-  iconUrl: string;
+  userIconImageUrl: string;
 }
 
 export interface VerifyEmailRequest {

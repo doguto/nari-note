@@ -16,6 +16,7 @@ export default function robots(): MetadataRoute.Robots {
           '/articles/*/edit',
           '/courses/new',
           '/courses/my-courses',
+          '/courses/*/edit',
           '/settings/',
           '/debug/',
         ],

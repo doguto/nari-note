@@ -23,6 +23,7 @@ public class GetMyCoursesService
             Id = c.Id,
             UserId = c.UserId,
             UserName = c.User.Name,
+            UserIconImageUrl = c.User.ProfileImage,
             Name = c.Name,
             ArticleIds = c.Articles.Select(a => a.Id).ToList(),
             ArticleNames = c.Articles.Select(a => a.Title).ToList(),

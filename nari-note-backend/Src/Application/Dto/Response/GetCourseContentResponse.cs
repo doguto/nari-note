@@ -8,6 +8,7 @@ public class GetCourseContentResponse
     public required string Name { get; set; }
     public UserId UserId { get; set; }
     public required string UserName { get; set; }
+    public string? UserIconImageUrl { get; set; }
     public int LikeCount { get; set; }
     public bool IsPublished { get; set; }
     public DateTime? PublishedAt { get; set; }

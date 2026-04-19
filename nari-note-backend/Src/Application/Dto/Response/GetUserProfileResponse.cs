@@ -13,6 +13,6 @@ public class GetUserProfileResponse
     public bool IsFollowing { get; set; }
     public int ArticleCount { get; set; }
     public int LikedArticleCount { get; set; }
-    public string? IconUrl { get; set; }
+    public string? UserIconImageUrl { get; set; }
     // 注意: PasswordHash と Email は含めない
 }

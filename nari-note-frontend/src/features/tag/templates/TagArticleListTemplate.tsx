@@ -40,6 +40,7 @@ export function TagArticleListTemplate({ tag, articles }: TagArticleListTemplate
               title={article.title ?? ''}
               author={article.authorName ?? ''}
               authorId={article.authorId ?? 0}
+              userIconImageUrl={article.userIconImageUrl}
               tags={article.tags ?? []}
               likeCount={article.likeCount ?? 0}
               date={article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('ja-JP') : article.updatedAt ? new Date(article.updatedAt).toLocaleDateString('ja-JP') : ''}
