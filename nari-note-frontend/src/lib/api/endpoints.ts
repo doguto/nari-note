@@ -56,6 +56,8 @@ import type {
   UpdateArticleResponse,
   UpdateCourseRequest,
   UpdateCourseResponse,
+  UpdatePasswordRequest,
+  UpdatePasswordResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
   VerifyEmailRequest,
@@ -128,6 +130,10 @@ export const authApi = {
   },
   verifyEmail: async (data: VerifyEmailRequest): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/api/auth/verify-email', data);
+    return response;
+  },
+  updatePassword: async (data: UpdatePasswordRequest): Promise<UpdatePasswordResponse> => {
+    const response = await apiClient.put<UpdatePasswordResponse>('/api/auth/password', data);
     return response;
   },
   logout: async (): Promise<void> => {

@@ -367,6 +367,15 @@ export interface UpdateCourseResponse {
   updatedAt: string;
 }
 
+export interface UpdatePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UpdatePasswordResponse {
+}
+
 export interface UpdateUserProfileRequest {
   name?: string;
   profileImage?: string;
