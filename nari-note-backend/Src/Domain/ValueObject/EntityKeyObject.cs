@@ -32,6 +32,9 @@ public partial struct LikeId;
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct NotificationId;
 
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct PasswordResetTokenId;
+
 [ValueObject<Guid>(Conversions.EfCoreValueConverter)]
 public partial struct TagId;
 

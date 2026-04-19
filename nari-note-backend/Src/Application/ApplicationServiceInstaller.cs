@@ -24,6 +24,7 @@ public static class ApplicationServiceInstaller
         services.AddScoped<GetCourseContentService>();
         services.AddScoped<GetUserProfileService>();
         services.AddScoped<UpdateUserProfileService>();
+        services.AddScoped<UpdatePasswordService>();
         services.AddScoped<SignUpService>();
         services.AddScoped<VerifyEmailService>();
         services.AddScoped<SignInService>();
@@ -40,5 +41,7 @@ public static class ApplicationServiceInstaller
         services.AddScoped<GetFollowingsService>();
         services.AddScoped<GetLikedArticlesService>();
         services.AddScoped<GetPopularTagsService>();
+        services.AddScoped<ForgotPasswordService>();
+        services.AddScoped<ResetPasswordService>();
     }
 }

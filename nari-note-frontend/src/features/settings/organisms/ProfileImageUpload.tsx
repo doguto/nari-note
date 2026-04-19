@@ -9,11 +9,6 @@ interface ProfileImageUploadProps {
   error?: string;
 }
 
-/**
- * ProfileImageUpload - Molecule Component
- * 
- * プロフィール画像アップロードコンポーネント
- */
 export function ProfileImageUpload({
   currentImage,
   onImageSelect,

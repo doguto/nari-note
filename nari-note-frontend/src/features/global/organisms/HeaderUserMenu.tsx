@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
   DropdownMenu,
@@ -16,7 +17,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { UserAvatar } from '@/components/ui';
-import { User, FileText, BookOpen, LogOut } from 'lucide-react';
+import { User, FileText, BookOpen, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface HeaderUserMenuProps {
@@ -29,10 +30,12 @@ interface HeaderUserMenuProps {
 
 export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: HeaderUserMenuProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   const handleLogoutConfirm = () => {
     setIsModalOpen(false);
     onLogout();
+    router.push('/');
   };
 
   return (
@@ -69,7 +72,8 @@ export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: Hea
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            className="flex items-center gap-2 bg-brand-text text-white hover:bg-brand-text-hover transition-colors text-sm"
+            variant="ghost"
+            className="flex items-center gap-2 text-white hover:bg-white/10 hover:text-white transition-colors text-sm"
             style={{ fontFamily: 'serif' }}
           >
             <UserAvatar username={userName} size="sm" />
@@ -117,6 +121,17 @@ export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: Hea
             >
               <BookOpen className="w-4 h-4" />
               <span>マイ講座一覧</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-brand-text-dark" />
+          <DropdownMenuItem asChild>
+            <Link
+              href="/settings/general/profile"
+              className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
+              style={{ fontFamily: 'serif' }}
+            >
+              <Settings className="w-4 h-4" />
+              <span>設定</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-brand-text-dark" />

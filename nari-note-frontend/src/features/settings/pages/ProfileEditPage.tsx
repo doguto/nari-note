@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
-import { PageWithoutSidebar } from '@/features/global/organisms';
 import { useGetUserProfile, useUpdateUserProfile } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import type { GetUserProfileResponse } from '@/lib/api/types';
@@ -13,18 +12,11 @@ interface ProfileEditPageProps {
   initialUserData?: GetUserProfileResponse;
 }
 
-/**
- * ProfileEditPage - Page Component
- * 
- * プロフィール編集ページのビジネスロジックを担当するページコンポーネント
- * データフェッチング、状態管理、バリデーション、イベントハンドリングを行い、Templateにpropsを渡す
- * 
- * @param initialUserData - Optional pre-fetched user data to avoid redundant API calls
- */
+
 export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) {
   const router = useRouter();
   const { userId } = useAuth();
-  
+
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -37,16 +29,13 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
   const [hasChanges, setHasChanges] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  // ユーザー情報取得 (initialUserDataがない場合のみフェッチ)
   const { data: fetchedUser, isLoading, error: loadError, refetch } = useGetUserProfile(
     { id: userId || '' },
     { enabled: !!userId && !initialUserData }
   );
 
-  // Use initialUserData if provided, otherwise use fetched data
   const user = initialUserData || fetchedUser;
 
-  // プロフィール更新
   const updateProfile = useUpdateUserProfile({
     onSuccess: () => {
       router.push(`/users/${userId}`);
@@ -60,7 +49,6 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     },
   });
 
-  // 初期データ設定
   useEffect(() => {
     if (user) {
       setUsername(user.username || '');
@@ -68,10 +56,9 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     }
   }, [user]);
 
-  // 変更検知
   useEffect(() => {
     if (user) {
-      const changed = 
+      const changed =
         username !== (user.username || '') ||
         bio !== (user.bio || '') ||
         profileImage !== null;
@@ -82,7 +69,6 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
   const validateForm = () => {
     const newErrors: typeof errors = {};
 
-    // ユーザー名バリデーション
     if (!username.trim()) {
       newErrors.username = 'ユーザー名は必須です';
     } else if (username.length < 3) {
@@ -91,7 +77,6 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
       newErrors.username = 'ユーザー名は英数字とアンダースコアのみ使用可能です';
     }
 
-    // 自己紹介文バリデーション
     if (bio.length > 250) {
       newErrors.bio = '自己紹介文は250文字以内である必要があります';
     }
@@ -109,11 +94,10 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     }
 
     // TODO: Implement image upload processing later
-    // Currently only updating text fields
     updateProfile.mutate({
       name: username,
       bio: bio || undefined,
-      profileImage: undefined, // Image upload API needed
+      profileImage: undefined,
     });
   };
 
@@ -137,39 +121,36 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     setProfileImage(null);
   };
 
-  // Only show loading if we're actually fetching (not using initialUserData)
   if (!initialUserData && isLoading) {
     return <LoadingSpinner text="プロフィール情報を読み込み中..." />;
   }
 
   if (!initialUserData && loadError) {
     return (
-      <ErrorMessage 
-        message="プロフィール情報の取得に失敗しました" 
+      <ErrorMessage
+        message="プロフィール情報の取得に失敗しました"
         onRetry={refetch}
       />
     );
   }
 
   return (
-    <PageWithoutSidebar title="プロフィール編集">
-      <ProfileEditTemplate
-        username={username}
-        bio={bio}
-        errors={errors}
-        generalError={generalError}
-        hasChanges={hasChanges}
-        isSubmitting={updateProfile.isPending}
-        showCancelConfirm={showCancelConfirm}
-        onUsernameChange={setUsername}
-        onBioChange={setBio}
-        onImageSelect={handleImageSelect}
-        onImageRemove={handleImageRemove}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        onConfirmCancel={handleConfirmCancel}
-        onCancelConfirmClose={() => setShowCancelConfirm(false)}
-      />
-    </PageWithoutSidebar>
+    <ProfileEditTemplate
+      username={username}
+      bio={bio}
+      errors={errors}
+      generalError={generalError}
+      hasChanges={hasChanges}
+      isSubmitting={updateProfile.isPending}
+      showCancelConfirm={showCancelConfirm}
+      onUsernameChange={setUsername}
+      onBioChange={setBio}
+      onImageSelect={handleImageSelect}
+      onImageRemove={handleImageRemove}
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      onConfirmCancel={handleConfirmCancel}
+      onCancelConfirmClose={() => setShowCancelConfirm(false)}
+    />
   );
 }

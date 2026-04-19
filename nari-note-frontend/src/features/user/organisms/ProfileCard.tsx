@@ -12,12 +12,7 @@ interface ProfileCardProps {
   onFollowClick: () => void;
 }
 
-/**
- * ProfileCard - Organism Component
- *
- * ユーザープロフィールカード
- * アバター、ユーザー名、bio、フォロー統計、フォローボタンを表示
- */
+
 export function ProfileCard({
   user,
   isOwnProfile,
@@ -41,7 +36,7 @@ export function ProfileCard({
             </h1>
             <div className="flex-shrink-0">
               {isOwnProfile ? (
-                <Link href="/settings/profile">
+                <Link href="/settings/general/profile">
                   <Button variant="outline" size="sm">プロフィール編集</Button>
                 </Link>
               ) : (
