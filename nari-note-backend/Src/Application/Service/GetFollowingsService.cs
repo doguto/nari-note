@@ -28,7 +28,7 @@ public class GetFollowingsService
             {
                 Id = user.Id,
                 Username = user.Name,
-                ProfileImage = user.ProfileImage
+                UserIconImageUrl = user.ProfileImage
             }).ToList()
         };
     }

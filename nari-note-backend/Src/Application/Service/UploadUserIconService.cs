@@ -33,6 +33,6 @@ public class UploadUserIconService
         user.UpdatedAt = DateTime.UtcNow;
         await userRepository.UpdateAsync(user);
 
-        return new UploadUserIconResponse { IconUrl = iconUrl };
+        return new UploadUserIconResponse { UserIconImageUrl = iconUrl };
     }
 }

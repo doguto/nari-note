@@ -65,7 +65,7 @@ export function FollowersModal({ userId, isOpen, onClose }: FollowersModalProps)
                     key={follower.id}
                     userId={follower.id}
                     username={follower.username}
-                    profileImage={follower.profileImage}
+                    userIconImageUrl={follower.userIconImageUrl}
                   />
                 ) : null
               ))}

@@ -6,7 +6,7 @@ export interface Comment {
   id: number;
   userId: string;
   userName: string;
-  userProfileImage?: string;
+  userIconImageUrl?: string;
   message: string;
   createdAt: string;
 }

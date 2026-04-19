@@ -4,7 +4,7 @@ import { UserAvatar } from '@/components/ui';
 interface ArticleAuthorInfoProps {
   authorId: string;
   authorName: string;
-  authorProfileImage?: string;
+  userIconImageUrl?: string;
   createdAt?: string;
 }
 
@@ -13,13 +13,13 @@ interface ArticleAuthorInfoProps {
  *
  * 記事の著者情報（アバター・名前・投稿日時）を表示するコンポーネント
  */
-export function ArticleAuthorInfo({ authorId, authorName, authorProfileImage, createdAt }: ArticleAuthorInfoProps) {
+export function ArticleAuthorInfo({ authorId, authorName, userIconImageUrl, createdAt }: ArticleAuthorInfoProps) {
   return (
     <Link
       href={`/users/${authorId}`}
       className="flex items-center gap-3 hover:opacity-80 transition-opacity"
     >
-      <UserAvatar username={authorName} profileImage={authorProfileImage} size="md" />
+      <UserAvatar username={authorName} profileImage={userIconImageUrl} size="md" />
       <div>
         <div className="font-medium text-brand-text">{authorName}</div>
         <div className="text-sm text-gray-500">

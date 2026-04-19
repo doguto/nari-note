@@ -6,5 +6,5 @@ public class AuthResponse
 {
     public UserId? UserId { get; set; }
     public string? UserName { get; set; }
-    public string? ProfileImage { get; set; }
+    public string? UserIconImageUrl { get; set; }
 }

@@ -7,7 +7,7 @@ type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 
 interface UserAvatarProps {
   username: string;
-  profileImage?: string;
+  userIconImageUrl?: string;
   size?: AvatarSize;
   className?: string;
 }
@@ -27,7 +27,7 @@ const sizeClasses: Record<AvatarSize, { container: string }> = {
  */
 export function UserAvatar({
   username,
-  profileImage,
+  userIconImageUrl,
   size = 'md',
   className = '',
 }: UserAvatarProps) {
@@ -35,13 +35,13 @@ export function UserAvatar({
   const sizeConfig = sizeClasses[size];
   
   // 画像がある場合かつエラーが発生していない場合は画像を表示
-  const shouldShowImage = profileImage && !imageError;
+  const shouldShowImage = userIconImageUrl && !imageError;
   
   if (shouldShowImage) {
     return (
       <div className={`${sizeConfig.container} relative rounded-full overflow-hidden bg-gray-200 flex-shrink-0 ${className}`}>
         <img
-          src={profileImage}
+          src={userIconImageUrl}
           alt={`${username}のアイコン`}
           className="w-full h-full object-cover"
           onError={() => setImageError(true)}

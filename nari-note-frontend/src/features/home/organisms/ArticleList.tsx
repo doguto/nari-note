@@ -42,7 +42,7 @@ export function ArticleList({ articles, isLoading, error, onRetry }: ArticleList
           title={article.title ?? ''}
           author={article.authorName ?? ''}
           authorId={article.authorId ?? 0}
-          authorProfileImage={article.authorProfileImage}
+          userIconImageUrl={article.userIconImageUrl}
           tags={article.tags ?? []}
           likeCount={article.likeCount ?? 0}
           date={article.createdAt ? new Date(article.createdAt).toLocaleDateString('ja-JP') : ''}

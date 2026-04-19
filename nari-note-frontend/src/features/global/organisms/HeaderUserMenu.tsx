@@ -23,13 +23,13 @@ import { Button } from '@/components/ui/button';
 interface HeaderUserMenuProps {
   userId: string;
   userName: string;
-  profileImage?: string;
+  userIconImageUrl?: string;
   onLogout: () => void;
   isLoggingOut: boolean;
 }
 
 
-export function HeaderUserMenu({ userId, userName, profileImage, onLogout, isLoggingOut }: HeaderUserMenuProps) {
+export function HeaderUserMenu({ userId, userName, userIconImageUrl, onLogout, isLoggingOut }: HeaderUserMenuProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
@@ -77,7 +77,7 @@ export function HeaderUserMenu({ userId, userName, profileImage, onLogout, isLog
             className="flex items-center gap-2 text-white hover:bg-white/10 hover:text-white transition-colors text-sm"
             style={{ fontFamily: 'serif' }}
           >
-            <UserAvatar username={userName} profileImage={profileImage} size="sm" />
+            <UserAvatar username={userName} userIconImageUrl={userIconImageUrl} size="sm" />
             <span>マイページ</span>
             <svg
               className="w-3 h-3"

@@ -27,7 +27,7 @@ public class GetCurrentUserService
         {
             UserId = currentUserId,
             UserName = userName,
-            ProfileImage = profileImage
+            UserIconImageUrl = profileImage
         };
     }
 }

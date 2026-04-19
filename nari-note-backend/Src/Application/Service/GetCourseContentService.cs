@@ -36,7 +36,7 @@ public class GetCourseContentService
         Name = course.Name,
         UserId = course.UserId,
         UserName = course.User?.Name ?? "",
-        UserProfileImage = course.User?.ProfileImage,
+        UserIconImageUrl = course.User?.ProfileImage,
         LikeCount = course.LikeCount,
         IsPublished = course.IsPublished,
         PublishedAt = course.PublishedAt,

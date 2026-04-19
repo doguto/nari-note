@@ -7,7 +7,7 @@ public class CommentDto
     public CommentId Id { get; set; }
     public UserId UserId { get; set; }
     public required string UserName { get; set; }
-    public string? UserProfileImage { get; set; }
+    public string? UserIconImageUrl { get; set; }
     public required string Message { get; set; }
     public DateTime CreatedAt { get; set; }
 }

@@ -1,4 +1,3 @@
-
 import { MetadataRoute } from 'next';
 import { getArticles } from '@/lib/api/server';
 
@@ -9,13 +8,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: siteUrl,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: 'weekly',
       priority: 1,
     },
     {
-      url: `${siteUrl}/search`,
+      url: `${siteUrl}/articles`,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
+      changeFrequency: 'daily',
       priority: 0.5,
     },
   ];
@@ -27,7 +26,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .map((article) => ({
         url: `${siteUrl}/articles/${article.id}`,
         lastModified: new Date(article.updatedAt),
-        changeFrequency: 'weekly' as const,
         priority: 0.8,
       }));
 
