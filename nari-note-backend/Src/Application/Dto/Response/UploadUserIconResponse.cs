@@ -2,5 +2,5 @@ namespace NariNoteBackend.Application.Dto.Response;
 
 public class UploadUserIconResponse
 {
-    public required string IconUrl { get; set; }
+    public required string UserIconImageUrl { get; set; }
 }

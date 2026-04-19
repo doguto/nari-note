@@ -73,7 +73,7 @@ export function ArticleSearchTemplate({
                 title={article.title ?? ''}
                 author={article.authorName ?? ''}
                 authorId={article.authorId ?? 0}
-                authorProfileImage={article.authorProfileImage}
+                userIconImageUrl={article.userIconImageUrl}
                 tags={article.tags ?? []}
                 likeCount={article.likeCount ?? 0}
                 date={article.publishedAt

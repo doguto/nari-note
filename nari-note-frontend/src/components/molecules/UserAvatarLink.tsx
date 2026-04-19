@@ -8,7 +8,7 @@ type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 interface UserAvatarLinkProps {
   userId: string;
   username: string;
-  profileImage?: string;
+  userIconImageUrl?: string;
   size?: AvatarSize;
   showUsername?: boolean;
   className?: string;
@@ -23,14 +23,14 @@ interface UserAvatarLinkProps {
 export function UserAvatarLink({
   userId,
   username,
-  profileImage,
+  userIconImageUrl,
   size = 'sm',
   showUsername = true,
   className = '',
 }: UserAvatarLinkProps) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <UserAvatar username={username} profileImage={profileImage} size={size} />
+      <UserAvatar username={username} userIconImageUrl={userIconImageUrl} size={size} />
       {showUsername && (
         <Link
           href={`/users/${userId}`}

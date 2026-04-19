@@ -55,7 +55,7 @@ public class GetUserProfileService
             IsFollowing = isFollowing,
             ArticleCount = articleCount,
             LikedArticleCount = likedArticleCount,
-            IconUrl = user.ProfileImage
+            UserIconImageUrl = user.ProfileImage
         };
     }
 }

@@ -58,7 +58,7 @@ export function UserFollowersList({
                 key={user.id}
                 userId={user.id}
                 username={user.username}
-                profileImage={user.profileImage}
+                userIconImageUrl={user.userIconImageUrl}
               />
             ) : null
           ))}

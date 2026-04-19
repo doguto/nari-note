@@ -6,7 +6,7 @@ import { useGetCurrentUser } from '@/lib/api';
 interface AuthContextType {
   userId: string | null;
   userName: string | null;
-  profileImage: string | null;
+  userIconImageUrl: string | null;
   isLoggedIn: boolean;
   isLoading: boolean;
   refetch: () => void;
@@ -22,14 +22,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const userId = data?.userId ?? null;
   const userName = data?.userName ?? null;
-  const profileImage = data?.profileImage ?? null;
+  const userIconImageUrl = data?.userIconImageUrl ?? null;
 
   return (
     <AuthContext.Provider
       value={{
         userId,
         userName,
-        profileImage,
+        userIconImageUrl,
         isLoggedIn: userId !== null,
         isLoading,
         refetch,

@@ -9,7 +9,7 @@ public class ArticleDto
     public required string Body { get; set; }
     public UserId AuthorId { get; set; }
     public required string AuthorName { get; set; }
-    public string? AuthorProfileImage { get; set; }
+    public string? UserIconImageUrl { get; set; }
     public List<string> Tags { get; set; } = new();
     public List<KifuDto> Kifus { get; set; } = new();
     public int LikeCount { get; set; }

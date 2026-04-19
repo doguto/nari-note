@@ -44,7 +44,7 @@ public class GetArticleContentService
                 Body = article.Body,
                 AuthorId = article.AuthorId,
                 AuthorName = article.Author.Name,
-                AuthorProfileImage = article.Author.ProfileImage,
+                UserIconImageUrl = article.Author.ProfileImage,
                 Tags = article.ArticleTags.Select(x => x.Tag.Name).ToList(),
                 Kifus = article.Kifus.Select(x => new KifuDto { Name = x.Name, KifuText = x.KifuText, SortOrder = x.SortOrder })
                                .ToList(),
@@ -64,7 +64,7 @@ public class GetArticleContentService
                            Id = c.Id,
                            UserId = c.UserId,
                            UserName = c.User!.Name,
-                           UserProfileImage = c.User.ProfileImage,
+                           UserIconImageUrl = c.User.ProfileImage,
                            Message = c.Message,
                            CreatedAt = c.CreatedAt
                        }).OrderBy(c => c.CreatedAt).ToList()

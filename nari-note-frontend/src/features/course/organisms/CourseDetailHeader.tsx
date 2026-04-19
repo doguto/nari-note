@@ -6,7 +6,7 @@ interface CourseDetailHeaderProps {
   courseName: string;
   userId: string;
   userName: string;
-  userProfileImage?: string;
+  userIconImageUrl?: string;
   likeCount: number;
   articleCount: number;
   createdAt?: string;
@@ -22,7 +22,7 @@ export function CourseDetailHeader({
   courseName,
   userId,
   userName,
-  userProfileImage,
+  userIconImageUrl,
   likeCount,
   articleCount,
   createdAt,
@@ -44,7 +44,7 @@ export function CourseDetailHeader({
           href={`/users/${userId}`}
           className="flex items-center gap-3 hover:opacity-80 transition-opacity"
         >
-          <UserAvatar username={userName} profileImage={userProfileImage} size="md" />
+          <UserAvatar username={userName} profileImage={userIconImageUrl} size="md" />
           <div>
             <div className="font-medium text-gray-800">
               {userName || '不明なユーザー'}

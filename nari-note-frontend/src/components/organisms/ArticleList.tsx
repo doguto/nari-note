@@ -56,7 +56,7 @@ export function ArticleList({
           title={article.title ?? ''}
           author={article.authorName ?? ''}
           authorId={article.authorId ?? ''}
-          authorProfileImage={article.authorProfileImage}
+          userIconImageUrl={article.userIconImageUrl}
           tags={article.tags ?? []}
           likeCount={article.likeCount ?? 0}
           date={article.updatedAt ? new Date(article.updatedAt).toLocaleDateString('ja-JP') : ''}

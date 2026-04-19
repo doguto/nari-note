@@ -7,7 +7,7 @@ interface ArticleCardProps {
   title: string;
   author: string;
   authorId: string;
-  authorProfileImage?: string;
+  userIconImageUrl?: string;
   tags: string[];
   likeCount: number;
   date: string;
@@ -19,7 +19,7 @@ export function ArticleCard({
   title,
   author,
   authorId,
-  authorProfileImage,
+  userIconImageUrl,
   tags,
   likeCount,
   date,
@@ -33,7 +33,7 @@ export function ArticleCard({
       />
       <div className="flex flex-col gap-3">
         <h3 className="text-lg font-bold text-gray-800">{title}</h3>
-        <UserAvatarLink userId={authorId} username={author} profileImage={authorProfileImage} size="sm" />
+        <UserAvatarLink userId={authorId} username={author} profileImage={userIconImageUrl} size="sm" />
         <div className='flex gap-2 flex-wrap'>
           {
             tags.map((tag) => (

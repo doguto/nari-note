@@ -103,7 +103,7 @@ export function UnifiedSearchTemplate({
                       title={article.title ?? ''}
                       author={article.authorName ?? ''}
                       authorId={article.authorId ?? 0}
-                      authorProfileImage={article.authorProfileImage}
+                      userIconImageUrl={article.userIconImageUrl}
                       tags={article.tags ?? []}
                       likeCount={article.likeCount ?? 0}
                       date={article.publishedAt
@@ -152,7 +152,7 @@ export function UnifiedSearchTemplate({
                       name={course.name ?? ''}
                       userId={course.userId ?? 0}
                       userName={course.userName ?? ''}
-                      userProfileImage={course.userProfileImage}
+                      userIconImageUrl={course.userIconImageUrl}
                       articleCount={course.articleIds?.length ?? 0}
                       likeCount={course.likeCount ?? 0}
                     />

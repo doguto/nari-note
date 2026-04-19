@@ -77,7 +77,7 @@ export function ArticleDetailTemplate({
         <ArticleAuthorInfo
           authorId={article.article.authorId}
           authorName={article.article.authorName}
-          authorProfileImage={article.article.authorProfileImage}
+          userIconImageUrl={article.article.userIconImageUrl}
           createdAt={article.article.createdAt}
         />
 

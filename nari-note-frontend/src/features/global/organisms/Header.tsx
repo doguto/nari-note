@@ -12,7 +12,7 @@ import { HeaderAuthButtons } from './HeaderAuthButtons';
 
 export function Header() {
   const [isMounted, setIsMounted] = useState(false);
-  const { userId, userName, profileImage, isLoggedIn, isLoading, refetch } = useAuth();
+  const { userId, userName, userIconImageUrl, isLoggedIn, isLoading, refetch } = useAuth();
   const logoutMutation = useLogout({
     onSuccess: () => {
       refetch();
@@ -42,7 +42,7 @@ export function Header() {
               <HeaderUserMenu
                 userId={userId!}
                 userName={userName!}
-                profileImage={profileImage ?? undefined}
+                userIconImageUrl={userIconImageUrl ?? undefined}
                 onLogout={handleLogout}
                 isLoggingOut={logoutMutation.isPending}
               />
