@@ -7,4 +7,5 @@ export { ProfileImageUpload } from './ProfileImageUpload';
 export { ProfileCard } from './ProfileCard';
 export { ProfileTabNav } from './ProfileTabNav';
 export { UserFollowersList } from './UserFollowersList';
+export { PasswordChangeFields } from './PasswordChangeFields';
 

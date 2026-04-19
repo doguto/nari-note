@@ -69,7 +69,7 @@ export function HeaderUserMenu({ userId, userName, onLogout, isLoggingOut }: Hea
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            className="flex items-center gap-2 bg-brand-text text-white hover:bg-brand-text-hover transition-colors text-sm"
+            className="flex items-center gap-2 bg-transparent text-white hover:bg-white/10 transition-colors text-sm"
             style={{ fontFamily: 'serif' }}
           >
             <UserAvatar username={userName} size="sm" />
