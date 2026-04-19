@@ -9,6 +9,8 @@ interface BoardProps {
   size?: BoardSize;
   className?: string;
   highlightCell?: { colIndex: number; rowIndex: number };
+  selectedCell?: { row: number; col: number } | null;
+  onCellClick?: (row: number, col: number) => void;
 }
 
 function getSizeClasses(size: BoardSize = 'md') {
@@ -19,7 +21,7 @@ function getSizeClasses(size: BoardSize = 'md') {
   }
 }
 
-export function Board({ board, size = 'md', className, highlightCell }: BoardProps) {
+export function Board({ board, size = 'md', className, highlightCell, selectedCell, onCellClick }: BoardProps) {
   const { cellW, cellH, labelW, text } = getSizeClasses(size);
 
   return (
@@ -62,8 +64,18 @@ export function Board({ board, size = 'md', className, highlightCell }: BoardPro
               const ci = idx % 9;
               const ri = Math.floor(idx / 9);
               const isHL = highlightCell?.colIndex === ci && highlightCell?.rowIndex === ri;
+              const isSel = selectedCell?.row === ri && selectedCell?.col === ci;
               return (
-                <div key={idx} className={cn('flex items-center justify-center', cellW, cellH)}>
+                <div
+                  key={idx}
+                  className={cn(
+                    'flex items-center justify-center',
+                    cellW, cellH,
+                    onCellClick && 'cursor-pointer',
+                    isSel && 'bg-yellow-300/70',
+                  )}
+                  onClick={() => onCellClick?.(ri, ci)}
+                >
                   {piece && (
                     <span
                       className={cn(

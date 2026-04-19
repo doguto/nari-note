@@ -27,6 +27,7 @@ interface ArticleFormTemplateProps {
   onBodyChange: (value: string) => void;
   onTagsChange: (tags: string[]) => void;
   onKifuConfirm: (kifu: KifuItem) => void;
+  onKifuAdd: (kifu: KifuItem) => void;
   onKifuEdit: (index: number) => void;
   onKifuDelete: (index: number) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -57,6 +58,7 @@ export function ArticleFormTemplate({
   onBodyChange,
   onTagsChange,
   onKifuConfirm,
+  onKifuAdd,
   onKifuEdit,
   onKifuDelete,
   onSubmit,
@@ -111,6 +113,7 @@ export function ArticleFormTemplate({
         onChange={onBodyChange}
         maxCharacters={maxCharacters}
         kifuList={kifuList}
+        onKifuAdd={onKifuAdd}
       />
 
       <PublishSettingsDialog

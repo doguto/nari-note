@@ -11,8 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { KifPlayer } from '@/lib/kif-player';
-import { parseKif } from '@/lib/kif-player/utils';
+import { Input } from '@/components/ui/input';
+import { KifPlayer, Board, CapturedPieces, useFreePlayRecorder, getBoardAtMove, parseKif } from '@/lib/kif-player';
 import type { KifMove } from '@/lib/kif-player/types';
 import type { KifuItem } from '../types/kifu';
 
@@ -29,46 +29,90 @@ interface KifuEmbedDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (kifu: KifuItem, move: number) => void;
+  onConfirmBOD?: (bod: string) => void;
+  onSaveAsKifu?: (name: string, kifText: string) => void;
   kifuList: KifuItem[];
+  kifuCount?: number;
 }
 
 export function KifuEmbedDialog({
   open,
   onOpenChange,
   onConfirm,
+  onConfirmBOD,
+  onSaveAsKifu,
   kifuList,
+  kifuCount = 0,
 }: KifuEmbedDialogProps) {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [move, setMove] = useState<number>(0);
+  const [freePlayMode, setFreePlayMode] = useState(false);
+  const [embedType, setEmbedType] = useState<'bod' | 'kifu'>('bod');
+  const [newKifuName, setNewKifuName] = useState('');
+
+  const recorder = useFreePlayRecorder();
 
   useEffect(() => {
     if (open) {
       setSelectedIndex(0);
       setMove(0);
+      setFreePlayMode(false);
+      setEmbedType('bod');
+      setNewKifuName('');
     }
   }, [open]);
 
   const selectedKifu = kifuList[selectedIndex];
 
-  const moveOptions = useMemo(() => {
-    if (!selectedKifu?.text.trim()) return [];
+  const parsedGame = useMemo(() => {
+    if (!selectedKifu?.text.trim()) return null;
     try {
-      return parseKif(selectedKifu.text).moves;
+      return parseKif(selectedKifu.text);
     } catch {
-      return [];
+      return null;
     }
   }, [selectedKifu]);
+
+  const moveOptions = parsedGame?.moves ?? [];
 
   const handleKifuChange = (index: number) => {
     setSelectedIndex(index);
     setMove(0);
+    setFreePlayMode(false);
+  };
+
+  const handleMoveChange = (nextMove: number) => {
+    setMove(nextMove);
+    setFreePlayMode(false);
+  };
+
+  const handleEnterFreePlay = () => {
+    if (!parsedGame) return;
+    const parsed = getBoardAtMove(parsedGame, move);
+    recorder.initializeBoard(parsed.board, parsed.captured.sente, parsed.captured.gote);
+    setFreePlayMode(true);
+    setEmbedType('bod');
+    setNewKifuName(`棋譜${kifuCount + 1}`);
   };
 
   const handleConfirm = () => {
     if (!selectedKifu) return;
-    onConfirm(selectedKifu, move);
+    if (freePlayMode) {
+      if (embedType === 'kifu' && onSaveAsKifu) {
+        const kifText = recorder.generateKIF(selectedKifu.text, move);
+        onSaveAsKifu(newKifuName.trim() || `棋譜${kifuCount + 1}`, kifText);
+      } else {
+        onConfirmBOD?.(recorder.generateKIF(selectedKifu.text, move));
+      }
+    } else {
+      onConfirm(selectedKifu, move);
+    }
     onOpenChange(false);
   };
+
+  const selectedBoardCell = recorder.selected?.from === 'board'
+    ? { row: recorder.selected.row, col: recorder.selected.col }
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,7 +152,7 @@ export function KifuEmbedDialog({
                 <select
                   id="embed-move-select"
                   value={move}
-                  onChange={(e) => setMove(Number(e.target.value))}
+                  onChange={(e) => handleMoveChange(Number(e.target.value))}
                   className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value={0}>0: 初期配置</option>
@@ -121,13 +165,104 @@ export function KifuEmbedDialog({
               </div>
 
               {selectedKifu?.text.trim() && (
-                <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
-                  <KifPlayer
-                    kifText={selectedKifu.text}
-                    moveNumber={move}
-                    onMoveChange={setMove}
-                    size="sm"
-                  />
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      {freePlayMode
+                        ? `${recorder.moveHistory.length}手 記録済み`
+                        : 'プレビュー'}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={freePlayMode ? () => setFreePlayMode(false) : handleEnterFreePlay}
+                    >
+                      {freePlayMode ? 'KIF再生に戻す' : '自由に動かす'}
+                    </Button>
+                  </div>
+
+                  {freePlayMode && (
+                    <div className="space-y-2">
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer text-sm">
+                          <input
+                            type="radio"
+                            name="embedType"
+                            value="bod"
+                            checked={embedType === 'bod'}
+                            onChange={() => setEmbedType('bod')}
+                          />
+                          単一の盤面として埋め込む
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer text-sm">
+                          <input
+                            type="radio"
+                            name="embedType"
+                            value="kifu"
+                            checked={embedType === 'kifu'}
+                            onChange={() => setEmbedType('kifu')}
+                          />
+                          棋譜として保存して埋め込む
+                        </label>
+                      </div>
+                      {embedType === 'kifu' && (
+                        <Input
+                          value={newKifuName}
+                          onChange={(e) => setNewKifuName(e.target.value)}
+                          placeholder="棋譜名を入力"
+                          className="text-sm"
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
+                    {freePlayMode ? (
+                      <div className="inline-flex flex-col items-center gap-2">
+                        <CapturedPieces
+                          pieces={recorder.goteCaptured}
+                          owner="gote"
+                          size="sm"
+                          onPieceClick={recorder.handleHandClick}
+                          isSelected={recorder.isSelectedHand}
+                          onHandZoneClick={recorder.handleHandZoneClick}
+                        />
+                        <Board
+                          board={recorder.board}
+                          size="sm"
+                          selectedCell={selectedBoardCell}
+                          onCellClick={recorder.handleBoardClick}
+                        />
+                        <CapturedPieces
+                          pieces={recorder.senteCaptured}
+                          owner="sente"
+                          size="sm"
+                          onPieceClick={recorder.handleHandClick}
+                          isSelected={recorder.isSelectedHand}
+                          onHandZoneClick={recorder.handleHandZoneClick}
+                        />
+                        {recorder.pendingPromotion && (
+                          <div className="flex items-center gap-3 mt-1 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
+                            <span>{recorder.pendingPromotion.prePiece}を成りますか？</span>
+                            <Button type="button" size="sm" onClick={() => recorder.confirmPromotion(true)}>
+                              成る
+                            </Button>
+                            <Button type="button" size="sm" variant="outline" onClick={() => recorder.confirmPromotion(false)}>
+                              成らない
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <KifPlayer
+                        kifText={selectedKifu.text}
+                        moveNumber={move}
+                        onMoveChange={setMove}
+                        size="sm"
+                      />
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -141,7 +276,7 @@ export function KifuEmbedDialog({
           <Button
             type="button"
             onClick={handleConfirm}
-            disabled={!selectedKifu}
+            disabled={!selectedKifu || !!recorder.pendingPromotion}
             className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
           >
             埋め込む

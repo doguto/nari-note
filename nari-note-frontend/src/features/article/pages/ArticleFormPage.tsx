@@ -267,6 +267,7 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
         onBodyChange={setBody}
         onTagsChange={setTags}
         onKifuConfirm={handleKifuConfirm}
+        onKifuAdd={handleKifuConfirm}
         onKifuEdit={handleKifuEdit}
         onKifuDelete={handleKifuDelete}
         onSave={handleSave}
