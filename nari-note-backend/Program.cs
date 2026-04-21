@@ -1,6 +1,4 @@
 using System.Text.Json;
-using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application;
 using NariNoteBackend.Application.Service;
@@ -52,35 +50,6 @@ builder.Services.AddControllers(options => { options.ModelBinderProviders.Insert
        });
 
 builder.Services.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
-
-builder.Services.AddRateLimiter(options =>
-{
-    // auth系エンドポイント: 5req/min per IP (ブルートフォース・メール爆撃対策)
-    options.AddFixedWindowLimiter("auth", o =>
-    {
-        o.Window = TimeSpan.FromMinutes(1);
-        o.PermitLimit = 5;
-        o.QueueLimit = 0;
-        o.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-    });
-
-    // 一般API: 100req/min per IP
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-    {
-        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-        return RateLimitPartition.GetSlidingWindowLimiter(ip, _ => new SlidingWindowRateLimiterOptions
-        {
-            Window = TimeSpan.FromMinutes(1),
-            SegmentsPerWindow = 6,
-            PermitLimit = 100,
-            QueueLimit = 0,
-            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-        });
-    });
-
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-});
-
 builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
 builder.Services.AddApplicationServices();
 
@@ -103,8 +72,6 @@ if (app.Environment.IsDevelopment())
 
 // CORSミドルウェアを最初に登録（preflightリクエスト対応のため）
 app.UseCors();
-
-app.UseRateLimiter();
 
 // SerilogによるAPIリクエストのログ出力を設定
 app.UseSerilogRequestLogging();

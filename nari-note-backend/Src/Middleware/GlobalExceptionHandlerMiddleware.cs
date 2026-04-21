@@ -3,14 +3,13 @@ using System.Net;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Extension;
-using Sentry;
 
 namespace NariNoteBackend.Middleware;
 
 public class GlobalExceptionHandlerMiddleware
 {
-    readonly RequestDelegate next;
     readonly ILogger<GlobalExceptionHandlerMiddleware> logger;
+    readonly RequestDelegate next;
 
     public GlobalExceptionHandlerMiddleware(
         RequestDelegate next,
@@ -45,7 +44,7 @@ public class GlobalExceptionHandlerMiddleware
         var statusCode = ex switch
         {
             // 400 Bad Request
-            ArgumentNullException or ArgumentOutOfRangeException or ArgumentException 
+            ArgumentNullException or ArgumentOutOfRangeException or ArgumentException
                 or ValidationException or InvalidOperationException
                 => HttpStatusCode.BadRequest,
 
@@ -59,17 +58,27 @@ public class GlobalExceptionHandlerMiddleware
             TimeoutException => HttpStatusCode.RequestTimeout,
 
             // TODO: メンテナンス等によるサービスの停止中 503 ServiceUnavailable
-            
+
             // 500 Internal Server Error
             // NariNoteException はカスタムのエラーであるため可読性の為 500 であることを明記
             NariNoteException => HttpStatusCode.InternalServerError,
-            _ => HttpStatusCode.InternalServerError,
+            _ => HttpStatusCode.InternalServerError
         };
 
-        return new ErrorResponse()
+        string message;
+        if (statusCode == HttpStatusCode.InternalServerError)
+        {
+            message = "サーバーで問題が発生しました。しばらくしてから再度お試しください。";
+        }
+        else
+        {
+            message = ex.Message;
+        }
+
+        return new ErrorResponse
         {
             StatusCode = statusCode.AsInt(),
-            Message = ex.Message,
+            Message = message
         };
     }
 }
