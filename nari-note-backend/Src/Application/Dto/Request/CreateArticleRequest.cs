@@ -12,6 +12,7 @@ public class CreateArticleRequest
     public string Title { get; set; } = string.Empty;
     
     [Required(ErrorMessage = "本文は必須です")]
+    [MaxLength(10000, ErrorMessage = "本文は10000文字以内で入力してください")]
     public string Body { get; set; } = string.Empty;
     
     public UserId AuthorId { get; set; }
