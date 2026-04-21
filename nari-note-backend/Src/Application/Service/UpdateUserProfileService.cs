@@ -26,11 +26,6 @@ public class UpdateUserProfileService
             user.Name = request.Name;
         }
 
-        if (request.UserIconImageUrl != null)
-        {
-            user.ProfileImage = request.UserIconImageUrl;
-        }
-
         if (request.Bio != null)
         {
             user.Bio = request.Bio;
