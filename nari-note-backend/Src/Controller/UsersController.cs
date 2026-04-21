@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Domain.ValueObject;
@@ -50,6 +51,8 @@ public class UsersController : ApplicationController
 
     [HttpPost("icon")]
     [RequireAuth]
+    [RequestSizeLimit(5_000_000)]
+    [EnableRateLimiting("auth")]
     public async Task<ActionResult> UploadUserIcon(IFormFile file)
     {
         var response = await uploadUserIconService.ExecuteAsync(UserId!.Value, file);

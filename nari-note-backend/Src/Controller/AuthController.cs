@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Service;
@@ -43,6 +44,7 @@ public class AuthController : ApplicationController
     [HttpPost("signup")]
     [AllowAnonymous]
     [ValidateModelState]
+    [EnableRateLimiting("auth")]
     public async Task<ActionResult<AuthResponse>> SignUp([FromBody] SignUpRequest request)
     {
         var response = await signUpService.ExecuteAsync(request);
@@ -52,6 +54,7 @@ public class AuthController : ApplicationController
     [HttpPost("signin")]
     [AllowAnonymous]
     [ValidateModelState]
+    [EnableRateLimiting("auth")]
     public async Task<ActionResult<AuthResponse>> SignIn([FromBody] SignInRequest request)
     {
         var response = await signInService.ExecuteAsync(request, Response);
@@ -88,6 +91,7 @@ public class AuthController : ApplicationController
     [HttpPost("forgot-password")]
     [AllowAnonymous]
     [ValidateModelState]
+    [EnableRateLimiting("auth")]
     public async Task<ActionResult<ForgotPasswordResponse>> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
         var response = await forgotPasswordService.ExecuteAsync(request);

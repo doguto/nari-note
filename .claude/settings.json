@@ -12,7 +12,8 @@
     ],
     "deny": [
       "Read(**/.env)",
-      "Read(.secret/**)"
+      "Read(.secret/**)",
+      "Read(**/secret.json)"
     ]
   }
 }
