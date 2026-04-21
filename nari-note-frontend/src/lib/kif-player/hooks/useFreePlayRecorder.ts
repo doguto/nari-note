@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { deepCopyBoard, addToCaptured, removeFromCaptured, DEMOTE_MAP } from '../utils/boardEditor';
+import { deepCopyBoard, addToCaptured, removeFromCaptured, DEMOTE_MAP, generateBOD } from '../utils/boardEditor';
 import type { BoardState, CapturedPiece, PieceOwner, PieceType } from '../types';
 import type { BoardEditorSelection } from './useBoardEditor';
 
@@ -64,6 +64,7 @@ export interface FreePlayRecorderState {
   isSelectedHand: (owner: PieceOwner, type: PieceType) => boolean;
   initializeBoard: (board: BoardState, sente: CapturedPiece[], gote: CapturedPiece[]) => void;
   generateKIF: (originalKifText: string, originalMoveCount: number) => string;
+  generateCurrentBOD: () => string;
 }
 
 function formatMove(move: FreePlayMove, moveNum: number, prev?: FreePlayMove): string {
@@ -295,6 +296,10 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
     return kept.join('\n');
   }, [moveHistory]);
 
+  const generateCurrentBOD = useCallback(() =>
+    generateBOD(board, senteCaptured, goteCaptured),
+  [board, senteCaptured, goteCaptured]);
+
   return {
     board,
     senteCaptured,
@@ -310,5 +315,6 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
     isSelectedHand,
     initializeBoard,
     generateKIF,
+    generateCurrentBOD,
   };
 }
