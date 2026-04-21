@@ -43,10 +43,10 @@ export function ArticleBodyEditor({
     insertBODFnRef.current = null;
   };
 
-  const handleSaveAsKifu = (name: string, kifText: string) => {
+  const handleSaveAsKifu = (name: string, kifText: string, totalMoves: number) => {
     const kifu: KifuItem = { name, text: kifText };
     onKifuAdd?.(kifu);
-    insertFnRef.current?.(name, 0);
+    insertFnRef.current?.(name, totalMoves);
     insertFnRef.current    = null;
     insertBODFnRef.current = null;
   };

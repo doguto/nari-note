@@ -30,7 +30,7 @@ interface KifuEmbedDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: (kifu: KifuItem, move: number) => void;
   onConfirmBOD?: (bod: string) => void;
-  onSaveAsKifu?: (name: string, kifText: string) => void;
+  onSaveAsKifu?: (name: string, kifText: string, totalMoves: number) => void;
   kifuList: KifuItem[];
   kifuCount?: number;
 }
@@ -97,14 +97,16 @@ export function KifuEmbedDialog({
 
   const handleConfirm = () => {
     if (!selectedKifu) return;
-    if (freePlayMode) {
-      if (embedType === 'kifu' && onSaveAsKifu) {
+    if (freePlayMode && onSaveAsKifu) {
+      const name = newKifuName.trim() || `棋譜${kifuCount + 1}`;
+      if (embedType === 'kifu') {
         const kifText = recorder.generateKIF(selectedKifu.text, move);
-        onSaveAsKifu(newKifuName.trim() || `棋譜${kifuCount + 1}`, kifText);
+        const totalMoves = move + recorder.moveHistory.length;
+        onSaveAsKifu(name, kifText, totalMoves);
       } else {
-        onConfirmBOD?.(recorder.generateKIF(selectedKifu.text, move));
+        onSaveAsKifu(name, recorder.generateCurrentBOD(), 0);
       }
-    } else {
+    } else if (!freePlayMode) {
       onConfirm(selectedKifu, move);
     }
     onOpenChange(false);
