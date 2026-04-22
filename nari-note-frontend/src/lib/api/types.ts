@@ -402,7 +402,6 @@ export interface UpdatePasswordResponse {
 
 export interface UpdateUserProfileRequest {
   name?: string;
-  userIconImageUrl?: string;
   bio?: string;
 }
 
