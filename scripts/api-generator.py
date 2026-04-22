@@ -64,14 +64,6 @@ DTO_DIR = BACKEND_ROOT / "Application/Dto"
 VALUE_OBJECT_FILE = BACKEND_ROOT / "Domain/ValueObject/EntityKeyObject.cs"
 
 
-
-
-
-
-
-
-
-
 def main():
     # コマンドライン引数をパース
     parser = argparse.ArgumentParser(
