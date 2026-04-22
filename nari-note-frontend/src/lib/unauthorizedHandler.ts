@@ -1,9 +1,3 @@
-/**
- * UnauthorizedHandler - Singleton
- * 
- * 401エラーが発生した時にモーダル表示をトリガーするためのシングルトン
- * axiosインターセプターとReactコンテキスト間の橋渡しを行う
- */
 class UnauthorizedHandler {
   private callback: (() => void) | null = null;
 
