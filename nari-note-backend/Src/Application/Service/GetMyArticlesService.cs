@@ -34,8 +34,7 @@ public class GetMyArticlesService
 
         return new GetMyArticlesResponse
         {
-            Articles = articleDtos,
-            TotalCount = articles.Count
+            Articles = articleDtos
         };
     }
 }
