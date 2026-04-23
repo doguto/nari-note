@@ -102,7 +102,6 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
       updateProfile.mutate({
         name: username,
         bio: bio || undefined,
-        userIconImageUrl: undefined,
       });
     } catch (err) {
       if (err instanceof Error) {
