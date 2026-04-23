@@ -21,10 +21,10 @@ export function UsernameField({
         type="text"
         value={value}
         onChange={onChange}
-        placeholder="user_name123"
+        placeholder="user_name-日本語"
         required={required}
         minLength={3}
-        helperText="英数字とアンダースコアのみ使用可能（3文字以上）"
+        helperText="全角文字・半角英数字・アンダーバー・ハイフンが使用可能（3文字以上）"
       />
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>

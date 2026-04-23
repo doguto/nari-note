@@ -75,8 +75,8 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
       newErrors.username = 'ユーザー名は必須です';
     } else if (username.length < 3) {
       newErrors.username = 'ユーザー名は3文字以上である必要があります';
-    } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      newErrors.username = 'ユーザー名は英数字とアンダースコアのみ使用可能です';
+    } else if (!/^[a-zA-Z0-9_\-\u3041-\u30FF\u4E00-\u9FFF]+$/.test(username)) {
+      newErrors.username = 'ユーザー名は全角文字・半角英数字・アンダーバー・ハイフンのみ使用可能です';
     }
 
     if (bio.length > 250) {
