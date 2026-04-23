@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useGetCurrentUser } from '@/lib/api';
 
 interface AuthContextType {
@@ -22,7 +22,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const userId = data?.userId ?? null;
   const userName = data?.userName ?? null;
-  const userIconImageUrl = data?.userIconImageUrl ?? null;
+  const [userIconImageUrl, setUserIconImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const rawUrl = data?.userIconImageUrl ?? null;
+    if (!rawUrl) {
+      setUserIconImageUrl(null);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => setUserIconImageUrl(rawUrl);
+    img.onerror = () => setUserIconImageUrl(null);
+    img.src = rawUrl;
+  }, [data?.userIconImageUrl]);
 
   return (
     <AuthContext.Provider

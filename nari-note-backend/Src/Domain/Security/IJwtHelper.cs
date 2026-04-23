@@ -5,7 +5,7 @@ namespace NariNoteBackend.Domain.Security;
 
 public interface IJwtHelper
 {
-    int GetExpirationInHours();
+    int GetExpiration();
     string GenerateToken(UserId userId, string userName);
     ClaimsPrincipal? ValidateToken(string token);
     UserId? GetUserIdFromToken(string token);

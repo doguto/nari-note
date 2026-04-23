@@ -44,7 +44,7 @@ public class VerifyEmailService
         await userUpdateTask;
 
         var cookieOptions = cookieOptionsHelper.CreateAuthCookieOptions(
-            TimeSpan.FromHours(jwtHelper.GetExpirationInHours())
+            TimeSpan.FromHours(jwtHelper.GetExpiration())
         );
         response.Cookies.Append("authToken", token, cookieOptions);
 

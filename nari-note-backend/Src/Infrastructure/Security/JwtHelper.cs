@@ -27,7 +27,7 @@ public class JwtHelper : IJwtHelper
 
     SymmetricSecurityKey SymmetricSecurityKey => new(Encoding.UTF8.GetBytes(secret));
 
-    public int GetExpirationInHours()
+    public int GetExpiration()
     {
         return expirationInHours;
     }

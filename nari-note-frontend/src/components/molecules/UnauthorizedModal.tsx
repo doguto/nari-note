@@ -16,11 +16,7 @@ interface UnauthorizedModalProps {
   onCancel: () => void;
 }
 
-/**
- * UnauthorizedModal - Molecule Component
- * 
- * 401エラー時にサインイン画面への遷移を確認するモーダル
- */
+
 export function UnauthorizedModal({
   open,
   onNavigateToSignIn,
