@@ -28,8 +28,6 @@ import type {
   GetCoursesByAuthorResponse,
   GetCoursesRequest,
   GetCoursesResponse,
-  GetCurrentUserRequest,
-  GetDraftArticlesRequest,
   GetDraftArticlesResponse,
   GetFollowersRequest,
   GetFollowersResponse,
@@ -40,7 +38,6 @@ import type {
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
   GetMyCoursesResponse,
-  GetPopularTagsRequest,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -105,8 +102,8 @@ export const articlesApi = {
     const response = await apiClient.get<GetMyArticlesResponse>('/api/articles/my');
     return response;
   },
-  getDraftArticles: async (data: GetDraftArticlesRequest): Promise<GetDraftArticlesResponse> => {
-    const response = await apiClient.get<GetDraftArticlesResponse>('/api/articles/drafts', { params: data });
+  getDraftArticles: async (): Promise<GetDraftArticlesResponse> => {
+    const response = await apiClient.get<GetDraftArticlesResponse>('/api/articles/drafts');
     return response;
   },
   searchArticles: async (data: SearchArticlesRequest): Promise<SearchArticlesResponse> => {
@@ -129,8 +126,8 @@ export const authApi = {
     const response = await apiClient.post<AuthResponse>('/api/auth/signin', data);
     return response;
   },
-  getCurrentUser: async (data: GetCurrentUserRequest): Promise<AuthResponse> => {
-    const response = await apiClient.get<AuthResponse>('/api/auth/me', { params: data });
+  getCurrentUser: async (): Promise<AuthResponse> => {
+    const response = await apiClient.get<AuthResponse>('/api/auth/me');
     return response;
   },
   verifyEmail: async (data: VerifyEmailRequest): Promise<AuthResponse> => {
@@ -204,8 +201,8 @@ export const healthApi = {
 
 // Tags API
 export const tagsApi = {
-  getPopularTags: async (data: GetPopularTagsRequest): Promise<GetPopularTagsResponse> => {
-    const response = await apiClient.get<GetPopularTagsResponse>('/api/tags/popular', { params: data });
+  getPopularTags: async (): Promise<GetPopularTagsResponse> => {
+    const response = await apiClient.get<GetPopularTagsResponse>('/api/tags/popular');
     return response;
   },
 };
