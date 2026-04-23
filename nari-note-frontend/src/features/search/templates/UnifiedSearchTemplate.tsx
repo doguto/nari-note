@@ -49,7 +49,6 @@ export function UnifiedSearchTemplate({
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'articles' | 'courses')} className="flex flex-col gap-6">
-        {/* モバイル: カスタムドロップダウン */}
         <div className="block md:hidden w-full max-w-2xl mx-auto">
           <DropdownMenu>
             <DropdownMenuTrigger className="flex w-full items-center justify-between rounded-md border border-brand-border bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring">
@@ -63,7 +62,6 @@ export function UnifiedSearchTemplate({
           </DropdownMenu>
         </div>
 
-        {/* デスクトップ: Tabs */}
         <TabsList className="hidden md:flex w-full max-w-2xl mx-auto">
           <TabsTrigger value="articles" className="flex-1">記事</TabsTrigger>
           <TabsTrigger value="courses" className="flex-1">講座</TabsTrigger>
@@ -144,7 +142,7 @@ export function UnifiedSearchTemplate({
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-4">
                   {courses.map((course) => (
                     <CourseCard
                       key={course.id}
