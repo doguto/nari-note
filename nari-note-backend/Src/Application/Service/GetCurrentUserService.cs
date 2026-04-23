@@ -1,27 +1,24 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Service;
 
 public class GetCurrentUserService
 {
-    readonly IUserRepository userRepository;
+    readonly IImageStorageGateway imageStorageGateway;
 
-    public GetCurrentUserService(IUserRepository userRepository)
+    public GetCurrentUserService(IImageStorageGateway imageStorageGateway)
     {
-        this.userRepository = userRepository;
+        this.imageStorageGateway = imageStorageGateway;
     }
 
-    public async Task<AuthResponse> ExecuteAsync(GetCurrentUserRequest request, UserId? currentUserId, string? userName)
+    public AuthResponse Execute(GetCurrentUserRequest request, UserId? currentUserId, string? userName)
     {
-        string? profileImage = null;
-        if (currentUserId.HasValue)
-        {
-            var user = await userRepository.FindByIdAsync(currentUserId.Value);
-            profileImage = user?.ProfileImage;
-        }
+        var profileImage = currentUserId.HasValue
+            ? imageStorageGateway.GetUserIconUrl(currentUserId.Value.Value.ToString())
+            : null;
 
         return new AuthResponse
         {

@@ -63,10 +63,10 @@ public class AuthController : ApplicationController
 
     [HttpGet("me")]
     [OptionalAuth]
-    public async Task<ActionResult<AuthResponse>> GetCurrentUser()
+    public ActionResult<AuthResponse> GetCurrentUser()
     {
         var request = new GetCurrentUserRequest();
-        var response = await getCurrentUserService.ExecuteAsync(request, UserId, UserName);
+        var response = getCurrentUserService.Execute(request, UserId, UserName);
         return Ok(response);
     }
 
