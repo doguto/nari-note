@@ -155,6 +155,12 @@ def main():
     # （例: PUT /api/courses/{id} の UpdateCourseRequest.id → id?: number）
     _mark_path_param_fields_optional(all_endpoints, class_map)
 
+    # プロパティのない空の Request 型は void 扱いにする（data 引数不要なエンドポイント）
+    for ep in all_endpoints:
+        if ep.request_type and ep.request_type in class_map:
+            if not class_map[ep.request_type].properties:
+                ep.request_type = None
+
     types_template = TypesTemplate(value_object_types)
     endpoints_template = EndpointsTemplate(value_object_types, class_map)
     hooks_template = HooksTemplate(value_object_types)

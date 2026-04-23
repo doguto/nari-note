@@ -22,7 +22,7 @@ PROPERTY = re.compile(
 # group(5): パラメータ文字列
 HTTP_METHOD_ATTR = re.compile(
     r'\[Http(Get|Post|Put|Delete)(?:\("([^"]+)"\))?\](?:\s*\[\w+\])*'
-    r'\s+public\s+async\s+Task<ActionResult(?:<(\w+)>)?>\s+(\w+)\s*\(([^)]*)\)'
+    r'\s+public\s+(?:async\s+Task<)?ActionResult(?:<(\w+)>)?(?:>)?\s+(\w+)\s*\(([^)]*)\)'
 )
 
 # --- パラメータ ---

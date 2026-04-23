@@ -29,8 +29,6 @@ import type {
   GetCoursesByAuthorResponse,
   GetCoursesRequest,
   GetCoursesResponse,
-  GetCurrentUserRequest,
-  GetDraftArticlesRequest,
   GetDraftArticlesResponse,
   GetFollowersRequest,
   GetFollowersResponse,
@@ -41,7 +39,6 @@ import type {
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
   GetMyCoursesResponse,
-  GetPopularTagsRequest,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -194,10 +191,10 @@ export function useGetMyArticles(options?: Omit<UseQueryOptions<GetMyArticlesRes
   });
 }
 
-export function useGetDraftArticles(params: GetDraftArticlesRequest, options?: Omit<UseQueryOptions<GetDraftArticlesResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetDraftArticles(options?: Omit<UseQueryOptions<GetDraftArticlesResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetDraftArticlesResponse>({
-    queryKey: [...queryKeys.articles.getDraftArticles, params],
-    queryFn: () => articlesApi.getDraftArticles(params),
+    queryKey: queryKeys.articles.getDraftArticles,
+    queryFn: () => articlesApi.getDraftArticles(),
     ...options,
   });
 }
@@ -247,10 +244,10 @@ export function useSignIn(options?: UseMutationOptions<AuthResponse, Error, Sign
   });
 }
 
-export function useGetCurrentUser(params: GetCurrentUserRequest, options?: Omit<UseQueryOptions<AuthResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetCurrentUser(options?: Omit<UseQueryOptions<AuthResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<AuthResponse>({
-    queryKey: [...queryKeys.auth.getCurrentUser, params],
-    queryFn: () => authApi.getCurrentUser(params),
+    queryKey: queryKeys.auth.getCurrentUser,
+    queryFn: () => authApi.getCurrentUser(),
     ...options,
   });
 }
@@ -410,10 +407,10 @@ export function useGetHealth(options?: Omit<UseQueryOptions<GetHealthResponse>, 
 }
 
 // Tags Hooks
-export function useGetPopularTags(params: GetPopularTagsRequest, options?: Omit<UseQueryOptions<GetPopularTagsResponse>, 'queryKey' | 'queryFn'>) {
+export function useGetPopularTags(options?: Omit<UseQueryOptions<GetPopularTagsResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetPopularTagsResponse>({
-    queryKey: [...queryKeys.tags.getPopularTags, params],
-    queryFn: () => tagsApi.getPopularTags(params),
+    queryKey: queryKeys.tags.getPopularTags,
+    queryFn: () => tagsApi.getPopularTags(),
     ...options,
   });
 }
