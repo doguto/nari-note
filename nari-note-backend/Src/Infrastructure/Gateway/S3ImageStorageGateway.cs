@@ -16,6 +16,8 @@ public class S3ImageStorageGateway : IImageStorageGateway
         domain = configuration["image_delivery_domain"]!;
     }
 
+    public string GetUserIconUrl(string userId) => $"https://{domain}/users/{userId}/icon";
+
     public async Task<string> UploadUserIconAsync(string userId, Stream imageStream, string contentType)
     {
         var key = $"users/{userId}/icon";
@@ -30,6 +32,6 @@ public class S3ImageStorageGateway : IImageStorageGateway
 
         await s3Client.Value.PutObjectAsync(request);
 
-        return $"https://{domain}/{key}";
+        return GetUserIconUrl(userId);
     }
 }
