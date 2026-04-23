@@ -36,8 +36,7 @@ public class GetArticlesService
 
         return new GetArticlesResponse
         {
-            Articles = articleDtos,
-            TotalCount = totalCount
+            Articles = articleDtos
         };
     }
 }

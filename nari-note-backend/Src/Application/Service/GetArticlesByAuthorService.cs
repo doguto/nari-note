@@ -37,8 +37,7 @@ public class GetArticlesByAuthorService
         {
             AuthorId = request.AuthorId,
             AuthorName = publishedArticles.FirstOrDefault()?.Author.Name ?? "",
-            Articles = articleDtos,
-            TotalCount = publishedArticles.Count
+            Articles = articleDtos
         };
     }
 }

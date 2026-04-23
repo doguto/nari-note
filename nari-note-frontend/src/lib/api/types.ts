@@ -149,7 +149,6 @@ export interface GetArticlesByAuthorResponse {
   authorId: string;
   authorName: string;
   articles: ArticleThumbnailDto[];
-  totalCount: number;
 }
 
 export interface GetArticlesByTagRequest {
@@ -167,7 +166,6 @@ export interface GetArticlesRequest {
 
 export interface GetArticlesResponse {
   articles: ArticleDto[];
-  totalCount: number;
 }
 
 export interface GetCourseContentRequest {
@@ -195,7 +193,6 @@ export interface GetCoursesByAuthorResponse {
   authorId: string;
   authorName: string;
   courses: CourseDto[];
-  totalCount: number;
 }
 
 export interface GetCoursesRequest {
@@ -205,7 +202,6 @@ export interface GetCoursesRequest {
 
 export interface GetCoursesResponse {
   courses: CourseDto[];
-  totalCount: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -248,17 +244,14 @@ export interface GetLikedArticlesRequest {
 export interface GetLikedArticlesResponse {
   userId: string;
   articles: ArticleThumbnailDto[];
-  totalCount: number;
 }
 
 export interface GetMyArticlesResponse {
   articles: ArticleThumbnailDto[];
-  totalCount: number;
 }
 
 export interface GetMyCoursesResponse {
   courses: CourseDto[];
-  totalCount: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

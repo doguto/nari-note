@@ -36,8 +36,7 @@ public class GetCoursesByAuthorService
         {
             AuthorId = request.AuthorId,
             AuthorName = courses.FirstOrDefault()?.User.Name ?? "",
-            Courses = courseDtos,
-            TotalCount = courses.Count
+            Courses = courseDtos
         };
     }
 }

@@ -12,12 +12,7 @@ interface CourseCardProps {
   likeCount: number;
 }
 
-/**
- * CourseCard - Molecule Component
- * 
- * 講座カード表示コンポーネント
- * ホーム画面などで講座の概要を表示します
- */
+
 export function CourseCard({
   id,
   name,

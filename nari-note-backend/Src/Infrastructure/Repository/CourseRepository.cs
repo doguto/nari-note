@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Infrastructure.Database;
 
@@ -10,7 +10,7 @@ namespace NariNoteBackend.Infrastructure.Repository;
 public class CourseRepository : ICourseRepository
 {
     readonly NariNoteDbContext context;
-    
+
     public CourseRepository(NariNoteDbContext context)
     {
         this.context = context;
@@ -25,7 +25,7 @@ public class CourseRepository : ICourseRepository
     {
         var course = await FindByIdAsync(id);
         if (course == null) throw new KeyNotFoundException($"ID: {id} の講座が見つかりません");
-        
+
         return course;
     }
 
@@ -46,8 +46,8 @@ public class CourseRepository : ICourseRepository
     public async Task DeleteAsync(CourseId id)
     {
         await context.Courses
-            .Where(c => c.Id == id)
-            .ExecuteDeleteAsync();
+                     .Where(c => c.Id == id)
+                     .ExecuteDeleteAsync();
     }
 
     public async Task<Course> UpdateWithArticlesAsync(Course course)
@@ -57,9 +57,9 @@ public class CourseRepository : ICourseRepository
         if (course.IsPublished)
         {
             var articles = await context.Articles
-                .Where(a => a.CourseId == course.Id && !a.PublishedAt.HasValue)
-                .ToListAsync();
-            
+                                        .Where(a => a.CourseId == course.Id && !a.PublishedAt.HasValue)
+                                        .ToListAsync();
+
             foreach (var article in articles)
             {
                 article.PublishedAt = course.PublishedAt ?? DateTime.UtcNow;
@@ -74,10 +74,10 @@ public class CourseRepository : ICourseRepository
     public async Task<Course> FindByIdWithArticlesAsync(CourseId id)
     {
         var course = await context.Courses
-            .Include(c => c.User)
-            .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue))
-            .Include(c => c.CourseLikes)
-            .FirstOrDefaultAsync(c => c.Id == id);
+                                  .Include(c => c.User)
+                                  .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue))
+                                  .Include(c => c.CourseLikes)
+                                  .FirstOrDefaultAsync(c => c.Id == id);
 
         if (course == null) throw new KeyNotFoundException($"ID: {id} の講座が見つかりません");
 
@@ -87,10 +87,10 @@ public class CourseRepository : ICourseRepository
     public async Task<Course> FindByIdWithAllArticlesAsync(CourseId id)
     {
         var course = await context.Courses
-            .Include(c => c.User)
-            .Include(c => c.Articles)
-            .Include(c => c.CourseLikes)
-            .FirstOrDefaultAsync(c => c.Id == id);
+                                  .Include(c => c.User)
+                                  .Include(c => c.Articles)
+                                  .Include(c => c.CourseLikes)
+                                  .FirstOrDefaultAsync(c => c.Id == id);
 
         if (course == null) throw new KeyNotFoundException($"ID: {id} の講座が見つかりません");
 
@@ -100,19 +100,19 @@ public class CourseRepository : ICourseRepository
     public async Task<(List<Course> Courses, int TotalCount)> FindLatestAsync(int limit, int offset)
     {
         var now = DateTime.UtcNow;
-        
+
         var query = context.Courses
-            .Include(c => c.User)
-            .Include(c => c.CourseLikes)
-            .Include(c => c.Articles)
-            .Where(c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now)
-            .OrderByDescending(c => c.CreatedAt);
+                           .Include(c => c.User)
+                           .Include(c => c.CourseLikes)
+                           .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue && a.PublishedAt.Value < now))
+                           .Where(c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now)
+                           .OrderByDescending(c => c.CreatedAt);
 
         var totalCount = await query.CountAsync();
         var courses = await query
-            .Skip(offset)
-            .Take(limit)
-            .ToListAsync();
+                            .Skip(offset)
+                            .Take(limit)
+                            .ToListAsync();
 
         return (courses, totalCount);
     }
@@ -123,22 +123,20 @@ public class CourseRepository : ICourseRepository
         var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
 
         var courses = await context.Courses
-            .Include(c => c.User)
-            .Include(c => c.CourseLikes)
-            .Include(c => c.Articles)
-            .Where(searchFilter)
-            .OrderByDescending(c => c.CreatedAt)
-            .Skip(offset)
-            .Take(limit)
-            .ToListAsync();
+                                   .Include(c => c.User)
+                                   .Include(c => c.CourseLikes)
+                                   .Include(
+                                       c => c.Articles.Where(
+                                           a => a.PublishedAt.HasValue && a.PublishedAt.Value < now
+                                       )
+                                   )
+                                   .Where(searchFilter)
+                                   .OrderByDescending(c => c.CreatedAt)
+                                   .Skip(offset)
+                                   .Take(limit)
+                                   .ToListAsync();
 
         return courses;
-    }
-
-    static Expression<Func<Course, bool>> IsPubliclyVisibleAndContainsKeyword(DateTime now, string keyword)
-    {
-        return c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now &&
-                    (c.Name.Contains(keyword) || c.Articles.Any(a => a.Title.Contains(keyword)));
     }
 
     public async Task<List<Course>> FindPublishedByAuthorAsync(UserId authorId)
@@ -146,22 +144,28 @@ public class CourseRepository : ICourseRepository
         var now = DateTime.UtcNow;
 
         return await context.Courses
-            .Include(c => c.User)
-            .Include(c => c.CourseLikes)
-            .Include(c => c.Articles)
-            .Where(c => c.UserId == authorId && c.PublishedAt.HasValue && c.PublishedAt.Value <= now)
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync();
+                            .Include(c => c.User)
+                            .Include(c => c.CourseLikes)
+                            .Include(c => c.Articles)
+                            .Where(c => c.UserId == authorId && c.PublishedAt.HasValue && c.PublishedAt.Value <= now)
+                            .OrderByDescending(c => c.CreatedAt)
+                            .ToListAsync();
     }
 
     public async Task<List<Course>> FindAllByAuthorAsync(UserId authorId)
     {
         return await context.Courses
-            .Include(c => c.User)
-            .Include(c => c.CourseLikes)
-            .Include(c => c.Articles)
-            .Where(c => c.UserId == authorId)
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync();
+                            .Include(c => c.User)
+                            .Include(c => c.CourseLikes)
+                            .Include(c => c.Articles)
+                            .Where(c => c.UserId == authorId)
+                            .OrderByDescending(c => c.CreatedAt)
+                            .ToListAsync();
+    }
+
+    static Expression<Func<Course, bool>> IsPubliclyVisibleAndContainsKeyword(DateTime now, string keyword)
+    {
+        return c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now &&
+                    (c.Name.Contains(keyword) || c.Articles.Any(a => a.Title.Contains(keyword)));
     }
 }
