@@ -34,8 +34,7 @@ public class GetCoursesService
 
         return new GetCoursesResponse
         {
-            Courses = courseDtos,
-            TotalCount = totalCount
+            Courses = courseDtos
         };
     }
 }

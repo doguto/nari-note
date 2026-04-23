@@ -34,8 +34,7 @@ public class GetLikedArticlesService
         return new GetLikedArticlesResponse
         {
             UserId = request.UserId,
-            Articles = articleDtos,
-            TotalCount = articles.Count
+            Articles = articleDtos
         };
     }
 }

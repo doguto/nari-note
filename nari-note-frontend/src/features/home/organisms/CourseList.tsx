@@ -9,12 +9,7 @@ interface CourseListProps {
   onRetry: () => void;
 }
 
-/**
- * CourseList - Organism Component
- * 
- * 講座一覧を表示するOrganismコンポーネント
- * ローディング、エラー、空状態のハンドリングを含む
- */
+
 export function CourseList({ courses, isLoading, error, onRetry }: CourseListProps) {
   if (isLoading) {
     return <LoadingSpinner text="講座を読み込み中..." />;

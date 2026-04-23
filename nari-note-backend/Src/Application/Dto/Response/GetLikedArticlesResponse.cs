@@ -6,5 +6,4 @@ public class GetLikedArticlesResponse
 {
     public UserId UserId { get; set; }
     public List<ArticleThumbnailDto> Articles { get; set; } = new();
-    public int TotalCount { get; set; }
 }

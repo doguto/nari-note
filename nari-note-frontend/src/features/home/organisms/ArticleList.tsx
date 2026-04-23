@@ -9,12 +9,7 @@ interface ArticleListProps {
   onRetry: () => void;
 }
 
-/**
- * ArticleList - Organism Component
- * 
- * 記事一覧を表示するOrganismコンポーネント
- * ローディング、エラー、空状態のハンドリングを含む
- */
+
 export function ArticleList({ articles, isLoading, error, onRetry }: ArticleListProps) {
   if (isLoading) {
     return <LoadingSpinner text="記事を読み込み中..." />;
