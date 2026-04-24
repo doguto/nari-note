@@ -28,7 +28,7 @@ Article ||--o{ Comment: "has many"
 User ||--o{ Notification: "has many"
 
 User {
-    id integer PK
+    id uuid PK
     name varchar(50)
     profile_image varchar(255)
     bio varchar(500)
@@ -40,8 +40,8 @@ User {
 
 Article {
     id uuid PK
-    author_id integer FK
-    course_id integer FK "nullable"
+    author_id uuid FK
+    course_id uuid FK "nullable"
     article_order integer "nullable"
     title varchar(50)
     body varchar(10000)
@@ -59,7 +59,7 @@ Tag {
 
 ArticleTag {
     id integer PK
-    article_id integer FK
+    article_id uuid FK
     tag_id integer FK
     created_at datetime
     updated_at datetime
@@ -67,7 +67,7 @@ ArticleTag {
 
 Course {
     id uuid PK
-    user_id integer FK
+    user_id uuid FK
     name varchar(100)
     created_at datetime
     updated_at datetime
@@ -75,30 +75,30 @@ Course {
 
 CourseLike {
     id integer PK
-    user_id integer FK
-    course_id integer FK
+    user_id uuid FK
+    course_id uuid FK
     created_at datetime
     updated_at datetime
 }
 
 Kifu {
     id integer PK
-    article_id FK
+    article_id uuid FK
     kifu_text text
 }
 
 Like {
     id integer PK
-    user_id integer FK
-    article_id integer FK
+    user_id uuid FK
+    article_id uuid FK
     created_at datetime
     updated_at datetime
 }
 
 Comment {
     id integer PK
-    user_id integer FK
-    article_id integer FK
+    user_id uuid FK
+    article_id uuid FK
     message text
     created_at datetime
     updated_at datetime
@@ -106,16 +106,16 @@ Comment {
 
 Follow {
     id integer PK
-    follower_id integer FK
-    following_id integer FK
+    follower_id uuid FK
+    following_id uuid FK
     created_at datetime
     updated_at datetime
 }
 
 Notification {
     id integer PK
-    user_id integer FK
-    article_id integer FK
+    user_id uuid FK
+    article_id uuid FK
     is_read boolean
     created_at datetime
     updated_at datetime
