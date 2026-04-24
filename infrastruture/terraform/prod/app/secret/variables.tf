@@ -39,3 +39,9 @@ variable "sentry_dsn" {
   type        = string
   sensitive   = true
 }
+
+variable "discord_general_webhook_url" {
+  description = "Discord Webhook URL for general notifications"
+  type        = string
+  sensitive   = true
+}

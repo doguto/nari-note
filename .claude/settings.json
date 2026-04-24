@@ -13,8 +13,8 @@
     "deny": [
       "Read(**/.env)",
       "Read(.secret/**)",
-      "Read(**/secret.json)"
+      "Read(**/secret.json)",
+      "Read(**/*.tfvars)"
     ]
   }
 }
-
