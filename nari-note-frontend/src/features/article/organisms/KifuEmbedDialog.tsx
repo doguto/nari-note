@@ -33,6 +33,8 @@ interface KifuEmbedDialogProps {
   onSaveAsKifu?: (name: string, kifText: string, totalMoves: number) => void;
   kifuList: KifuItem[];
   kifuCount?: number;
+  initialKifuName?: string;
+  initialMove?: number;
 }
 
 export function KifuEmbedDialog({
@@ -43,6 +45,8 @@ export function KifuEmbedDialog({
   onSaveAsKifu,
   kifuList,
   kifuCount = 0,
+  initialKifuName,
+  initialMove,
 }: KifuEmbedDialogProps) {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [move, setMove] = useState<number>(0);
@@ -54,13 +58,16 @@ export function KifuEmbedDialog({
 
   useEffect(() => {
     if (open) {
-      setSelectedIndex(0);
-      setMove(0);
+      const idx = initialKifuName
+        ? Math.max(0, kifuList.findIndex((k) => k.name === initialKifuName))
+        : 0;
+      setSelectedIndex(idx);
+      setMove(initialMove ?? 0);
       setFreePlayMode(false);
       setEmbedType('bod');
       setNewKifuName('');
     }
-  }, [open]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedKifu = kifuList[selectedIndex];
 
