@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { KifPlayer, Board, CapturedPieces, useFreePlayRecorder, getBoardAtMove, parseKif } from '@/lib/kif-player';
-import type { KifMove } from '@/lib/kif-player/types';
+import type { KifMove, PieceOwner } from '@/lib/kif-player/types';
 import type { KifuItem } from '../types/kifu';
 
 const COL_LABEL = ['', '１', '２', '３', '４', '５', '６', '７', '８', '９'];
@@ -96,10 +96,17 @@ export function KifuEmbedDialog({
   const handleEnterFreePlay = () => {
     if (!parsedGame) return;
     const parsed = getBoardAtMove(parsedGame, move);
-    recorder.initializeBoard(parsed.board, parsed.captured.sente, parsed.captured.gote);
+    const initialTurn: PieceOwner = move % 2 === 0 ? 'sente' : 'gote';
+    // 初期は BOD モード（手番強制なし）
+    recorder.initializeBoard(parsed.board, parsed.captured.sente, parsed.captured.gote, initialTurn, false);
     setFreePlayMode(true);
     setEmbedType('bod');
     setNewKifuName(`棋譜${kifuCount + 1}`);
+  };
+
+  const handleEmbedTypeChange = (type: 'bod' | 'kifu') => {
+    setEmbedType(type);
+    recorder.setTurnEnforced(type === 'kifu');
   };
 
   const handleConfirm = () => {
@@ -176,10 +183,19 @@ export function KifuEmbedDialog({
               {selectedKifu?.text.trim() && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-muted-foreground flex items-center gap-2">
                       {freePlayMode
                         ? `${recorder.moveHistory.length}手 記録済み`
                         : 'プレビュー'}
+                      {freePlayMode && embedType === 'kifu' && (
+                        <span className={
+                          recorder.currentTurn === 'sente'
+                            ? 'text-blue-600 font-medium'
+                            : 'text-red-500 font-medium'
+                        }>
+                          {recorder.currentTurn === 'sente' ? '先手番' : '後手番'}
+                        </span>
+                      )}
                     </span>
                     <Button
                       type="button"
@@ -200,7 +216,7 @@ export function KifuEmbedDialog({
                             name="embedType"
                             value="bod"
                             checked={embedType === 'bod'}
-                            onChange={() => setEmbedType('bod')}
+                            onChange={() => handleEmbedTypeChange('bod')}
                           />
                           単一の盤面として埋め込む
                         </label>
@@ -210,7 +226,7 @@ export function KifuEmbedDialog({
                             name="embedType"
                             value="kifu"
                             checked={embedType === 'kifu'}
-                            onChange={() => setEmbedType('kifu')}
+                            onChange={() => handleEmbedTypeChange('kifu')}
                           />
                           棋譜として保存して埋め込む
                         </label>

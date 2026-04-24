@@ -17,6 +17,7 @@ export function KifuBoardCreator({ recorder }: KifuBoardCreatorProps) {
     selected,
     moveHistory,
     pendingPromotion,
+    currentTurn,
     handleBoardClick,
     handleHandClick,
     handleHandZoneClick,
@@ -147,7 +148,15 @@ export function KifuBoardCreator({ recorder }: KifuBoardCreatorProps) {
       )}
 
       <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-600">{moveHistory.length}手</span>
+        <span className="text-sm text-gray-600">
+        {moveHistory.length}手
+        <span className={cn(
+          'font-medium',
+          currentTurn === 'sente' ? 'text-blue-600' : 'text-red-500',
+        )}>
+          {currentTurn === 'sente' ? '先手番' : '後手番'}
+        </span>
+      </span>
         <Button
           type="button"
           variant="outline"

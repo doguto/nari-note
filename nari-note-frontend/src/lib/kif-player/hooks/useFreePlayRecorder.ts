@@ -56,13 +56,16 @@ export interface FreePlayRecorderState {
   selected: BoardEditorSelection | null;
   moveHistory: FreePlayMove[];
   pendingPromotion: PendingPromotion | null;
+  currentTurn: PieceOwner;
+  turnEnforced: boolean;
+  setTurnEnforced: (v: boolean) => void;
   handleBoardClick: (row: number, col: number) => void;
   handleHandClick: (owner: PieceOwner, type: PieceType) => void;
   handleHandZoneClick: (owner: PieceOwner) => void;
   confirmPromotion: (promote: boolean) => void;
   isSelectedBoard: (row: number, col: number) => boolean;
   isSelectedHand: (owner: PieceOwner, type: PieceType) => boolean;
-  initializeBoard: (board: BoardState, sente: CapturedPiece[], gote: CapturedPiece[]) => void;
+  initializeBoard: (board: BoardState, sente: CapturedPiece[], gote: CapturedPiece[], initialTurn?: PieceOwner, initialTurnEnforced?: boolean) => void;
   generateKIF: (originalKifText: string, originalMoveCount: number) => string;
   generateCurrentBOD: () => string;
 }
@@ -82,14 +85,26 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
   const [selected, setSelected]           = useState<BoardEditorSelection | null>(null);
   const [moveHistory, setMoveHistory]     = useState<FreePlayMove[]>([]);
   const [pendingPromotion, setPendingPromotion] = useState<PendingPromotion | null>(null);
+  const [currentTurn, setCurrentTurn]     = useState<PieceOwner>('sente');
+  const [turnEnforced, setTurnEnforced]   = useState(true);
 
-  const initializeBoard = useCallback((newBoard: BoardState, sente: CapturedPiece[], gote: CapturedPiece[]) => {
+  const toggleTurn = useCallback(() => setCurrentTurn(t => t === 'sente' ? 'gote' : 'sente'), []);
+
+  const initializeBoard = useCallback((
+    newBoard: BoardState,
+    sente: CapturedPiece[],
+    gote: CapturedPiece[],
+    initialTurn: PieceOwner = 'sente',
+    initialTurnEnforced = true,
+  ) => {
     setBoard(deepCopyBoard(newBoard));
     setSenteCaptured(sente.map(p => ({ ...p })));
     setGoteCaptured(gote.map(p => ({ ...p })));
     setSelected(null);
     setMoveHistory([]);
     setPendingPromotion(null);
+    setCurrentTurn(initialTurn);
+    setTurnEnforced(initialTurnEnforced);
   }, []);
 
   const recordAndApplyMove = useCallback((
@@ -118,12 +133,13 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
       newB[toRow][toCol] = { type: PROMOTE_MAP[piece]!, owner };
       setBoard(newB);
       setMoveHistory(prev => [...prev, { ...move, isPromote: true }]);
+      toggleTurn();
     } else if (
       canPromote &&
       !move.isDrop &&
       (inPromotionZone(toRow, owner) || (fromRow !== undefined && inPromotionZone(fromRow, owner)))
     ) {
-      // 任意成り → 確認待ち
+      // 任意成り → 確認待ち（toggleTurn は confirmPromotion で行う）
       setPendingPromotion({
         boardRow: toRow,
         boardCol: toCol,
@@ -134,15 +150,16 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
       });
     } else {
       setMoveHistory(prev => [...prev, { ...move, isPromote: false }]);
+      toggleTurn();
     }
-  }, []);
+  }, [toggleTurn]);
 
   const handleBoardClick = useCallback((row: number, col: number) => {
     if (pendingPromotion) return;
     const piece = board[row]?.[col];
 
     if (!selected) {
-      if (piece) setSelected({ from: 'board', row, col, piece });
+      if (piece && (!turnEnforced || piece.owner === currentTurn)) setSelected({ from: 'board', row, col, piece });
       return;
     }
 
@@ -157,6 +174,12 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
 
     if (selected.from === 'board') {
       const movingPiece = selected.piece;
+
+      // 自分の駒をクリックした場合は選択し直す（自駒の上書きを防ぐ）
+      if (piece && piece.owner === movingPiece.owner) {
+        setSelected({ from: 'board', row, col, piece });
+        return;
+      }
       const displaced   = newBoard[row][col];
       newBoard[selected.row][selected.col] = null;
       newBoard[row][col] = movingPiece;
@@ -209,7 +232,7 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
 
       recordAndApplyMove(newBoard, newSente, newGote, move, row, col, undefined, undefined, selected.type, selected.owner);
     }
-  }, [board, senteCaptured, goteCaptured, selected, pendingPromotion, recordAndApplyMove]);
+  }, [board, senteCaptured, goteCaptured, selected, pendingPromotion, currentTurn, turnEnforced, recordAndApplyMove]);
 
   const handleHandZoneClick = useCallback((owner: PieceOwner) => {
     if (pendingPromotion || selected?.from !== 'board') return;
@@ -232,7 +255,7 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
     if (pendingPromotion) return;
 
     if (!selected) {
-      setSelected({ from: 'hand', owner, type });
+      if (!turnEnforced || owner === currentTurn) setSelected({ from: 'hand', owner, type });
       return;
     }
     if (selected.from === 'hand' && selected.owner === owner && selected.type === type) {
@@ -244,7 +267,7 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
       return;
     }
     setSelected({ from: 'hand', owner, type });
-  }, [selected, pendingPromotion, handleHandZoneClick]);
+  }, [selected, pendingPromotion, currentTurn, turnEnforced, handleHandZoneClick]);
 
   const confirmPromotion = useCallback((promote: boolean) => {
     if (!pendingPromotion) return;
@@ -267,7 +290,8 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
     };
     setMoveHistory(prev => [...prev, move]);
     setPendingPromotion(null);
-  }, [board, pendingPromotion]);
+    toggleTurn();
+  }, [board, pendingPromotion, toggleTurn]);
 
   const isSelectedBoard = useCallback((row: number, col: number) =>
     selected?.from === 'board' && selected.row === row && selected.col === col,
@@ -307,6 +331,9 @@ export function useFreePlayRecorder(): FreePlayRecorderState {
     selected,
     moveHistory,
     pendingPromotion,
+    currentTurn,
+    turnEnforced,
+    setTurnEnforced,
     handleBoardClick,
     handleHandClick,
     handleHandZoneClick,
