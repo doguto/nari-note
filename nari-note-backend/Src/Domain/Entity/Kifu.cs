@@ -16,7 +16,7 @@ public class Kifu : EntityBase
     public required string Name { get; set; }
 
     [Required]
-    [MaxLength(4096)]
+    [MaxLength(8192)]
     public required string KifuText { get; set; }
 
     [Required]
