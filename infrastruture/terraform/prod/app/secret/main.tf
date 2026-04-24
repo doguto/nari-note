@@ -39,3 +39,9 @@ resource "aws_ssm_parameter" "sentry_dsn" {
   type  = "SecureString"
   value = var.sentry_dsn
 }
+
+resource "aws_ssm_parameter" "discord_general_webhook_url" {
+  name  = "/${var.app_name}/app/discord_general_webhook_url"
+  type  = "SecureString"
+  value = var.discord_general_webhook_url
+}
