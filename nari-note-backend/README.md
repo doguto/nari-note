@@ -16,41 +16,6 @@ nari-noteプロジェクトのバックエンドAPIサーバーです。
 - Docker & Docker Compose（推奨）
 - PostgreSQL 16（ローカル実行の場合）
 
-## セットアップ
-
-### Docker Composeを使用する場合（推奨）
-
-プロジェクトルートディレクトリから以下のコマンドを実行してください：
-
-```bash
-docker-compose up
-```
-
-バックエンドAPIサーバーは `http://localhost:5243` で起動します。
-
-### ローカル環境で直接実行する場合
-
-1. PostgreSQLをインストールし、起動してください
-
-2. 依存パッケージをインストール：
-
-```bash
-cd nari-note-backend
-dotnet restore
-```
-
-3. 開発サーバーを起動：
-
-```bash
-dotnet run
-```
-
-または、ホットリロードを有効にして起動：
-
-```bash
-dotnet watch run
-```
-
 ## プロジェクト構成
 
 ```
@@ -159,48 +124,6 @@ Controller → Service → Repository Interface
 6. **Service実装** - `Src/Application/Service/`（API一個につきService一個）
 7. **Controller実装** - `Src/Controller/`
 8. **DI登録** - `Program.cs`
-
-### パッケージの追加
-
-```bash
-dotnet add package <パッケージ名>
-```
-
-### マイグレーション（Entity Framework Core）
-
-```bash
-# マイグレーションの作成
-dotnet ef migrations add <マイグレーション名>
-
-# マイグレーションの適用
-dotnet ef database update
-```
-
-### ビルド
-
-```bash
-dotnet build
-```
-
-### テスト実行
-
-```bash
-dotnet test
-```
-
-## 環境変数
-
-| 変数名 | 説明 | デフォルト値 |
-|--------|------|------------|
-| `ConnectionStrings:DefaultConnection` | PostgreSQL接続文字列 | `Host=localhost;Port=5432;Database=nari_note;Username=postgres;Password=postgres` |
-| `Jwt:Secret` | JWT署名用の秘密鍵（本番環境では環境変数で設定） | 設定ファイル参照 |
-| `Jwt:Issuer` | JWTトークンの発行者 | `nari-note-api` |
-| `Jwt:Audience` | JWTトークンの対象者 | `nari-note-client` |
-| `Jwt:ExpirationInHours` | JWTトークンの有効期限（時間） | `24` |
-
-### Docker Compose使用時
-`docker-compose.yml`で以下の環境変数が自動設定されます：
-- `DATABASE_URL`: PostgreSQLコンテナへの接続URL
 
 ## 主要な技術詳細
 
