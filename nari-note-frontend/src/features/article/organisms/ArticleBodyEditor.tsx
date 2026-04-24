@@ -21,6 +21,8 @@ export function ArticleBodyEditor({
 }: ArticleBodyEditorProps) {
   const [showEmbedDialog, setShowEmbedDialog]           = useState(false);
   const [showBoardEditorDialog, setShowBoardEditorDialog] = useState(false);
+  const [lastEmbedKifuName, setLastEmbedKifuName] = useState<string | undefined>(undefined);
+  const [lastEmbedMove, setLastEmbedMove]         = useState<number | undefined>(undefined);
   const insertFnRef      = useRef<((name: string, move: number) => void) | null>(null);
   const insertBODFnRef   = useRef<((bod: string) => void) | null>(null);
   const boardInsertFnRef = useRef<((bod: string) => void) | null>(null);
@@ -33,6 +35,8 @@ export function ArticleBodyEditor({
 
   const handleEmbedConfirm = (kifu: KifuItem, move: number) => {
     insertFnRef.current?.(kifu.name, move);
+    setLastEmbedKifuName(kifu.name);
+    setLastEmbedMove(move);
     insertFnRef.current    = null;
     insertBODFnRef.current = null;
   };
@@ -47,6 +51,8 @@ export function ArticleBodyEditor({
     const kifu: KifuItem = { name, text: kifText };
     onKifuAdd?.(kifu);
     insertFnRef.current?.(name, totalMoves);
+    setLastEmbedKifuName(name);
+    setLastEmbedMove(totalMoves);
     insertFnRef.current    = null;
     insertBODFnRef.current = null;
   };
@@ -80,6 +86,8 @@ export function ArticleBodyEditor({
         onConfirm={handleEmbedConfirm}
         onConfirmBOD={handleEmbedConfirmBOD}
         onSaveAsKifu={handleSaveAsKifu}
+        initialKifuName={lastEmbedKifuName}
+        initialMove={lastEmbedMove}
       />
       <BoardEditorDialog
         open={showBoardEditorDialog}
