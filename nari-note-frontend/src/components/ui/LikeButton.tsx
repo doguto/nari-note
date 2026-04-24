@@ -1,4 +1,5 @@
 import { HeartIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface LikeButtonProps {
   isLiked: boolean;
@@ -15,13 +16,14 @@ interface LikeButtonProps {
  */
 export function LikeButton({ isLiked, likeCount, onClick, disabled = false }: LikeButtonProps) {
   return (
-    <button
+    <Button
+      variant="outline"
       onClick={onClick}
       disabled={disabled}
-      className="flex items-center px-4 py-2 border text-black bg-white border-gray-300 rounded hover:bg-gray-50"
+      className="h-auto px-4 py-2 text-black bg-white border-gray-300 hover:bg-gray-50"
     >
       <span>{isLiked ? <HeartIcon className="text-red-500" /> : <HeartIcon className="text-gray-400" />}</span>
       <span className="ml-1">{likeCount}</span>
-    </button>
+    </Button>
   );
 }

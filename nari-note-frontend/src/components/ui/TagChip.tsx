@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button';
+
 interface TagChipProps {
   tag: string;
   onRemove: (tag: string) => void;
@@ -12,14 +14,15 @@ export function TagChip({ tag, onRemove }: TagChipProps) {
   return (
     <span className="px-3 py-1 bg-[var(--brand-bg-light)] text-[var(--brand-text)] rounded-full text-sm flex items-center gap-2">
       #{tag}
-      <button
+      <Button
         type="button"
+        variant="ghost"
         onClick={() => onRemove(tag)}
-        className="text-red-500 hover:text-red-700"
+        className="h-auto w-auto p-0 text-red-500 hover:text-red-700 hover:bg-transparent"
         aria-label={`${tag}を削除`}
       >
         ×
-      </button>
+      </Button>
     </span>
   );
 }
