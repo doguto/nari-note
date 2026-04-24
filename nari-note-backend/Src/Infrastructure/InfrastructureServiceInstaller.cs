@@ -55,6 +55,7 @@ public static class InfrastructureServiceInstaller
         services.Configure<ResendClientOptions>(o => { o.ApiToken = configuration["resend_api_token"]!; });
         services.AddTransient<IResend, ResendClient>();
         services.AddScoped<IEmailHelper, ResendEmailHelper>();
+        services.AddHttpClient<IDiscordNotifier, DiscordWebhookNotifier>();
         if (env.IsDevelopment())
             services.AddScoped<IImageStorageGateway, LocalImageStorageGateway>();
         else
