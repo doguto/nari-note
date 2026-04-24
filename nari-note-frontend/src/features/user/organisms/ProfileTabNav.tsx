@@ -1,4 +1,5 @@
 import { ArticleList } from '@/components/organisms';
+import { Button } from '@/components/ui/button';
 import { UserFollowersList } from './UserFollowersList';
 import type { GetArticlesByAuthorResponse, GetLikedArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
@@ -58,60 +59,65 @@ export function ProfileTabNav({
           {tabContext === 'content' ? (
             <>
               {/* コンテンツタブ（記事/いいね/フォロー中のタグ） */}
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => onTabChange('articles')}
-                className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
+                className={`py-4 h-auto px-0 border-b-2 whitespace-nowrap flex-shrink-0 rounded-none hover:bg-transparent ${
                   activeTab === 'articles'
                     ? 'border-brand-primary text-brand-text font-medium'
                     : 'border-transparent text-gray-600 hover:text-brand-text'
                 }`}
               >
                 記事
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => onTabChange('likes')}
-                className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
+                className={`py-4 h-auto px-0 border-b-2 whitespace-nowrap flex-shrink-0 rounded-none hover:bg-transparent ${
                   activeTab === 'likes'
                     ? 'border-brand-primary text-brand-text font-medium'
                     : 'border-transparent text-gray-600 hover:text-brand-text'
                 }`}
               >
                 いいね
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => onTabChange('following-tags')}
-                className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
+                className={`py-4 h-auto px-0 border-b-2 whitespace-nowrap flex-shrink-0 rounded-none hover:bg-transparent ${
                   activeTab === 'following-tags'
                     ? 'border-brand-primary text-brand-text font-medium'
                     : 'border-transparent text-gray-600 hover:text-brand-text'
                 }`}
               >
                 フォロー中のタグ
-              </button>
+              </Button>
             </>
           ) : (
             <>
               {/* フォロータブ（フォロワー/フォロー中） */}
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => onTabChange('followers')}
-                className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
+                className={`py-4 h-auto px-0 border-b-2 whitespace-nowrap flex-shrink-0 rounded-none hover:bg-transparent ${
                   activeTab === 'followers'
                     ? 'border-brand-primary text-brand-text font-medium'
                     : 'border-transparent text-gray-600 hover:text-brand-text'
                 }`}
               >
                 フォロワー
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => onTabChange('followings')}
-                className={`py-4 border-b-2 whitespace-nowrap flex-shrink-0 ${
+                className={`py-4 h-auto px-0 border-b-2 whitespace-nowrap flex-shrink-0 rounded-none hover:bg-transparent ${
                   activeTab === 'followings'
                     ? 'border-brand-primary text-brand-text font-medium'
                     : 'border-transparent text-gray-600 hover:text-brand-text'
                 }`}
               >
                 フォロー中
-              </button>
+              </Button>
             </>
           )}
         </nav>

@@ -61,13 +61,14 @@ export function ProfileCard({
           )}
 
           <div className="flex flex-wrap gap-4 sm:gap-6 text-sm text-gray-600">
-            <button
+            <Button
+              variant="ghost"
               onClick={onArticlesClick}
-              className="hover:opacity-70 transition-opacity cursor-pointer"
+              className="h-auto p-0 hover:opacity-70 hover:bg-transparent transition-opacity cursor-pointer font-normal"
             >
               <span className="font-bold text-brand-text">{user.articleCount ?? 0}</span>
               <span className="ml-1">記事</span>
-            </button>
+            </Button>
             <FollowStats
               label="フォロワー"
               count={user.followerCount || 0}

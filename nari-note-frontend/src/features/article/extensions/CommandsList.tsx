@@ -1,6 +1,7 @@
 'use client';
 
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Command } from './SlashCommand';
 import {
   Heading1,
@@ -96,21 +97,22 @@ export const CommandsList = forwardRef<KeyDownHandler, CommandsListProps>((props
       {props.items.map((item, index) => {
         const Icon = iconMap[item.icon];
         return (
-          <button
+          <Button
             key={item.id}
+            variant="ghost"
             onClick={() => selectItem(index)}
-            className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${
+            className={`w-full h-auto flex items-start gap-3 px-4 py-3 justify-start transition-colors ${
               index === selectedIndex
-                ? 'bg-blue-50'
+                ? 'bg-blue-50 hover:bg-blue-50'
                 : 'hover:bg-gray-50'
             }`}
           >
             {Icon && <Icon className="w-5 h-5 mt-0.5 flex-shrink-0 text-gray-600" />}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 text-left">
               <div className="font-medium text-gray-900">{item.title}</div>
               <div className="text-sm text-gray-500 truncate">{item.description}</div>
             </div>
-          </button>
+          </Button>
         );
       })}
     </div>

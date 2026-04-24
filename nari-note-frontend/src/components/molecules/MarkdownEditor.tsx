@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { CharacterCounter, NarinoteMarkdown } from '@/components/molecules';
 import { CheckCircle } from 'lucide-react';
 
@@ -278,24 +279,26 @@ export function MarkdownEditor({
 
       {/* Mobile preview toggle */}
       <div className="flex md:hidden border border-gray-200 rounded-lg overflow-hidden mb-2">
-        <button
+        <Button
           type="button"
+          variant="ghost"
           onClick={() => setMobileShowPreview(false)}
-          className={`flex-1 py-2 text-sm font-medium transition-colors ${
-            !mobileShowPreview ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+          className={`flex-1 py-2 h-auto rounded-none text-sm font-medium transition-colors ${
+            !mobileShowPreview ? 'bg-blue-500 text-white hover:bg-blue-500 hover:text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
           }`}
         >
           エディタ
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
           onClick={() => setMobileShowPreview(true)}
-          className={`flex-1 py-2 text-sm font-medium transition-colors ${
-            mobileShowPreview ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+          className={`flex-1 py-2 h-auto rounded-none text-sm font-medium transition-colors ${
+            mobileShowPreview ? 'bg-blue-500 text-white hover:bg-blue-500 hover:text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
           }`}
         >
           プレビュー
-        </button>
+        </Button>
       </div>
 
       <div className="md:grid md:grid-cols-2 md:gap-4 md:items-stretch">
@@ -325,17 +328,18 @@ export function MarkdownEditor({
               }}
             >
               {filteredCommands.map((cmd, index) => (
-                <button
+                <Button
                   key={cmd.trigger}
                   type="button"
+                  variant="ghost"
                   onClick={() => insertCommand(cmd)}
-                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors ${
-                    index === selectedCommandIndex ? 'bg-blue-50' : ''
+                  className={`w-full h-auto text-left px-4 py-2 justify-start transition-colors ${
+                    index === selectedCommandIndex ? 'bg-blue-50 hover:bg-blue-50' : 'hover:bg-gray-100'
                   }`}
                 >
                   <div className="font-medium text-sm">{cmd.label}</div>
                   <div className="text-xs text-gray-500">{cmd.description}</div>
-                </button>
+                </Button>
               ))}
             </div>
           )}

@@ -62,20 +62,21 @@ export function BoardEditorDialog({ open, onOpenChange, onConfirm }: BoardEditor
       <div className="flex flex-wrap gap-1" onClick={e => e.stopPropagation()}>
         {pieces.length === 0 && <span className="text-xs text-gray-400">なし</span>}
         {pieces.map(({ type, count }: { type: PieceType; count: number }) => (
-          <button
+          <Button
             key={type}
             type="button"
+            variant="outline"
             onClick={() => handleHandClick(owner, type)}
             className={cn(
-              'flex items-center gap-0.5 px-1.5 py-0.5 rounded text-sm font-serif border transition-colors',
+              'h-auto px-1.5 py-0.5 gap-0.5 font-serif',
               isSelectedHand(owner, type)
-                ? 'bg-yellow-200 border-yellow-500 ring-1 ring-yellow-400'
+                ? 'bg-yellow-200 border-yellow-500 ring-1 ring-yellow-400 hover:bg-yellow-200'
                 : 'bg-white border-gray-300 hover:bg-gray-100',
             )}
           >
             <span className={cn(owner === 'gote' && 'rotate-180 inline-block')}>{type}</span>
             {count > 1 && <span className="text-xs text-gray-600 ml-0.5">{count}</span>}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
