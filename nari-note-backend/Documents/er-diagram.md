@@ -5,10 +5,9 @@
 ```mermaid
 erDiagram
 
-User ||--o{ Session: "has many"
-
 User ||--o{ Article: "has many"
 Article ||--o{ ArticleTag: "has many"
+Article ||--o{ Kifu: "has_many"
 Tag ||--o{ ArticleTag: "1:n"
 
 User ||--o{ Course: "has many"
@@ -39,17 +38,8 @@ User {
     updated_at datetime
 }
 
-Session {
-    id integer PK
-    user_id integer FK
-    session_key varchar(255)
-    expires_at datetime
-    created_at datetime
-    updated_at datetime
-}
-
 Article {
-    id integer PK
+    id uuid PK
     author_id integer FK
     course_id integer FK "nullable"
     article_order integer "nullable"
@@ -61,7 +51,7 @@ Article {
 }
 
 Tag {
-    id integer PK
+    id uuid PK
     name varchar(50)
     created_at datetime
     updated_at datetime
@@ -76,7 +66,7 @@ ArticleTag {
 }
 
 Course {
-    id integer PK
+    id uuid PK
     user_id integer FK
     name varchar(100)
     created_at datetime
@@ -89,6 +79,12 @@ CourseLike {
     course_id integer FK
     created_at datetime
     updated_at datetime
+}
+
+Kifu {
+    id integer PK
+    article_id FK
+    kifu_text text
 }
 
 Like {
