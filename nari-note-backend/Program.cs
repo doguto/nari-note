@@ -76,11 +76,14 @@ app.UseCors();
 // SerilogによるAPIリクエストのログ出力を設定
 app.UseSerilogRequestLogging();
 
-// グローバル例外ハンドラーを最初に登録（重要）
+// グローバル例外ハンドラーを最初に登録
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 // JWT認証ミドルウェアを登録
 app.UseMiddleware<JwtAuthenticationMiddleware>();
+
+// 書き込みリクエストのDBトランザクション管理
+app.UseMiddleware<TransactionMiddleware>();
 
 app.UseHttpsRedirection();
 
