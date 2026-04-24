@@ -11,16 +11,19 @@ public class SignUpService
     readonly IEmailHelper emailHelper;
     readonly IEmailVerificationRepository emailVerificationRepository;
     readonly IUserRepository userRepository;
+    readonly IDiscordNotifier discordNotifier;
 
     public SignUpService(
         IUserRepository userRepository,
         IEmailVerificationRepository emailVerificationRepository,
-        IEmailHelper emailHelper
+        IEmailHelper emailHelper,
+        IDiscordNotifier discordNotifier
     )
     {
         this.userRepository = userRepository;
         this.emailVerificationRepository = emailVerificationRepository;
         this.emailHelper = emailHelper;
+        this.discordNotifier = discordNotifier;
     }
 
     public async Task<AuthResponse> ExecuteAsync(SignUpRequest request)
@@ -49,6 +52,19 @@ public class SignUpService
         await emailVerificationRepository.CreateAsync(emailVerification);
 
         await emailHelper.SendAsync(EmailMessageStore.SignupMessage(request.Email, guid));
+
+        await discordNotifier.NotifyWithEmbedAsync(new DiscordEmbed
+        {
+            Title = "新規ユーザー登録",
+            Description = "新しいユーザーが nari-note に登録しました！",
+            Color = 0x57F287,
+            Timestamp = DateTime.UtcNow.ToString("o"),
+            Fields =
+            [
+                new DiscordEmbedField("名前", createdUser.Name, Inline: true)
+            ],
+            Footer = new DiscordEmbedFooter("nari-note")
+        });
 
         return new AuthResponse
         {
