@@ -52,8 +52,8 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
       setIsPublishing(false);
     },
     onError: (error) => {
-      console.error('記事の投稿に失敗しました:', error);
-      setValidationError('記事の投稿に失敗しました。もう一度お試しください。');
+      console.error('記事の保存に失敗しました:', error);
+      setValidationError('記事の保存に失敗しました。もう一度お試しください。');
       setIsPublishing(false);
     },
   });
@@ -65,8 +65,8 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
       setIsPublishing(false);
     },
     onError: (error) => {
-      console.error('記事の更新に失敗しました:', error);
-      setValidationError('記事の更新に失敗しました。もう一度お試しください。');
+      console.error('記事の保存に失敗しました:', error);
+      setValidationError('記事の保存に失敗しました。もう一度お試しください。');
       setIsPublishing(false);
     },
   });
