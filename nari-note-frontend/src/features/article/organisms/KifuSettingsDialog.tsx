@@ -9,11 +9,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { KifPlayer } from '@/lib/kif-player';
+import { useFreePlayRecorder } from '@/lib/kif-player';
+import { INITIAL_BOARD } from '@/lib/kif-player/constants';
+import { KifuTextInput } from './KifuTextInput';
+import { KifuBoardCreator } from './KifuBoardCreator';
 import type { KifuItem } from '../types/kifu';
 
 interface KifuSettingsDialogProps {
@@ -33,28 +36,34 @@ export function KifuSettingsDialog({
 }: KifuSettingsDialogProps) {
   const [name, setName] = useState('');
   const [kifuText, setKifuText] = useState('');
-  const [showPreview, setShowPreview] = useState(false);
+  const [mode, setMode] = useState<'text' | 'editor'>('text');
+
+  const recorder = useFreePlayRecorder();
 
   useEffect(() => {
     if (open) {
       setName(initialKifu?.name ?? '');
       setKifuText(initialKifu?.text ?? '');
-      setShowPreview(false);
+      setMode('text');
+      recorder.initializeBoard(INITIAL_BOARD, [], []);
     }
+  // initializeBoard is stable (useCallback with [] deps)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialKifu]);
 
   const handleConfirm = () => {
-    onConfirm({ name: name.trim() || defaultName, text: kifuText });
+    const text = mode === 'editor' ? recorder.generateKIF('', 0) : kifuText;
+    onConfirm({ name: name.trim() || defaultName, text });
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-2xl">
+      <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>棋譜を設定</DialogTitle>
           <DialogDescription>
-            KIF形式の棋譜テキストを入力してください
+            KIF形式のテキストを入力するか、盤面エディターで棋譜を作成してください
           </DialogDescription>
         </DialogHeader>
 
@@ -69,38 +78,20 @@ export function KifuSettingsDialog({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="kifu-text">棋譜テキスト（KIF形式）</Label>
-            <Textarea
-              id="kifu-text"
-              value={kifuText}
-              onChange={(e) => {
-                setKifuText(e.target.value);
-                setShowPreview(false);
-              }}
-              placeholder="棋譜をここに貼り付けてください..."
-              className="min-h-[200px] font-mono text-sm"
-            />
-          </div>
+          <Tabs value={mode} onValueChange={(v) => setMode(v as 'text' | 'editor')}>
+            <TabsList>
+              <TabsTrigger value="text">テキスト入力</TabsTrigger>
+              <TabsTrigger value="editor">新規作成</TabsTrigger>
+            </TabsList>
 
-          {kifuText.trim() && (
-            <div className="space-y-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPreview((v) => !v)}
-              >
-                {showPreview ? 'プレビューを閉じる' : 'プレビューを表示'}
-              </Button>
+            <TabsContent value="text">
+              <KifuTextInput kifuText={kifuText} onChange={setKifuText} />
+            </TabsContent>
 
-              {showPreview && (
-                <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
-                  <KifPlayer kifText={kifuText} size="sm" />
-                </div>
-              )}
-            </div>
-          )}
+            <TabsContent value="editor">
+              <KifuBoardCreator recorder={recorder} />
+            </TabsContent>
+          </Tabs>
         </div>
 
         <DialogFooter>
