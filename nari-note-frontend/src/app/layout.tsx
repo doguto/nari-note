@@ -15,20 +15,20 @@ export const metadata: Metadata = {
     default: "将棋ブログ投稿サイト ～なりノート～",
     template: "%s | なりノート",
   },
-  description: "将棋の知識共有プラットフォーム。あなたの将棋の知識を共有し、コミュニティと共に成長しましょう。",
+  description: "将棋の記事投稿プラットフォーム。みんなの記事を読んで、将棋の知識を深めよう！",
   openGraph: {
     type: "website",
     locale: "ja_JP",
     url: siteUrl,
     siteName: "なりノート",
     title: "将棋ブログ投稿サイト ～なりノート～",
-    description: "将棋の知識共有プラットフォーム。あなたの将棋の知識を共有し、コミュニティと共に成長しましょう。",
+    description: "将棋の記事投稿プラットフォーム。みんなの記事を読んで、将棋の知識を深めよう！",
     images: [{ url: "/narinote_background.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "将棋ブログ投稿サイト ～なりノート～",
-    description: "将棋の知識共有プラットフォーム。あなたの将棋の知識を共有し、コミュニティと共に成長しましょう。",
+    description: "将棋の記事投稿プラットフォーム。みんなの記事を読んで、将棋の知識を深めよう！",
     images: ["/narinote_background.png"],
   },
   robots: {
