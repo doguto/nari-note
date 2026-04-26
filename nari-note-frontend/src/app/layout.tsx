@@ -23,11 +23,13 @@ export const metadata: Metadata = {
     siteName: "なりノート",
     title: "将棋ブログ投稿サイト ～なりノート～",
     description: "将棋の知識共有プラットフォーム。あなたの将棋の知識を共有し、コミュニティと共に成長しましょう。",
+    images: [{ url: "/narinote_background.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "将棋ブログ投稿サイト ～なりノート～",
     description: "将棋の知識共有プラットフォーム。あなたの将棋の知識を共有し、コミュニティと共に成長しましょう。",
+    images: ["/narinote_background.png"],
   },
   robots: {
     index: true,
