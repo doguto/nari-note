@@ -22,14 +22,12 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "なりノート",
     title: "将棋ブログ投稿サイト ～なりノート～",
-    description: "将棋の記事投稿プラットフォーム。みんなの記事を読んで、将棋の知識を深めよう！",
-    images: [{ url: "/narinote_background.png" }],
+    description: "将棋の記事投稿プラットフォーム。みんなの記事を読んで、将棋の知識を深めよう！"
   },
   twitter: {
     card: "summary_large_image",
     title: "将棋ブログ投稿サイト ～なりノート～",
-    description: "将棋の記事投稿プラットフォーム。みんなの記事を読んで、将棋の知識を深めよう！",
-    images: ["/narinote_background.png"],
+    description: "将棋の記事投稿プラットフォーム。みんなの記事を読んで、将棋の知識を深めよう！"
   },
   robots: {
     index: true,
