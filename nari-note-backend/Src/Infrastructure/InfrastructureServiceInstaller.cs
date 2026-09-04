@@ -29,7 +29,10 @@ public static class InfrastructureServiceInstaller
             $"Username={configuration["username"]};" +
             $"Password={configuration["password"]}";
         services.AddDbContext<NariNoteDbContext>(
-            options => options.UseNpgsql(connectionString)
+            options => options.UseNpgsql(
+                connectionString,
+                npgsqlOptions => npgsqlOptions.EnableRetryOnFailure() // 30s 待機のリトライを最大 6 回
+            )
         );
 
         // Register repositories
