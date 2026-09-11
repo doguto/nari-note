@@ -12,11 +12,18 @@ function getBaseUrl(): string {
  * サーバーサイド用のfetch関数（共通処理）
  */
 async function serverFetch<T>(url: string): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  const internalApiKey = getEnv('INTERNAL_API_KEY');
+  if (internalApiKey) {
+    headers['X-Narinote-Kf'] = internalApiKey;
+  }
+
   const response = await fetch(url, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     cache: 'no-store', // Next.js: 常に最新のデータを取得
   });
 
