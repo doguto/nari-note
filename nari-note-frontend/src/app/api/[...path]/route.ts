@@ -18,6 +18,11 @@ async function proxyRequest(
   const headers = new Headers(request.headers);
   headers.delete('host');
 
+  const internalApiKey = getEnv('INTERNAL_API_KEY');
+  if (internalApiKey) {
+    headers.set('X-Narinote-Kf', internalApiKey);
+  }
+
   const init: RequestInit = {
     method: request.method,
     headers,
