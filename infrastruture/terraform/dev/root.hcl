@@ -1,12 +1,12 @@
 locals {
   aws_region   = "ap-northeast-1"
-  app_name     = "nari-note"
+  app_name     = "nari-note-dev"
   s3_bucket    = "nari-note-terraform"
   state_prefix = "nari-note-app"
 
   template_dir = "${get_repo_root()}/infrastruture/terraform/terragrunt-template"
 
-  env_name = "prod"
+  env_name = "dev"
 }
 
 remote_state {

@@ -9,3 +9,9 @@ variable "public_key_path" {
   type        = string
   default     = "~/.ssh/nari-note.pub"
 }
+
+variable "postgres_data_volume_size" {
+  description = "Size in GB of the EBS volume used for the PostgreSQL data directory"
+  type        = number
+  default     = 20
+}

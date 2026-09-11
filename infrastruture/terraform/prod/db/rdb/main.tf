@@ -73,26 +73,6 @@ resource "aws_db_subnet_group" "main" {
   }
 }
 
-resource "aws_ssm_parameter" "db_host" {
-  name  = "/${var.app_name}/db/host"
-  type  = "SecureString"
-  value = aws_db_instance.main.address
-
-  tags = {
-    Name = "${var.app_name}-db-host"
-  }
-}
-
-resource "aws_ssm_parameter" "db_name" {
-  name  = "/${var.app_name}/db/name"
-  type  = "SecureString"
-  value = aws_db_instance.main.db_name
-
-  tags = {
-    Name = "${var.app_name}-db-name"
-  }
-}
-
 resource "aws_security_group" "rdb" {
   name        = "${var.app_name}-rdb-sg"
   description = "Security group for RDS PostgreSQL"
