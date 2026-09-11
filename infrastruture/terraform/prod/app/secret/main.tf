@@ -45,3 +45,9 @@ resource "aws_ssm_parameter" "discord_general_webhook_url" {
   type  = "SecureString"
   value = var.discord_general_webhook_url
 }
+
+resource "aws_ssm_parameter" "internal_api_key" {
+  name  = "/${var.app_name}/nginx/internal-api-key"
+  type  = "SecureString"
+  value = var.internal_api_key
+}

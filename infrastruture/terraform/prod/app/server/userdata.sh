@@ -34,6 +34,16 @@ aws ssm get-parameter \
 
 chmod 600 /etc/nginx/ssl/cloudflare-origin.key
 
+# フロントエンドプロキシ検証用の共有シークレットを SSM から取得し、nginx 設定へ埋め込む
+INTERNAL_API_KEY=$(aws ssm get-parameter \
+  --name "/${app_name}/nginx/internal-api-key" \
+  --with-decryption \
+  --query "Parameter.Value" \
+  --output text \
+  --region ap-northeast-1)
+
+sed -i "s|__INTERNAL_API_KEY__|$${INTERNAL_API_KEY}|" /etc/nginx/conf.d/nari-note-backend.conf
+
 # nginx の自動起動を有効化&起動
 systemctl enable --now nginx
 

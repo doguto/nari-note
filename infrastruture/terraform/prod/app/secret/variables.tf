@@ -45,3 +45,9 @@ variable "discord_general_webhook_url" {
   type        = string
   sensitive   = true
 }
+
+variable "internal_api_key" {
+  description = "Shared secret for validating requests forwarded from the frontend proxy (X-Narinote-Kf header)"
+  type        = string
+  sensitive   = true
+}
