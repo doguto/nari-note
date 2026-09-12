@@ -62,16 +62,13 @@ EOF
 
 
 # == PostgreSQL ==
-# NOTE: パッケージ名・systemdユニット名は Amazon Linux 2023 のリポジトリ内容に依存するため、
-# 実際の apply 時に想定通りかを確認すること (現状 postgresql17 / postgresql17-server を想定)
 dnf install -y postgresql17 postgresql17-server
 
 PGDATA="/data/postgresql"
 
 # PostgreSQL データ用の EBS ボリュームを特定し、未フォーマットなら初期化してマウントする
 # (インスタンスの user_data 変更による再作成時にもデータを失わないよう、ルートボリュームとは独立させている)
-# NOTE: ルートボリュームも /dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_* にマッチするため、
-# ワイルドカードではなく Terraform から渡した実際のボリュームIDで一意に特定する
+# NOTE: ルートボリュームも /dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_* にマッチするため、ワイルドカードではなく Terraform から渡した実際のボリュームIDで一意に特定する
 DEVICE="/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_${postgres_volume_id}"
 if [ ! -e "$${DEVICE}" ]; then
   echo "PostgreSQL data volume (EBS) not found: $${DEVICE}" >&2
