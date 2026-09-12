@@ -13,15 +13,18 @@ if [[ -f "${ENV_FILE}" ]]; then
   source "${ENV_FILE}"
 fi
 
-S3_BUCKET="nari-note-deploy"
+S3_BUCKET="${S3_BUCKET:-nari-note-deploy}"
 AWS_REGION="ap-northeast-1"
-AWS_VAULT_PROFILE="narinote"
+AWS_VAULT_PROFILE="${AWS_VAULT_PROFILE:-narinote}"
 RUNTIME="linux-x64"
 BINARY_NAME="nari-note-backend"
 
 EC2_USER="ec2-user"
 EC2_HOST="${EC2_HOST:?EC2_HOST が未設定やわ。例: EC2_HOST=1.2.3.4 ./scripts/deploy.sh}"
 SSH_KEY="${SSH_KEY:-${HOME}/.ssh/nari-note}"
+
+# インスタンス再作成でホストキーが変わっていても弾かれないよう、古いエントリを事前に掃除する
+ssh-keygen -R "${EC2_HOST}" >/dev/null 2>&1 || true
 
 # S3 キーにコミットハッシュと日時を含めてトレーサビリティを確保
 GIT_SHA=$(git -C "${REPO_ROOT}" rev-parse --short HEAD 2>/dev/null || echo "unknown")

@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Middleware;

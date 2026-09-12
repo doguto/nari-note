@@ -1,6 +1,17 @@
 locals {
-  vpc_id            = data.terraform_remote_state.vpc.outputs.vpc_id
-  public_subnet_ids = data.terraform_remote_state.vpc.outputs.public_subnet_ids
+  vpc_id                       = data.terraform_remote_state.vpc.outputs.vpc_id
+  public_subnet_ids            = data.terraform_remote_state.vpc.outputs.public_subnet_ids
+  app_server_availability_zone = data.aws_subnet.app_server.availability_zone
+}
+
+resource "aws_ebs_volume" "postgres_data" {
+  availability_zone = local.app_server_availability_zone
+  size              = var.postgres_data_volume_size
+  type              = "gp3"
+
+  tags = {
+    Name = "${var.app_name}-postgres-data"
+  }
 }
 
 resource "aws_instance" "app_server" {
@@ -16,16 +27,23 @@ resource "aws_instance" "app_server" {
   iam_instance_profile = aws_iam_instance_profile.app_server.name
 
   user_data = templatefile("${path.module}/userdata.sh", {
-    service_file       = file("${path.module}/nari-note-backend.service")
+    service_file       = templatefile("${path.module}/nari-note-backend.service", { app_name = var.app_name })
     nginx_conf_file    = file("${path.module}/nari-note-backend.nginx.conf")
     cloudwatch_conf    = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
     app_name           = var.app_name
+    postgres_volume_id = replace(aws_ebs_volume.postgres_data.id, "-", "")
   })
   user_data_replace_on_change = true
 
   tags = {
     Name = "${var.app_name}-app-server"
   }
+}
+
+resource "aws_volume_attachment" "postgres_data" {
+  device_name = "/dev/sdf"
+  volume_id   = aws_ebs_volume.postgres_data.id
+  instance_id = aws_instance.app_server.id
 }
 
 resource "aws_security_group" "app_server" {

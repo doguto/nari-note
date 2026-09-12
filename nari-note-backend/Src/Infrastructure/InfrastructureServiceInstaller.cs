@@ -28,11 +28,11 @@ public static class InfrastructureServiceInstaller
             $"Database={configuration["name"]};" +
             $"Username={configuration["username"]};" +
             $"Password={configuration["password"]}";
+        // TransactionMiddleware がリクエスト全体（副作用を含むコントローラー処理）を
+        // トランザクション単位にしているため、EnableRetryOnFailure は使用しない
+        // （リトライ戦略は再実行対象にDB操作以外の副作用が含まれないことが前提のため）
         services.AddDbContext<NariNoteDbContext>(
-            options => options.UseNpgsql(
-                connectionString,
-                npgsqlOptions => npgsqlOptions.EnableRetryOnFailure() // 30s 待機のリトライを最大 6 回
-            )
+            options => options.UseNpgsql(connectionString)
         );
 
         // Register repositories
