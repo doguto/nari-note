@@ -21,24 +21,18 @@ public class TransactionMiddleware
             return;
         }
 
-        // EnableRetryOnFailure() のリトライ実行戦略はユーザー主導のトランザクションと併用できないため、
-        // CreateExecutionStrategy() 経由でリトライ単位ごとトランザクションを実行する
-        var strategy = dbContext.Database.CreateExecutionStrategy();
-        await strategy.ExecuteAsync(async () =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
+        try
         {
-            await using var transaction = await dbContext.Database.BeginTransactionAsync();
-            try
-            {
-                await next(httpContext);
-                await transaction.CommitAsync();
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
+            await next(httpContext);
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
 
-                // Error は別 Middleware で catch し一元管理するので、そのまま throw する
-                throw;
-            }
-        });
+            // Error は別 Middleware で catch し一元管理するので、そのまま throw する
+            throw;
+        }
     }
 }

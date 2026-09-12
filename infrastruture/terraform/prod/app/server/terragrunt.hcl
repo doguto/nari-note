@@ -8,6 +8,7 @@ dependencies {
     "../../network/gateway",
     "../../deploy/bucket",
     "../secret",
+    "../../db/secret",
     "../../image_delivery/storage"
   ]
 }
