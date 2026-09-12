@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Middleware;
@@ -19,18 +21,24 @@ public class TransactionMiddleware
             return;
         }
 
-        await using var transaction = await dbContext.Database.BeginTransactionAsync();
-        try
+        // EnableRetryOnFailure() のリトライ実行戦略はユーザー主導のトランザクションと併用できないため、
+        // CreateExecutionStrategy() 経由でリトライ単位ごとトランザクションを実行する
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
-            await next(httpContext);
-            await transaction.CommitAsync();
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
+            await using var transaction = await dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                await next(httpContext);
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
 
-            // Error は別 Middleware で catch し一元管理するので、そのまま throw する
-            throw;
-        }
+                // Error は別 Middleware で catch し一元管理するので、そのまま throw する
+                throw;
+            }
+        });
     }
 }

@@ -70,9 +70,11 @@ PGDATA="/data/postgresql"
 
 # PostgreSQL データ用の EBS ボリュームを特定し、未フォーマットなら初期化してマウントする
 # (インスタンスの user_data 変更による再作成時にもデータを失わないよう、ルートボリュームとは独立させている)
-DEVICE=$(readlink -f /dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_* 2>/dev/null | head -n1)
-if [ -z "$${DEVICE}" ]; then
-  echo "PostgreSQL data volume (EBS) not found" >&2
+# NOTE: ルートボリュームも /dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_* にマッチするため、
+# ワイルドカードではなく Terraform から渡した実際のボリュームIDで一意に特定する
+DEVICE="/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_${postgres_volume_id}"
+if [ ! -e "$${DEVICE}" ]; then
+  echo "PostgreSQL data volume (EBS) not found: $${DEVICE}" >&2
   exit 1
 fi
 
@@ -80,10 +82,15 @@ mkdir -p "$${PGDATA}"
 
 if ! blkid "$${DEVICE}" >/dev/null 2>&1; then
   mkfs.xfs "$${DEVICE}"
+  udevadm settle
 fi
 
 VOLUME_UUID=$(blkid -s UUID -o value "$${DEVICE}")
-grep -q "$${VOLUME_UUID}" /etc/fstab || echo "UUID=$${VOLUME_UUID} $${PGDATA} xfs defaults,nofail 0 2" >> /etc/fstab
+if [ -z "$${VOLUME_UUID}" ]; then
+  echo "Failed to read UUID for $${DEVICE}" >&2
+  exit 1
+fi
+grep -q "UUID=$${VOLUME_UUID} " /etc/fstab || echo "UUID=$${VOLUME_UUID} $${PGDATA} xfs defaults,nofail 0 2" >> /etc/fstab
 
 mountpoint -q "$${PGDATA}" || mount "$${PGDATA}"
 

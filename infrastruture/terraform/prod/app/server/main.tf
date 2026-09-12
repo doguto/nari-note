@@ -3,6 +3,20 @@ locals {
   public_subnet_ids = data.terraform_remote_state.vpc.outputs.public_subnet_ids
 }
 
+data "aws_subnet" "app_server" {
+  id = local.public_subnet_ids[0]
+}
+
+resource "aws_ebs_volume" "postgres_data" {
+  availability_zone = data.aws_subnet.app_server.availability_zone
+  size              = var.postgres_data_volume_size
+  type              = "gp3"
+
+  tags = {
+    Name = "${var.app_name}-postgres-data"
+  }
+}
+
 resource "aws_instance" "app_server" {
   ami                    = data.aws_ami.amazon_linux_2023.id
   instance_type          = var.instance_type
@@ -16,25 +30,16 @@ resource "aws_instance" "app_server" {
   iam_instance_profile = aws_iam_instance_profile.app_server.name
 
   user_data = templatefile("${path.module}/userdata.sh", {
-    service_file    = templatefile("${path.module}/nari-note-backend.service", { app_name = var.app_name })
-    nginx_conf_file = file("${path.module}/nari-note-backend.nginx.conf")
-    cloudwatch_conf = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
-    app_name        = var.app_name
+    service_file       = templatefile("${path.module}/nari-note-backend.service", { app_name = var.app_name })
+    nginx_conf_file    = file("${path.module}/nari-note-backend.nginx.conf")
+    cloudwatch_conf    = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
+    app_name           = var.app_name
+    postgres_volume_id = replace(aws_ebs_volume.postgres_data.id, "-", "")
   })
   user_data_replace_on_change = true
 
   tags = {
     Name = "${var.app_name}-app-server"
-  }
-}
-
-resource "aws_ebs_volume" "postgres_data" {
-  availability_zone = aws_instance.app_server.availability_zone
-  size              = var.postgres_data_volume_size
-  type              = "gp3"
-
-  tags = {
-    Name = "${var.app_name}-postgres-data"
   }
 }
 
