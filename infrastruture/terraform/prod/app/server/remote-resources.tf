@@ -39,3 +39,7 @@ data "aws_ami" "amazon_linux_2023" {
     values = ["x86_64"]
   }
 }
+
+data "aws_subnet" "app_server" {
+  id = local.public_subnet_ids[0]
+}

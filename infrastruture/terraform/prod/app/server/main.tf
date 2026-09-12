@@ -1,14 +1,11 @@
 locals {
-  vpc_id            = data.terraform_remote_state.vpc.outputs.vpc_id
-  public_subnet_ids = data.terraform_remote_state.vpc.outputs.public_subnet_ids
-}
-
-data "aws_subnet" "app_server" {
-  id = local.public_subnet_ids[0]
+  vpc_id                       = data.terraform_remote_state.vpc.outputs.vpc_id
+  public_subnet_ids            = data.terraform_remote_state.vpc.outputs.public_subnet_ids
+  app_server_availability_zone = data.aws_subnet.app_server.availability_zone
 }
 
 resource "aws_ebs_volume" "postgres_data" {
-  availability_zone = data.aws_subnet.app_server.availability_zone
+  availability_zone = local.app_server_availability_zone
   size              = var.postgres_data_volume_size
   type              = "gp3"
 
