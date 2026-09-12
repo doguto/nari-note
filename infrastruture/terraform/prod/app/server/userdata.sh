@@ -63,8 +63,8 @@ EOF
 
 # == PostgreSQL ==
 # NOTE: パッケージ名・systemdユニット名は Amazon Linux 2023 のリポジトリ内容に依存するため、
-# 実際の apply 時に想定通りかを確認すること (現状 postgresql16 / postgresql16-server を想定)
-dnf install -y postgresql16 postgresql16-server
+# 実際の apply 時に想定通りかを確認すること (現状 postgresql17 / postgresql17-server を想定)
+dnf install -y postgresql17 postgresql17-server
 
 PGDATA="/data/postgresql"
 
@@ -142,7 +142,7 @@ dnf install -y aspnetcore-runtime-9.0
 
 # S3 からバイナリを取得
 APP_NAME="nari-note-backend"
-S3_BUCKET="nari-note-deploy"
+S3_BUCKET="${app_name}-deploy"
 AWS_REGION="ap-northeast-1"
 INSTALL_DIR="/opt/$${APP_NAME}"
 

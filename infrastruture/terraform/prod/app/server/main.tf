@@ -16,7 +16,7 @@ resource "aws_instance" "app_server" {
   iam_instance_profile = aws_iam_instance_profile.app_server.name
 
   user_data = templatefile("${path.module}/userdata.sh", {
-    service_file    = file("${path.module}/nari-note-backend.service")
+    service_file    = templatefile("${path.module}/nari-note-backend.service", { app_name = var.app_name })
     nginx_conf_file = file("${path.module}/nari-note-backend.nginx.conf")
     cloudwatch_conf = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
     app_name        = var.app_name
