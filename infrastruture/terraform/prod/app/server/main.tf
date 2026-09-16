@@ -26,6 +26,12 @@ resource "aws_instance" "app_server" {
   # EC2 への IAM ロールの割り当て
   iam_instance_profile = aws_iam_instance_profile.app_server.name
 
+  # AMI のデフォルト(2GiB)だと dnf キャッシュ等ですぐ埋まるため拡張
+  root_block_device {
+    volume_size = 4
+    volume_type = "gp3"
+  }
+
   user_data = templatefile("${path.module}/userdata.sh", {
     service_file       = templatefile("${path.module}/nari-note-backend.service", { app_name = var.app_name })
     nginx_conf_file    = file("${path.module}/nari-note-backend.nginx.conf")
