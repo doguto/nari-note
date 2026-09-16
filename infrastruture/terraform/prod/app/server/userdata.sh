@@ -173,3 +173,6 @@ EOF
 
 systemctl daemon-reload
 systemctl enable --now "$${APP_NAME}"
+
+# dnf のパッケージキャッシュを削除しディスク容量を回収する
+dnf clean all
