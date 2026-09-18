@@ -1,3 +1,4 @@
+import { Koma } from '@/types/koma';
 import type { BoardState, Piece, PieceType } from '../types';
 
 const s = (type: Piece['type']): Piece => ({ type, owner: 'sente' });
@@ -62,3 +63,22 @@ export const KANJI_NUMBER_MAP: Record<string, number> = {
 };
 
 export const EMPTY_SQUARE = '・';
+
+// 駒種（漢字表記） → public/koma 配下のpngファイル名（拡張子なし）
+export const KOMA_IMAGE_MAP: Record<PieceType, string> = {
+  '玉': Koma.Gyoku,
+  '王': Koma.Ou,
+  '飛': Koma.Hisha,
+  '角': Koma.Kaku,
+  '金': Koma.Kin,
+  '銀': Koma.Gin,
+  '桂': Koma.Keima,
+  '香': Koma.Kyousha,
+  '歩': Koma.Hu,
+  '龍': Koma.Ryu,
+  '馬': Koma.Uma,
+  '成銀': Koma.Narigin,
+  '成桂': Koma.Narikei,
+  '成香': Koma.Narikyousha,
+  'と': Koma.ToKin,
+};

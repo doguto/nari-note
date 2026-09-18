@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import type { CapturedPiece, PieceOwner, BoardSize, PieceType } from '../types';
+import { KomaImage } from './KomaImage';
 
 interface CapturedPiecesProps {
   pieces: CapturedPiece[];
@@ -13,11 +14,11 @@ interface CapturedPiecesProps {
   onHandZoneClick?: (owner: PieceOwner) => void;
 }
 
-function getSizeClass(size: BoardSize = 'md'): string {
+function getSizeClasses(size: BoardSize = 'md') {
   switch (size) {
-    case 'sm': return 'text-xs';
-    case 'lg': return 'text-lg';
-    default:   return 'text-sm';
+    case 'sm': return { text: 'text-xs', pieceSize: 18 };
+    case 'lg': return { text: 'text-lg', pieceSize: 28 };
+    default:   return { text: 'text-sm', pieceSize: 22 };
   }
 }
 
@@ -25,13 +26,13 @@ export function CapturedPieces({
   pieces, owner, playerName, size = 'md',
   onPieceClick, isSelected, onHandZoneClick,
 }: CapturedPiecesProps) {
-  const sizeClass = getSizeClass(size);
+  const { text, pieceSize } = getSizeClasses(size);
   const displayName = playerName || (owner === 'sente' ? '先手' : '後手');
   const interactive = !!onPieceClick;
 
   return (
     <div
-      className={cn('flex items-center gap-2 py-2 font-serif', sizeClass)}
+      className={cn('flex items-center gap-2 py-2 font-serif', text)}
       onClick={() => onHandZoneClick?.(owner)}
     >
       <span className="font-bold text-black">{displayName}の持駒：</span>
@@ -45,7 +46,7 @@ export function CapturedPieces({
               <span
                 key={index}
                 className={cn(
-                  'text-black',
+                  'inline-flex items-center',
                   interactive && 'cursor-pointer rounded px-0.5',
                   sel && 'bg-yellow-300',
                 )}
@@ -55,7 +56,7 @@ export function CapturedPieces({
                   onPieceClick!(owner, piece.type);
                 }}
               >
-                {piece.type}
+                <KomaImage type={piece.type} owner={owner} size={pieceSize} rotate={false} />
                 {piece.count > 1 && <span className="ml-0.5 text-gray-600">×{piece.count}</span>}
               </span>
             );
