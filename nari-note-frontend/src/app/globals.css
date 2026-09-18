@@ -33,6 +33,9 @@
   --color-brand-bg-gradient-to: #e8e4d0;
   --color-brand-border: #d4cdb3;
   --color-brand-secondary-text: #555;
+
+  /* Shogi board color */
+  --color-shogi-board: #dcb35c;
 }
 
 :root {
