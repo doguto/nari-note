@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useBoardEditor } from '@/lib/kif-player';
+import { useBoardEditor, KomaImage } from '@/lib/kif-player';
 import { COLUMN_LABELS, ROW_LABELS } from '@/lib/kif-player/constants';
 import type { CapturedPiece, PieceOwner, PieceType } from '@/lib/kif-player/types';
 
@@ -68,13 +68,13 @@ export function BoardEditorDialog({ open, onOpenChange, onConfirm }: BoardEditor
             variant="outline"
             onClick={() => handleHandClick(owner, type)}
             className={cn(
-              'h-auto px-1.5 py-0.5 gap-0.5 font-serif',
+              'h-auto px-1.5 py-0.5 gap-0.5',
               isSelectedHand(owner, type)
                 ? 'bg-yellow-200 border-yellow-500 ring-1 ring-yellow-400 hover:bg-yellow-200'
                 : 'bg-white border-gray-300 hover:bg-gray-100',
             )}
           >
-            <span className={cn(owner === 'gote' && 'rotate-180 inline-block')}>{type}</span>
+            <KomaImage type={type} owner={owner} size={20} />
             {count > 1 && <span className="text-xs text-gray-600 ml-0.5">{count}</span>}
           </Button>
         ))}
@@ -125,19 +125,14 @@ export function BoardEditorDialog({ open, onOpenChange, onConfirm }: BoardEditor
                           isSel
                             ? 'bg-yellow-200'
                             : selected && !piece
-                              ? 'bg-white hover:bg-green-100'
+                              ? 'bg-shogi-board hover:bg-green-100'
                               : selected && piece
-                                ? 'bg-white hover:bg-orange-100'
-                                : 'bg-white hover:bg-gray-100',
+                                ? 'bg-shogi-board hover:bg-orange-100'
+                                : 'bg-shogi-board hover:bg-gray-100',
                         )}
                       >
                         {piece && (
-                          <span className={cn(
-                            'font-serif text-sm font-bold select-none',
-                            piece.owner === 'gote' && 'rotate-180',
-                          )}>
-                            {piece.type}
-                          </span>
+                          <KomaImage type={piece.type} owner={piece.owner} size={28} />
                         )}
                       </div>
                     );

@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "deploy" {
-  bucket = "${var.app_name}-deploy"
+  bucket        = "${var.app_name}-deploy"
+  force_destroy = var.force_destroy
 
   tags = {
     Name = "${var.app_name}-deploy"

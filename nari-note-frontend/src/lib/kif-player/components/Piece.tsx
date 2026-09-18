@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import type { Piece as PieceData, BoardSize } from '../types';
+import { KomaImage } from './KomaImage';
 
 interface PieceProps {
   piece: PieceData;
@@ -11,32 +12,24 @@ interface PieceProps {
 
 function getSizeClasses(size: BoardSize = 'md') {
   switch (size) {
-    case 'sm': return { container: 'w-6 h-7', text: 'text-xs' };
-    case 'lg': return { container: 'w-10 h-12', text: 'text-lg' };
-    default:   return { container: 'w-8 h-9',  text: 'text-sm' };
+    case 'sm': return { container: 'w-6 h-7', imageSize: 22 };
+    case 'lg': return { container: 'w-10 h-12', imageSize: 36 };
+    default:   return { container: 'w-8 h-9',  imageSize: 28 };
   }
 }
 
 export function Piece({ piece, size = 'md', isHighlighted = false }: PieceProps) {
-  const { container, text } = getSizeClasses(size);
+  const { container, imageSize } = getSizeClasses(size);
   return (
     <div
       className={cn(
         'flex items-center justify-center',
-        'border border-gray-700 bg-white',
+        'border border-gray-700 bg-shogi-board',
         container,
-        piece.owner === 'gote' && 'rotate-180'
+        isHighlighted && 'scale-115',
       )}
     >
-      <span
-        className={cn(
-          'font-serif text-black',
-          text,
-          isHighlighted ? 'font-black scale-115' : 'font-bold',
-        )}
-      >
-        {piece.type}
-      </span>
+      <KomaImage type={piece.type} owner={piece.owner} size={imageSize} />
     </div>
   );
 }

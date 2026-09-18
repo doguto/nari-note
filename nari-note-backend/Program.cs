@@ -11,8 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 if (!builder.Environment.IsDevelopment())
 {
-    builder.Configuration.AddSystemsManager("/nari-note/app", false);
-    builder.Configuration.AddSystemsManager("/nari-note/db", false);
+    var appName = Environment.GetEnvironmentVariable("APP_NAME") ?? "nari-note";
+    builder.Configuration.AddSystemsManager($"/{appName}/app", false);
+    builder.Configuration.AddSystemsManager($"/{appName}/db", false);
 }
 else
 {

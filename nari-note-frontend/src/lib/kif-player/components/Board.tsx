@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import type { BoardState, BoardSize } from '../types';
 import { COLUMN_LABELS, ROW_LABELS } from '../constants';
+import { KomaImage } from './KomaImage';
 
 interface BoardProps {
   board: BoardState;
@@ -15,14 +16,14 @@ interface BoardProps {
 
 function getSizeClasses(size: BoardSize = 'md') {
   switch (size) {
-    case 'sm': return { cellW: 'w-6', cellH: 'h-6', labelW: 'w-4', text: 'text-xs' };
-    case 'lg': return { cellW: 'w-10', cellH: 'h-10', labelW: 'w-6', text: 'text-lg' };
-    default:   return { cellW: 'w-8', cellH: 'h-8', labelW: 'w-5', text: 'text-sm' };
+    case 'sm': return { cellW: 'w-6', cellH: 'h-6', labelW: 'w-4', text: 'text-xs', pieceSize: 20 };
+    case 'lg': return { cellW: 'w-10', cellH: 'h-10', labelW: 'w-6', text: 'text-lg', pieceSize: 36 };
+    default:   return { cellW: 'w-8', cellH: 'h-8', labelW: 'w-5', text: 'text-sm', pieceSize: 28 };
   }
 }
 
 export function Board({ board, size = 'md', className, highlightCell, selectedCell, onCellClick }: BoardProps) {
-  const { cellW, cellH, labelW, text } = getSizeClasses(size);
+  const { cellW, cellH, labelW, text, pieceSize } = getSizeClasses(size);
 
   return (
     <div className={cn('inline-block', className)}>
@@ -51,7 +52,7 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
                     cellW, cellH,
                     ci < 8 && 'border-r border-gray-700',
                     ri < 8 && 'border-b border-gray-700',
-                    'bg-white',
+                    'bg-shogi-board',
                   )}
                 />
               );
@@ -77,16 +78,12 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
                   onClick={() => onCellClick?.(ri, ci)}
                 >
                   {piece && (
-                    <span
-                      className={cn(
-                        'font-serif text-black select-none',
-                        text,
-                        piece.owner === 'gote' && 'rotate-180',
-                        isHL ? 'font-black scale-115' : 'font-bold',
-                      )}
-                    >
-                      {piece.type}
-                    </span>
+                    <KomaImage
+                      type={piece.type}
+                      owner={piece.owner}
+                      size={pieceSize}
+                      className={isHL ? 'scale-115' : undefined}
+                    />
                   )}
                 </div>
               );

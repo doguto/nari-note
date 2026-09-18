@@ -70,11 +70,11 @@ public static class EmailTemplate
                                 このメールに心当たりがない場合は、無視していただいて構いません。
                               </p>
                               <p style="margin:0;font-size:12px;color:#aaaaaa;">
-                                © 2025 nari-note. All rights reserved.
+                                © 2026 nari-note. All rights reserved.
                               </p>
                             </td>
                           </tr>
-                
+
                         </table>
                       </td>
                     </tr>
@@ -94,7 +94,7 @@ public static class EmailTemplate
 
                 このメールに心当たりがない場合は、無視していただいて構いません。
 
-                © 2025 nari-note
+                © 2026 nari-note
                 """;
     }
 
@@ -166,7 +166,7 @@ public static class EmailTemplate
                                 このメールに心当たりがない場合は、無視していただいて構いません。
                               </p>
                               <p style="margin:0;font-size:12px;color:#aaaaaa;">
-                                © 2025 nari-note. All rights reserved.
+                                © 2026 nari-note. All rights reserved.
                               </p>
                             </td>
                           </tr>
@@ -190,7 +190,7 @@ public static class EmailTemplate
 
                 このメールに心当たりがない場合は、無視していただいて構いません。
 
-                © 2025 nari-note
+                © 2026 nari-note
                 """;
     }
 }
