@@ -88,11 +88,11 @@ public class CoursesController : ApplicationController
     }
 
     [HttpGet("{id}")]
-    [AllowAnonymous]
+    [OptionalAuth]
     public async Task<ActionResult<GetCourseContentResponse>> GetCourseContent(CourseId id)
     {
         var request = new GetCourseContentRequest { Id = id };
-        var response = await getCourseContentService.ExecuteAsync(request);
+        var response = await getCourseContentService.ExecuteAsync(request, UserId);
         return Ok(response);
     }
 
