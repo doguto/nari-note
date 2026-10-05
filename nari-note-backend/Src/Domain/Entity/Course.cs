@@ -30,6 +30,9 @@ public class Course : EntityBase
     public int LikeCount => CourseLikes.Count;
     public bool IsPublished => PublishedAt.HasValue;
 
+    // 予約公開を考慮し、公開日時を過ぎているかまで判定する
+    public bool IsPubliclyVisible => PublishedAt.HasValue && PublishedAt.Value <= DateTime.UtcNow;
+
     // Domain Logic
     public bool IsLikedBy(UserId userId)
     {

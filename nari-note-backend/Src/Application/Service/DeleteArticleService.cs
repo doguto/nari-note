@@ -1,4 +1,5 @@
 using NariNoteBackend.Application.Dto.Request;
+using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 
@@ -16,7 +17,7 @@ public class DeleteArticleService
     public async Task ExecuteAsync(UserId userId, DeleteArticleRequest request)
     {
         var article = await articleRepository.FindForceByIdAsync(request.Id);
-        if (article.AuthorId != userId) throw new UnauthorizedAccessException("この記事を削除する権限がありません");
+        if (article.AuthorId != userId) throw new ForbiddenException("この記事を削除する権限がありません");
             
         await articleRepository.DeleteAsync(request.Id);
     }

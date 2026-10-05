@@ -73,9 +73,11 @@ public class CourseRepository : ICourseRepository
 
     public async Task<Course> FindByIdWithArticlesAsync(CourseId id)
     {
+        // 予約投稿（公開日時が未来）の記事は含めない
+        var now = DateTime.UtcNow;
         var course = await context.Courses
                                   .Include(c => c.User)
-                                  .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue))
+                                  .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now))
                                   .Include(c => c.CourseLikes)
                                   .FirstOrDefaultAsync(c => c.Id == id);
 

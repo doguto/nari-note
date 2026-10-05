@@ -1,5 +1,6 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
 
@@ -32,7 +33,7 @@ public class CreateArticleService
 
             if (course.UserId != request.AuthorId)
             {
-                throw new UnauthorizedAccessException("この講座に記事を追加する権限がありません");
+                throw new ForbiddenException("この講座に記事を追加する権限がありません");
             }
         }
 
