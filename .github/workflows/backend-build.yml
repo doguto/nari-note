@@ -1,0 +1,35 @@
+name: Backend Build
+
+on:
+  pull_request:
+    paths:
+      - "nari-note-backend/**"
+      - ".github/workflows/backend-build.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: nari-note-backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: nari-note-backend/global.json
+
+      - name: Restore dependencies
+        run: dotnet restore nari-note-backend.sln
+
+      - name: Build
+        run: dotnet build nari-note-backend.sln --configuration Release --no-restore
