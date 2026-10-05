@@ -63,6 +63,8 @@ import type {
   UpdateUserProfileResponse,
   UploadUserIconResponse,
   VerifyEmailRequest,
+  WithdrawRequest,
+  WithdrawResponse,
 } from './types';
 
 // Articles API
@@ -148,6 +150,10 @@ export const authApi = {
   },
   logout: async (): Promise<void> => {
     const response = await apiClient.post<void>('/api/auth/logout');
+    return response;
+  },
+  withdraw: async (data: WithdrawRequest): Promise<WithdrawResponse> => {
+    const response = await apiClient.post<WithdrawResponse>('/api/auth/withdraw', data);
     return response;
   },
 };

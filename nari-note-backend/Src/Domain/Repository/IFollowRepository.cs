@@ -10,4 +10,5 @@ public interface IFollowRepository : IRepository<Follow, FollowId>
     Task<int> CountFollowingsAsync(UserId userId);
     Task<List<User>> GetFollowersAsync(UserId userId);
     Task<List<User>> GetFollowingsAsync(UserId userId);
+    Task DeleteAllByUserIdAsync(UserId userId);
 }

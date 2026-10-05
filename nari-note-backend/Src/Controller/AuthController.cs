@@ -19,6 +19,7 @@ public class AuthController : ApplicationController
     readonly SignUpService signUpService;
     readonly UpdatePasswordService updatePasswordService;
     readonly VerifyEmailService verifyEmailService;
+    readonly WithdrawService withdrawService;
 
     public AuthController(
         SignUpService signUpService,
@@ -28,7 +29,8 @@ public class AuthController : ApplicationController
         VerifyEmailService verifyEmailService,
         UpdatePasswordService updatePasswordService,
         ForgotPasswordService forgotPasswordService,
-        ResetPasswordService resetPasswordService
+        ResetPasswordService resetPasswordService,
+        WithdrawService withdrawService
     )
     {
         this.signUpService = signUpService;
@@ -39,6 +41,7 @@ public class AuthController : ApplicationController
         this.updatePasswordService = updatePasswordService;
         this.forgotPasswordService = forgotPasswordService;
         this.resetPasswordService = resetPasswordService;
+        this.withdrawService = withdrawService;
     }
 
     [HttpPost("signup")]
@@ -114,5 +117,15 @@ public class AuthController : ApplicationController
         var request = new LogoutRequest();
         await logoutService.ExecuteAsync(request, Response);
         return NoContent();
+    }
+
+    [HttpPost("withdraw")]
+    [RequireAuth]
+    [ValidateModelState]
+    [EnableRateLimiting("auth")]
+    public async Task<ActionResult<WithdrawResponse>> Withdraw([FromBody] WithdrawRequest request)
+    {
+        var response = await withdrawService.ExecuteAsync(UserId!.Value, request, Response);
+        return Ok(response);
     }
 }

@@ -25,6 +25,7 @@ public static class ApplicationServiceInstaller
         services.AddScoped<GetUserProfileService>();
         services.AddScoped<UpdateUserProfileService>();
         services.AddScoped<UpdatePasswordService>();
+        services.AddScoped<WithdrawService>();
         services.AddScoped<SignUpService>();
         services.AddScoped<VerifyEmailService>();
         services.AddScoped<SignInService>();
