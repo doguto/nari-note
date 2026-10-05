@@ -8,18 +8,15 @@ namespace NariNoteBackend.Application.Service;
 
 public class WithdrawService
 {
-    readonly IFollowRepository followRepository;
     readonly IImageStorageGateway imageStorageGateway;
     readonly IUserRepository userRepository;
 
     public WithdrawService(
         IUserRepository userRepository,
-        IFollowRepository followRepository,
         IImageStorageGateway imageStorageGateway
     )
     {
         this.userRepository = userRepository;
-        this.followRepository = followRepository;
         this.imageStorageGateway = imageStorageGateway;
     }
 
@@ -32,10 +29,7 @@ public class WithdrawService
             throw new ArgumentException("パスワードが正しくありません");
         }
 
-        // Follow は DeleteBehavior.Restrict のため、ユーザー削除前に明示的に削除する
-        await followRepository.DeleteAllByUserIdAsync(userId);
-
-        // 記事・講座・いいね・コメント・通知・認証トークン等は Cascade で削除される
+        // 記事・講座・いいね・コメント・フォロー・通知・認証トークン等は Cascade で削除される
         await userRepository.DeleteAsync(userId);
 
         // 外部ストレージはロールバックできないため、DB 操作が成功した後に削除する

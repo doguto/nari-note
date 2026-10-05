@@ -81,11 +81,4 @@ public class FollowRepository : IFollowRepository
             .Select(f => f.Following)
             .ToListAsync();
     }
-
-    public async Task DeleteAllByUserIdAsync(UserId userId)
-    {
-        await context.Follows
-            .Where(f => f.FollowerId == userId || f.FollowingId == userId)
-            .ExecuteDeleteAsync();
-    }
 }

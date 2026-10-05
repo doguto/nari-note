@@ -80,12 +80,12 @@ public class NariNoteDbContext : DbContext
             x.HasMany(u => u.Followings)
              .WithOne(f => f.Follower)
              .HasForeignKey(f => f.FollowerId)
-             .OnDelete(DeleteBehavior.Restrict);
+             .OnDelete(DeleteBehavior.Cascade);
 
             x.HasMany(u => u.Followers)
              .WithOne(f => f.Following)
              .HasForeignKey(f => f.FollowingId)
-             .OnDelete(DeleteBehavior.Restrict);
+             .OnDelete(DeleteBehavior.Cascade);
 
             x.HasMany(u => u.Notifications)
              .WithOne(n => n.User)
@@ -203,12 +203,12 @@ public class NariNoteDbContext : DbContext
             x.HasOne(f => f.Follower)
              .WithMany(u => u.Followings)
              .HasForeignKey(f => f.FollowerId)
-             .OnDelete(DeleteBehavior.Restrict);
+             .OnDelete(DeleteBehavior.Cascade);
 
             x.HasOne(f => f.Following)
              .WithMany(u => u.Followers)
              .HasForeignKey(f => f.FollowingId)
-             .OnDelete(DeleteBehavior.Restrict);
+             .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(f => f.Id)
              .HasValueGenerator<FollowIdValueGenerator>();
