@@ -8,6 +8,7 @@ export { UserAvatarLink } from './UserAvatarLink';
 export { ArticleCard } from './ArticleCard';
 export { CourseCard } from './CourseCard';
 export { UnauthorizedModal } from './UnauthorizedModal';
+export { ForbiddenModal } from './ForbiddenModal';
 export { SearchBar } from './SearchBar';
 export { MarkdownEditor } from './MarkdownEditor';
 export { DraftArticleCard } from './DraftArticleCard';

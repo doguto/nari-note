@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
 import { UnauthorizedProvider } from "@/lib/providers/UnauthorizedProvider";
+import { ForbiddenProvider } from "@/lib/providers/ForbiddenProvider";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nari-note.com";
@@ -50,7 +51,9 @@ export default function RootLayout({
           <AuthProvider>
             <Suspense fallback={null}>
               <UnauthorizedProvider>
-                {children}
+                <ForbiddenProvider>
+                  {children}
+                </ForbiddenProvider>
               </UnauthorizedProvider>
             </Suspense>
           </AuthProvider>
