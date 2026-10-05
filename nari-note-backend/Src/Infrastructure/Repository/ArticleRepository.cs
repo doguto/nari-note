@@ -206,7 +206,7 @@ public class ArticleRepository : IArticleRepository
 
     static Expression<Func<Article, bool>> IsPubliclyVisible(DateTime now)
     {
-        // a.IsPublished は DB に登録されたカラムではなく Property なため、Where 句では PublishedAt.HasValue
+        // a.IsPubliclyVisible は DB に登録されたカラムではなく Property なため、Where 句では PublishedAt で判定する
         return a => a.PublishedAt.HasValue && a.PublishedAt!.Value <= now;
     }
 
