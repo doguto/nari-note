@@ -1,5 +1,6 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 
@@ -25,7 +26,7 @@ public class GetCourseContentService
         var course = await courseRepository.FindByIdWithAllArticlesAsync(request.Id);
 
         if (course.UserId != requesterId)
-            throw new UnauthorizedAccessException("この講座を編集する権限がありません");
+            throw new ForbiddenException("この講座を編集する権限がありません");
 
         return MapToResponse(course);
     }

@@ -1,5 +1,6 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
@@ -26,13 +27,13 @@ public class UpdateArticleService
     public async Task<UpdateArticleResponse> ExecuteAsync(UserId userId, UpdateArticleRequest request)
     {
         var article = await articleRepository.FindForceByIdAsync(request.Id);
-        if (article.AuthorId != userId) throw new UnauthorizedAccessException("この記事を更新する権限がありません");
+        if (article.AuthorId != userId) throw new ForbiddenException("この記事を更新する権限がありません");
 
         // 講座記事の場合、講座の所有権を検証
         if (article.CourseId.HasValue)
         {
             var course = await courseRepository.FindForceByIdAsync(article.CourseId.Value);
-            if (course.UserId != userId) throw new UnauthorizedAccessException("この講座の記事を更新する権限がありません");
+            if (course.UserId != userId) throw new ForbiddenException("この講座の記事を更新する権限がありません");
         }
 
         // nullでない値のみ更新
