@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse, type InternalAxiosRequestConfig, type AxiosRequestConfig } from 'axios';
 import { unauthorizedHandler } from '@/lib/unauthorizedHandler';
+import { forbiddenHandler } from '@/lib/forbiddenHandler';
 
 const API_BASE_URL = '';
 
@@ -33,11 +34,14 @@ axiosInstance.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      // モーダルを表示
-      unauthorizedHandler.trigger();
-    }
     const serverMessage = error.response?.data?.message;
+    if (error.response?.status === 401) {
+      // 未認証: ログインモーダルを表示
+      unauthorizedHandler.trigger();
+    } else if (error.response?.status === 403) {
+      // ログイン済みだが権限が無い: 権限エラーモーダルを表示
+      forbiddenHandler.trigger(serverMessage);
+    }
     return Promise.reject(serverMessage ? new Error(serverMessage) : error);
   }
 );
