@@ -28,9 +28,8 @@ public class GetArticleContentService
         var article = await articleRepository.FindForceByIdAsync(request.Id);
 
         // 未公開（下書き・予約投稿）の記事は作者本人以外には存在自体を秘匿する
-        var isPubliclyVisible = article.PublishedAt.HasValue && article.PublishedAt.Value <= DateTime.UtcNow;
         var isAuthor = userId.HasValue && article.AuthorId == userId.Value;
-        if (!isPubliclyVisible && !isAuthor) throw new KeyNotFoundException($"記事{request.Id}が存在しません");
+        if (!article.IsPubliclyVisible && !isAuthor) throw new KeyNotFoundException($"記事{request.Id}が存在しません");
 
         var comments = await commentRepository.FindByArticleAsync(request.Id);
 
