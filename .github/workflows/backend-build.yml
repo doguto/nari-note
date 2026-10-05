@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - "nari-note-backend/**"
-      - ".github/workflows/backend-build.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
