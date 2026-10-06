@@ -1,4 +1,4 @@
-name: Backend Build
+name: Backend Test
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,5 +30,5 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore nari-note-backend.sln
 
-      - name: Build
-        run: dotnet build nari-note-backend.sln --configuration Release --no-restore
+      - name: Test
+        run: dotnet test nari-note-backend.sln --configuration Release --no-restore
