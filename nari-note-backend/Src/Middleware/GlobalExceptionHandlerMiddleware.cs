@@ -57,6 +57,9 @@ public class GlobalExceptionHandlerMiddleware
             // 404 Not Found
             KeyNotFoundException => HttpStatusCode.NotFound,
 
+            // 409 Conflict
+            ConflictException => HttpStatusCode.Conflict,
+
             // 408 Request Timeout
             TimeoutException => HttpStatusCode.RequestTimeout,
 
