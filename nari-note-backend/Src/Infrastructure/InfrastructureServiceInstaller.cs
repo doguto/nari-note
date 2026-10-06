@@ -1,9 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using NariNoteBackend.Application.BackgroundJob;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Security;
-using NariNoteBackend.Infrastructure.BackgroundJob;
 using NariNoteBackend.Infrastructure.Database;
 using NariNoteBackend.Infrastructure.Gateway;
 using NariNoteBackend.Infrastructure.Repository;
@@ -65,9 +63,5 @@ public static class InfrastructureServiceInstaller
             services.AddScoped<IImageStorageGateway, LocalImageStorageGateway>();
         else
             services.AddScoped<IImageStorageGateway, S3ImageStorageGateway>();
-
-        // Register background jobs
-        services.AddSingleton<ISignUpJobQueue, ChannelSignUpJobQueue>();
-        services.AddHostedService<SignUpJobWorker>();
     }
 }
