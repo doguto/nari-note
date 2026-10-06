@@ -48,7 +48,7 @@ public class AuthController : ApplicationController
     [AllowAnonymous]
     [ValidateModelState]
     [EnableRateLimiting("auth")]
-    public async Task<ActionResult<AuthResponse>> SignUp([FromBody] SignUpRequest request)
+    public async Task<ActionResult<SignUpResponse>> SignUp([FromBody] SignUpRequest request)
     {
         var response = await signUpService.ExecuteAsync(request);
         return Ok(response);

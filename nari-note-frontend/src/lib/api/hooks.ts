@@ -50,6 +50,7 @@ import type {
   SearchCoursesResponse,
   SignInRequest,
   SignUpRequest,
+  SignUpResponse,
   ToggleFollowRequest,
   ToggleFollowResponse,
   ToggleLikeRequest,
@@ -222,9 +223,9 @@ export function useCreateComment(options?: UseMutationOptions<CreateCommentRespo
 }
 
 // Auth Hooks
-export function useSignUp(options?: UseMutationOptions<AuthResponse, Error, SignUpRequest>) {
+export function useSignUp(options?: UseMutationOptions<SignUpResponse, Error, SignUpRequest>) {
   const queryClient = useQueryClient();
-  return useMutation<AuthResponse, Error, SignUpRequest>({
+  return useMutation<SignUpResponse, Error, SignUpRequest>({
     mutationFn: (data) => authApi.signUp(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });

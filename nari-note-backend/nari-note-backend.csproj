@@ -7,6 +7,13 @@
     <RootNamespace>NariNoteBackend</RootNamespace>
   </PropertyGroup>
 
+  <!-- メールテンプレートは埋め込みリソースとして読み込む -->
+  <ItemGroup>
+    <None Remove="Src/Domain/Template/Email/**" />
+    <Content Remove="Src/Domain/Template/Email/**" />
+    <EmbeddedResource Include="Src/Domain/Template/Email/**" LogicalName="NariNoteBackend.Domain.Template.Email.%(Filename)%(Extension)" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="DotNext" Version="5.26.1" />

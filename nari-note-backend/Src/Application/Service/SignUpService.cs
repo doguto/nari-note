@@ -26,11 +26,30 @@ public class SignUpService
         this.discordNotifier = discordNotifier;
     }
 
-    public async Task<AuthResponse> ExecuteAsync(SignUpRequest request)
+    public async Task<SignUpResponse> ExecuteAsync(SignUpRequest request)
     {
+        // メールアドレスの登録有無によらず同じレスポンスを返す（ユーザー列挙攻撃防止）
         var existingUser = await userRepository.FindByEmailAsync(request.Email);
-        if (existingUser != null) throw new ArgumentException("このメールアドレスは既に使用されています");
+        if (existingUser == null)
+        {
+            await CreateUserAsync(request);
+        }
+        else if (existingUser.IsEmailVerified)
+        {
+            // 登録済みアドレスには、その旨とパスワード再設定の案内を通知する
+            await emailHelper.SendAsync(EmailMessageStore.AlreadyRegisteredMessage(existingUser.Email));
+        }
+        else
+        {
+            // 未認証のアカウントは確認メールを再送する（既存の名前・パスワードは変更しない）
+            await SendVerificationEmailAsync(existingUser);
+        }
 
+        return new SignUpResponse();
+    }
+
+    async Task CreateUserAsync(SignUpRequest request)
+    {
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
         var user = new User
@@ -42,16 +61,7 @@ public class SignUpService
 
         var createdUser = await userRepository.CreateAsync(user);
 
-        var guid = Guid.NewGuid();
-        var emailVerification = new EmailVerification
-        {
-            UserId = createdUser.Id,
-            Token = guid.ToString(),
-            ExpiresAt = DateTime.UtcNow.AddHours(24)
-        };
-        await emailVerificationRepository.CreateAsync(emailVerification);
-
-        await emailHelper.SendAsync(EmailMessageStore.SignupMessage(request.Email, guid));
+        await SendVerificationEmailAsync(createdUser);
 
         await discordNotifier.NotifyWithEmbedAsync(new DiscordEmbed
         {
@@ -65,10 +75,19 @@ public class SignUpService
             ],
             Footer = new DiscordEmbedFooter("nari-note")
         });
+    }
 
-        return new AuthResponse
+    async Task SendVerificationEmailAsync(User user)
+    {
+        var guid = Guid.NewGuid();
+        var emailVerification = new EmailVerification
         {
-            UserId = createdUser.Id
+            UserId = user.Id,
+            Token = guid.ToString(),
+            ExpiresAt = DateTime.UtcNow.AddHours(24)
         };
+        await emailVerificationRepository.CreateAsync(emailVerification);
+
+        await emailHelper.SendAsync(EmailMessageStore.SignupMessage(user.Email, guid));
     }
 }
