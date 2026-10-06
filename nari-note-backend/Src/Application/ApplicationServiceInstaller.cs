@@ -1,3 +1,4 @@
+using NariNoteBackend.Application.BackgroundJob;
 using NariNoteBackend.Application.Service;
 
 namespace NariNoteBackend.Application;
@@ -44,5 +45,8 @@ public static class ApplicationServiceInstaller
         services.AddScoped<ForgotPasswordService>();
         services.AddScoped<ResetPasswordService>();
         services.AddScoped<UploadUserIconService>();
+
+        // Register background job handlers
+        services.AddScoped<SignUpJobHandler>();
     }
 }

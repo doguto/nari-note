@@ -36,19 +36,25 @@ export function SignUpTemplate({
   if (isCompleted) {
     return (
       <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-lg px-10 py-12 text-center">
-        <FormTitle>登録完了</FormTitle>
+        <FormTitle>確認メールを送信しました</FormTitle>
         <div className="mt-6 space-y-4">
-          <p className="text-gray-700">
-            確認メールを送信しました。
-          </p>
           <p className="text-sm text-gray-500">
-            <span className="font-medium text-gray-700">{email}</span> 宛にメールをお送りしました。
+            <span className="font-medium text-gray-700">{email}</span> 宛にメールをお送りします。
             メールボックスをご確認の上、記載のリンクからメールアドレスを認証してください。
           </p>
+          <p className="text-sm text-gray-500">
+            すでに登録済みのメールアドレスの場合は、ログイン方法とパスワード再設定のご案内をお送りします。
+          </p>
+          <p className="text-xs text-gray-400">
+            数分経ってもメールが届かない場合は、迷惑メールフォルダもご確認ください。
+          </p>
         </div>
-        <div className="mt-8">
+        <div className="mt-8 flex flex-col items-center gap-2">
           <Link href="/login" className="text-sm text-brand-primary hover:underline">
             ログインページへ
+          </Link>
+          <Link href="/forgot-password" className="text-sm text-brand-primary hover:underline">
+            パスワードをお忘れの方
           </Link>
         </div>
       </div>

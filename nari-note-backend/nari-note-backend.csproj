@@ -7,6 +7,14 @@
     <RootNamespace>NariNoteBackend</RootNamespace>
   </PropertyGroup>
 
+  <!-- テストプロジェクトは別プロジェクトとしてビルドするため除外する -->
+  <ItemGroup>
+    <Compile Remove="Tests/**" />
+    <Content Remove="Tests/**" />
+    <EmbeddedResource Remove="Tests/**" />
+    <None Remove="Tests/**" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="DotNext" Version="5.26.1" />

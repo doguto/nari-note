@@ -32,3 +32,6 @@ jobs:
 
       - name: Build
         run: dotnet build nari-note-backend.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test nari-note-backend.sln --configuration Release --no-build

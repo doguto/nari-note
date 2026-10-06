@@ -1,74 +1,27 @@
+using NariNoteBackend.Application.BackgroundJob;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Domain.Entity;
-using NariNoteBackend.Domain.Gateway;
-using NariNoteBackend.Domain.Repository;
 
 namespace NariNoteBackend.Application.Service;
 
 public class SignUpService
 {
-    readonly IEmailHelper emailHelper;
-    readonly IEmailVerificationRepository emailVerificationRepository;
-    readonly IUserRepository userRepository;
-    readonly IDiscordNotifier discordNotifier;
+    readonly ISignUpJobQueue signUpJobQueue;
 
-    public SignUpService(
-        IUserRepository userRepository,
-        IEmailVerificationRepository emailVerificationRepository,
-        IEmailHelper emailHelper,
-        IDiscordNotifier discordNotifier
-    )
+    public SignUpService(ISignUpJobQueue signUpJobQueue)
     {
-        this.userRepository = userRepository;
-        this.emailVerificationRepository = emailVerificationRepository;
-        this.emailHelper = emailHelper;
-        this.discordNotifier = discordNotifier;
+        this.signUpJobQueue = signUpJobQueue;
     }
 
-    public async Task<AuthResponse> ExecuteAsync(SignUpRequest request)
+    public async Task<SignUpResponse> ExecuteAsync(SignUpRequest request)
     {
-        var existingUser = await userRepository.FindByEmailAsync(request.Email);
-        if (existingUser != null) throw new ArgumentException("このメールアドレスは既に使用されています");
-
+        // メールアドレスの登録有無によらず同じレスポンス・同程度の応答時間にするため（ユーザー列挙攻撃防止）、
+        // リクエスト内ではパスワードのハッシュ化とキュー投入のみを行い、
+        // 登録有無の判定・DB書き込み・メール送信はバックグラウンドで実行する
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-        var user = new User
-        {
-            Name = request.Name,
-            Email = request.Email,
-            PasswordHash = passwordHash
-        };
+        await signUpJobQueue.EnqueueAsync(new SignUpJob(request.Name, request.Email, passwordHash));
 
-        var createdUser = await userRepository.CreateAsync(user);
-
-        var guid = Guid.NewGuid();
-        var emailVerification = new EmailVerification
-        {
-            UserId = createdUser.Id,
-            Token = guid.ToString(),
-            ExpiresAt = DateTime.UtcNow.AddHours(24)
-        };
-        await emailVerificationRepository.CreateAsync(emailVerification);
-
-        await emailHelper.SendAsync(EmailMessageStore.SignupMessage(request.Email, guid));
-
-        await discordNotifier.NotifyWithEmbedAsync(new DiscordEmbed
-        {
-            Title = "新規ユーザー登録",
-            Description = "新しいユーザーが nari-note に登録しました！",
-            Color = 0x57F287,
-            Timestamp = DateTime.UtcNow.ToString("o"),
-            Fields =
-            [
-                new DiscordEmbedField("名前", createdUser.Name, Inline: true)
-            ],
-            Footer = new DiscordEmbedFooter("nari-note")
-        });
-
-        return new AuthResponse
-        {
-            UserId = createdUser.Id
-        };
+        return new SignUpResponse();
     }
 }
