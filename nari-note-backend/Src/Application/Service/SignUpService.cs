@@ -33,18 +33,18 @@ public class SignUpService
         if (existingUser == null)
         {
             await CreateUserAsync(request);
-            return new SignUpResponse();
         }
-
-        if (existingUser.IsEmailVerified)
+        else if (existingUser.IsEmailVerified)
         {
             // 登録済みアドレスには、その旨とパスワード再設定の案内を通知する
             await emailHelper.SendAsync(EmailMessageStore.AlreadyRegisteredMessage(existingUser.Email));
-            return new SignUpResponse();
+        }
+        else
+        {
+            // 未認証のアカウントは確認メールを再送する（既存の名前・パスワードは変更しない）
+            await SendVerificationEmailAsync(existingUser);
         }
 
-        // 未認証のアカウントは確認メールを再送する（既存の名前・パスワードは変更しない）
-        await SendVerificationEmailAsync(existingUser);
         return new SignUpResponse();
     }
 
