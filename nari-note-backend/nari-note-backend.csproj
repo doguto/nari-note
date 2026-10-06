@@ -7,14 +7,6 @@
     <RootNamespace>NariNoteBackend</RootNamespace>
   </PropertyGroup>
 
-  <!-- テストプロジェクトは別プロジェクトとしてビルドするため除外する -->
-  <ItemGroup>
-    <Compile Remove="Tests/**" />
-    <Content Remove="Tests/**" />
-    <EmbeddedResource Remove="Tests/**" />
-    <None Remove="Tests/**" />
-  </ItemGroup>
-
   <!-- メールテンプレートは埋め込みリソースとして読み込む -->
   <ItemGroup>
     <None Remove="Src/Domain/Template/Email/**" />
