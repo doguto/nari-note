@@ -34,4 +34,15 @@ public class S3ImageStorageGateway : IImageStorageGateway
 
         return GetUserIconUrl(userId);
     }
+
+    public async Task DeleteUserIconAsync(string userId)
+    {
+        var request = new DeleteObjectRequest
+        {
+            BucketName = bucketName,
+            Key = $"users/{userId}/icon",
+        };
+
+        await s3Client.Value.DeleteObjectAsync(request);
+    }
 }

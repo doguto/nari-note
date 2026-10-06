@@ -64,6 +64,8 @@ import type {
   UpdateUserProfileResponse,
   UploadUserIconResponse,
   VerifyEmailRequest,
+  WithdrawRequest,
+  WithdrawResponse,
 } from './types';
 
 // Query Keys
@@ -304,6 +306,18 @@ export function useLogout(options?: UseMutationOptions<void, Error, void>) {
   const queryClient = useQueryClient();
   return useMutation<void, Error, void>({
     mutationFn: () => authApi.logout(),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useWithdraw(options?: UseMutationOptions<WithdrawResponse, Error, WithdrawRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<WithdrawResponse, Error, WithdrawRequest>({
+    mutationFn: (data) => authApi.withdraw(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
