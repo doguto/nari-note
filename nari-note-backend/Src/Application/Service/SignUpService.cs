@@ -1,6 +1,5 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
@@ -51,12 +50,6 @@ public class SignUpService
 
     async Task CreateUserAsync(SignUpRequest request)
     {
-        // 名前の重複確認は新規作成時のみ行う（既存メールの分岐に置くとメールの登録有無が漏れるため）
-        if (await userRepository.ExistsByNameAsync(request.Name))
-        {
-            throw new ConflictException("このユーザー名は既に使用されています");
-        }
-
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
         var user = new User

@@ -24,13 +24,11 @@ public class SignInService
 
     public async Task<AuthResponse> ExecuteAsync(SignInRequest request, HttpResponse response)
     {
-        // Name は一意のため、メールアドレス → ユーザー名の順で照合する
-        var user = await userRepository.FindByEmailAsync(request.UsernameOrEmail)
-                   ?? await userRepository.FindByNameAsync(request.UsernameOrEmail);
-        if (user == null) throw new ArgumentException("ユーザー名またはメールアドレス、もしくはパスワードが正しくありません");
+        var user = await userRepository.FindByUsernameOrEmailAsync(request.UsernameOrEmail);
+        if (user == null) throw new ArgumentException("ユーザー名またはパスワードが正しくありません");
 
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
-        if (!isPasswordValid) throw new ArgumentException("ユーザー名またはメールアドレス、もしくはパスワードが正しくありません");
+        if (!isPasswordValid) throw new ArgumentException("ユーザー名またはパスワードが正しくありません");
 
         var token = jwtHelper.GenerateToken(user.Id, user.Name);
 

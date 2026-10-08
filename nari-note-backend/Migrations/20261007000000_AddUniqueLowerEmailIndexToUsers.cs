@@ -7,7 +7,7 @@ using NariNoteBackend.Infrastructure.Database;
 namespace NariNoteBackend.Migrations
 {
     /// <summary>
-    /// Users.Email の大文字小文字を区別しない一意制約を追加する。
+    /// Users.Email の大文字小文字を区別しない一意制約と、Users.Name の一意制約を追加する。
     /// EF Core の属性では式インデックスを表現できないため、生 SQL で作成する（モデルスナップショットは変更なし）。
     /// </summary>
     [DbContext(typeof(NariNoteDbContext))]
@@ -34,26 +34,26 @@ namespace NariNoteBackend.Migrations
 
             migrationBuilder.Sql("""CREATE UNIQUE INDEX ux_users_email_lower ON "Users" (lower("Email"));""");
 
-            // 名前も同様に、重複がある場合は中断する。
-            // 検出クエリ: SELECT lower("Name"), count(*) FROM "Users" GROUP BY 1 HAVING count(*) > 1;
+            // 名前は大文字小文字を区別して一意にする。重複がある場合は中断する。
+            // 検出クエリ: SELECT "Name", count(*) FROM "Users" GROUP BY 1 HAVING count(*) > 1;
             migrationBuilder.Sql("""
                 DO $$
                 BEGIN
                     IF EXISTS (
-                        SELECT 1 FROM "Users" GROUP BY lower("Name") HAVING count(*) > 1
+                        SELECT 1 FROM "Users" GROUP BY "Name" HAVING count(*) > 1
                     ) THEN
-                        RAISE EXCEPTION 'Duplicate names (case-insensitive) exist in "Users". Resolve them before applying this migration.';
+                        RAISE EXCEPTION 'Duplicate names exist in "Users". Resolve them before applying this migration.';
                     END IF;
                 END $$;
                 """);
 
-            migrationBuilder.Sql("""CREATE UNIQUE INDEX ux_users_name_lower ON "Users" (lower("Name"));""");
+            migrationBuilder.Sql("""CREATE UNIQUE INDEX ux_users_name ON "Users" ("Name");""");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("""DROP INDEX IF EXISTS ux_users_name_lower;""");
+            migrationBuilder.Sql("""DROP INDEX IF EXISTS ux_users_name;""");
             migrationBuilder.Sql("""DROP INDEX IF EXISTS ux_users_email_lower;""");
         }
     }

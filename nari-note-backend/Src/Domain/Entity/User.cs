@@ -30,12 +30,6 @@ public class User : EntityBase
 
     public bool IsEmailVerified { get; set; } = false;
 
-    // 名前の重複判定は、大文字小文字・前後空白を無視して行う
-    public static string NormalizeName(string name)
-    {
-        return name.Trim().ToLowerInvariant();
-    }
-
     // メールアドレスは小文字・前後空白除去で正規化して保存・照合する
     public static string NormalizeEmail(string email)
     {

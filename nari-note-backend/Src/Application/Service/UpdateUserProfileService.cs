@@ -1,6 +1,5 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Extension;
@@ -24,11 +23,6 @@ public class UpdateUserProfileService
         // ProfileImageとBioは空文字列も許可（クリア操作として扱う）
         if (!request.Name.IsNullOrEmpty())
         {
-            if (await userRepository.ExistsByNameAsync(request.Name, userId))
-            {
-                throw new ConflictException("このユーザー名は既に使用されています");
-            }
-
             user.Name = request.Name;
         }
 
