@@ -61,6 +61,11 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.Name == usernameOrEmail || u.Email.ToLower() == normalizedEmail);
     }
 
+    public async Task<bool> ExistsByNameAsync(string name, UserId? excludeUserId = null)
+    {
+        return await context.Users.AnyAsync(u => u.Name == name && (excludeUserId == null || u.Id != excludeUserId));
+    }
+
     public async Task<User> CreateAsync(User user)
     {
         context.Users.Add(user);
