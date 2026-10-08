@@ -51,8 +51,14 @@ public class GlobalExceptionHandlerMiddleware
             // 401 Unauthorized
             UnauthorizedAccessException => HttpStatusCode.Unauthorized,
 
+            // 403 Forbidden（認証済みだが操作権限が無い）
+            ForbiddenException => HttpStatusCode.Forbidden,
+
             // 404 Not Found
             KeyNotFoundException => HttpStatusCode.NotFound,
+
+            // 409 Conflict
+            ConflictException => HttpStatusCode.Conflict,
 
             // 408 Request Timeout
             TimeoutException => HttpStatusCode.RequestTimeout,

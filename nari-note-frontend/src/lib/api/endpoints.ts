@@ -49,6 +49,7 @@ import type {
   SearchCoursesResponse,
   SignInRequest,
   SignUpRequest,
+  SignUpResponse,
   ToggleFollowRequest,
   ToggleFollowResponse,
   ToggleLikeRequest,
@@ -63,6 +64,8 @@ import type {
   UpdateUserProfileResponse,
   UploadUserIconResponse,
   VerifyEmailRequest,
+  WithdrawRequest,
+  WithdrawResponse,
 } from './types';
 
 // Articles API
@@ -118,8 +121,8 @@ export const articlesApi = {
 
 // Auth API
 export const authApi = {
-  signUp: async (data: SignUpRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/api/auth/signup', data);
+  signUp: async (data: SignUpRequest): Promise<SignUpResponse> => {
+    const response = await apiClient.post<SignUpResponse>('/api/auth/signup', data);
     return response;
   },
   signIn: async (data: SignInRequest): Promise<AuthResponse> => {
@@ -148,6 +151,10 @@ export const authApi = {
   },
   logout: async (): Promise<void> => {
     const response = await apiClient.post<void>('/api/auth/logout');
+    return response;
+  },
+  withdraw: async (data: WithdrawRequest): Promise<WithdrawResponse> => {
+    const response = await apiClient.post<WithdrawResponse>('/api/auth/withdraw', data);
     return response;
   },
 };

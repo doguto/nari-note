@@ -1,4 +1,5 @@
 using System.Net;
+using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Extension;
 using NariNoteBackend.Filter;
@@ -16,7 +17,7 @@ public class JwtAuthenticationMiddleware
         this.logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context, IJwtHelper jwtHelper)
+    public async Task InvokeAsync(HttpContext context, IJwtHelper jwtHelper, IUserRepository userRepository)
     {
         var endpoint = context.GetEndpoint();
 
@@ -92,6 +93,36 @@ public class JwtAuthenticationMiddleware
                     {
                         code = "UNAUTHORIZED",
                         message = "ユーザー情報が見つかりません",
+                        timestamp = DateTime.UtcNow,
+                        path = context.Request.Path
+                    }
+                });
+            return;
+        }
+
+        // 退会済みユーザーのトークンは無効として扱う
+        var user = await userRepository.FindByIdAsync(userId.Value);
+        if (user == null)
+        {
+            context.Response.Cookies.Delete("authToken", new CookieOptions
+            {
+                Path = "/"
+            });
+
+            if (allowAnonymous || optionalAuth)
+            {
+                await next(context);
+                return;
+            }
+
+            context.Response.StatusCode = HttpStatusCode.Unauthorized.AsInt();
+            await context.Response.WriteAsJsonAsync(
+                new
+                {
+                    error = new
+                    {
+                        code = "UNAUTHORIZED",
+                        message = "ユーザーが存在しません",
                         timestamp = DateTime.UtcNow,
                         path = context.Request.Path
                     }

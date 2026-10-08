@@ -1,5 +1,6 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 
@@ -14,9 +15,13 @@ public class GetCourseContentService
         this.courseRepository = courseRepository;
     }
 
-    public async Task<GetCourseContentResponse> ExecuteAsync(GetCourseContentRequest request)
+    public async Task<GetCourseContentResponse> ExecuteAsync(GetCourseContentRequest request, UserId? userId = null)
     {
         var course = await courseRepository.FindByIdWithArticlesAsync(request.Id);
+
+        // 未公開（下書き・予約公開）の講座は作成者本人以外には存在自体を秘匿する
+        var isOwner = userId.HasValue && course.UserId == userId.Value;
+        if (!course.IsPubliclyVisible && !isOwner) throw new KeyNotFoundException($"ID: {request.Id} の講座が見つかりません");
         return MapToResponse(course);
     }
 
@@ -25,7 +30,7 @@ public class GetCourseContentService
         var course = await courseRepository.FindByIdWithAllArticlesAsync(request.Id);
 
         if (course.UserId != requesterId)
-            throw new UnauthorizedAccessException("この講座を編集する権限がありません");
+            throw new ForbiddenException("この講座を編集する権限がありません");
 
         return MapToResponse(course);
     }

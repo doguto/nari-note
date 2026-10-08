@@ -7,4 +7,5 @@ public interface IUserRepository : IRepository<User, UserId>
 {
     Task<User?> FindByEmailAsync(string email);
     Task<User?> FindByUsernameOrEmailAsync(string usernameOrEmail);
+    Task<bool> ExistsByNameAsync(string name, UserId? excludeUserId = null);
 }

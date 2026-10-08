@@ -27,6 +27,20 @@ public static class EmailMessageStore
         );
     }
 
+    public static EmailMessage AlreadyRegisteredMessage(string to)
+    {
+        const string loginUrl = "https://nari-note.com/login";
+        const string forgotPasswordUrl = "https://nari-note.com/forgot-password";
+
+        return new EmailMessage(
+            From,
+            [to],
+            "【なりノート】このメールアドレスは登録済みです",
+            EmailTemplate.AlreadyRegisteredHtml(loginUrl, forgotPasswordUrl),
+            EmailTemplate.AlreadyRegisteredText(loginUrl, forgotPasswordUrl)
+        );
+    }
+
     public static EmailMessage ForgotPasswordMessage(string to, Guid guid)
     {
         var url = $"https://nari-note.com/reset-password?token={guid}";

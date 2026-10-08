@@ -1,5 +1,6 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Extension;
@@ -18,7 +19,7 @@ public class UpdateCourseService
     public async Task<UpdateCourseResponse> ExecuteAsync(UserId userId, UpdateCourseRequest request)
     {
         var course = await courseRepository.FindForceByIdAsync(request.Id);
-        if (course.UserId != userId) throw new UnauthorizedAccessException("この講座を更新する権限がありません");
+        if (course.UserId != userId) throw new ForbiddenException("この講座を更新する権限がありません");
 
         if (!request.Name.IsNullOrEmpty()) course.Name = request.Name!;
 

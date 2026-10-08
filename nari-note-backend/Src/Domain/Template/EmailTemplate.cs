@@ -1,196 +1,85 @@
+using System.Collections.Concurrent;
+using System.Net;
+using System.Reflection;
+
 namespace NariNoteBackend.Domain.Template;
 
+/// <summary>
+/// メール本文のテンプレート
+/// 本文は Email/ 配下の .html / .txt ファイル（埋め込みリソース）で管理し、
+/// {{key}} 形式のプレースホルダーを置換して生成する
+/// </summary>
 public static class EmailTemplate
 {
+    const string ResourcePrefix = "NariNoteBackend.Domain.Template.Email.";
+
+    static readonly ConcurrentDictionary<string, string> Cache = new();
+
     public static string SignupVerificationHtml(string verificationUrl)
     {
-        return $"""
-                <!DOCTYPE html>
-                <html lang="ja">
-                <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>メールアドレスの確認</title>
-                </head>
-                <body style="margin:0;padding:0;background-color:#f5f5f0;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN',sans-serif;">
-                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f0;padding:40px 0;">
-                    <tr>
-                      <td align="center">
-                        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-                
-                          <!-- Header -->
-                          <tr>
-                            <td style="background-color:#1a1a1a;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
-                              <span style="font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">なりノート</span>
-                              <span style="display:block;font-size:12px;color:#888888;margin-top:4px;letter-spacing:2px;">NOTE YOUR THOUGHTS</span>
-                            </td>
-                          </tr>
-                
-                          <!-- Body -->
-                          <tr>
-                            <td style="background-color:#ffffff;padding:48px 40px;">
-                              <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1a1a1a;line-height:1.4;">
-                                メールアドレスの確認
-                              </h1>
-                              <p style="margin:0 0 8px;font-size:15px;color:#555555;line-height:1.7;">
-                                なりノートへご登録いただき、ありがとうございます。
-                              </p>
-                              <p style="margin:0 0 32px;font-size:15px;color:#555555;line-height:1.7;">
-                                以下のボタンをクリックして、メールアドレスを確認してください。
-                              </p>
-                
-                              <!-- CTA Button -->
-                              <table width="100%" cellpadding="0" cellspacing="0">
-                                <tr>
-                                  <td align="center" style="padding:8px 0 40px;">
-                                    <a href="{verificationUrl}"
-                                       style="display:inline-block;background-color:#1a1a1a;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:16px 48px;border-radius:8px;letter-spacing:0.3px;">
-                                      メールアドレスを確認する
-                                    </a>
-                                  </td>
-                                </tr>
-                              </table>
-                
-                              <!-- Divider -->
-                              <hr style="border:none;border-top:1px solid #eeeeee;margin:0 0 32px;">
-                
-                              <p style="margin:0 0 8px;font-size:13px;color:#888888;line-height:1.7;">
-                                ボタンが機能しない場合は、以下のURLをブラウザに貼り付けてください：
-                              </p>
-                              <p style="margin:0;font-size:12px;color:#aaaaaa;word-break:break-all;line-height:1.6;">
-                                {verificationUrl}
-                              </p>
-                            </td>
-                          </tr>
-                
-                          <!-- Footer -->
-                          <tr>
-                            <td style="background-color:#f5f5f0;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
-                              <p style="margin:0 0 8px;font-size:12px;color:#aaaaaa;line-height:1.6;">
-                                このメールに心当たりがない場合は、無視していただいて構いません。
-                              </p>
-                              <p style="margin:0;font-size:12px;color:#aaaaaa;">
-                                © 2026 nari-note. All rights reserved.
-                              </p>
-                            </td>
-                          </tr>
-
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                </body>
-                </html>
-                """;
+        return RenderHtml("SignupVerification.html", ("verificationUrl", verificationUrl));
     }
 
     public static string SignupVerificationText(string verificationUrl)
     {
-        return $"""
-                なりノートへご登録いただき、ありがとうございます。
+        return RenderText("SignupVerification.txt", ("verificationUrl", verificationUrl));
+    }
 
-                以下のURLにアクセスして、メールアドレスを確認してください：
-                {verificationUrl}
+    public static string AlreadyRegisteredHtml(string loginUrl, string forgotPasswordUrl)
+    {
+        return RenderHtml(
+            "AlreadyRegistered.html",
+            ("loginUrl", loginUrl),
+            ("forgotPasswordUrl", forgotPasswordUrl)
+        );
+    }
 
-                このメールに心当たりがない場合は、無視していただいて構いません。
-
-                © 2026 nari-note
-                """;
+    public static string AlreadyRegisteredText(string loginUrl, string forgotPasswordUrl)
+    {
+        return RenderText(
+            "AlreadyRegistered.txt",
+            ("loginUrl", loginUrl),
+            ("forgotPasswordUrl", forgotPasswordUrl)
+        );
     }
 
     public static string PasswordResetHtml(string resetUrl)
     {
-        return $"""
-                <!DOCTYPE html>
-                <html lang="ja">
-                <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>パスワードの再設定</title>
-                </head>
-                <body style="margin:0;padding:0;background-color:#f5f5f0;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN',sans-serif;">
-                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f0;padding:40px 0;">
-                    <tr>
-                      <td align="center">
-                        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-
-                          <!-- Header -->
-                          <tr>
-                            <td style="background-color:#1a1a1a;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
-                              <span style="font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">なりノート</span>
-                              <span style="display:block;font-size:12px;color:#888888;margin-top:4px;letter-spacing:2px;">NOTE YOUR THOUGHTS</span>
-                            </td>
-                          </tr>
-
-                          <!-- Body -->
-                          <tr>
-                            <td style="background-color:#ffffff;padding:48px 40px;">
-                              <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1a1a1a;line-height:1.4;">
-                                パスワードの再設定
-                              </h1>
-                              <p style="margin:0 0 8px;font-size:15px;color:#555555;line-height:1.7;">
-                                パスワードの再設定リクエストを受け付けました。
-                              </p>
-                              <p style="margin:0 0 32px;font-size:15px;color:#555555;line-height:1.7;">
-                                以下のボタンをクリックして、新しいパスワードを設定してください。リンクの有効期限は1時間です。
-                              </p>
-
-                              <!-- CTA Button -->
-                              <table width="100%" cellpadding="0" cellspacing="0">
-                                <tr>
-                                  <td align="center" style="padding:8px 0 40px;">
-                                    <a href="{resetUrl}"
-                                       style="display:inline-block;background-color:#1a1a1a;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:16px 48px;border-radius:8px;letter-spacing:0.3px;">
-                                      パスワードを再設定する
-                                    </a>
-                                  </td>
-                                </tr>
-                              </table>
-
-                              <!-- Divider -->
-                              <hr style="border:none;border-top:1px solid #eeeeee;margin:0 0 32px;">
-
-                              <p style="margin:0 0 8px;font-size:13px;color:#888888;line-height:1.7;">
-                                ボタンが機能しない場合は、以下のURLをブラウザに貼り付けてください：
-                              </p>
-                              <p style="margin:0;font-size:12px;color:#aaaaaa;word-break:break-all;line-height:1.6;">
-                                {resetUrl}
-                              </p>
-                            </td>
-                          </tr>
-
-                          <!-- Footer -->
-                          <tr>
-                            <td style="background-color:#f5f5f0;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
-                              <p style="margin:0 0 8px;font-size:12px;color:#aaaaaa;line-height:1.6;">
-                                このメールに心当たりがない場合は、無視していただいて構いません。
-                              </p>
-                              <p style="margin:0;font-size:12px;color:#aaaaaa;">
-                                © 2026 nari-note. All rights reserved.
-                              </p>
-                            </td>
-                          </tr>
-
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                </body>
-                </html>
-                """;
+        return RenderHtml("PasswordReset.html", ("resetUrl", resetUrl));
     }
 
     public static string PasswordResetText(string resetUrl)
     {
-        return $"""
-                パスワードの再設定リクエストを受け付けました。
+        return RenderText("PasswordReset.txt", ("resetUrl", resetUrl));
+    }
 
-                以下のURLにアクセスして、新しいパスワードを設定してください（有効期限：1時間）：
-                {resetUrl}
+    static string RenderHtml(string fileName, params (string Key, string Value)[] values)
+    {
+        return Render(fileName, values.Select(v => (v.Key, WebUtility.HtmlEncode(v.Value))).ToArray());
+    }
 
-                このメールに心当たりがない場合は、無視していただいて構いません。
+    static string RenderText(string fileName, params (string Key, string Value)[] values)
+    {
+        return Render(fileName, values);
+    }
 
-                © 2026 nari-note
-                """;
+    static string Render(string fileName, (string Key, string Value)[] values)
+    {
+        var template = Cache.GetOrAdd(fileName, Load);
+        foreach (var (key, value) in values)
+        {
+            template = template.Replace($"{{{{{key}}}}}", value);
+        }
+
+        return template;
+    }
+
+    static string Load(string fileName)
+    {
+        var resourceName = ResourcePrefix + fileName;
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
+            ?? throw new InvalidOperationException($"メールテンプレートが見つかりません: {resourceName}");
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
     }
 }
