@@ -30,6 +30,12 @@ public class User : EntityBase
 
     public bool IsEmailVerified { get; set; } = false;
 
+    // メールアドレスは小文字・前後空白除去で正規化して保存・照合する
+    public static string NormalizeEmail(string email)
+    {
+        return email.Trim().ToLowerInvariant();
+    }
+
     // Navigation Properties
     public List<Article> Articles { get; set; } = new();
     public List<Course> Courses { get; set; } = new();

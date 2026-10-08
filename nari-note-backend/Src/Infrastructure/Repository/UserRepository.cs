@@ -47,15 +47,25 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> FindByEmailAsync(string email)
     {
-        return await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        var normalizedEmail = User.NormalizeEmail(email);
+
+        // lower("Email") の一意インデックスを利用して大文字小文字を区別せずに照合する
+        return await context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
     }
 
     public async Task<User?> FindByUsernameOrEmailAsync(string usernameOrEmail)
     {
+        var normalizedEmail = User.NormalizeEmail(usernameOrEmail);
+
         return await context.Users
-            .FirstOrDefaultAsync(u => u.Name == usernameOrEmail || u.Email == usernameOrEmail);
+            .FirstOrDefaultAsync(u => u.Name == usernameOrEmail || u.Email.ToLower() == normalizedEmail);
     }
-    
+
+    public async Task<bool> ExistsByNameAsync(string name, UserId? excludeUserId = null)
+    {
+        return await context.Users.AnyAsync(u => u.Name == name && (excludeUserId == null || u.Id != excludeUserId));
+    }
+
     public async Task<User> CreateAsync(User user)
     {
         context.Users.Add(user);
