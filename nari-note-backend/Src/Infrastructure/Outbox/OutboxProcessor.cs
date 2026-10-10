@@ -3,12 +3,16 @@ using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Extension;
+using Serilog.Context;
 
 namespace NariNoteBackend.Infrastructure.Outbox;
 
 public class OutboxProcessor
 {
     public const int BatchSize = 20;
+
+    // ポーリング中のログに付与するプロパティ名。Program.cs の Serilog フィルタで出力対象から除外する
+    public const string PollingLogProperty = "OutboxPolling";
 
     public static readonly TimeSpan Lease = TimeSpan.FromMinutes(2);
 
@@ -35,14 +39,29 @@ public class OutboxProcessor
 
     public async Task<int> ProcessBatchAsync()
     {
-        var messages = await outboxMessageRepository.ClaimPendingAsync(BatchSize, timeProvider.UtcNow(), Lease);
+        var messages = await ClaimPendingAsync();
+        if (messages.Count == 0) return 0;
 
         foreach (var message in messages)
         {
             await ProcessAsync(message);
         }
 
+        logger.LogInformation(
+            "Outbox batch processed. Count={Count} Succeeded={Succeeded}",
+            messages.Count,
+            messages.Count(message => message.ProcessedAt != null)
+        );
+
         return messages.Count;
+    }
+
+    async Task<IReadOnlyList<OutboxMessage>> ClaimPendingAsync()
+    {
+        using (LogContext.PushProperty(PollingLogProperty, true))
+        {
+            return await outboxMessageRepository.ClaimPendingAsync(BatchSize, timeProvider.UtcNow(), Lease);
+        }
     }
 
     async Task ProcessAsync(OutboxMessage message)
