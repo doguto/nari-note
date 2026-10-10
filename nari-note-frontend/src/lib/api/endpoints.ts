@@ -41,6 +41,7 @@ import type {
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
   SearchArticlesRequest,
@@ -135,6 +136,10 @@ export const authApi = {
   },
   verifyEmail: async (data: VerifyEmailRequest): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/api/auth/verify-email', data);
+    return response;
+  },
+  resendVerificationEmail: async (): Promise<ResendVerificationEmailResponse> => {
+    const response = await apiClient.post<ResendVerificationEmailResponse>('/api/auth/resend-verification');
     return response;
   },
   updatePassword: async (data: UpdatePasswordRequest): Promise<UpdatePasswordResponse> => {

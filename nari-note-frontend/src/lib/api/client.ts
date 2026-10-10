@@ -39,8 +39,8 @@ axiosInstance.interceptors.response.use(
       // 未認証: ログインモーダルを表示
       unauthorizedHandler.trigger();
     } else if (error.response?.status === 403) {
-      // ログイン済みだが権限が無い: 権限エラーモーダルを表示
-      forbiddenHandler.trigger(serverMessage);
+      // ログイン済みだが権限が無い: 権限エラーモーダルを表示（メール未認証の場合は再送導線を表示）
+      forbiddenHandler.trigger(serverMessage, error.response?.data?.code);
     }
     return Promise.reject(serverMessage ? new Error(serverMessage) : error);
   }

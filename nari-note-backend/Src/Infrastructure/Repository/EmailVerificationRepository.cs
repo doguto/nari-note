@@ -41,6 +41,14 @@ public class EmailVerificationRepository : IEmailVerificationRepository
             .FirstOrDefaultAsync(ev => ev.Token == token);
     }
 
+    public async Task<EmailVerification?> FindLatestByUserIdAsync(UserId userId)
+    {
+        return await context.EmailVerifications
+            .Where(ev => ev.UserId == userId)
+            .OrderByDescending(ev => ev.CreatedAt)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<EmailVerification> UpdateAsync(EmailVerification entity)
     {
         context.EmailVerifications.Update(entity);

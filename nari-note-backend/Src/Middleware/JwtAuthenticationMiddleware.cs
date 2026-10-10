@@ -1,4 +1,5 @@
 using System.Net;
+using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Extension;
@@ -132,6 +133,21 @@ public class JwtAuthenticationMiddleware
                         path = context.Request.Path
                     }
                 });
+            return;
+        }
+
+        // メール認証が必要なエンドポイントは、未認証ユーザーを拒否する
+        var requireVerifiedEmail = endpoint?.Metadata.GetMetadata<RequireVerifiedEmailAttribute>() != null;
+        if (requireVerifiedEmail && !user.IsEmailVerified)
+        {
+            context.Response.StatusCode = HttpStatusCode.Forbidden.AsInt();
+            await context.Response.WriteAsJsonAsync(new ErrorResponse
+            {
+                StatusCode = HttpStatusCode.Forbidden.AsInt(),
+                Message = "メールアドレスの認証が完了していません。確認メールのリンクから認証を完了してください。",
+                TimeStamp = timeProvider.UtcNow(),
+                Code = ErrorCode.EmailNotVerified
+            });
             return;
         }
 

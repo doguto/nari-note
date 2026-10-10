@@ -66,6 +66,7 @@ public class ArticlesController : ApplicationController
 
     [HttpPost]
     [RequireAuth]
+    [RequireVerifiedEmail]
     [ValidateModelState]
     public async Task<ActionResult> CreateArticle([FromBody] CreateArticleRequest request)
     {
@@ -85,6 +86,7 @@ public class ArticlesController : ApplicationController
 
     [HttpPut("{id}")]
     [RequireAuth]
+    [RequireVerifiedEmail]
     [ValidateModelState]
     public async Task<ActionResult<UpdateArticleResponse>> UpdateArticle(ArticleId id, [FromBody] UpdateArticleRequest request)
     {

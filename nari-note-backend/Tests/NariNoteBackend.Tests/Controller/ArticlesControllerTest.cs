@@ -72,6 +72,22 @@ public class ArticlesControllerTest : IntegrationTestBase
     }
 
     [Fact]
+    public async Task メール未認証のユーザーは記事を作成できない()
+    {
+        var author = new UserBuilder().EmailUnverified().Build();
+        await SeedAsync(author);
+
+        var response = await CreateClientAs(author).PostAsJsonAsync(
+            "/api/articles",
+            new { title = "タイトル", body = "本文" }
+        );
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ErrorCode.EmailNotVerified, (await ReadAsync<ErrorResponse>(response)).Code);
+        Assert.Equal(0, await QueryAsync(db => db.Articles.CountAsync()));
+    }
+
+    [Fact]
     public async Task 記事を作成するとログインユーザーを作者として保存される()
     {
         var author = new UserBuilder().Build();
@@ -247,6 +263,23 @@ public class ArticlesControllerTest : IntegrationTestBase
     #endregion
 
     #region PUT /api/articles/{id}
+
+    [Fact]
+    public async Task メール未認証のユーザーは自分の記事でも更新できない()
+    {
+        var author = new UserBuilder().EmailUnverified().Build();
+        var article = new ArticleBuilder(author).WithTitle("旧タイトル").Build();
+        await SeedAsync(author, article);
+
+        var response = await CreateClientAs(author).PutAsJsonAsync(
+            $"/api/articles/{article.Id.Value}",
+            new { title = "新タイトル" }
+        );
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ErrorCode.EmailNotVerified, (await ReadAsync<ErrorResponse>(response)).Code);
+        Assert.Equal("旧タイトル", (await QueryAsync(db => db.Articles.SingleAsync())).Title);
+    }
 
     [Fact]
     public async Task 作者は記事のタイトル_本文_タグを更新できる()
