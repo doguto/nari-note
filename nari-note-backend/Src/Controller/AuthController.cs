@@ -121,6 +121,7 @@ public class AuthController : ApplicationController
 
     [HttpPost("withdraw")]
     [RequireAuth]
+    [NoTransaction]
     [ValidateModelState]
     [EnableRateLimiting("auth")]
     public async Task<ActionResult<WithdrawResponse>> Withdraw([FromBody] WithdrawRequest request)

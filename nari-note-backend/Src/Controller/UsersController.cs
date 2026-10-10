@@ -51,6 +51,7 @@ public class UsersController : ApplicationController
 
     [HttpPost("icon")]
     [RequireAuth]
+    [NoTransaction]
     [RequestSizeLimit(5_000_000)]
     [EnableRateLimiting("auth")]
     public async Task<ActionResult> UploadUserIcon(IFormFile file)
