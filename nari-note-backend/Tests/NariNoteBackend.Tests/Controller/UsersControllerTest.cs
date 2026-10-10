@@ -179,7 +179,7 @@ public class UsersControllerTest : IntegrationTestBase
         );
     }
 
-    [Fact(Skip = "既知の不具合: UploadUserIconService の形式検証で SKCodec がストリームを破棄し後続の Seek が失敗する。Linux では libSkiaSharp も読み込めない")]
+    [Fact(Skip = "既知の不具合 (#574): UploadUserIconService の形式検証で SKCodec がストリームを破棄し後続の Seek が失敗する。Linux では libSkiaSharp も読み込めない")]
     public async Task アイコン画像をアップロードするとプロフィール画像が更新される()
     {
         var user = new UserBuilder().Build();

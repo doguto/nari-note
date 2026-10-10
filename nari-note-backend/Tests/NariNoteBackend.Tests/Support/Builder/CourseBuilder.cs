@@ -8,7 +8,9 @@ namespace NariNoteBackend.Tests.Support.Builder;
 /// </summary>
 public class CourseBuilder
 {
+    readonly List<Article> articles = new();
     readonly CourseId id = CourseId.From(Guid.CreateVersion7());
+    readonly List<User> likers = new();
     DateTime createdAt = TestTimeProvider.DefaultUtcNow.AddDays(-1);
     readonly User owner;
     string name = "テスト講座";
@@ -43,9 +45,22 @@ public class CourseBuilder
         return this;
     }
 
+    /// <summary>単体テスト用に、読み込み済みの記事として設定する</summary>
+    public CourseBuilder WithArticles(params Article[] values)
+    {
+        this.articles.AddRange(values);
+        return this;
+    }
+
+    public CourseBuilder LikedBy(params User[] users)
+    {
+        this.likers.AddRange(users);
+        return this;
+    }
+
     public Course Build()
     {
-        return new Course
+        var course = new Course
         {
             Id = this.id,
             Name = this.name,
@@ -55,5 +70,13 @@ public class CourseBuilder
             CreatedAt = this.createdAt,
             UpdatedAt = this.createdAt
         };
+
+        course.Articles.AddRange(this.articles);
+        foreach (var liker in this.likers)
+        {
+            course.CourseLikes.Add(TestEntity.CourseLike(liker, course));
+        }
+
+        return course;
     }
 }

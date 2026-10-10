@@ -161,7 +161,7 @@ public class CoursesControllerTest : IntegrationTestBase
         Assert.Equal(["新しい講座", "古い講座"], body.Courses.Select(c => c.Name));
     }
 
-    [Fact(Skip = "既知の不具合: CourseRepository.FindPublishedByAuthorAsync が未公開の記事も含めて返す")]
+    [Fact(Skip = "既知の不具合 (#572): CourseRepository.FindPublishedByAuthorAsync が未公開の記事も含めて返す")]
     public async Task 作者別の講座一覧に未公開の記事は含まれない()
     {
         var owner = new UserBuilder().Build();
