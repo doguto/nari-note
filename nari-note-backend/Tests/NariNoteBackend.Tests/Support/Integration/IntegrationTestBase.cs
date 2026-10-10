@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Infrastructure.Database;
+using NariNoteBackend.Infrastructure.Outbox;
 
 namespace NariNoteBackend.Tests.Support.Integration;
 
@@ -58,9 +59,32 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         using var scope = Factory.Services.CreateScope();
         var token = scope.ServiceProvider.GetRequiredService<IJwtHelper>().GenerateToken(user.Id, user.Name);
 
+        return CreateClientWithToken(token);
+    }
+
+    /// <summary>指定した認証トークンを Cookie に持つクライアント</summary>
+    protected HttpClient CreateClientWithToken(string token)
+    {
         var client = Factory.CreateClient();
         client.DefaultRequestHeaders.Add("Cookie", $"authToken={token}");
         return client;
+    }
+
+    /// <summary>レスポンスの Set-Cookie から認証トークンを取り出す（無ければ null）</summary>
+    protected static string? GetAuthToken(HttpResponseMessage response)
+    {
+        const string prefix = "authToken=";
+        if (!response.Headers.TryGetValues("Set-Cookie", out var cookies)) return null;
+
+        var cookie = cookies.FirstOrDefault(c => c.StartsWith(prefix));
+        return cookie?[prefix.Length..].Split(';')[0];
+    }
+
+    /// <summary>Outbox に溜まったメッセージを配送する（本番では OutboxWorker が定期実行する処理）</summary>
+    protected async Task ProcessOutboxAsync()
+    {
+        using var scope = Factory.Services.CreateScope();
+        await scope.ServiceProvider.GetRequiredService<OutboxProcessor>().ProcessBatchAsync();
     }
 
     /// <summary>テストデータを DB に投入する</summary>

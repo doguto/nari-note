@@ -10,6 +10,7 @@ public class ArticleBuilder
 {
     readonly User author;
     readonly ArticleId id = ArticleId.From(Guid.CreateVersion7());
+    int? articleOrder;
     string body = "テスト本文";
     Course? course;
     DateTime createdAt = TestTimeProvider.DefaultUtcNow.AddDays(-1);
@@ -51,9 +52,10 @@ public class ArticleBuilder
         return this;
     }
 
-    public ArticleBuilder InCourse(Course value)
+    public ArticleBuilder InCourse(Course value, int? order = null)
     {
         this.course = value;
+        this.articleOrder = order;
         return this;
     }
 
@@ -68,6 +70,7 @@ public class ArticleBuilder
             Author = this.author,
             CourseId = this.course?.Id,
             Course = this.course,
+            ArticleOrder = this.articleOrder,
             PublishedAt = this.publishedAt,
             CreatedAt = this.createdAt,
             UpdatedAt = this.createdAt
