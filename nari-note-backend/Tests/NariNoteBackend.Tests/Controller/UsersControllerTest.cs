@@ -6,7 +6,6 @@ using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Tests.Support;
 using NariNoteBackend.Tests.Support.Builder;
 using NariNoteBackend.Tests.Support.Integration;
-using SkiaSharp;
 
 namespace NariNoteBackend.Tests.Controller;
 
@@ -172,14 +171,15 @@ public class UsersControllerTest : IntegrationTestBase
         return new MultipartFormDataContent { { file, "file", "icon" } };
     }
 
+    // 1x1 ピクセルの PNG 画像
     static byte[] CreatePngBytes()
     {
-        using var bitmap = new SKBitmap(4, 4);
-        using var data = bitmap.Encode(SKEncodedImageFormat.Png, 100);
-        return data.ToArray();
+        return Convert.FromBase64String(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+        );
     }
 
-    [Fact(Skip = "既知の不具合: UploadUserIconService の形式検証で SKCodec がストリームを破棄するため、後続の Seek が失敗する")]
+    [Fact(Skip = "既知の不具合: UploadUserIconService の形式検証で SKCodec がストリームを破棄し後続の Seek が失敗する。Linux では libSkiaSharp も読み込めない")]
     public async Task アイコン画像をアップロードするとプロフィール画像が更新される()
     {
         var user = new UserBuilder().Build();
