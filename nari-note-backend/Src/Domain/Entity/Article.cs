@@ -38,7 +38,9 @@ public class Article : EntityBase
     public List<ArticleTag> ArticleTags { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
     public List<Comment> Comments { get; set; } = new();
-    public int LikeCount => Likes.Count;
+    // いいね数は Likes 全行をロードせず、Repository でサブクエリ COUNT により設定する
+    [NotMapped]
+    public int LikeCount { get; set; }
 
     public List<Kifu> Kifus { get; set; } = new();
 

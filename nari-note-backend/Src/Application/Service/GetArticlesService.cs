@@ -27,7 +27,7 @@ public class GetArticlesService
             AuthorName = a.Author.Name,
             UserIconImageUrl = a.Author.ProfileImage,
             Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
-            LikeCount = a.Likes.Count,
+            LikeCount = a.LikeCount,
             IsPublished = a.IsPublished,
             PublishedAt = a.PublishedAt,
             CreatedAt = a.CreatedAt,
