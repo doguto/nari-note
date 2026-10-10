@@ -26,8 +26,8 @@ public class ArticlesControllerTest : IntegrationTestBase
         await SeedAsync(
             author,
             course,
-            new ArticleBuilder(author).WithTitle("古い記事").CreatedAt(Now.AddDays(-3)).Build(),
-            new ArticleBuilder(author).WithTitle("新しい記事").CreatedAt(Now.AddDays(-1)).Build(),
+            new ArticleBuilder(author).WithTitle("古い記事").PublishedAt(Now.AddDays(-3)).Build(),
+            new ArticleBuilder(author).WithTitle("新しい記事").PublishedAt(Now.AddDays(-1)).Build(),
             new ArticleBuilder(author).WithTitle("下書き").Draft().Build(),
             new ArticleBuilder(author).WithTitle("予約投稿").PublishedAt(Now.AddDays(1)).Build(),
             new ArticleBuilder(author).WithTitle("講座の記事").InCourse(course).Build()
@@ -47,9 +47,9 @@ public class ArticlesControllerTest : IntegrationTestBase
         var author = new UserBuilder().Build();
         await SeedAsync(
             author,
-            new ArticleBuilder(author).WithTitle("1番目").CreatedAt(Now.AddDays(-1)).Build(),
-            new ArticleBuilder(author).WithTitle("2番目").CreatedAt(Now.AddDays(-2)).Build(),
-            new ArticleBuilder(author).WithTitle("3番目").CreatedAt(Now.AddDays(-3)).Build()
+            new ArticleBuilder(author).WithTitle("1番目").PublishedAt(Now.AddDays(-1)).Build(),
+            new ArticleBuilder(author).WithTitle("2番目").PublishedAt(Now.AddDays(-2)).Build(),
+            new ArticleBuilder(author).WithTitle("3番目").PublishedAt(Now.AddDays(-3)).Build()
         );
 
         var response = await CreateClient().GetAsync("/api/articles?limit=1&offset=1");
@@ -480,8 +480,8 @@ public class ArticlesControllerTest : IntegrationTestBase
         await SeedAsync(
             author,
             otherUser,
-            new ArticleBuilder(author).WithTitle("古い記事").CreatedAt(Now.AddDays(-3)).Build(),
-            new ArticleBuilder(author).WithTitle("新しい記事").CreatedAt(Now.AddDays(-1)).Build(),
+            new ArticleBuilder(author).WithTitle("古い記事").PublishedAt(Now.AddDays(-3)).Build(),
+            new ArticleBuilder(author).WithTitle("新しい記事").PublishedAt(Now.AddDays(-1)).Build(),
             new ArticleBuilder(author).WithTitle("下書き").Draft().Build(),
             new ArticleBuilder(otherUser).WithTitle("他人の記事").Build()
         );
@@ -605,9 +605,9 @@ public class ArticlesControllerTest : IntegrationTestBase
         await SeedAsync(
             author,
             otherUser,
-            new ArticleBuilder(author).WithTitle("公開記事").CreatedAt(Now.AddDays(-3)).Build(),
-            new ArticleBuilder(author).WithTitle("下書き").Draft().CreatedAt(Now.AddDays(-2)).Build(),
-            new ArticleBuilder(author).WithTitle("予約投稿").PublishedAt(Now.AddDays(1)).CreatedAt(Now.AddDays(-1)).Build(),
+            new ArticleBuilder(author).WithTitle("公開記事").PublishedAt(Now.AddDays(-3)).Build(),
+            new ArticleBuilder(author).WithTitle("下書き").Draft().Build(),
+            new ArticleBuilder(author).WithTitle("予約投稿").PublishedAt(Now.AddDays(1)).Build(),
             new ArticleBuilder(otherUser).WithTitle("他人の記事").Build()
         );
 
@@ -615,7 +615,7 @@ public class ArticlesControllerTest : IntegrationTestBase
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await ReadAsync<GetMyArticlesResponse>(response);
-        Assert.Equal(["予約投稿", "下書き", "公開記事"], body.Articles.Select(a => a.Title));
+        Assert.Equal(["下書き", "予約投稿", "公開記事"], body.Articles.Select(a => a.Title));
     }
 
     #endregion

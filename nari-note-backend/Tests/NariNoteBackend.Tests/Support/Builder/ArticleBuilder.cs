@@ -88,7 +88,8 @@ public class ArticleBuilder
             ArticleOrder = this.articleOrder,
             PublishedAt = this.publishedAt,
             CreatedAt = this.createdAt,
-            UpdatedAt = this.createdAt
+            UpdatedAt = this.createdAt,
+            LikeCount = this.likers.Count
         };
 
         foreach (var name in this.tagNames)
