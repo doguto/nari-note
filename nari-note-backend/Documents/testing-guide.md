@@ -1,0 +1,145 @@
+# テストガイド
+
+バックエンドのテストの方針と書き方をまとめます。
+
+## 実行方法
+
+```bash
+cd nari-note-backend
+
+# 全テスト（結合テストは Docker が必要）
+dotnet test
+
+# 単体テストのみ（Docker 不要）
+dotnet test --filter "FullyQualifiedName~NariNoteBackend.Tests.Application"
+
+# 結合テストのみ
+dotnet test --filter "FullyQualifiedName~NariNoteBackend.Tests.Controller"
+```
+
+## 構成
+
+| 種別 | 対象 | 依存の扱い | 配置 |
+|---|---|---|---|
+| 単体テスト | Service | Repository / Gateway の interface を NSubstitute で差し替え | `Tests/NariNoteBackend.Tests/Application/Service/` |
+| 結合テスト | Controller（HTTP 経由） | 実 Service・実 Repository・実 PostgreSQL（Testcontainers） | `Tests/NariNoteBackend.Tests/Controller/` |
+
+```
+Tests/NariNoteBackend.Tests/
+├── Application/Service/     # Service の単体テスト
+├── Controller/              # Controller の結合テスト
+└── Support/
+    ├── Builder/             # テストデータの Builder
+    ├── Fake/                # 外部サービス（メール・Discord・画像ストレージ）の Fake
+    ├── Integration/         # NariNoteApiFactory / IntegrationTestBase
+    └── TestTimeProvider.cs  # 時刻を固定・変更できる TimeProvider
+```
+
+使用ライブラリ: xUnit v3 / NSubstitute / Microsoft.AspNetCore.Mvc.Testing / Testcontainers / Respawn
+
+## 共通ルール
+
+- テストクラス名は `{対象クラス名}Test`、テストメソッド名は日本語で「何がどうなるか」を書く
+- アサーションは xUnit の `Assert` を使う
+- **テストデータは Builder で作る**。既定値で有効な Entity になるので、テストに関係する項目だけ `With*` 等で上書きする
+- **現在時刻は `TestTimeProvider` で制御する**。既定値は `TestTimeProvider.DefaultUtcNow`（2026-01-01 00:00:00 UTC）。テスト内で `DateTime.UtcNow` は使わない
+- 開発用の `DataSeeder` はテストでは使わない
+
+```csharp
+var author = new UserBuilder().Build();
+var draft = new ArticleBuilder(author).WithTitle("下書き").Draft().Build();
+var scheduled = new ArticleBuilder(author).PublishedAt(TestTimeProvider.DefaultUtcNow.AddHours(1)).Build();
+```
+
+## 単体テスト（Service）
+
+Service はコンストラクタで受け取る interface を `Substitute.For<T>()` で差し替えて直接生成します。
+
+```csharp
+public class CreateArticleServiceTest
+{
+    readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
+    readonly TestTimeProvider timeProvider = new();
+    ...
+
+    [Fact]
+    public async Task 公開指定で公開日時が未指定なら現在時刻で公開される()
+    {
+        var request = CreateRequest();
+        request.IsPublished = true;
+
+        await this.service.ExecuteAsync(request);
+
+        await this.articleRepository.Received(1).CreateAsync(
+            Arg.Is<Article>(a => a.PublishedAt == TestTimeProvider.DefaultUtcNow)
+        );
+    }
+}
+```
+
+### 注意: Vogen の ID 型に `Arg.Any` は使えない
+
+`Arg.Any<ArticleId>()` は内部で `default(ArticleId)` を返しますが、Vogen の未初期化値は等価比較が成立しないため、NSubstitute が引数を特定できず例外になります。「任意の ID」を指定したい場合は `ForAnyArgs` / `WithAnyArgs` を使います。
+
+```csharp
+// ❌ 例外になる
+this.commentRepository.FindByArticleAsync(Arg.Any<ArticleId>()).Returns(comments);
+
+// ✅ 任意の引数にマッチさせる（渡す値は何でもよい）
+this.commentRepository
+    .FindByArticleAsync(ArticleId.From(Guid.CreateVersion7()))
+    .ReturnsForAnyArgs(comments);
+
+await this.kifuRepository.DidNotReceiveWithAnyArgs().ReplaceAllByArticleIdAsync(
+    ArticleId.From(Guid.CreateVersion7()),
+    null!
+);
+```
+
+特定の ID を指定する場合（`FindForceByIdAsync(article.Id)` 等）や、`Arg.Is<Article>(...)` のような Entity への使用は問題ありません。
+
+## 結合テスト（Controller）
+
+`IntegrationTestBase` を継承します。API は `NariNoteApiFactory` が 1 回だけ起動し、結合テスト全体で共有します。
+
+- **テストごとに DB は空になる**（Respawn）。必要なデータは各テストの Arrange で `SeedAsync` する
+- 時計と Fake の記録もテストごとに初期化される
+- 結合テスト同士は直列に実行される
+
+```csharp
+public class ArticlesControllerTest : IntegrationTestBase
+{
+    public ArticlesControllerTest(NariNoteApiFactory factory) : base(factory)
+    {
+    }
+
+    [Fact]
+    public async Task 下書きは作者本人だけが取得できる()
+    {
+        var author = new UserBuilder().Build();
+        var draft = new ArticleBuilder(author).Draft().Build();
+        await SeedAsync(author, draft);
+        var url = $"/api/articles/{draft.Id.Value}";
+
+        Assert.Equal(HttpStatusCode.NotFound, (await CreateClient().GetAsync(url)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await CreateClientAs(author).GetAsync(url)).StatusCode);
+    }
+}
+```
+
+| ヘルパー | 用途 |
+|---|---|
+| `CreateClient()` | 未認証のクライアント |
+| `CreateClientAs(user)` | 指定ユーザーで認証済みのクライアント（`user` は事前に `SeedAsync` しておく） |
+| `SeedAsync(...)` | Entity を DB に投入する |
+| `QueryAsync(db => ...)` | DB の状態を検証する |
+| `ReadAsync<T>(response)` | API と同じ JSON 設定でレスポンスを読む |
+| `TimeProvider` | 時刻の変更（`SetUtcNow` / `Advance`） |
+| `Factory.EmailHelper` 等 | 外部サービスの Fake（送信内容の検証） |
+
+### 本番との違い
+
+- 環境名は `Testing`（SSM・シードデータは読み込まない）
+- メール・Discord・画像ストレージは Fake に差し替え
+- `OutboxWorker`（バックグラウンド処理）は起動しない。Outbox の配送まで検証する場合は `OutboxProcessor` を DI から取得して直接実行する
+- リクエストボディは API の契約を検証するため、DTO ではなく匿名オブジェクトで組み立てる

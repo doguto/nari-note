@@ -333,6 +333,7 @@ python scripts/update-agent-docs.py --dry-run --verbose
 - `nari-note-backend/Documents/architecture.md` - アーキテクチャ設計
 - `nari-note-backend/Documents/error-handling-strategy.md` - エラーハンドリング戦略
 - `nari-note-backend/Documents/development-workflow.md` - 開発ワークフロー
+- `nari-note-backend/Documents/testing-guide.md` - テストの方針と書き方（単体 / 結合）
 
 **フロントエンド:**
 - `nari-note-frontend/docs/implementation-guide.md` - Atomic Design実装ガイド（最重要）

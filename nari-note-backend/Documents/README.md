@@ -55,6 +55,16 @@
 - Entity Framework Coreとの統合
 - Service粒度の設計方針（API一個につきService一個）
 
+### 🧪 テスト
+
+#### [testing-guide.md](./testing-guide.md)
+**テストの方針と書き方**
+
+**内容:**
+- 実行方法
+- 単体テスト（Service）と結合テスト（Controller）の構成
+- テストデータ（Builder）と時刻（TestTimeProvider）の扱い
+
 ### 🔨 開発ワークフロー
 
 #### [development-workflow.md](./development-workflow.md)
