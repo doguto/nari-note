@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Extension;
 using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Infrastructure.Repository;
@@ -10,10 +11,12 @@ namespace NariNoteBackend.Infrastructure.Repository;
 public class CourseRepository : ICourseRepository
 {
     readonly NariNoteDbContext context;
+    readonly TimeProvider timeProvider;
 
-    public CourseRepository(NariNoteDbContext context)
+    public CourseRepository(NariNoteDbContext context, TimeProvider timeProvider)
     {
         this.context = context;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<Course?> FindByIdAsync(CourseId id)
@@ -60,10 +63,11 @@ public class CourseRepository : ICourseRepository
                                         .Where(a => a.CourseId == course.Id && !a.PublishedAt.HasValue)
                                         .ToListAsync();
 
+            var now = timeProvider.UtcNow();
             foreach (var article in articles)
             {
-                article.PublishedAt = course.PublishedAt ?? DateTime.UtcNow;
-                article.UpdatedAt = DateTime.UtcNow;
+                article.PublishedAt = course.PublishedAt ?? now;
+                article.UpdatedAt = now;
             }
         }
 
@@ -74,7 +78,7 @@ public class CourseRepository : ICourseRepository
     public async Task<Course> FindByIdWithArticlesAsync(CourseId id)
     {
         // 予約投稿（公開日時が未来）の記事は含めない
-        var now = DateTime.UtcNow;
+        var now = timeProvider.UtcNow();
         var course = await context.Courses
                                   .Include(c => c.User)
                                   .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now))
@@ -101,7 +105,7 @@ public class CourseRepository : ICourseRepository
 
     public async Task<(List<Course> Courses, int TotalCount)> FindLatestAsync(int limit, int offset)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.UtcNow();
 
         var query = context.Courses
                            .Include(c => c.User)
@@ -121,7 +125,7 @@ public class CourseRepository : ICourseRepository
 
     public async Task<List<Course>> SearchAsync(string keyword, int limit, int offset)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.UtcNow();
         var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
 
         var courses = await context.Courses
@@ -143,7 +147,7 @@ public class CourseRepository : ICourseRepository
 
     public async Task<List<Course>> FindPublishedByAuthorAsync(UserId authorId)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.UtcNow();
 
         return await context.Courses
                             .Include(c => c.User)

@@ -22,7 +22,7 @@ public class OutboxMessage : EntityBase
     [Required]
     public required string Payload { get; set; }
 
-    public DateTime NextAttemptAt { get; set; } = DateTime.UtcNow;
+    public required DateTime NextAttemptAt { get; set; }
 
     public int Attempts { get; set; }
 
@@ -32,14 +32,24 @@ public class OutboxMessage : EntityBase
 
     public string? LastError { get; set; }
 
-    public static OutboxMessage ForEmail(EmailMessage message)
+    public static OutboxMessage ForEmail(EmailMessage message, DateTime now)
     {
-        return new OutboxMessage { Type = EmailType, Payload = JsonSerializer.Serialize(message) };
+        return new OutboxMessage
+        {
+            Type = EmailType,
+            Payload = JsonSerializer.Serialize(message),
+            NextAttemptAt = now
+        };
     }
 
-    public static OutboxMessage ForDiscordEmbed(DiscordEmbed embed)
+    public static OutboxMessage ForDiscordEmbed(DiscordEmbed embed, DateTime now)
     {
-        return new OutboxMessage { Type = DiscordEmbedType, Payload = JsonSerializer.Serialize(embed) };
+        return new OutboxMessage
+        {
+            Type = DiscordEmbedType,
+            Payload = JsonSerializer.Serialize(embed),
+            NextAttemptAt = now
+        };
     }
 
     public void MarkProcessed(DateTime now)

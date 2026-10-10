@@ -15,7 +15,7 @@
 - コーディング規約
   - 命名規則（private修飾子の省略、アンダースコアなし）
   - アクセス修飾子の規約
-  - 日付時刻の扱い（DateTime.UtcNow）
+  - 日付時刻の扱い（TimeProvider）
 - レイヤー別実装パターン
   - Controller層の実装パターンとルール
   - Service層の実装パターンとルール（API一個につきService一個）

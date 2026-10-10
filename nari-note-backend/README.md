@@ -95,7 +95,7 @@ nari-note-backend/
 主要な規約：
 - private変数: アンダースコア無し、キャメルケース、`this.`でアクセス
 - private修飾子: クラスフィールドでは省略
-- 日付時刻: 常に `DateTime.UtcNow` を使用
+- 日付時刻: DI した `TimeProvider` から取得（`timeProvider.UtcNow()`）。`DateTime.UtcNow` は直接使用しない
 
 ### アーキテクチャ
 

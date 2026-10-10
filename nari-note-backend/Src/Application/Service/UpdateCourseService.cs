@@ -10,10 +10,12 @@ namespace NariNoteBackend.Application.Service;
 public class UpdateCourseService
 {
     readonly ICourseRepository courseRepository;
+    readonly TimeProvider timeProvider;
 
-    public UpdateCourseService(ICourseRepository courseRepository)
+    public UpdateCourseService(ICourseRepository courseRepository, TimeProvider timeProvider)
     {
         this.courseRepository = courseRepository;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<UpdateCourseResponse> ExecuteAsync(UserId userId, UpdateCourseRequest request)
@@ -31,10 +33,10 @@ public class UpdateCourseService
         }
         else if (!wasPublished && request.IsPublished.HasValue && request.IsPublished.Value)
         {
-            course.PublishedAt = DateTime.UtcNow;
+            course.PublishedAt = timeProvider.UtcNow();
         }
 
-        course.UpdatedAt = DateTime.UtcNow;
+        course.UpdatedAt = timeProvider.UtcNow();
 
         await courseRepository.UpdateWithArticlesAsync(course);
 

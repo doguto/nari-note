@@ -54,6 +54,7 @@ public static class InfrastructureServiceInstaller
         services.AddHostedService<OutboxWorker>();
 
         // Register helpers
+        services.AddSingleton(TimeProvider.System);
         services.AddScoped<IJwtHelper, JwtHelper>();
         services.AddScoped<ICookieOptionsHelper, CookieOptionsHelper>();
 
