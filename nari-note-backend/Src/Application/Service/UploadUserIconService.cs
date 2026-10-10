@@ -42,7 +42,7 @@ public class UploadUserIconService
 
         await using var stream = file.OpenReadStream();
 
-        if (!IsValidImageMagicBytesAsync(stream))
+        if (!IsDecodableImage(stream))
         {
             throw new ArgumentException("ファイルの形式が正しくありません。");
         }
@@ -59,16 +59,14 @@ public class UploadUserIconService
         return new UploadUserIconResponse { UserIconImageUrl = iconUrl };
     }
 
-    bool IsValidImageMagicBytesAsync(Stream stream)
+    // SKCodec に Stream を直接渡すと codec の破棄時に Stream も破棄されるため、SKData にコピーして渡す。
+    // ネイティブライブラリの読み込み失敗を形式エラーとして扱わないよう、例外は捕捉しない。
+    static bool IsDecodableImage(Stream stream)
     {
-        try
-        {
-            using var codec = SKCodec.Create(stream);
-            return codec != null;
-        }
-        catch
-        {
-            return false;
-        }
+        using var data = SKData.Create(stream);
+        if (data == null) return false;
+
+        using var codec = SKCodec.Create(data);
+        return codec != null;
     }
 }
