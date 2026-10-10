@@ -44,12 +44,29 @@ Tests/NariNoteBackend.Tests/
 - **テストデータは Builder で作る**。既定値で有効な Entity になるので、テストに関係する項目だけ `With*` 等で上書きする
 - **現在時刻は `TestTimeProvider` で制御する**。既定値は `TestTimeProvider.DefaultUtcNow`（2026-01-01 00:00:00 UTC）。テスト内で `DateTime.UtcNow` は使わない
 - 開発用の `DataSeeder` はテストでは使わない
+- いいね・フォロー・タグなど設定項目の少ない Entity は `TestEntity` で作る（`TestEntity.Like(user, article)` 等）
 
 ```csharp
 var author = new UserBuilder().Build();
 var draft = new ArticleBuilder(author).WithTitle("下書き").Draft().Build();
 var scheduled = new ArticleBuilder(author).PublishedAt(TestTimeProvider.DefaultUtcNow.AddHours(1)).Build();
 ```
+
+### どちらのテストを書くか
+
+- **結合テスト**: すべてのエンドポイントについて、正常系・認証・権限・バリデーション・公開状態による出し分けを検証する
+- **単体テスト**: 分岐や境界値（有効期限・公開日時など）を持つ Service について、その分岐を網羅する。Repository の結果を DTO に詰め替えるだけの Service は結合テストで検証する
+
+### テストで不具合を見つけた場合
+
+本来あるべき挙動でテストを書き、修正するまでは理由を付けて `Skip` する。現状の誤った挙動を期待値にしない。
+
+```csharp
+[Fact(Skip = "既知の不具合: KifuRepository.ReplaceAllByArticleIdAsync が余分な既存の棋譜を削除しない")]
+public async Task 棋譜を減らして更新すると余分な棋譜は削除される()
+```
+
+不具合を修正する際は `Skip` を外して、テストが通ることを確認する。
 
 ## 単体テスト（Service）
 
@@ -134,6 +151,9 @@ public class ArticlesControllerTest : IntegrationTestBase
 | `SeedAsync(...)` | Entity を DB に投入する |
 | `QueryAsync(db => ...)` | DB の状態を検証する |
 | `ReadAsync<T>(response)` | API と同じ JSON 設定でレスポンスを読む |
+| `CreateClientWithToken(token)` | 任意の認証トークンを Cookie に持つクライアント |
+| `GetAuthToken(response)` | レスポンスの `Set-Cookie` から認証トークンを取り出す |
+| `ProcessOutboxAsync()` | Outbox に溜まったメッセージを配送する（メール送信等の検証用） |
 | `TimeProvider` | 時刻の変更（`SetUtcNow` / `Advance`） |
 | `Factory.EmailHelper` 等 | 外部サービスの Fake（送信内容の検証） |
 
@@ -141,5 +161,6 @@ public class ArticlesControllerTest : IntegrationTestBase
 
 - 環境名は `Testing`（SSM・シードデータは読み込まない）
 - メール・Discord・画像ストレージは Fake に差し替え
-- `OutboxWorker`（バックグラウンド処理）は起動しない。Outbox の配送まで検証する場合は `OutboxProcessor` を DI から取得して直接実行する
+- `OutboxWorker`（バックグラウンド処理）は起動しない。Outbox の配送まで検証する場合は `ProcessOutboxAsync()` を呼ぶ
+- 認証 Cookie は `Secure` 属性付きで発行されるため、`HttpClient` が自動では送り返さない。サインイン後の状態を検証する場合は `GetAuthToken` と `CreateClientWithToken` を使う
 - リクエストボディは API の契約を検証するため、DTO ではなく匿名オブジェクトで組み立てる
