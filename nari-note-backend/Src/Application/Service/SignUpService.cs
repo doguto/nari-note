@@ -69,7 +69,6 @@ public class SignUpService
 
         await SendVerificationEmailAsync(createdUser);
 
-        // 外部通知は Outbox に保存し、Commit 後にワーカーが送信する
         await outboxMessageRepository.AddAsync(OutboxMessage.ForDiscordEmbed(new DiscordEmbed
         {
             Title = "新規ユーザー登録",

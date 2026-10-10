@@ -24,8 +24,6 @@ public class OutboxMessageRepository : IOutboxMessageRepository
     {
         var leaseUntil = now + lease;
 
-        // 取得と更新を 1 文で行い、FOR UPDATE SKIP LOCKED で複数インスタンス間の重複取得を防ぐ。
-        // 単一文の自動コミットで完結するため、外部 I/O の間は行ロックを保持しない。
         return await context.OutboxMessages
             .FromSql($"""
                 UPDATE "OutboxMessages"

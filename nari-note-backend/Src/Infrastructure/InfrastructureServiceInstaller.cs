@@ -32,8 +32,6 @@ public static class InfrastructureServiceInstaller
             $"Username={configuration["username"]};" +
             $"Password={configuration["password"]}";
         // TransactionMiddleware がリクエスト全体をトランザクション単位にしているため、EnableRetryOnFailure は使用しない
-        // （リトライ戦略は、ユーザー開始のトランザクションを ExecutionStrategy で包む必要があるため）
-        // メール・Discord は Outbox 経由で Commit 後に送信するが、画像ストレージ操作は未対応
         services.AddDbContext<NariNoteDbContext>(
             options => options.UseNpgsql(connectionString)
         );
@@ -52,7 +50,6 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IOutboxMessageRepository, OutboxMessageRepository>();
 
-        // Register outbox worker
         services.AddScoped<OutboxProcessor>();
         services.AddHostedService<OutboxWorker>();
 
@@ -62,7 +59,6 @@ public static class InfrastructureServiceInstaller
 
         // Register gateways
         services.AddOptions();
-        // 外部サービスの遅延が長引かないよう、タイムアウトを明示する
         services.AddHttpClient<ResendClient>(client => client.Timeout = ExternalRequestTimeout);
         services.Configure<ResendClientOptions>(o => { o.ApiToken = configuration["resend_api_token"]!; });
         services.AddTransient<IResend, ResendClient>();

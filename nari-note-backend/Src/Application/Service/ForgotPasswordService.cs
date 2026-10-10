@@ -40,7 +40,6 @@ public class ForgotPasswordService
 
         await passwordResetTokenRepository.CreateAsync(passwordResetToken);
 
-        // メール送信は Outbox に保存し、Commit 後にワーカーが送信する
         var message = EmailMessageStore.ForgotPasswordMessage(user.Email, tokenGuid);
         await outboxMessageRepository.AddAsync(OutboxMessage.ForEmail(message));
 

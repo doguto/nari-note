@@ -1,9 +1,5 @@
 namespace NariNoteBackend.Infrastructure.Outbox;
 
-/// <summary>
-/// Outbox を一定間隔でポーリングし、未送信メッセージを送信する常駐ワーカー。
-/// BackgroundService は Singleton のため、Scoped な依存は処理ごとにスコープを作って解決する。
-/// </summary>
 public class OutboxWorker : BackgroundService
 {
     static readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(5);
@@ -27,7 +23,6 @@ public class OutboxWorker : BackgroundService
         } while (await WaitNextTickAsync(timer, stoppingToken));
     }
 
-    // バッチが満杯の間は待機せず続けて処理する
     async Task ProcessUntilDrainedAsync(CancellationToken stoppingToken)
     {
         try
@@ -42,11 +37,9 @@ public class OutboxWorker : BackgroundService
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
-            // 停止要求
         }
         catch (System.Exception ex)
         {
-            // DB 障害などでループが終了しないよう、次の周期で再試行する
             logger.LogError(ex, "Outbox polling failed");
         }
     }

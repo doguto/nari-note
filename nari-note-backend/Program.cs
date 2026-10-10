@@ -71,7 +71,7 @@ if (app.Environment.IsDevelopment())
     await DataSeeder.SeedAsync(context);
 }
 
-// エンドポイントのメタデータ（[NoTransaction] 等）を後続ミドルウェアから参照できるよう、ルーティングを明示的に先頭へ置く
+// [NoTransaction] 等のエンドポイント情報を後続ミドルウェアで参照するため先頭に置く
 app.UseRouting();
 
 // CORSミドルウェアを登録（preflightリクエスト対応のため）

@@ -39,8 +39,6 @@ public class DiscordWebhookNotifier : IDiscordNotifier
     {
         var content = new StringContent(payload, Encoding.UTF8, "application/json");
         using var response = await httpClient.PostAsync(webhookUrl, content);
-
-        // 失敗を握りつぶすと Outbox が送信済みと扱うため、HTTP エラーは例外として再試行対象にする
         response.EnsureSuccessStatusCode();
     }
 }

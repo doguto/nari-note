@@ -8,7 +8,6 @@ namespace NariNoteBackend.Middleware;
 
 public class TransactionMiddleware
 {
-    // トランザクション保持時間がこの値を超えた場合は警告ログを出力する
     static readonly TimeSpan SlowTransactionThreshold = TimeSpan.FromSeconds(1);
 
     readonly ILogger<TransactionMiddleware> logger;
