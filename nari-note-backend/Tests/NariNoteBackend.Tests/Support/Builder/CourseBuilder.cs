@@ -9,6 +9,7 @@ namespace NariNoteBackend.Tests.Support.Builder;
 public class CourseBuilder
 {
     readonly CourseId id = CourseId.From(Guid.CreateVersion7());
+    DateTime createdAt = TestTimeProvider.DefaultUtcNow.AddDays(-1);
     readonly User owner;
     string name = "テスト講座";
     DateTime? publishedAt = TestTimeProvider.DefaultUtcNow.AddDays(-1);
@@ -30,6 +31,12 @@ public class CourseBuilder
         return this;
     }
 
+    public CourseBuilder CreatedAt(DateTime value)
+    {
+        this.createdAt = value;
+        return this;
+    }
+
     public CourseBuilder Draft()
     {
         this.publishedAt = null;
@@ -45,8 +52,8 @@ public class CourseBuilder
             UserId = this.owner.Id,
             User = this.owner,
             PublishedAt = this.publishedAt,
-            CreatedAt = TestTimeProvider.DefaultUtcNow.AddDays(-1),
-            UpdatedAt = TestTimeProvider.DefaultUtcNow.AddDays(-1)
+            CreatedAt = this.createdAt,
+            UpdatedAt = this.createdAt
         };
     }
 }

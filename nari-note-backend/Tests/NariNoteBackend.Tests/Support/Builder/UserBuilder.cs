@@ -12,10 +12,12 @@ public class UserBuilder
     static int sequence;
 
     readonly UserId id = UserId.From(Guid.CreateVersion7());
+    string? bio;
     string email;
     bool isEmailVerified = true;
     string name;
     string passwordHash = "test-password-hash";
+    string? profileImage;
 
     public UserBuilder()
     {
@@ -43,6 +45,18 @@ public class UserBuilder
         return this;
     }
 
+    public UserBuilder WithBio(string value)
+    {
+        this.bio = value;
+        return this;
+    }
+
+    public UserBuilder WithProfileImage(string value)
+    {
+        this.profileImage = value;
+        return this;
+    }
+
     public UserBuilder EmailUnverified()
     {
         this.isEmailVerified = false;
@@ -57,6 +71,8 @@ public class UserBuilder
             Name = this.name,
             Email = this.email,
             PasswordHash = this.passwordHash,
+            Bio = this.bio,
+            ProfileImage = this.profileImage,
             IsEmailVerified = this.isEmailVerified,
             CreatedAt = TestTimeProvider.DefaultUtcNow.AddDays(-30),
             UpdatedAt = TestTimeProvider.DefaultUtcNow.AddDays(-30)
