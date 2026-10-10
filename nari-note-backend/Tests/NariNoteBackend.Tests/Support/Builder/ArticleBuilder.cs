@@ -10,6 +10,8 @@ public class ArticleBuilder
 {
     readonly User author;
     readonly ArticleId id = ArticleId.From(Guid.CreateVersion7());
+    readonly List<User> likers = new();
+    readonly List<string> tagNames = new();
     int? articleOrder;
     string body = "テスト本文";
     Course? course;
@@ -59,9 +61,22 @@ public class ArticleBuilder
         return this;
     }
 
+    /// <summary>タグを新規作成して紐づける（結合テストで既存のタグを使う場合は TestEntity.ArticleTag を使用する）</summary>
+    public ArticleBuilder WithTags(params string[] names)
+    {
+        this.tagNames.AddRange(names);
+        return this;
+    }
+
+    public ArticleBuilder LikedBy(params User[] users)
+    {
+        this.likers.AddRange(users);
+        return this;
+    }
+
     public Article Build()
     {
-        return new Article
+        var article = new Article
         {
             Id = this.id,
             Title = this.title,
@@ -75,5 +90,17 @@ public class ArticleBuilder
             CreatedAt = this.createdAt,
             UpdatedAt = this.createdAt
         };
+
+        foreach (var name in this.tagNames)
+        {
+            article.ArticleTags.Add(TestEntity.ArticleTag(article, TestEntity.Tag(name)));
+        }
+
+        foreach (var liker in this.likers)
+        {
+            article.Likes.Add(TestEntity.Like(liker, article));
+        }
+
+        return article;
     }
 }
