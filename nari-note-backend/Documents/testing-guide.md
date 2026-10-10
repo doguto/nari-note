@@ -54,15 +54,17 @@ var scheduled = new ArticleBuilder(author).PublishedAt(TestTimeProvider.DefaultU
 
 ### どちらのテストを書くか
 
-- **結合テスト**: すべてのエンドポイントについて、正常系・認証・権限・バリデーション・公開状態による出し分けを検証する
-- **単体テスト**: 分岐や境界値（有効期限・公開日時など）を持つ Service について、その分岐を網羅する。Repository の結果を DTO に詰め替えるだけの Service は結合テストで検証する
+新しい API を追加したら、Service の単体テストと Controller の結合テストの両方を書く。
+
+- **単体テスト**: すべての Service に `{Service名}Test` を用意する。分岐や境界値（有効期限・公開日時など）を網羅し、Repository に渡す引数とレスポンスへの詰め替えを検証する
+- **結合テスト**: すべてのエンドポイントについて、正常系・認証・権限・バリデーション・公開状態による出し分けを検証する。クエリの正しさ（絞り込み・並び順）は単体テストでは検証できないため、こちらで確認する
 
 ### テストで不具合を見つけた場合
 
-本来あるべき挙動でテストを書き、修正するまでは理由を付けて `Skip` する。現状の誤った挙動を期待値にしない。
+本来あるべき挙動でテストを書き、Issue を起票したうえで、修正するまでは理由と Issue 番号を付けて `Skip` する。現状の誤った挙動を期待値にしない。
 
 ```csharp
-[Fact(Skip = "既知の不具合: KifuRepository.ReplaceAllByArticleIdAsync が余分な既存の棋譜を削除しない")]
+[Fact(Skip = "既知の不具合 (#570): KifuRepository.ReplaceAllByArticleIdAsync が余分な既存の棋譜を削除しない")]
 public async Task 棋譜を減らして更新すると余分な棋譜は削除される()
 ```
 
@@ -115,6 +117,26 @@ await this.kifuRepository.DidNotReceiveWithAnyArgs().ReplaceAllByArticleIdAsync(
 
 特定の ID を指定する場合（`FindForceByIdAsync(article.Id)` 等）や、`Arg.Is<Article>(...)` のような Entity への使用は問題ありません。
 
+### HttpResponse を受け取る Service
+
+`SignInService` のように `HttpResponse` へ Cookie を書き込む Service は、`new DefaultHttpContext().Response` を渡し、`Headers.SetCookie` を検証する。
+
+```csharp
+readonly HttpResponse httpResponse = new DefaultHttpContext().Response;
+...
+Assert.Contains("authToken=jwt-token", this.httpResponse.Headers.SetCookie.ToString());
+```
+
+### Builder でナビゲーションプロパティを設定する
+
+単体テストでは Repository が読み込み済みの Entity を返す想定になるため、タグ・いいね・講座の記事は Builder で設定する。
+
+```csharp
+var article = new ArticleBuilder(author).WithTags("振り飛車").LikedBy(liker).Build();
+var course = new CourseBuilder(owner).WithArticles(article).LikedBy(liker).Build();
+```
+| `Factory.EmailHelper` 等 | 外部サービスの Fake（送信内容の検証） |
+
 ## 結合テスト（Controller）
 
 `IntegrationTestBase` を継承します。API は `NariNoteApiFactory` が 1 回だけ起動し、結合テスト全体で共有します。
@@ -155,7 +177,6 @@ public class ArticlesControllerTest : IntegrationTestBase
 | `GetAuthToken(response)` | レスポンスの `Set-Cookie` から認証トークンを取り出す |
 | `ProcessOutboxAsync()` | Outbox に溜まったメッセージを配送する（メール送信等の検証用） |
 | `TimeProvider` | 時刻の変更（`SetUtcNow` / `Advance`） |
-| `Factory.EmailHelper` 等 | 外部サービスの Fake（送信内容の検証） |
 
 ### 本番との違い
 
