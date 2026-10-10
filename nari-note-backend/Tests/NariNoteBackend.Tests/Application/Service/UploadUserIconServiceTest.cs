@@ -44,7 +44,7 @@ public class UploadUserIconServiceTest
         await this.userRepository.DidNotReceive().UpdateAsync(Arg.Any<User>());
     }
 
-    [Fact(Skip = "既知の不具合 (#574): 形式検証で SKCodec がストリームを破棄し後続の Seek が失敗する。Linux では libSkiaSharp も読み込めない")]
+    [Fact]
     public async Task 画像をアップロードしてプロフィール画像を更新する()
     {
         this.imageStorageGateway
