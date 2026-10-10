@@ -4,6 +4,7 @@ using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -11,17 +12,20 @@ public class SignUpService
 {
     readonly IEmailVerificationRepository emailVerificationRepository;
     readonly IOutboxMessageRepository outboxMessageRepository;
+    readonly TimeProvider timeProvider;
     readonly IUserRepository userRepository;
 
     public SignUpService(
         IUserRepository userRepository,
         IEmailVerificationRepository emailVerificationRepository,
-        IOutboxMessageRepository outboxMessageRepository
+        IOutboxMessageRepository outboxMessageRepository,
+        TimeProvider timeProvider
     )
     {
         this.userRepository = userRepository;
         this.emailVerificationRepository = emailVerificationRepository;
         this.outboxMessageRepository = outboxMessageRepository;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<SignUpResponse> ExecuteAsync(SignUpRequest request)
@@ -36,7 +40,10 @@ public class SignUpService
         {
             // 登録済みアドレスには、その旨とパスワード再設定の案内を通知する
             await outboxMessageRepository.AddAsync(
-                OutboxMessage.ForEmail(EmailMessageStore.AlreadyRegisteredMessage(existingUser.Email))
+                OutboxMessage.ForEmail(
+                    EmailMessageStore.AlreadyRegisteredMessage(existingUser.Email),
+                    timeProvider.UtcNow()
+                )
             );
         }
         else
@@ -69,33 +76,38 @@ public class SignUpService
 
         await SendVerificationEmailAsync(createdUser);
 
-        await outboxMessageRepository.AddAsync(OutboxMessage.ForDiscordEmbed(new DiscordEmbed
-        {
-            Title = "新規ユーザー登録",
-            Description = "新しいユーザーが nari-note に登録しました！",
-            Color = 0x57F287,
-            Timestamp = DateTime.UtcNow.ToString("o"),
-            Fields =
-            [
-                new DiscordEmbedField("名前", createdUser.Name, Inline: true)
-            ],
-            Footer = new DiscordEmbedFooter("nari-note")
-        }));
+        var now = timeProvider.UtcNow();
+        await outboxMessageRepository.AddAsync(OutboxMessage.ForDiscordEmbed(
+            new DiscordEmbed
+            {
+                Title = "新規ユーザー登録",
+                Description = "新しいユーザーが nari-note に登録しました！",
+                Color = 0x57F287,
+                Timestamp = now.ToString("o"),
+                Fields =
+                [
+                    new DiscordEmbedField("名前", createdUser.Name, Inline: true)
+                ],
+                Footer = new DiscordEmbedFooter("nari-note")
+            },
+            now
+        ));
     }
 
     async Task SendVerificationEmailAsync(User user)
     {
+        var now = timeProvider.UtcNow();
         var guid = Guid.NewGuid();
         var emailVerification = new EmailVerification
         {
             UserId = user.Id,
             Token = guid.ToString(),
-            ExpiresAt = DateTime.UtcNow.AddHours(24)
+            ExpiresAt = now.AddHours(24)
         };
         await emailVerificationRepository.CreateAsync(emailVerification);
 
         await outboxMessageRepository.AddAsync(
-            OutboxMessage.ForEmail(EmailMessageStore.SignupMessage(user.Email, guid))
+            OutboxMessage.ForEmail(EmailMessageStore.SignupMessage(user.Email, guid), now)
         );
     }
 }

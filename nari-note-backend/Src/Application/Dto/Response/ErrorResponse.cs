@@ -4,5 +4,5 @@ public class ErrorResponse
 {
     public required int StatusCode { get; set; }
     public required string Message { get; set; }
-    public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
+    public required DateTime TimeStamp { get; set; }
 }

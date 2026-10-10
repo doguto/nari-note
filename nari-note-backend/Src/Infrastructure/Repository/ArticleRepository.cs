@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Extension;
 using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Infrastructure.Repository;
@@ -10,10 +11,12 @@ namespace NariNoteBackend.Infrastructure.Repository;
 public class ArticleRepository : IArticleRepository
 {
     readonly NariNoteDbContext context;
+    readonly TimeProvider timeProvider;
 
-    public ArticleRepository(NariNoteDbContext context)
+    public ArticleRepository(NariNoteDbContext context, TimeProvider timeProvider)
     {
         this.context = context;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<Article> CreateAsync(Article article)
@@ -64,7 +67,7 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<List<Article>> FindByTagAsync(string tagName)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.UtcNow();
         var visibilityFilter = IsPubliclyVisible(now);
 
         return await context.Articles
@@ -116,7 +119,7 @@ public class ArticleRepository : IArticleRepository
                 {
                     ArticleId = article.Id,
                     TagId = tag.Id,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = timeProvider.UtcNow(),
                     Article = article,
                     Tag = tag
                 }).ToList();
@@ -141,7 +144,7 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<(List<Article> Articles, int TotalCount)> FindLatestSingleArticlesAsync(int limit, int offset)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.UtcNow();
         var visibilityFilter = IsPubliclyVisible(now);
 
         // 講座の記事は取得しない
@@ -179,7 +182,7 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<List<Article>> SearchAsync(string keyword, int limit, int offset)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.UtcNow();
         var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
 
         var articles = await context.Articles

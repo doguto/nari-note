@@ -1,7 +1,8 @@
-﻿namespace NariNoteBackend.Domain.Entity;
+namespace NariNoteBackend.Domain.Entity;
 
 public abstract class EntityBase
 {
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    // 未設定の場合は NariNoteDbContext が保存時に現在時刻を設定する
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }

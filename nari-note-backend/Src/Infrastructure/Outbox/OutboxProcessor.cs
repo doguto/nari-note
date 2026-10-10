@@ -2,6 +2,7 @@ using System.Text.Json;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Infrastructure.Outbox;
 
@@ -15,23 +16,26 @@ public class OutboxProcessor
     readonly IEmailHelper emailHelper;
     readonly ILogger<OutboxProcessor> logger;
     readonly IOutboxMessageRepository outboxMessageRepository;
+    readonly TimeProvider timeProvider;
 
     public OutboxProcessor(
         IOutboxMessageRepository outboxMessageRepository,
         IEmailHelper emailHelper,
         IDiscordNotifier discordNotifier,
-        ILogger<OutboxProcessor> logger
+        ILogger<OutboxProcessor> logger,
+        TimeProvider timeProvider
     )
     {
         this.outboxMessageRepository = outboxMessageRepository;
         this.emailHelper = emailHelper;
         this.discordNotifier = discordNotifier;
         this.logger = logger;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<int> ProcessBatchAsync()
     {
-        var messages = await outboxMessageRepository.ClaimPendingAsync(BatchSize, DateTime.UtcNow, Lease);
+        var messages = await outboxMessageRepository.ClaimPendingAsync(BatchSize, timeProvider.UtcNow(), Lease);
 
         foreach (var message in messages)
         {
@@ -46,11 +50,11 @@ public class OutboxProcessor
         try
         {
             await DispatchAsync(message);
-            message.MarkProcessed(DateTime.UtcNow);
+            message.MarkProcessed(timeProvider.UtcNow());
         }
         catch (System.Exception ex)
         {
-            message.MarkFailed(DateTime.UtcNow, ex.Message);
+            message.MarkFailed(timeProvider.UtcNow(), ex.Message);
             logger.LogWarning(
                 ex,
                 "Outbox message failed. Id={Id} Type={Type} Attempts={Attempts} Abandoned={Abandoned}",

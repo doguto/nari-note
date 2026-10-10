@@ -45,7 +45,10 @@ public class Article : EntityBase
     public bool IsPublished => PublishedAt.HasValue;
 
     // 予約投稿を考慮し、公開日時を過ぎているかまで判定する
-    public bool IsPubliclyVisible => PublishedAt.HasValue && PublishedAt.Value <= DateTime.UtcNow;
+    public bool IsPubliclyVisibleAt(DateTime now)
+    {
+        return PublishedAt.HasValue && PublishedAt.Value <= now;
+    }
 
     // Domain Logic
     public bool IsLikedBy(UserId userId)

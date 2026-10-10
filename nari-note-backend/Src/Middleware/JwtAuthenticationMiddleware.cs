@@ -17,7 +17,12 @@ public class JwtAuthenticationMiddleware
         this.logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context, IJwtHelper jwtHelper, IUserRepository userRepository)
+    public async Task InvokeAsync(
+        HttpContext context,
+        IJwtHelper jwtHelper,
+        IUserRepository userRepository,
+        TimeProvider timeProvider
+    )
     {
         var endpoint = context.GetEndpoint();
 
@@ -43,7 +48,7 @@ public class JwtAuthenticationMiddleware
                 {
                     code = "UNAUTHORIZED",
                     message = "認証が必要です",
-                    timestamp = DateTime.UtcNow,
+                    timestamp = timeProvider.UtcNow(),
                     path = context.Request.Path
                 }
             });
@@ -68,7 +73,7 @@ public class JwtAuthenticationMiddleware
                 {
                     code = "UNAUTHORIZED",
                     message = "無効なトークンです",
-                    timestamp = DateTime.UtcNow,
+                    timestamp = timeProvider.UtcNow(),
                     path = context.Request.Path
                 }
             });
@@ -93,7 +98,7 @@ public class JwtAuthenticationMiddleware
                     {
                         code = "UNAUTHORIZED",
                         message = "ユーザー情報が見つかりません",
-                        timestamp = DateTime.UtcNow,
+                        timestamp = timeProvider.UtcNow(),
                         path = context.Request.Path
                     }
                 });
@@ -123,7 +128,7 @@ public class JwtAuthenticationMiddleware
                     {
                         code = "UNAUTHORIZED",
                         message = "ユーザーが存在しません",
-                        timestamp = DateTime.UtcNow,
+                        timestamp = timeProvider.UtcNow(),
                         path = context.Request.Path
                     }
                 });

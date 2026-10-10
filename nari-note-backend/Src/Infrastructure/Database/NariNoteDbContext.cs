@@ -1,13 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Infrastructure.Database;
 
 public class NariNoteDbContext : DbContext
 {
-    public NariNoteDbContext(DbContextOptions<NariNoteDbContext> options) : base(options)
+    readonly TimeProvider timeProvider;
+
+    public NariNoteDbContext(DbContextOptions<NariNoteDbContext> options, TimeProvider timeProvider) : base(options)
     {
+        this.timeProvider = timeProvider;
     }
 
     public DbSet<User> Users { get; set; }
@@ -24,6 +28,35 @@ public class NariNoteDbContext : DbContext
     public DbSet<EmailVerification> EmailVerifications { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        SetTimestampsOnAdded();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default
+    )
+    {
+        SetTimestampsOnAdded();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    // 明示的に設定された値（シードデータ等）は上書きしない
+    void SetTimestampsOnAdded()
+    {
+        var now = timeProvider.UtcNow();
+
+        foreach (var entry in ChangeTracker.Entries<EntityBase>())
+        {
+            if (entry.State != EntityState.Added) continue;
+
+            if (entry.Entity.CreatedAt == default) entry.Entity.CreatedAt = now;
+            if (entry.Entity.UpdatedAt == default) entry.Entity.UpdatedAt = now;
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
