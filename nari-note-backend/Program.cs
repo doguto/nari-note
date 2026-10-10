@@ -4,8 +4,10 @@ using NariNoteBackend.Application;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Infrastructure;
 using NariNoteBackend.Infrastructure.Database;
+using NariNoteBackend.Infrastructure.Outbox;
 using NariNoteBackend.Middleware;
 using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,7 +43,14 @@ builder.Services.AddCors(options =>
 });
 
 // Serilogの設定をsettings.jsonから取り込み
-builder.Host.UseSerilog((context, configuration) => { configuration.ReadFrom.Configuration(context.Configuration); });
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration.ReadFrom.Configuration(context.Configuration)
+                 // Outbox のポーリングは数秒おきに走るため、その SQL ログ等は出力しない（Warning 以上は残す）
+                 .Filter.ByExcluding(logEvent =>
+                     logEvent.Level < LogEventLevel.Warning
+                     && logEvent.Properties.ContainsKey(OutboxProcessor.PollingLogProperty));
+});
 
 // ValueObject の設定
 builder.Services.AddControllers(options => { options.ModelBinderProviders.Insert(0, new ValueObjectModelBinderProvider()); })
