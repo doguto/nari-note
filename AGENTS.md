@@ -204,7 +204,8 @@ nari-note-frontend/src/
   - `NariNoteBackend.Domain.ValueObject` 名前空間に定義
 
 **日付時刻:**
-- 常に `DateTime.UtcNow` を使用（`DateTime.Now` は禁止）
+- 現在時刻は DI した `TimeProvider` から取得（`timeProvider.UtcNow()`）
+- `DateTime.UtcNow` / `DateTime.Now` の直接使用は禁止（テストで時刻を固定できなくなるため）
 
 **エラーハンドリング:**
 - Controllerでtry-catchは不要（グローバル例外ハンドラーが処理）

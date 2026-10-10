@@ -42,7 +42,7 @@ nari-note-backend/src/Controller/            ← 追加先のControllerを読む
 特に以下のパターンを確認しておく：
 - ユーザー取得: `userRepository.FindForceByIdAsync(userId)`
 - BCrypt: `BCrypt.Net.BCrypt.HashPassword()` / `BCrypt.Net.BCrypt.Verify()`
-- 更新時: `user.UpdatedAt = DateTime.UtcNow;`
+- 更新時: `user.UpdatedAt = timeProvider.UtcNow();`（`TimeProvider` をコンストラクタで受け取る）
 - エラー: `throw new ArgumentException("メッセージ")`
 
 ---
