@@ -9,22 +9,19 @@ namespace NariNoteBackend.Application.Service;
 
 public class SignUpService
 {
-    readonly IEmailHelper emailHelper;
     readonly IEmailVerificationRepository emailVerificationRepository;
+    readonly IOutboxMessageRepository outboxMessageRepository;
     readonly IUserRepository userRepository;
-    readonly IDiscordNotifier discordNotifier;
 
     public SignUpService(
         IUserRepository userRepository,
         IEmailVerificationRepository emailVerificationRepository,
-        IEmailHelper emailHelper,
-        IDiscordNotifier discordNotifier
+        IOutboxMessageRepository outboxMessageRepository
     )
     {
         this.userRepository = userRepository;
         this.emailVerificationRepository = emailVerificationRepository;
-        this.emailHelper = emailHelper;
-        this.discordNotifier = discordNotifier;
+        this.outboxMessageRepository = outboxMessageRepository;
     }
 
     public async Task<SignUpResponse> ExecuteAsync(SignUpRequest request)
@@ -38,7 +35,9 @@ public class SignUpService
         else if (existingUser.IsEmailVerified)
         {
             // 登録済みアドレスには、その旨とパスワード再設定の案内を通知する
-            await emailHelper.SendAsync(EmailMessageStore.AlreadyRegisteredMessage(existingUser.Email));
+            await outboxMessageRepository.AddAsync(
+                OutboxMessage.ForEmail(EmailMessageStore.AlreadyRegisteredMessage(existingUser.Email))
+            );
         }
         else
         {
@@ -70,7 +69,7 @@ public class SignUpService
 
         await SendVerificationEmailAsync(createdUser);
 
-        await discordNotifier.NotifyWithEmbedAsync(new DiscordEmbed
+        await outboxMessageRepository.AddAsync(OutboxMessage.ForDiscordEmbed(new DiscordEmbed
         {
             Title = "新規ユーザー登録",
             Description = "新しいユーザーが nari-note に登録しました！",
@@ -81,7 +80,7 @@ public class SignUpService
                 new DiscordEmbedField("名前", createdUser.Name, Inline: true)
             ],
             Footer = new DiscordEmbedFooter("nari-note")
-        });
+        }));
     }
 
     async Task SendVerificationEmailAsync(User user)
@@ -95,6 +94,8 @@ public class SignUpService
         };
         await emailVerificationRepository.CreateAsync(emailVerification);
 
-        await emailHelper.SendAsync(EmailMessageStore.SignupMessage(user.Email, guid));
+        await outboxMessageRepository.AddAsync(
+            OutboxMessage.ForEmail(EmailMessageStore.SignupMessage(user.Email, guid))
+        );
     }
 }

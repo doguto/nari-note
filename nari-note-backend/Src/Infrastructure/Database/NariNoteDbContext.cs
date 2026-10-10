@@ -23,6 +23,7 @@ public class NariNoteDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<EmailVerification> EmailVerifications { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

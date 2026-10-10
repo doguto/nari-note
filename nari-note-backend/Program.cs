@@ -71,7 +71,10 @@ if (app.Environment.IsDevelopment())
     await DataSeeder.SeedAsync(context);
 }
 
-// CORSミドルウェアを最初に登録（preflightリクエスト対応のため）
+// [NoTransaction] 等のエンドポイント情報を後続ミドルウェアで参照するため先頭に置く
+app.UseRouting();
+
+// CORSミドルウェアを登録（preflightリクエスト対応のため）
 app.UseCors();
 
 // SerilogによるAPIリクエストのログ出力を設定
