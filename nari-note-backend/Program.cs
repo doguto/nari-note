@@ -9,15 +9,16 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (!builder.Environment.IsDevelopment())
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("secret.json", true, false);
+}
+// テスト時は WebApplicationFactory から設定を注入するため、SSM は参照しない
+else if (!builder.Environment.IsEnvironment("Testing"))
 {
     var appName = Environment.GetEnvironmentVariable("APP_NAME") ?? "nari-note";
     builder.Configuration.AddSystemsManager($"/{appName}/app", false);
     builder.Configuration.AddSystemsManager($"/{appName}/db", false);
-}
-else
-{
-    builder.Configuration.AddJsonFile("secret.json", true, false);
 }
 
 // Sentry設定
@@ -95,3 +96,6 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+// 結合テストの WebApplicationFactory<Program> から参照できるよう公開する
+public partial class Program;

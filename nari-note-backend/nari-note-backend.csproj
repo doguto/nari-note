@@ -7,6 +7,14 @@
     <RootNamespace>NariNoteBackend</RootNamespace>
   </PropertyGroup>
 
+  <!-- テストプロジェクトは別プロジェクトとしてビルドするため除外する -->
+  <ItemGroup>
+    <Compile Remove="Tests/**" />
+    <Content Remove="Tests/**" />
+    <EmbeddedResource Remove="Tests/**" />
+    <None Remove="Tests/**" />
+  </ItemGroup>
+
   <!-- メールテンプレートは埋め込みリソースとして読み込む -->
   <ItemGroup>
     <None Remove="Src/Domain/Template/Email/**" />
@@ -23,6 +31,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <!-- Design / Tools は PrivateAssets のため、参照元（テスト）にも同じバージョンが伝わるよう明示する -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
