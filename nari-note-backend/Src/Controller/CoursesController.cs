@@ -80,6 +80,7 @@ public class CoursesController : ApplicationController
 
     [HttpPost]
     [RequireAuth]
+    [RequireVerifiedEmail]
     [ValidateModelState]
     public async Task<ActionResult<CreateCourseResponse>> CreateCourse([FromBody] CreateCourseRequest request)
     {
@@ -116,6 +117,7 @@ public class CoursesController : ApplicationController
 
     [HttpPut("{id}")]
     [RequireAuth]
+    [RequireVerifiedEmail]
     [ValidateModelState]
     public async Task<ActionResult<UpdateCourseResponse>> UpdateCourse(CourseId id, [FromBody] UpdateCourseRequest request)
     {

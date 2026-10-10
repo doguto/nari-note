@@ -113,6 +113,7 @@ export interface ErrorResponse {
   statusCode: number;
   message: string;
   timeStamp: string;
+  code?: string;
 }
 
 export interface FollowerUserDto {
@@ -291,6 +292,10 @@ export interface KifuDto {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface LogoutRequest {
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ResendVerificationEmailResponse {
 }
 
 export interface ResetPasswordRequest {

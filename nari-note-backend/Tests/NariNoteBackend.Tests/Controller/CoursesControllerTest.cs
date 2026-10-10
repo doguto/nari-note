@@ -225,6 +225,19 @@ public class CoursesControllerTest : IntegrationTestBase
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    [Fact]
+    public async Task メール未認証のユーザーは講座を作成できない()
+    {
+        var owner = new UserBuilder().EmailUnverified().Build();
+        await SeedAsync(owner);
+
+        var response = await CreateClientAs(owner).PostAsJsonAsync("/api/courses", new { name = "講座" });
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ErrorCode.EmailNotVerified, (await ReadAsync<ErrorResponse>(response)).Code);
+        Assert.Equal(0, await QueryAsync(db => db.Courses.CountAsync()));
+    }
+
     #endregion
 
     #region GET /api/courses/{id}
@@ -331,6 +344,23 @@ public class CoursesControllerTest : IntegrationTestBase
     #endregion
 
     #region PUT /api/courses/{id}
+
+    [Fact]
+    public async Task メール未認証のユーザーは自分の講座でも更新できない()
+    {
+        var owner = new UserBuilder().EmailUnverified().Build();
+        var course = new CourseBuilder(owner).WithName("旧講座名").Build();
+        await SeedAsync(owner, course);
+
+        var response = await CreateClientAs(owner).PutAsJsonAsync(
+            $"/api/courses/{course.Id.Value}",
+            new { name = "新講座名" }
+        );
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ErrorCode.EmailNotVerified, (await ReadAsync<ErrorResponse>(response)).Code);
+        Assert.Equal("旧講座名", (await QueryAsync(db => db.Courses.SingleAsync())).Name);
+    }
 
     [Fact]
     public async Task 作成者は講座名を更新できる()

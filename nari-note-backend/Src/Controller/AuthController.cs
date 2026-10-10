@@ -13,6 +13,7 @@ public class AuthController : ApplicationController
     readonly ForgotPasswordService forgotPasswordService;
     readonly GetCurrentUserService getCurrentUserService;
     readonly LogoutService logoutService;
+    readonly ResendVerificationEmailService resendVerificationEmailService;
     readonly ResetPasswordService resetPasswordService;
     readonly SignInService signInService;
     readonly SignUpService signUpService;
@@ -26,6 +27,7 @@ public class AuthController : ApplicationController
         GetCurrentUserService getCurrentUserService,
         LogoutService logoutService,
         VerifyEmailService verifyEmailService,
+        ResendVerificationEmailService resendVerificationEmailService,
         UpdatePasswordService updatePasswordService,
         ForgotPasswordService forgotPasswordService,
         ResetPasswordService resetPasswordService,
@@ -37,6 +39,7 @@ public class AuthController : ApplicationController
         this.getCurrentUserService = getCurrentUserService;
         this.logoutService = logoutService;
         this.verifyEmailService = verifyEmailService;
+        this.resendVerificationEmailService = resendVerificationEmailService;
         this.updatePasswordService = updatePasswordService;
         this.forgotPasswordService = forgotPasswordService;
         this.resetPasswordService = resetPasswordService;
@@ -76,6 +79,14 @@ public class AuthController : ApplicationController
     public async Task<ActionResult<AuthResponse>> VerifyEmail([FromBody] VerifyEmailRequest request)
     {
         var response = await verifyEmailService.ExecuteAsync(request, Response);
+        return Ok(response);
+    }
+
+    [HttpPost("resend-verification")]
+    [RequireAuth]
+    public async Task<ActionResult<ResendVerificationEmailResponse>> ResendVerificationEmail()
+    {
+        var response = await resendVerificationEmailService.ExecuteAsync(UserId!.Value);
         return Ok(response);
     }
 
