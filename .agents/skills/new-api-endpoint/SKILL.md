@@ -22,9 +22,10 @@ description: nari-noteバックエンドに新しいAPIエンドポイントを�
   - `ArticlesController` → 記事関連（`/api/articles/...`）
   - など
 - **認証要件**:
-  - `[RequireAuth]` → ログイン必須
-  - `[OptionalAuth]` → 任意（`UserId` が nullable）
-  - `[AllowAnonymous]` → 誰でもアクセス可
+  - `[Auth(AuthLevel.VerifiedEmail)]` → ログイン必須 + メール認証済み
+  - `[Auth(AuthLevel.Authenticated)]` → ログイン必須
+  - `[Auth(AuthLevel.Optional)]` → 任意（`UserId` が nullable）
+  - `[Auth(AuthLevel.Anonymous)]` → 誰でもアクセス可
 - **リクエスト内容**: ボディ・パスパラメータ・クエリパラメータ
 - **レスポンス内容**: 返すデータ（なければ空レスポンス）
 
@@ -138,7 +139,7 @@ this.{actionName}Service = {actionName}Service;
 ### 6-3. アクションメソッド
 ```csharp
 [HttpPost("path")]
-[RequireAuth]           // 認証要件に応じて変更
+[Auth(AuthLevel.Authenticated)]  // 認証要件に応じて変更
 [ValidateModelState]    // リクエストボディがある場合
 public async Task<ActionResult<{ActionName}Response>> {ActionName}([FromBody] {ActionName}Request request)
 {

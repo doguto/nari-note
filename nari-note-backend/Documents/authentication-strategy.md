@@ -641,7 +641,7 @@ public class Session
 | 記事の作成・更新（下書き保存を含む） | ❌ 403 |
 | 講座の作成・更新 | ❌ 403 |
 
-- 制限するエンドポイントには `[RequireVerifiedEmail]` を付与し、`JwtAuthenticationMiddleware` で判定する
+- 制限するエンドポイントには `[Auth(AuthLevel.VerifiedEmail)]` を付与し、`JwtAuthenticationMiddleware` で判定する
 - 拒否時は `403 Forbidden` と `code: "EMAIL_NOT_VERIFIED"` を返す。フロントエンドはこのコードを見て確認メールの再送導線を表示する
 - 認証状態はリクエストごとに DB を参照するため、認証完了後は発行済みの Cookie のまま制限が解除される
 
