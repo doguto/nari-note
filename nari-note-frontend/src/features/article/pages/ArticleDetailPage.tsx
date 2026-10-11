@@ -2,6 +2,7 @@
 
 import { useGetArticleContent, useToggleLike } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useRequireVerifiedEmail } from '@/lib/hooks';
 import { PageWithSidebar } from '@/features/global/organisms';
 import { ArticleDetailTemplate } from '../templates/ArticleDetailTemplate';
 import { Comment } from '@/types/comment';
@@ -12,6 +13,7 @@ interface ArticleDetailPageProps {
 
 export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const { userId } = useAuth();
+  const { ensureVerifiedEmail } = useRequireVerifiedEmail();
   const { data: article, isLoading, error, refetch } = useGetArticleContent({ id: articleId });
   const { mutate: toggleLike, isPending: isLikePending } = useToggleLike({
     onSuccess: () => {
@@ -25,6 +27,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
 
   const handleLikeClick = () => {
     if (isLikePending) return;
+    if (!ensureVerifiedEmail()) return;
     toggleLike({ articleId: articleId });
   };
 

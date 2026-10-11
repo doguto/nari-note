@@ -1,6 +1,6 @@
 
 import type { Metadata } from 'next';
-import { AuthGuard } from '@/features/global/organisms';
+import { AuthGuard, VerifiedEmailGuard } from '@/features/global/organisms';
 import { CourseFormPage } from '@/features/course/pages';
 
 export const metadata: Metadata = {
@@ -13,7 +13,9 @@ export const metadata: Metadata = {
 export default function NewCoursePage() {
   return (
     <AuthGuard redirectPath='/courses/new'>
-      <CourseFormPage mode="create" />
+      <VerifiedEmailGuard>
+        <CourseFormPage mode="create" />
+      </VerifiedEmailGuard>
     </AuthGuard>
   );
 }

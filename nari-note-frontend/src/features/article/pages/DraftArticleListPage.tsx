@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetDraftArticles, useDeleteArticle } from '@/lib/api';
+import { useRequireVerifiedEmail } from '@/lib/hooks';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PageWithSidebar } from '@/features/global/organisms';
 import { DraftArticleListTemplate } from '../templates/DraftArticleListTemplate';
@@ -15,6 +16,7 @@ import { DraftArticleListTemplate } from '../templates/DraftArticleListTemplate'
  */
 export function DraftArticleListPage() {
   const router = useRouter();
+  const { ensureVerifiedEmail } = useRequireVerifiedEmail();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   
   const { data, isLoading, error, refetch } = useGetDraftArticles({});
@@ -32,6 +34,7 @@ export function DraftArticleListPage() {
   });
 
   const handleDelete = (id: string, title: string) => {
+    if (!ensureVerifiedEmail()) return;
     if (window.confirm(`「${title}」を削除してもよろしいですか？`)) {
       setDeletingId(id);
       deleteArticle.mutate({ id });

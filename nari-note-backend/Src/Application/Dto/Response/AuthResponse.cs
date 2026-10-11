@@ -7,4 +7,5 @@ public class AuthResponse
     public UserId? UserId { get; set; }
     public string? UserName { get; set; }
     public string? UserIconImageUrl { get; set; }
+    public bool IsEmailVerified { get; set; }
 }

@@ -151,6 +151,7 @@ public class JwtAuthenticationMiddleware
 
         context.Items["UserId"] = userId;
         context.Items["UserName"] = userName;
+        context.Items["IsEmailVerified"] = user.IsEmailVerified;
 
         await next(context);
     }

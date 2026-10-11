@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { useGetUserProfile, useUpdateUserProfile, useUploadUserIcon } from '@/lib/api';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useRequireVerifiedEmail } from '@/lib/hooks';
 import type { GetUserProfileResponse } from '@/lib/api/types';
 import { ProfileEditTemplate } from '../templates/ProfileEditTemplate';
 
@@ -16,6 +17,7 @@ interface ProfileEditPageProps {
 export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) {
   const router = useRouter();
   const { userId } = useAuth();
+  const { ensureVerifiedEmail } = useRequireVerifiedEmail();
 
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
@@ -94,6 +96,9 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     if (!validateForm()) {
       return;
     }
+
+    // アイコンアップロードのみメール認証が必要
+    if (profileImage && !ensureVerifiedEmail()) return;
 
     try {
       if (profileImage) {

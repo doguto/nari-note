@@ -217,6 +217,19 @@ public class AuthControllerTest : IntegrationTestBase
         Assert.Equal(user.Id, body.UserId);
         Assert.Equal("taro", body.UserName);
         Assert.Equal(Factory.ImageStorageGateway.GetUserIconUrl(user.Id.Value.ToString()), body.UserIconImageUrl);
+        Assert.True(body.IsEmailVerified);
+    }
+
+    [Fact]
+    public async Task メール未認証なら現在のユーザー情報は未認証として返す()
+    {
+        var user = new UserBuilder().EmailUnverified().Build();
+        await SeedAsync(user);
+
+        var body = await ReadAsync<AuthResponse>(await CreateClientAs(user).GetAsync("/api/auth/me"));
+
+        Assert.Equal(user.Id, body.UserId);
+        Assert.False(body.IsEmailVerified);
     }
 
     [Fact]
@@ -267,7 +280,9 @@ public class AuthControllerTest : IntegrationTestBase
         var response = await CreateClient().PostAsJsonAsync("/api/auth/verify-email", new { token = "valid-token" });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal(user.Id, (await ReadAsync<AuthResponse>(response)).UserId);
+        var body = await ReadAsync<AuthResponse>(response);
+        Assert.Equal(user.Id, body.UserId);
+        Assert.True(body.IsEmailVerified);
         Assert.False(string.IsNullOrEmpty(GetAuthToken(response)));
         Assert.True((await QueryAsync(db => db.Users.SingleAsync())).IsEmailVerified);
         Assert.True((await QueryAsync(db => db.EmailVerifications.SingleAsync())).IsUsed);

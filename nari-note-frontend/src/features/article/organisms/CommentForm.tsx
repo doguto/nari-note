@@ -5,6 +5,7 @@ import { CommentField } from './CommentField';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { Button } from '@/components/ui/button';
 import { useCreateComment } from '@/lib/api';
+import { useRequireVerifiedEmail } from '@/lib/hooks';
 
 interface CommentFormProps {
   articleId: string;
@@ -21,6 +22,7 @@ interface CommentFormProps {
 export function CommentForm({ articleId, onSuccess }: CommentFormProps) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState<string>('');
+  const { ensureVerifiedEmail } = useRequireVerifiedEmail();
 
   const createComment = useCreateComment({
     onSuccess: () => {
@@ -35,7 +37,10 @@ export function CommentForm({ articleId, onSuccess }: CommentFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    if (!ensureVerifiedEmail()) return;
+
+
     // バリデーション
     if (!message.trim()) {
       setError('コメントを入力してください');
