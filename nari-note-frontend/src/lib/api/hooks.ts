@@ -42,6 +42,7 @@ import type {
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
   SearchArticlesRequest,
@@ -259,6 +260,18 @@ export function useVerifyEmail(options?: UseMutationOptions<AuthResponse, Error,
   const queryClient = useQueryClient();
   return useMutation<AuthResponse, Error, VerifyEmailRequest>({
     mutationFn: (data) => authApi.verifyEmail(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useResendVerificationEmail(options?: UseMutationOptions<ResendVerificationEmailResponse, Error, void>) {
+  const queryClient = useQueryClient();
+  return useMutation<ResendVerificationEmailResponse, Error, void>({
+    mutationFn: () => authApi.resendVerificationEmail(),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);

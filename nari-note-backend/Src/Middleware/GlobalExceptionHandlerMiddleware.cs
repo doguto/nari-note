@@ -63,6 +63,9 @@ public class GlobalExceptionHandlerMiddleware
             // 409 Conflict
             ConflictException => HttpStatusCode.Conflict,
 
+            // 429 Too Many Requests
+            TooManyRequestsException => HttpStatusCode.TooManyRequests,
+
             // 408 Request Timeout
             TimeoutException => HttpStatusCode.RequestTimeout,
 

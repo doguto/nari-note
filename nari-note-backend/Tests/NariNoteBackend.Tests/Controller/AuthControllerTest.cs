@@ -313,6 +313,100 @@ public class AuthControllerTest : IntegrationTestBase
 
     #endregion
 
+    #region POST /api/auth/resend-verification
+
+    [Fact]
+    public async Task メール未認証のユーザーは確認メールを再送できる()
+    {
+        var user = new UserBuilder().WithEmail("taro@example.com").EmailUnverified().Build();
+        await SeedAsync(user);
+
+        var response = await CreateClientAs(user).PostAsync("/api/auth/resend-verification", null);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var verification = await QueryAsync(db => db.EmailVerifications.SingleAsync());
+        Assert.Equal(user.Id, verification.UserId);
+        Assert.Equal(Now.AddHours(24), verification.ExpiresAt);
+
+        await ProcessOutboxAsync();
+        var email = Assert.Single(Factory.EmailHelper.SentMessages);
+        Assert.Equal(["taro@example.com"], email.To);
+        Assert.Contains(verification.Token, email.TextBody);
+    }
+
+    [Fact]
+    public async Task 確認メールは直近の送信から60秒経過するまで再送できない()
+    {
+        var user = new UserBuilder().EmailUnverified().Build();
+        await SeedAsync(user);
+        var client = CreateClientAs(user);
+        await client.PostAsync("/api/auth/resend-verification", null);
+
+        TimeProvider.SetUtcNow(Now.AddSeconds(59));
+        var tooEarly = await client.PostAsync("/api/auth/resend-verification", null);
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, tooEarly.StatusCode);
+        Assert.Equal(1, await QueryAsync(db => db.EmailVerifications.CountAsync()));
+
+        TimeProvider.SetUtcNow(Now.AddSeconds(60));
+        var afterCooldown = await client.PostAsync("/api/auth/resend-verification", null);
+
+        Assert.Equal(HttpStatusCode.OK, afterCooldown.StatusCode);
+        Assert.Equal(2, await QueryAsync(db => db.EmailVerifications.CountAsync()));
+    }
+
+    [Fact]
+    public async Task 再送後も先に発行した確認トークンで認証できる()
+    {
+        var user = new UserBuilder().EmailUnverified().Build();
+        await SeedAsync(user, TestEntity.EmailVerification(user, "first-token", Now.AddHours(1)));
+        TimeProvider.SetUtcNow(Now.AddMinutes(5));
+        await CreateClientAs(user).PostAsync("/api/auth/resend-verification", null);
+
+        var response = await CreateClient().PostAsJsonAsync("/api/auth/verify-email", new { token = "first-token" });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True((await QueryAsync(db => db.Users.SingleAsync())).IsEmailVerified);
+    }
+
+    [Fact]
+    public async Task メール認証済みのユーザーは確認メールを再送できない()
+    {
+        var user = new UserBuilder().Build();
+        await SeedAsync(user);
+
+        var response = await CreateClientAs(user).PostAsync("/api/auth/resend-verification", null);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(0, await QueryAsync(db => db.EmailVerifications.CountAsync()));
+    }
+
+    [Fact]
+    public async Task 未認証では確認メールを再送できない()
+    {
+        var response = await CreateClient().PostAsync("/api/auth/resend-verification", null);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task メールアドレスを認証すると記事を作成できるようになる()
+    {
+        var user = new UserBuilder().EmailUnverified().Build();
+        await SeedAsync(user, TestEntity.EmailVerification(user, "valid-token", Now.AddHours(1)));
+        var client = CreateClientAs(user);
+        var article = new { title = "タイトル", body = "本文" };
+
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/articles", article)).StatusCode);
+
+        await CreateClient().PostAsJsonAsync("/api/auth/verify-email", new { token = "valid-token" });
+
+        // 認証状態は DB を参照するため、発行済みの Cookie のまま利用できる
+        Assert.Equal(HttpStatusCode.OK, (await client.PostAsJsonAsync("/api/articles", article)).StatusCode);
+    }
+
+    #endregion
+
     #region PUT /api/auth/password
 
     [Fact]

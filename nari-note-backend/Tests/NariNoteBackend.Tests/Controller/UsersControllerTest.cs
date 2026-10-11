@@ -226,6 +226,23 @@ public class UsersControllerTest : IntegrationTestBase
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    [Fact]
+    public async Task メール未認証のユーザーはアイコン画像をアップロードできない()
+    {
+        var user = new UserBuilder().EmailUnverified().Build();
+        await SeedAsync(user);
+
+        var response = await CreateClientAs(user).PostAsync(
+            "/api/users/icon",
+            CreateFileContent(CreatePngBytes(), "image/png")
+        );
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ErrorCode.EmailNotVerified, (await ReadAsync<ErrorResponse>(response)).Code);
+        Assert.Null((await QueryAsync(db => db.Users.SingleAsync())).ProfileImage);
+        Assert.Empty(Factory.ImageStorageGateway.UploadedUserIds);
+    }
+
     #endregion
 
     #region POST /api/users/{id}/follow
@@ -271,6 +288,20 @@ public class UsersControllerTest : IntegrationTestBase
         var response = await CreateClient().PostAsync($"/api/users/{target.Id.Value}/follow", null);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task メール未認証のユーザーはフォローできない()
+    {
+        var user = new UserBuilder().EmailUnverified().Build();
+        var target = new UserBuilder().Build();
+        await SeedAsync(user, target);
+
+        var response = await CreateClientAs(user).PostAsync($"/api/users/{target.Id.Value}/follow", null);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ErrorCode.EmailNotVerified, (await ReadAsync<ErrorResponse>(response)).Code);
+        Assert.Equal(0, await QueryAsync(db => db.Follows.CountAsync()));
     }
 
     #endregion

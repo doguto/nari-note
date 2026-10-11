@@ -13,6 +13,7 @@ public class AuthController : ApplicationController
     readonly ForgotPasswordService forgotPasswordService;
     readonly GetCurrentUserService getCurrentUserService;
     readonly LogoutService logoutService;
+    readonly ResendVerificationEmailService resendVerificationEmailService;
     readonly ResetPasswordService resetPasswordService;
     readonly SignInService signInService;
     readonly SignUpService signUpService;
@@ -26,6 +27,7 @@ public class AuthController : ApplicationController
         GetCurrentUserService getCurrentUserService,
         LogoutService logoutService,
         VerifyEmailService verifyEmailService,
+        ResendVerificationEmailService resendVerificationEmailService,
         UpdatePasswordService updatePasswordService,
         ForgotPasswordService forgotPasswordService,
         ResetPasswordService resetPasswordService,
@@ -37,6 +39,7 @@ public class AuthController : ApplicationController
         this.getCurrentUserService = getCurrentUserService;
         this.logoutService = logoutService;
         this.verifyEmailService = verifyEmailService;
+        this.resendVerificationEmailService = resendVerificationEmailService;
         this.updatePasswordService = updatePasswordService;
         this.forgotPasswordService = forgotPasswordService;
         this.resetPasswordService = resetPasswordService;
@@ -44,7 +47,7 @@ public class AuthController : ApplicationController
     }
 
     [HttpPost("signup")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     [ValidateModelState]
     public async Task<ActionResult<SignUpResponse>> SignUp([FromBody] SignUpRequest request)
     {
@@ -53,7 +56,7 @@ public class AuthController : ApplicationController
     }
 
     [HttpPost("signin")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     [ValidateModelState]
     public async Task<ActionResult<AuthResponse>> SignIn([FromBody] SignInRequest request)
     {
@@ -62,7 +65,7 @@ public class AuthController : ApplicationController
     }
 
     [HttpGet("me")]
-    [OptionalAuth]
+    [Auth(AuthLevel.Optional)]
     public ActionResult<AuthResponse> GetCurrentUser()
     {
         var request = new GetCurrentUserRequest();
@@ -71,7 +74,7 @@ public class AuthController : ApplicationController
     }
 
     [HttpPost("verify-email")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     [ValidateModelState]
     public async Task<ActionResult<AuthResponse>> VerifyEmail([FromBody] VerifyEmailRequest request)
     {
@@ -79,8 +82,16 @@ public class AuthController : ApplicationController
         return Ok(response);
     }
 
+    [HttpPost("resend-verification")]
+    [Auth(AuthLevel.Authenticated)]
+    public async Task<ActionResult<ResendVerificationEmailResponse>> ResendVerificationEmail()
+    {
+        var response = await resendVerificationEmailService.ExecuteAsync(UserId!.Value);
+        return Ok(response);
+    }
+
     [HttpPut("password")]
-    [RequireAuth]
+    [Auth(AuthLevel.Authenticated)]
     [ValidateModelState]
     public async Task<ActionResult<UpdatePasswordResponse>> UpdatePassword([FromBody] UpdatePasswordRequest request)
     {
@@ -89,7 +100,7 @@ public class AuthController : ApplicationController
     }
 
     [HttpPost("forgot-password")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     [ValidateModelState]
     public async Task<ActionResult<ForgotPasswordResponse>> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
@@ -98,7 +109,7 @@ public class AuthController : ApplicationController
     }
 
     [HttpPost("reset-password")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     [ValidateModelState]
     public async Task<ActionResult<ResetPasswordResponse>> ResetPassword([FromBody] ResetPasswordRequest request)
     {
@@ -107,7 +118,7 @@ public class AuthController : ApplicationController
     }
 
     [HttpPost("logout")]
-    [OptionalAuth]
+    [Auth(AuthLevel.Optional)]
     public async Task<ActionResult> Logout()
     {
         var request = new LogoutRequest();
@@ -116,7 +127,7 @@ public class AuthController : ApplicationController
     }
 
     [HttpPost("withdraw")]
-    [RequireAuth]
+    [Auth(AuthLevel.Authenticated)]
     [NoTransaction]
     [ValidateModelState]
     public async Task<ActionResult<WithdrawResponse>> Withdraw([FromBody] WithdrawRequest request)

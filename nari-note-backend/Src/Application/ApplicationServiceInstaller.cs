@@ -28,6 +28,7 @@ public static class ApplicationServiceInstaller
         services.AddScoped<WithdrawService>();
         services.AddScoped<SignUpService>();
         services.AddScoped<VerifyEmailService>();
+        services.AddScoped<ResendVerificationEmailService>();
         services.AddScoped<SignInService>();
         services.AddScoped<GetCurrentUserService>();
         services.AddScoped<LogoutService>();

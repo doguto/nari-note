@@ -22,6 +22,7 @@ public static class DataSeeder
                 Email = "habu-fan@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
                 Bio = "将棋歴15年。居飛車党です。羽生先生の将棋を研究しています。",
+                IsEmailVerified = true,
                 CreatedAt = DateTime.UtcNow.AddDays(-30),
                 UpdatedAt = DateTime.UtcNow.AddDays(-30)
             },
@@ -31,6 +32,7 @@ public static class DataSeeder
                 Email = "furibisha@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
                 Bio = "四間飛車一筋20年。藤井システムを愛用しています。",
+                IsEmailVerified = true,
                 CreatedAt = DateTime.UtcNow.AddDays(-25),
                 UpdatedAt = DateTime.UtcNow.AddDays(-25)
             },
@@ -40,6 +42,7 @@ public static class DataSeeder
                 Email = "tsume@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
                 Bio = "詰将棋の創作と解答が趣味。毎日3問は解いています。",
+                IsEmailVerified = true,
                 CreatedAt = DateTime.UtcNow.AddDays(-20),
                 UpdatedAt = DateTime.UtcNow.AddDays(-20)
             },
@@ -49,6 +52,7 @@ public static class DataSeeder
                 Email = "beginner@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
                 Bio = "将棋を始めて半年。棒銀をマスター中です。",
+                IsEmailVerified = true,
                 CreatedAt = DateTime.UtcNow.AddDays(-15),
                 UpdatedAt = DateTime.UtcNow.AddDays(-15)
             }

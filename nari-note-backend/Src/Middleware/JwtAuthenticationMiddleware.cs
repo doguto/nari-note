@@ -1,4 +1,5 @@
 using System.Net;
+using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Extension;
@@ -26,15 +27,14 @@ public class JwtAuthenticationMiddleware
     {
         var endpoint = context.GetEndpoint();
 
-        // エンドポイントの属性を確認
-        var allowAnonymous = endpoint?.Metadata.GetMetadata<AllowAnonymousAttribute>() != null;
-        var optionalAuth = endpoint?.Metadata.GetMetadata<OptionalAuthAttribute>() != null;
+        var authLevel = endpoint?.Metadata.GetMetadata<AuthAttribute>()?.Level ?? AuthLevel.Authenticated;
+        var allowUnauthenticated = authLevel <= AuthLevel.Optional;
 
         var token = context.Request.Cookies["authToken"];
 
         if (token.IsNullOrEmpty())
         {
-            if (allowAnonymous || optionalAuth)
+            if (allowUnauthenticated)
             {
                 // 認証不要または任意認証の場合、認証なしで次のミドルウェアに進む
                 await next(context);
@@ -59,7 +59,7 @@ public class JwtAuthenticationMiddleware
         var principal = jwtHelper.ValidateToken(token!);
         if (principal == null)
         {
-            if (allowAnonymous || optionalAuth)
+            if (allowUnauthenticated)
             {
                 // 認証不要または任意認証の場合、トークンが無効でも次のミドルウェアに進む
                 await next(context);
@@ -84,7 +84,7 @@ public class JwtAuthenticationMiddleware
         var userName = jwtHelper.GetUserNameFromToken(token!);
         if (userId == null || userName == null)
         {
-            if (allowAnonymous || optionalAuth)
+            if (allowUnauthenticated)
             {
                 await next(context);
                 return;
@@ -114,7 +114,7 @@ public class JwtAuthenticationMiddleware
                 Path = "/"
             });
 
-            if (allowAnonymous || optionalAuth)
+            if (allowUnauthenticated)
             {
                 await next(context);
                 return;
@@ -132,6 +132,20 @@ public class JwtAuthenticationMiddleware
                         path = context.Request.Path
                     }
                 });
+            return;
+        }
+
+        // メール認証が必要なエンドポイントは、未認証ユーザーを拒否する
+        if (authLevel >= AuthLevel.VerifiedEmail && !user.IsEmailVerified)
+        {
+            context.Response.StatusCode = HttpStatusCode.Forbidden.AsInt();
+            await context.Response.WriteAsJsonAsync(new ErrorResponse
+            {
+                StatusCode = HttpStatusCode.Forbidden.AsInt(),
+                Message = "メールアドレスの認証が完了していません。確認メールのリンクから認証を完了してください。",
+                TimeStamp = timeProvider.UtcNow(),
+                Code = ErrorCode.EmailNotVerified
+            });
             return;
         }
 
