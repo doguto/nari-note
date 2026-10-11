@@ -35,6 +35,7 @@ export interface AuthResponse {
   userId?: string;
   userName?: string;
   userIconImageUrl?: string;
+  isEmailVerified: boolean;
 }
 
 export interface CommentDto {

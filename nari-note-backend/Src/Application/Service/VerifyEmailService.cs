@@ -52,6 +52,6 @@ public class VerifyEmailService
         );
         response.Cookies.Append("authToken", token, cookieOptions);
 
-        return new AuthResponse { UserId = user.Id };
+        return new AuthResponse { UserId = user.Id, IsEmailVerified = user.IsEmailVerified };
     }
 }

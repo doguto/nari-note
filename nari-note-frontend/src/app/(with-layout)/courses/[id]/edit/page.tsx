@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { AuthGuard } from '@/features/global/organisms';
+import { AuthGuard, VerifiedEmailGuard } from '@/features/global/organisms';
 import { CourseFormPage } from '@/features/course/pages';
 
 export default function EditCoursePage() {
@@ -10,7 +10,9 @@ export default function EditCoursePage() {
 
   return (
     <AuthGuard redirectPath={`/courses/${courseId}/edit`}>
-      <CourseFormPage mode="edit" courseId={courseId} />
+      <VerifiedEmailGuard>
+        <CourseFormPage mode="edit" courseId={courseId} />
+      </VerifiedEmailGuard>
     </AuthGuard>
   );
 }

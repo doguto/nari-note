@@ -4,6 +4,7 @@ import { useState, useCallback, ReactNode, useEffect } from 'react';
 import { EmailVerificationRequiredModal, ForbiddenModal } from '@/components/molecules';
 import { useResendVerificationEmail } from '@/lib/api/hooks';
 import { EMAIL_NOT_VERIFIED_CODE, forbiddenHandler } from '@/lib/forbiddenHandler';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 export function ForbiddenProvider({ children }: { children: ReactNode }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,6 +12,7 @@ export function ForbiddenProvider({ children }: { children: ReactNode }) {
   const [code, setCode] = useState<string | undefined>(undefined);
   const resendMutation = useResendVerificationEmail();
   const { reset: resetResend } = resendMutation;
+  const { isEmailVerified } = useAuth();
 
   const showForbiddenModal = useCallback((message?: string, code?: string) => {
     setMessage(message);
@@ -32,6 +34,13 @@ export function ForbiddenProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isEmailNotVerified = code === EMAIL_NOT_VERIFIED_CODE;
+
+  // 別タブ等でメール認証が完了したら、認証を促すモーダルは閉じる
+  useEffect(() => {
+    if (isEmailVerified && isEmailNotVerified) {
+      setIsModalOpen(false);
+    }
+  }, [isEmailVerified, isEmailNotVerified]);
 
   return (
     <>

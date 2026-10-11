@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useGetMyCourses, useDeleteCourse } from '@/lib/api';
+import { useRequireVerifiedEmail } from '@/lib/hooks';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PageWithSidebar } from '@/features/global/organisms';
 import { DeleteConfirmModal } from '@/components/molecules/DeleteConfirmModal';
@@ -12,6 +13,7 @@ import { MyCoursesListTemplate } from '../templates/MyCoursesListTemplate';
 export function MyCoursesListPage() {
   const router = useRouter();
   const { userId } = useAuth();
+  const { ensureVerifiedEmail } = useRequireVerifiedEmail();
   const [activeTab, setActiveTab] = useState<'published' | 'drafts'>('published');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
@@ -33,6 +35,7 @@ export function MyCoursesListPage() {
   });
 
   const handleDeleteRequest = (id: string, name: string) => {
+    if (!ensureVerifiedEmail()) return;
     setPendingDelete({ id, name });
   };
 

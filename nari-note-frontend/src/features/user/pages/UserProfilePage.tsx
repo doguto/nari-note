@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetUserProfile, useToggleFollow, useGetFollowers, useGetFollowings, useGetArticlesByAuthor, useGetLikedArticles } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useRequireVerifiedEmail } from '@/lib/hooks';
 import { PageWithSidebar } from '@/features/global/organisms';
 import { UserProfileTemplate } from '../templates/UserProfileTemplate';
 
@@ -22,6 +23,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
   
   const { data: user, isLoading, error, refetch } = useGetUserProfile({ id: userId });
   const { userId: currentUserId } = useAuth();
+  const { ensureVerifiedEmail } = useRequireVerifiedEmail();
   const { mutate: toggleFollow, isPending: isFollowPending } = useToggleFollow({
     onSuccess: () => {
       // フォロー/フォロー解除成功時にプロフィールを再取得
@@ -58,6 +60,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
   // フォローボタンクリックハンドラ
   const handleFollowClick = () => {
     if (isFollowPending) return;
+    if (!ensureVerifiedEmail()) return;
     toggleFollow({ followingId: userId });
   };
   

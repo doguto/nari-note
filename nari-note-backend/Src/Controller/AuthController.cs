@@ -69,7 +69,7 @@ public class AuthController : ApplicationController
     public ActionResult<AuthResponse> GetCurrentUser()
     {
         var request = new GetCurrentUserRequest();
-        var response = getCurrentUserService.Execute(request, UserId, UserName);
+        var response = getCurrentUserService.Execute(request, UserId, UserName, IsEmailVerified);
         return Ok(response);
     }
 

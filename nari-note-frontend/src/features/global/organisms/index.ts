@@ -6,4 +6,5 @@ export { HeroSection } from './HeroSection';
 export { PageWithSidebar } from './PageWithSidebar';
 export { PageWithoutSidebar } from './PageWithoutSidebar';
 export { AuthGuard } from './AuthGuard';
+export { VerifiedEmailGuard } from './VerifiedEmailGuard';
 export { SettingsSidebarNav } from './SettingsSidebarNav';
