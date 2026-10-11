@@ -18,7 +18,7 @@ ASP.NET Core 9.0 Web API
 C# (.NET 9.0)
 
 ### DB
-PostgreSQL 16
+PostgreSQL 17
 
 ### ライブラリ
 **ORM**

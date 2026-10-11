@@ -10,7 +10,7 @@ nari-noteは将棋記事の投稿・共有プラットフォームです。フ�
 
 **バックエンド**
 - ASP.NET Core 9.0 (.NET 9.0)
-- PostgreSQL 16 + Entity Framework Core 9.0
+- PostgreSQL 17 + Entity Framework Core 9.0
 - JWT認証（System.IdentityModel.Tokens.Jwt）
 - BCrypt.Net-Next（パスワードハッシュ化）
 - Vogen（型安全なValueObject）
@@ -310,7 +310,7 @@ python scripts/update-agent-docs.py --dry-run --verbose
 
 ## データベース
 
-- **DBMS**: PostgreSQL 16
+- **DBMS**: PostgreSQL 17
 - **ORM**: Entity Framework Core 9.0
 - **マイグレーション**: EF Core Migrations（`Migrations/` ディレクトリ）
 - **開発環境**: Docker Composeで自動マイグレーション + シードデータ投入

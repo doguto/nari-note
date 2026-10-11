@@ -6,7 +6,7 @@ nari-noteプロジェクトのバックエンドAPIサーバーです。
 
 - **フレームワーク**: ASP.NET Core 9.0
 - **言語**: C# (.NET 9.0)
-- **データベース**: PostgreSQL 16
+- **データベース**: PostgreSQL 17
 - **ORM**: Entity Framework Core 9.0
 - **アーキテクチャ**: レイヤードアーキテクチャ（Controller、Application、Domain、Infrastructure）
 
@@ -14,7 +14,7 @@ nari-noteプロジェクトのバックエンドAPIサーバーです。
 
 - .NET 9.0 SDK
 - Docker & Docker Compose（推奨）
-- PostgreSQL 16（ローカル実行の場合）
+- PostgreSQL 17（ローカル実行の場合）
 
 ## プロジェクト構成
 
@@ -138,7 +138,7 @@ Controller → Service → Repository Interface
 
 ### データベース設計
 
-- PostgreSQL 16 + Entity Framework Core 9.0
+- PostgreSQL 17 + Entity Framework Core 9.0
 - マイグレーションベースのスキーマ管理
 - リレーションシップ定義（Article-User, Article-Tag, Like, Follow等）
 

@@ -22,7 +22,7 @@ nari-noteは、将棋記事の投稿・共有プラットフォームです。
 ### バックエンド
 - **フレームワーク**: ASP.NET Core 9.0
 - **言語**: C# (.NET 9.0)
-- **データベース**: PostgreSQL 16
+- **データベース**: PostgreSQL 17
 - **ORM**: Entity Framework Core 9.0
 
 ### フロントエンド
