@@ -54,7 +54,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     public async Task<ActionResult<GetArticlesResponse>> GetArticles(
         [FromQuery] int limit = 20, [FromQuery] int offset = 0
     )
@@ -65,7 +65,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost]
-    [RequireAuth]
+    [Auth(AuthLevel.VerifiedEmail)]
     [ValidateModelState]
     public async Task<ActionResult> CreateArticle([FromBody] CreateArticleRequest request)
     {
@@ -75,7 +75,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet("{id}")]
-    [OptionalAuth]
+    [Auth(AuthLevel.Optional)]
     public async Task<ActionResult<GetArticleContentResponse>> GetArticleContent(ArticleId id)
     {
         var request = new GetArticleContentRequest { Id = id };
@@ -84,7 +84,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPut("{id}")]
-    [RequireAuth]
+    [Auth(AuthLevel.VerifiedEmail)]
     [ValidateModelState]
     public async Task<ActionResult<UpdateArticleResponse>> UpdateArticle(ArticleId id, [FromBody] UpdateArticleRequest request)
     {
@@ -94,7 +94,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet("author/{authorId}")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(UserId authorId)
     {
         var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
@@ -103,7 +103,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet("tag/{tagName}")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     public async Task<ActionResult<GetArticlesByTagResponse>> GetArticlesByTag(string tagName)
     {
         var request = new GetArticlesByTagRequest { TagName = tagName };
@@ -112,7 +112,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpDelete("{id}")]
-    [RequireAuth]
+    [Auth(AuthLevel.VerifiedEmail)]
     public async Task<ActionResult> DeleteArticle(ArticleId id)
     {
         var request = new DeleteArticleRequest { Id = id };
@@ -121,7 +121,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost("{id}/like")]
-    [RequireAuth]
+    [Auth(AuthLevel.VerifiedEmail)]
     public async Task<ActionResult<ToggleLikeResponse>> ToggleLike(ArticleId id)
     {
         var request = new ToggleLikeRequest
@@ -133,7 +133,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet("my")]
-    [RequireAuth]
+    [Auth(AuthLevel.Authenticated)]
     public async Task<ActionResult<GetMyArticlesResponse>> GetMyArticles()
     {
         var response = await getMyArticlesService.ExecuteAsync(UserId!.Value);
@@ -141,7 +141,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet("drafts")]
-    [RequireAuth]
+    [Auth(AuthLevel.Authenticated)]
     public async Task<ActionResult<GetDraftArticlesResponse>> GetDraftArticles()
     {
         var response = await getDraftArticlesService.ExecuteAsync(UserId!.Value);
@@ -149,7 +149,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpGet("search")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     [ValidateModelState]
     public async Task<ActionResult<SearchArticlesResponse>> SearchArticles([FromQuery] SearchArticlesRequest request)
     {
@@ -158,7 +158,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost("{id}/comments")]
-    [RequireAuth]
+    [Auth(AuthLevel.VerifiedEmail)]
     [ValidateModelState]
     public async Task<ActionResult<CreateCommentResponse>> CreateComment(ArticleId id, [FromBody] CreateCommentRequest request)
     {

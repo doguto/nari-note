@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Extension;
 using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Infrastructure.Repository;
@@ -10,10 +11,12 @@ namespace NariNoteBackend.Infrastructure.Repository;
 public class ArticleRepository : IArticleRepository
 {
     readonly NariNoteDbContext context;
+    readonly TimeProvider timeProvider;
 
-    public ArticleRepository(NariNoteDbContext context)
+    public ArticleRepository(NariNoteDbContext context, TimeProvider timeProvider)
     {
         this.context = context;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<Article> CreateAsync(Article article)
@@ -25,14 +28,16 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<Article?> FindByIdAsync(ArticleId id)
     {
-        return await context.Articles
+        var query = context.Articles
                             .Include(a => a.Author)
                             .Include(a => a.Course)
                             .Include(a => a.ArticleTags)
                             .ThenInclude(at => at.Tag)
-                            .Include(a => a.Likes)
                             .Include(a => a.Kifus)
-                            .FirstOrDefaultAsync(a => a.Id == id);
+                            .AsSplitQuery()
+                            .Where(a => a.Id == id);
+
+        return (await ToListWithLikeCountAsync(query)).FirstOrDefault();
     }
 
     public async Task<Article> FindForceByIdAsync(ArticleId id)
@@ -52,30 +57,36 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<List<Article>> FindByAuthorAsync(UserId authorId)
     {
-        return await context.Articles
-                            .Include(a => a.Author)
-                            .Include(a => a.ArticleTags)
-                            .ThenInclude(at => at.Tag)
-                            .Include(a => a.Likes)
-                            .Where(a => a.AuthorId == authorId)
-                            .OrderByDescending(a => a.CreatedAt)
-                            .ToListAsync();
+        var query = context.Articles
+                           .AsNoTracking()
+                           .Include(a => a.Author)
+                           .Include(a => a.ArticleTags)
+                           .ThenInclude(at => at.Tag)
+                           .AsSplitQuery()
+                           .Where(a => a.AuthorId == authorId)
+                           .OrderByDescending(a => a.PublishedAt)
+                           .ThenByDescending(a => a.Id);
+
+        return await ToListWithLikeCountAsync(query);
     }
 
     public async Task<List<Article>> FindByTagAsync(string tagName)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.UtcNow();
         var visibilityFilter = IsPubliclyVisible(now);
 
-        return await context.Articles
-                            .Include(a => a.Author)
-                            .Include(a => a.ArticleTags)
-                            .ThenInclude(at => at.Tag)
-                            .Include(a => a.Likes)
-                            .Where(a => a.ArticleTags.Any(at => EF.Functions.ILike(at.Tag.Name, tagName)))
-                            .Where(visibilityFilter)
-                            .OrderByDescending(a => a.CreatedAt)
-                            .ToListAsync();
+        var query = context.Articles
+                           .AsNoTracking()
+                           .Include(a => a.Author)
+                           .Include(a => a.ArticleTags)
+                           .ThenInclude(at => at.Tag)
+                           .AsSplitQuery()
+                           .Where(a => a.ArticleTags.Any(at => EF.Functions.ILike(at.Tag.Name, tagName)))
+                           .Where(visibilityFilter)
+                           .OrderByDescending(a => a.PublishedAt)
+                           .ThenByDescending(a => a.Id);
+
+        return await ToListWithLikeCountAsync(query);
     }
 
     public async Task<Article> UpdateWithTagAsync(Article article, List<string>? tagNames = null)
@@ -116,7 +127,7 @@ public class ArticleRepository : IArticleRepository
                 {
                     ArticleId = article.Id,
                     TagId = tag.Id,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = timeProvider.UtcNow(),
                     Article = article,
                     Tag = tag
                 }).ToList();
@@ -141,27 +152,26 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<(List<Article> Articles, int TotalCount)> FindLatestSingleArticlesAsync(int limit, int offset)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.UtcNow();
         var visibilityFilter = IsPubliclyVisible(now);
 
         // 講座の記事は取得しない
         var query = context.Articles
+                           .AsNoTracking()
                            .Include(a => a.Author)
                            .Include(a => a.ArticleTags)
                            .ThenInclude(at => at.Tag)
-                           .Include(a => a.Likes)
+                           .AsSplitQuery()
                            .Where(visibilityFilter)
                            .Where(a => !a.CourseId.HasValue)
-                           .OrderByDescending(a => a.CreatedAt);
+                           .OrderByDescending(a => a.PublishedAt)
+                           .ThenByDescending(a => a.Id);
 
         // 注: ページネーションの標準的な実装として、
         // 総数取得とデータ取得を別々に実行しています。
         // 大量データがある場合は、キャッシュの利用を検討してください。
         var totalCount = await query.CountAsync();
-        var articles = await query
-                             .Skip(offset)
-                             .Take(limit)
-                             .ToListAsync();
+        var articles = await ToListWithLikeCountAsync(query.Skip(offset).Take(limit));
 
         return (articles, totalCount);
     }
@@ -169,9 +179,11 @@ public class ArticleRepository : IArticleRepository
     public async Task<List<Article>> FindDraftsByAuthorAsync(UserId authorId)
     {
         return await context.Articles
+                            .AsNoTracking()
                             .Include(a => a.Author)
                             .Include(a => a.ArticleTags)
                             .ThenInclude(at => at.Tag)
+                            .AsSplitQuery()
                             .Where(a => a.AuthorId == authorId && !a.PublishedAt.HasValue)
                             .OrderByDescending(a => a.UpdatedAt)
                             .ToListAsync();
@@ -179,15 +191,14 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<List<Article>> SearchAsync(string keyword, int limit, int offset)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.UtcNow();
         var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
 
         var articles = await context.Articles
                                     .Include(a => a.Author)
                                     .Include(a => a.ArticleTags)
                                     .ThenInclude(at => at.Tag)
-                                    .Include(a => a.Likes)
-                                    .Where(searchFilter)
+                                            .Where(searchFilter)
                                     .OrderByDescending(a => a.CreatedAt)
                                     .Skip(offset)
                                     .Take(limit)
@@ -203,6 +214,18 @@ public class ArticleRepository : IArticleRepository
                             .CountAsync();
     }
 
+    /// <summary>
+    ///     Likes 行をロードせず、サブクエリ COUNT でいいね数を取得して Article.LikeCount に設定します。
+    /// </summary>
+    static async Task<List<Article>> ToListWithLikeCountAsync(IQueryable<Article> query)
+    {
+        var rows = await query.Select(a => new { Article = a, LikeCount = a.Likes.Count() })
+                              .ToListAsync();
+
+        foreach (var row in rows) row.Article.LikeCount = row.LikeCount;
+
+        return rows.Select(row => row.Article).ToList();
+    }
 
     static Expression<Func<Article, bool>> IsPubliclyVisible(DateTime now)
     {

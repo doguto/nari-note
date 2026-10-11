@@ -3,6 +3,7 @@ using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -11,16 +12,19 @@ public class GetArticleContentService
     readonly IArticleRepository articleRepository;
     readonly ICommentRepository commentRepository;
     readonly ILikeRepository likeRepository;
+    readonly TimeProvider timeProvider;
 
     public GetArticleContentService(
         IArticleRepository articleRepository,
         ICommentRepository commentRepository,
-        ILikeRepository likeRepository
+        ILikeRepository likeRepository,
+        TimeProvider timeProvider
     )
     {
         this.articleRepository = articleRepository;
         this.commentRepository = commentRepository;
         this.likeRepository = likeRepository;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<GetArticleContentResponse> ExecuteAsync(GetArticleContentRequest request, UserId? userId = null)
@@ -29,7 +33,7 @@ public class GetArticleContentService
 
         // 未公開（下書き・予約投稿）の記事は作者本人以外には存在自体を秘匿する
         var isAuthor = userId.HasValue && article.AuthorId == userId.Value;
-        if (!article.IsPubliclyVisible && !isAuthor) throw new KeyNotFoundException($"記事{request.Id}が存在しません");
+        if (!article.IsPubliclyVisibleAt(timeProvider.UtcNow()) && !isAuthor) throw new KeyNotFoundException($"記事{request.Id}が存在しません");
 
         var comments = await commentRepository.FindByArticleAsync(request.Id);
 

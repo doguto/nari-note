@@ -204,7 +204,8 @@ nari-note-frontend/src/
   - `NariNoteBackend.Domain.ValueObject` 名前空間に定義
 
 **日付時刻:**
-- 常に `DateTime.UtcNow` を使用（`DateTime.Now` は禁止）
+- 現在時刻は DI した `TimeProvider` から取得（`timeProvider.UtcNow()`）
+- `DateTime.UtcNow` / `DateTime.Now` の直接使用は禁止（テストで時刻を固定できなくなるため）
 
 **エラーハンドリング:**
 - Controllerでtry-catchは不要（グローバル例外ハンドラーが処理）
@@ -332,6 +333,7 @@ python scripts/update-agent-docs.py --dry-run --verbose
 - `nari-note-backend/Documents/architecture.md` - アーキテクチャ設計
 - `nari-note-backend/Documents/error-handling-strategy.md` - エラーハンドリング戦略
 - `nari-note-backend/Documents/development-workflow.md` - 開発ワークフロー
+- `nari-note-backend/Documents/testing-guide.md` - テストの方針と書き方（単体 / 結合）
 
 **フロントエンド:**
 - `nari-note-frontend/docs/implementation-guide.md` - Atomic Design実装ガイド（最重要）

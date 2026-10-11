@@ -42,7 +42,7 @@ public class CoursesController : ApplicationController
     }
 
     [HttpGet]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     public async Task<ActionResult<GetCoursesResponse>> GetCourses(
         [FromQuery] int limit = 20, [FromQuery] int offset = 0
     )
@@ -53,7 +53,7 @@ public class CoursesController : ApplicationController
     }
 
     [HttpGet("search")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     [ValidateModelState]
     public async Task<ActionResult<SearchCoursesResponse>> SearchCourses([FromQuery] SearchCoursesRequest request)
     {
@@ -62,7 +62,7 @@ public class CoursesController : ApplicationController
     }
 
     [HttpGet("my")]
-    [RequireAuth]
+    [Auth(AuthLevel.Authenticated)]
     public async Task<ActionResult<GetMyCoursesResponse>> GetMyCourses()
     {
         var response = await getMyCoursesService.ExecuteAsync(UserId!.Value);
@@ -70,7 +70,7 @@ public class CoursesController : ApplicationController
     }
 
     [HttpGet("author/{authorId}")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     public async Task<ActionResult<GetCoursesByAuthorResponse>> GetCoursesByAuthor(UserId authorId)
     {
         var request = new GetCoursesByAuthorRequest { AuthorId = authorId };
@@ -79,7 +79,7 @@ public class CoursesController : ApplicationController
     }
 
     [HttpPost]
-    [RequireAuth]
+    [Auth(AuthLevel.VerifiedEmail)]
     [ValidateModelState]
     public async Task<ActionResult<CreateCourseResponse>> CreateCourse([FromBody] CreateCourseRequest request)
     {
@@ -88,7 +88,7 @@ public class CoursesController : ApplicationController
     }
 
     [HttpGet("{id}")]
-    [OptionalAuth]
+    [Auth(AuthLevel.Optional)]
     public async Task<ActionResult<GetCourseContentResponse>> GetCourseContent(CourseId id)
     {
         var request = new GetCourseContentRequest { Id = id };
@@ -97,7 +97,7 @@ public class CoursesController : ApplicationController
     }
 
     [HttpGet("{id}/for-edit")]
-    [RequireAuth]
+    [Auth(AuthLevel.Authenticated)]
     public async Task<ActionResult<GetCourseContentResponse>> GetCourseContentForEdit(CourseId id)
     {
         var request = new GetCourseContentRequest { Id = id };
@@ -106,7 +106,7 @@ public class CoursesController : ApplicationController
     }
 
     [HttpDelete("{id}")]
-    [RequireAuth]
+    [Auth(AuthLevel.VerifiedEmail)]
     public async Task<ActionResult> DeleteCourse(CourseId id)
     {
         var request = new DeleteCourseRequest { Id = id };
@@ -115,7 +115,7 @@ public class CoursesController : ApplicationController
     }
 
     [HttpPut("{id}")]
-    [RequireAuth]
+    [Auth(AuthLevel.VerifiedEmail)]
     [ValidateModelState]
     public async Task<ActionResult<UpdateCourseResponse>> UpdateCourse(CourseId id, [FromBody] UpdateCourseRequest request)
     {

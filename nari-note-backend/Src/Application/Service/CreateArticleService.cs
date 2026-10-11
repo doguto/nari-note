@@ -3,6 +3,7 @@ using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Application.Service;
 
@@ -11,16 +12,19 @@ public class CreateArticleService
     readonly IArticleRepository articleRepository;
     readonly ICourseRepository courseRepository;
     readonly IKifuRepository kifuRepository;
+    readonly TimeProvider timeProvider;
 
     public CreateArticleService(
         IArticleRepository articleRepository,
         ICourseRepository courseRepository,
-        IKifuRepository kifuRepository
+        IKifuRepository kifuRepository,
+        TimeProvider timeProvider
     )
     {
         this.articleRepository = articleRepository;
         this.courseRepository = courseRepository;
         this.kifuRepository = kifuRepository;
+        this.timeProvider = timeProvider;
     }
 
 
@@ -44,7 +48,7 @@ public class CreateArticleService
         }
         else if (request.IsPublished)
         {
-            publishedAt = DateTime.UtcNow;
+            publishedAt = timeProvider.UtcNow();
         }
 
         var article = new Article

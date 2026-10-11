@@ -1,0 +1,35 @@
+name: Backend Test
+
+on:
+  pull_request:
+    paths:
+      - "nari-note-backend/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: nari-note-backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: nari-note-backend/global.json
+
+      - name: Restore dependencies
+        run: dotnet restore nari-note-backend.sln
+
+      # 結合テストは Testcontainers で PostgreSQL を起動する（ubuntu-latest は Docker が利用可能）
+      - name: Test
+        run: dotnet test nari-note-backend.sln --configuration Release --no-restore

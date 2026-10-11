@@ -4,20 +4,23 @@ using NariNoteBackend.Application;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Infrastructure;
 using NariNoteBackend.Infrastructure.Database;
+using NariNoteBackend.Infrastructure.Outbox;
 using NariNoteBackend.Middleware;
 using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (!builder.Environment.IsDevelopment())
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("secret.json", true, false);
+}
+// テスト時は WebApplicationFactory から設定を注入するため、SSM は参照しない
+else if (!builder.Environment.IsEnvironment("Testing"))
 {
     var appName = Environment.GetEnvironmentVariable("APP_NAME") ?? "nari-note";
     builder.Configuration.AddSystemsManager($"/{appName}/app", false);
     builder.Configuration.AddSystemsManager($"/{appName}/db", false);
-}
-else
-{
-    builder.Configuration.AddJsonFile("secret.json", true, false);
 }
 
 // Sentry設定
@@ -40,7 +43,14 @@ builder.Services.AddCors(options =>
 });
 
 // Serilogの設定をsettings.jsonから取り込み
-builder.Host.UseSerilog((context, configuration) => { configuration.ReadFrom.Configuration(context.Configuration); });
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration.ReadFrom.Configuration(context.Configuration)
+                 // Outbox のポーリングは数秒おきに走るため、その SQL ログ等は出力しない（Warning 以上は残す）
+                 .Filter.ByExcluding(logEvent =>
+                     logEvent.Level < LogEventLevel.Warning
+                     && logEvent.Properties.ContainsKey(OutboxProcessor.PollingLogProperty));
+});
 
 // ValueObject の設定
 builder.Services.AddControllers(options => { options.ModelBinderProviders.Insert(0, new ValueObjectModelBinderProvider()); })
@@ -71,7 +81,10 @@ if (app.Environment.IsDevelopment())
     await DataSeeder.SeedAsync(context);
 }
 
-// CORSミドルウェアを最初に登録（preflightリクエスト対応のため）
+// [NoTransaction] 等のエンドポイント情報を後続ミドルウェアで参照するため先頭に置く
+app.UseRouting();
+
+// CORSミドルウェアを登録（preflightリクエスト対応のため）
 app.UseCors();
 
 // SerilogによるAPIリクエストのログ出力を設定
@@ -92,3 +105,6 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+// 結合テストの WebApplicationFactory<Program> から参照できるよう公開する
+public partial class Program;

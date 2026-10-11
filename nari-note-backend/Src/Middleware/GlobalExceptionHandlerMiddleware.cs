@@ -10,14 +10,17 @@ public class GlobalExceptionHandlerMiddleware
 {
     readonly ILogger<GlobalExceptionHandlerMiddleware> logger;
     readonly RequestDelegate next;
+    readonly TimeProvider timeProvider;
 
     public GlobalExceptionHandlerMiddleware(
         RequestDelegate next,
-        ILogger<GlobalExceptionHandlerMiddleware> logger
+        ILogger<GlobalExceptionHandlerMiddleware> logger,
+        TimeProvider timeProvider
     )
     {
         this.next = next;
         this.logger = logger;
+        this.timeProvider = timeProvider;
     }
 
     public async Task InvokeAsync(HttpContext httpContext)
@@ -60,6 +63,9 @@ public class GlobalExceptionHandlerMiddleware
             // 409 Conflict
             ConflictException => HttpStatusCode.Conflict,
 
+            // 429 Too Many Requests
+            TooManyRequestsException => HttpStatusCode.TooManyRequests,
+
             // 408 Request Timeout
             TimeoutException => HttpStatusCode.RequestTimeout,
 
@@ -84,7 +90,8 @@ public class GlobalExceptionHandlerMiddleware
         return new ErrorResponse
         {
             StatusCode = statusCode.AsInt(),
-            Message = message
+            Message = message,
+            TimeStamp = timeProvider.UtcNow()
         };
     }
 }

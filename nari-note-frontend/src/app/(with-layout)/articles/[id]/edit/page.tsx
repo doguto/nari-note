@@ -2,7 +2,7 @@
 
 
 import { useParams } from 'next/navigation';
-import { AuthGuard } from '@/features/global/organisms';
+import { AuthGuard, VerifiedEmailGuard } from '@/features/global/organisms';
 import { ArticleFormPage } from '@/features/article/pages';
 
 /**
@@ -16,7 +16,9 @@ export default function EditArticlePage() {
 
   return (
     <AuthGuard redirectPath={`/articles/${params.id}/edit`}>
-      <ArticleFormPage articleId={articleId} mode="edit" />
+      <VerifiedEmailGuard>
+        <ArticleFormPage articleId={articleId} mode="edit" />
+      </VerifiedEmailGuard>
     </AuthGuard>
   );
 }

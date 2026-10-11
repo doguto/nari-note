@@ -14,7 +14,12 @@ public class GetCurrentUserService
         this.imageStorageGateway = imageStorageGateway;
     }
 
-    public AuthResponse Execute(GetCurrentUserRequest request, UserId? currentUserId, string? userName)
+    public AuthResponse Execute(
+        GetCurrentUserRequest request,
+        UserId? currentUserId,
+        string? userName,
+        bool isEmailVerified
+    )
     {
         var profileImage = currentUserId.HasValue
             ? imageStorageGateway.GetUserIconUrl(currentUserId.Value.Value.ToString())
@@ -24,7 +29,8 @@ public class GetCurrentUserService
         {
             UserId = currentUserId,
             UserName = userName,
-            UserIconImageUrl = profileImage
+            UserIconImageUrl = profileImage,
+            IsEmailVerified = isEmailVerified
         };
     }
 }

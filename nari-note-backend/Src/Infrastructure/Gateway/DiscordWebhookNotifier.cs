@@ -38,6 +38,7 @@ public class DiscordWebhookNotifier : IDiscordNotifier
     async Task PostAsync(string payload)
     {
         var content = new StringContent(payload, Encoding.UTF8, "application/json");
-        await httpClient.PostAsync(webhookUrl, content);
+        using var response = await httpClient.PostAsync(webhookUrl, content);
+        response.EnsureSuccessStatusCode();
     }
 }

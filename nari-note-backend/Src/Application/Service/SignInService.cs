@@ -40,7 +40,8 @@ public class SignInService
 
         return new AuthResponse
         {
-            UserId = user.Id
+            UserId = user.Id,
+            IsEmailVerified = user.IsEmailVerified
         };
     }
 }

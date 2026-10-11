@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Infrastructure.Security;
 
@@ -13,9 +14,12 @@ public class JwtHelper : IJwtHelper
     readonly int expirationInHours;
     readonly string issuer;
     readonly string secret;
+    readonly TimeProvider timeProvider;
 
-    public JwtHelper(IConfiguration configuration)
+    public JwtHelper(IConfiguration configuration, TimeProvider timeProvider)
     {
+        this.timeProvider = timeProvider;
+
         secret = configuration["Jwt:Secret"]
                  ?? throw new InvalidOperationException("JWT Secret is not configured");
         issuer = configuration["Jwt:Issuer"]
@@ -51,6 +55,8 @@ public class JwtHelper : IJwtHelper
                     ValidateAudience = true,
                     ValidAudience = audience,
                     ValidateLifetime = true,
+                    // 発行時と同じ TimeProvider で有効期限を判定する
+                    LifetimeValidator = IsWithinLifetime,
                     ClockSkew = TimeSpan.Zero
                 },
                 out _
@@ -96,7 +102,7 @@ public class JwtHelper : IJwtHelper
             issuer,
             audience,
             claims,
-            expires: DateTime.UtcNow.AddHours(expirationInHours),
+            expires: timeProvider.UtcNow().AddHours(expirationInHours),
             signingCredentials: credentials
         );
 
@@ -112,5 +118,19 @@ public class JwtHelper : IJwtHelper
         if (userNameClaim == null) return null;
 
         return userNameClaim.Value;
+    }
+
+    bool IsWithinLifetime(
+        DateTime? notBefore,
+        DateTime? expires,
+        SecurityToken securityToken,
+        TokenValidationParameters validationParameters
+    )
+    {
+        var now = timeProvider.UtcNow();
+        if (!expires.HasValue) return false;
+        if (notBefore.HasValue && notBefore.Value > now) return false;
+
+        return expires.Value >= now;
     }
 }

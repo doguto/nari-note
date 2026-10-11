@@ -38,14 +38,19 @@ public class Article : EntityBase
     public List<ArticleTag> ArticleTags { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
     public List<Comment> Comments { get; set; } = new();
-    public int LikeCount => Likes.Count;
+    // いいね数は Likes 全行をロードせず、Repository でサブクエリ COUNT により設定する
+    [NotMapped]
+    public int LikeCount { get; set; }
 
     public List<Kifu> Kifus { get; set; } = new();
 
     public bool IsPublished => PublishedAt.HasValue;
 
     // 予約投稿を考慮し、公開日時を過ぎているかまで判定する
-    public bool IsPubliclyVisible => PublishedAt.HasValue && PublishedAt.Value <= DateTime.UtcNow;
+    public bool IsPubliclyVisibleAt(DateTime now)
+    {
+        return PublishedAt.HasValue && PublishedAt.Value <= now;
+    }
 
     // Domain Logic
     public bool IsLikedBy(UserId userId)

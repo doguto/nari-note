@@ -16,7 +16,7 @@ public class HealthController : ControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     public async Task<ActionResult> GetHealth()
     {
         var response = await getHealthService.ExecuteAsync();

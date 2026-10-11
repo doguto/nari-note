@@ -9,11 +9,13 @@ namespace NariNoteBackend.Application.Service;
 
 public class UpdateUserProfileService
 {
+    readonly TimeProvider timeProvider;
     readonly IUserRepository userRepository;
 
-    public UpdateUserProfileService(IUserRepository userRepository)
+    public UpdateUserProfileService(IUserRepository userRepository, TimeProvider timeProvider)
     {
         this.userRepository = userRepository;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<UpdateUserProfileResponse> ExecuteAsync(UserId userId, UpdateUserProfileRequest request)
@@ -37,7 +39,7 @@ public class UpdateUserProfileService
             user.Bio = request.Bio;
         }
 
-        user.UpdatedAt = DateTime.UtcNow;
+        user.UpdatedAt = timeProvider.UtcNow();
 
         await userRepository.UpdateAsync(user);
 

@@ -99,7 +99,8 @@ nari-note-backend/
 - private修飾子: クラスフィールドでは省略
 
 ### 日付時刻
-- 常に `DateTime.UtcNow` を使用（`DateTime.Now` は使用しない）
+- 現在時刻は DI した `TimeProvider` から取得（`timeProvider.UtcNow()`）
+- `DateTime.UtcNow` / `DateTime.Now` は直接使用しない
 
 ### Entity
 - すべてのエンティティは `EntityBase` を継承

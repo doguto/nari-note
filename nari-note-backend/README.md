@@ -95,7 +95,7 @@ nari-note-backend/
 主要な規約：
 - private変数: アンダースコア無し、キャメルケース、`this.`でアクセス
 - private修飾子: クラスフィールドでは省略
-- 日付時刻: 常に `DateTime.UtcNow` を使用
+- 日付時刻: DI した `TimeProvider` から取得（`timeProvider.UtcNow()`）。`DateTime.UtcNow` は直接使用しない
 
 ### アーキテクチャ
 
@@ -152,6 +152,7 @@ Controller → Service → Repository Interface
 - [認証戦略](./Documents/authentication-strategy.md) - 認証システムの設計と実装（API使用方法を含む）
 - [ER図](./Documents/er-diagram.md) - データベース設計
 - [開発ワークフロー](./Documents/development-workflow.md) - 開発手順とタスクガイド
+- [テストガイド](./Documents/testing-guide.md) - テストの方針と書き方
 
 ## その他
 

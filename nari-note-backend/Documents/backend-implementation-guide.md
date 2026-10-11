@@ -77,23 +77,27 @@ public class Article
 
 ### 日付時刻の扱い
 
-- **常に `DateTime.UtcNow` を使用**
-- ローカル時刻（`DateTime.Now`）は使用しない
+- **現在時刻は DI した `TimeProvider` から取得する**（`timeProvider.UtcNow()`）
+- `DateTime.UtcNow` / `DateTime.Now` は直接使用しない（テストで時刻を固定できなくなるため）
+- Entity は現在時刻を自分で取得しない。判定に時刻が必要な場合は引数で受け取る
+- `CreatedAt` / `UpdatedAt` は未設定で新規追加すると `NariNoteDbContext` が保存時に設定する。更新時の `UpdatedAt` は Service で明示的に設定する
 
 ```csharp
 // ✅ 正しい例
-var article = new Article
+public class UpdateArticleService
 {
-    CreatedAt = DateTime.UtcNow,
-    UpdatedAt = DateTime.UtcNow
-};
+    readonly TimeProvider timeProvider;
+
+    public async Task ExecuteAsync(...)
+    {
+        article.UpdatedAt = timeProvider.UtcNow();
+        if (!article.IsPubliclyVisibleAt(timeProvider.UtcNow())) { ... }
+    }
+}
 
 // ❌ 間違った例
-var article = new Article
-{
-    CreatedAt = DateTime.Now,
-    UpdatedAt = DateTime.Now
-};
+article.UpdatedAt = DateTime.UtcNow;
+article.UpdatedAt = DateTime.Now;
 ```
 
 ---
@@ -369,7 +373,7 @@ public class UpdateArticleService
         if (request.Title != null) article.Title = request.Title;
         if (request.Body != null) article.Body = request.Body;
         if (request.IsPublished != null) article.IsPublished = request.IsPublished.Value;
-        article.UpdatedAt = DateTime.UtcNow;
+        article.UpdatedAt = timeProvider.UtcNow();
         
         await articleRepository.UpdateWithTagAsync(article, request.Tags);
         
@@ -649,8 +653,9 @@ namespace NariNoteBackend.Domain.Entity;
 
 public abstract class EntityBase
 {
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    // 未設定の場合は NariNoteDbContext が保存時に現在時刻を設定する
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
 ```
 
@@ -895,7 +900,7 @@ public class CreateArticleResponse
 #### 4. コードレビュー
 - [ ] コーディング規約に従っているか確認
 - [ ] private変数の命名（アンダースコア無し）
-- [ ] `DateTime.UtcNow` を使用しているか
+- [ ] 現在時刻を `TimeProvider` から取得しているか（`DateTime.UtcNow` を直接使用していないか）
 - [ ] try-catchを不要な箇所で使用していないか
 - [ ] レイヤー間の責務が守られているか
 - [ ] 既存のパターンと一貫性があるか

@@ -15,7 +15,7 @@
 - コーディング規約
   - 命名規則（private修飾子の省略、アンダースコアなし）
   - アクセス修飾子の規約
-  - 日付時刻の扱い（DateTime.UtcNow）
+  - 日付時刻の扱い（TimeProvider）
 - レイヤー別実装パターン
   - Controller層の実装パターンとルール
   - Service層の実装パターンとルール（API一個につきService一個）
@@ -54,6 +54,16 @@
 - レイヤー構成の詳細
 - Entity Framework Coreとの統合
 - Service粒度の設計方針（API一個につきService一個）
+
+### 🧪 テスト
+
+#### [testing-guide.md](./testing-guide.md)
+**テストの方針と書き方**
+
+**内容:**
+- 実行方法
+- 単体テスト（Service）と結合テスト（Controller）の構成
+- テストデータ（Builder）と時刻（TestTimeProvider）の扱い
 
 ### 🔨 開発ワークフロー
 

@@ -13,15 +13,18 @@ public class UpdateArticleService
     readonly IArticleRepository articleRepository;
     readonly ICourseRepository courseRepository;
     readonly IKifuRepository kifuRepository;
+    readonly TimeProvider timeProvider;
 
     public UpdateArticleService(
         IArticleRepository articleRepository,
         ICourseRepository courseRepository,
-        IKifuRepository kifuRepository)
+        IKifuRepository kifuRepository,
+        TimeProvider timeProvider)
     {
         this.articleRepository = articleRepository;
         this.courseRepository = courseRepository;
         this.kifuRepository = kifuRepository;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<UpdateArticleResponse> ExecuteAsync(UserId userId, UpdateArticleRequest request)
@@ -61,10 +64,10 @@ public class UpdateArticleService
         }
         else if (!wasPublished && request.IsPublished.HasValue && request.IsPublished.Value)
         {
-            article.PublishedAt = DateTime.UtcNow;
+            article.PublishedAt = timeProvider.UtcNow();
         }
 
-        article.UpdatedAt = DateTime.UtcNow;
+        article.UpdatedAt = timeProvider.UtcNow();
 
         await articleRepository.UpdateWithTagAsync(article, request.Tags);
 

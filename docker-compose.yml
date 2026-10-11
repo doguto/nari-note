@@ -22,6 +22,8 @@ services:
       - "5243:5243"
     volumes:
       - ./nari-note-backend:/app:cached
+      # ホスト側のテスト実行で生成される bin/obj を dotnet watch が監視して異常終了するため、コンテナからは隠す
+      - /app/Tests
       - nuget:/root/.nuget/packages:cached
     tty: true
     stdin_open: true
