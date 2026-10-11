@@ -36,6 +36,8 @@ resource "aws_instance" "app_server" {
     service_file       = templatefile("${path.module}/nari-note-backend.service", { app_name = var.app_name })
     nginx_conf_file    = file("${path.module}/nari-note-backend.nginx.conf")
     cloudwatch_conf    = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
+    postgresql_conf    = file("${path.module}/postgresql.conf")
+    pg_hba_conf        = file("${path.module}/pg_hba.conf")
     app_name           = var.app_name
     postgres_volume_id = replace(aws_ebs_volume.postgres_data.id, "-", "")
   })
