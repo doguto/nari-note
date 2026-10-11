@@ -113,7 +113,7 @@ host    all             all             ::1/128                 scram-sha-256
 HBA
 
   cat >> "$${PGDATA}/postgresql.conf" <<'CONF'
-listen_addresses = 'localhost'
+${postgresql_conf}
 CONF
 fi
 
