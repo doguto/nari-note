@@ -49,7 +49,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpPost("icon")]
-    [Auth(AuthLevel.Authenticated)]
+    [Auth(AuthLevel.VerifiedEmail)]
     [NoTransaction]
     [RequestSizeLimit(5_000_000)]
     public async Task<ActionResult> UploadUserIcon(IFormFile file)
@@ -68,7 +68,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpPost("{id}/follow")]
-    [Auth(AuthLevel.Authenticated)]
+    [Auth(AuthLevel.VerifiedEmail)]
     public async Task<ActionResult> ToggleFollow(UserId id)
     {
         var request = new ToggleFollowRequest

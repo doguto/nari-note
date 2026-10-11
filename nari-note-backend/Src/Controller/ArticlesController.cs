@@ -121,7 +121,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost("{id}/like")]
-    [Auth(AuthLevel.Authenticated)]
+    [Auth(AuthLevel.VerifiedEmail)]
     public async Task<ActionResult<ToggleLikeResponse>> ToggleLike(ArticleId id)
     {
         var request = new ToggleLikeRequest
@@ -158,7 +158,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpPost("{id}/comments")]
-    [Auth(AuthLevel.Authenticated)]
+    [Auth(AuthLevel.VerifiedEmail)]
     [ValidateModelState]
     public async Task<ActionResult<CreateCommentResponse>> CreateComment(ArticleId id, [FromBody] CreateCommentRequest request)
     {

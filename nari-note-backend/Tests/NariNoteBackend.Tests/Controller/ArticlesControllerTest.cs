@@ -626,6 +626,21 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    [Fact]
+    public async Task メール未認証のユーザーはいいねできない()
+    {
+        var author = new UserBuilder().Build();
+        var reader = new UserBuilder().EmailUnverified().Build();
+        var article = new ArticleBuilder(author).Build();
+        await SeedAsync(author, reader, article);
+
+        var response = await CreateClientAs(reader).PostAsync($"/api/articles/{article.Id.Value}/like", null);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ErrorCode.EmailNotVerified, (await ReadAsync<ErrorResponse>(response)).Code);
+        Assert.Equal(0, await QueryAsync(db => db.Likes.CountAsync()));
+    }
+
     #endregion
 
     #region GET /api/articles/my
@@ -791,6 +806,24 @@ public class ArticlesControllerTest : IntegrationTestBase
         );
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task メール未認証のユーザーはコメントできない()
+    {
+        var author = new UserBuilder().Build();
+        var reader = new UserBuilder().EmailUnverified().Build();
+        var article = new ArticleBuilder(author).Build();
+        await SeedAsync(author, reader, article);
+
+        var response = await CreateClientAs(reader).PostAsJsonAsync(
+            $"/api/articles/{article.Id.Value}/comments",
+            new { message = "コメント" }
+        );
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ErrorCode.EmailNotVerified, (await ReadAsync<ErrorResponse>(response)).Code);
+        Assert.Equal(0, await QueryAsync(db => db.Comments.CountAsync()));
     }
 
     #endregion
