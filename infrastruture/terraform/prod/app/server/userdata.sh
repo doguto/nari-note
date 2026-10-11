@@ -104,18 +104,25 @@ systemctl daemon-reload
 
 if [ ! -f "$${PGDATA}/PG_VERSION" ]; then
   PGDATA="$${PGDATA}" /usr/bin/postgresql-setup --initdb
+fi
 
-  # 外部ネットワークには一切公開せず、localhost からの接続のみ許可する
-  cat > "$${PGDATA}/pg_hba.conf" <<'HBA'
-local   all             all                                     peer
-host    all             all             127.0.0.1/32            scram-sha-256
-host    all             all             ::1/128                 scram-sha-256
+# 設定ファイルは initdb 済みの既存データボリュームにも変更が反映されるよう、毎回上書きする
+# 外部ネットワークには一切公開せず、localhost からの接続のみ許可する
+cat > "$${PGDATA}/pg_hba.conf" <<'HBA'
+${pg_hba_conf}
 HBA
 
-  cat >> "$${PGDATA}/postgresql.conf" <<'CONF'
+# postgresql.conf 本体は initdb の生成物のまま残し、上書きしたい設定だけを conf.d に配置する
+PG_CONF_DIR="$${PGDATA}/conf.d"
+install -d -o postgres -g postgres -m 700 "$${PG_CONF_DIR}"
+grep -q "^include_dir = 'conf.d'" "$${PGDATA}/postgresql.conf" || \
+  echo "include_dir = 'conf.d'" >> "$${PGDATA}/postgresql.conf"
+
+cat > "$${PG_CONF_DIR}/nari-note.conf" <<'CONF'
 ${postgresql_conf}
 CONF
-fi
+chown postgres:postgres "$${PG_CONF_DIR}/nari-note.conf"
+chmod 600 "$${PG_CONF_DIR}/nari-note.conf"
 
 systemctl enable --now postgresql
 
