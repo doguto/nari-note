@@ -69,16 +69,6 @@ public class NariNoteDbContext : DbContext
              .HasForeignKey(a => a.AuthorId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            x.HasMany(a => a.Likes)
-             .WithOne(l => l.Article)
-             .HasForeignKey(l => l.ArticleId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasMany(a => a.Comments)
-             .WithOne(c => c.Article)
-             .HasForeignKey(c => c.ArticleId)
-             .OnDelete(DeleteBehavior.Cascade);
-
             x.HasOne(a => a.Course)
              .WithMany(c => c.Articles)
              .HasForeignKey(a => a.CourseId)
@@ -96,46 +86,6 @@ public class NariNoteDbContext : DbContext
 
         modelBuilder.Entity<User>(x =>
         {
-            x.HasMany(u => u.Articles)
-             .WithOne(a => a.Author)
-             .HasForeignKey(a => a.AuthorId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasMany(u => u.Likes)
-             .WithOne(l => l.User)
-             .HasForeignKey(l => l.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasMany(u => u.Comments)
-             .WithOne(c => c.User)
-             .HasForeignKey(c => c.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasMany(u => u.Followings)
-             .WithOne(f => f.Follower)
-             .HasForeignKey(f => f.FollowerId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasMany(u => u.Followers)
-             .WithOne(f => f.Following)
-             .HasForeignKey(f => f.FollowingId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasMany(u => u.Notifications)
-             .WithOne(n => n.User)
-             .HasForeignKey(n => n.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasMany(u => u.Courses)
-             .WithOne(c => c.User)
-             .HasForeignKey(c => c.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasMany(u => u.CourseLikes)
-             .WithOne(cl => cl.User)
-             .HasForeignKey(cl => cl.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
-
             x.Property(u => u.Id)
              .HasValueGenerator<UserIdValueGenerator>();
 
@@ -145,11 +95,6 @@ public class NariNoteDbContext : DbContext
 
         modelBuilder.Entity<Tag>(x =>
         {
-            x.HasMany(t => t.ArticleTags)
-             .WithOne(at => at.Tag)
-             .HasForeignKey(at => at.TagId)
-             .OnDelete(DeleteBehavior.Cascade);
-
             x.Property(t => t.Id)
              .HasValueGenerator<TagIdValueGenerator>();
 
@@ -287,16 +232,6 @@ public class NariNoteDbContext : DbContext
             x.HasOne(c => c.User)
              .WithMany(u => u.Courses)
              .HasForeignKey(c => c.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasMany(c => c.CourseLikes)
-             .WithOne(cl => cl.Course)
-             .HasForeignKey(cl => cl.CourseId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasMany(c => c.Articles)
-             .WithOne(a => a.Course)
-             .HasForeignKey(a => a.CourseId)
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(c => c.Id)
