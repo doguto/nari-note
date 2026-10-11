@@ -112,7 +112,7 @@ public class ArticlesController : ApplicationController
     }
 
     [HttpDelete("{id}")]
-    [Auth(AuthLevel.Authenticated)]
+    [Auth(AuthLevel.VerifiedEmail)]
     public async Task<ActionResult> DeleteArticle(ArticleId id)
     {
         var request = new DeleteArticleRequest { Id = id };

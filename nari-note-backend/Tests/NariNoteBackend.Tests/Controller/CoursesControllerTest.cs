@@ -444,6 +444,20 @@ public class CoursesControllerTest : IntegrationTestBase
     #region DELETE /api/courses/{id}
 
     [Fact]
+    public async Task メール未認証のユーザーは自分の講座でも削除できない()
+    {
+        var owner = new UserBuilder().EmailUnverified().Build();
+        var course = new CourseBuilder(owner).Build();
+        await SeedAsync(owner, course);
+
+        var response = await CreateClientAs(owner).DeleteAsync($"/api/courses/{course.Id.Value}");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ErrorCode.EmailNotVerified, (await ReadAsync<ErrorResponse>(response)).Code);
+        Assert.Equal(1, await QueryAsync(db => db.Courses.CountAsync()));
+    }
+
+    [Fact]
     public async Task 作成者は講座を削除でき_講座の記事も削除される()
     {
         var owner = new UserBuilder().Build();

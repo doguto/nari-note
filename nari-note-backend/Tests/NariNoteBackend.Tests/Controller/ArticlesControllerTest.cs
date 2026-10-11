@@ -453,6 +453,20 @@ public class ArticlesControllerTest : IntegrationTestBase
     #region DELETE /api/articles/{id}
 
     [Fact]
+    public async Task メール未認証のユーザーは自分の記事でも削除できない()
+    {
+        var author = new UserBuilder().EmailUnverified().Build();
+        var article = new ArticleBuilder(author).Build();
+        await SeedAsync(author, article);
+
+        var response = await CreateClientAs(author).DeleteAsync($"/api/articles/{article.Id.Value}");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(ErrorCode.EmailNotVerified, (await ReadAsync<ErrorResponse>(response)).Code);
+        Assert.Equal(1, await QueryAsync(db => db.Articles.CountAsync()));
+    }
+
+    [Fact]
     public async Task 作者は記事を削除できる()
     {
         var author = new UserBuilder().Build();

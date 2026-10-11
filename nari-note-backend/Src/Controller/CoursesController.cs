@@ -106,7 +106,7 @@ public class CoursesController : ApplicationController
     }
 
     [HttpDelete("{id}")]
-    [Auth(AuthLevel.Authenticated)]
+    [Auth(AuthLevel.VerifiedEmail)]
     public async Task<ActionResult> DeleteCourse(CourseId id)
     {
         var request = new DeleteCourseRequest { Id = id };
