@@ -2,6 +2,10 @@ locals {
   vpc_id                       = data.terraform_remote_state.vpc.outputs.vpc_id
   public_subnet_ids            = data.terraform_remote_state.vpc.outputs.public_subnet_ids
   app_server_availability_zone = data.aws_subnet.app_server.availability_zone
+
+  # Amazon Linux 2023 (minimal, x86_64)
+  # NOTE: most_recent で動的に解決すると、AMI の公開のたびに apply でインスタンスが再作成されるうえ、ルートボリュームに収まらない別系統の AMI を選ぶことがあるため、IDで固定する
+  app_server_ami_id = "ami-005c30c039bdcb2b7"
 }
 
 resource "aws_ebs_volume" "postgres_data" {
@@ -15,7 +19,7 @@ resource "aws_ebs_volume" "postgres_data" {
 }
 
 resource "aws_instance" "app_server" {
-  ami                    = data.aws_ami.amazon_linux_2023.id
+  ami                    = local.app_server_ami_id
   instance_type          = var.instance_type
   subnet_id              = local.public_subnet_ids[0]
   vpc_security_group_ids = [aws_security_group.app_server.id]

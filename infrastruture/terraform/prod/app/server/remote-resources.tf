@@ -25,21 +25,6 @@ data "terraform_remote_state" "images_storage" {
   }
 }
 
-data "aws_ami" "amazon_linux_2023" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-*-x86_64"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-}
-
 data "aws_subnet" "app_server" {
   id = local.public_subnet_ids[0]
 }
