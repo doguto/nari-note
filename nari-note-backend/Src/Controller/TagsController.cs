@@ -18,7 +18,7 @@ public class TagsController : ControllerBase
     }
 
     [HttpGet("popular")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     public async Task<ActionResult<GetPopularTagsResponse>> GetPopularTags()
     {
         var request = new GetPopularTagsRequest();

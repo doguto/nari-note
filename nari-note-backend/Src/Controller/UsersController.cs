@@ -38,7 +38,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpGet("{id}")]
-    [OptionalAuth]
+    [Auth(AuthLevel.Optional)]
     public async Task<ActionResult> GetUserProfile(UserId id)
     {
         var request = new GetUserProfileRequest { Id = id };
@@ -49,7 +49,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpPost("icon")]
-    [RequireAuth]
+    [Auth(AuthLevel.VerifiedEmail)]
     [NoTransaction]
     [RequestSizeLimit(5_000_000)]
     public async Task<ActionResult> UploadUserIcon(IFormFile file)
@@ -59,7 +59,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpPut]
-    [RequireAuth]
+    [Auth(AuthLevel.Authenticated)]
     [ValidateModelState]
     public async Task<ActionResult> UpdateUserProfile([FromBody] UpdateUserProfileRequest request)
     {
@@ -68,7 +68,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpPost("{id}/follow")]
-    [RequireAuth]
+    [Auth(AuthLevel.VerifiedEmail)]
     public async Task<ActionResult> ToggleFollow(UserId id)
     {
         var request = new ToggleFollowRequest
@@ -80,7 +80,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpGet("{id}/followers")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     public async Task<ActionResult> GetFollowers(UserId id)
     {
         var request = new GetFollowersRequest { UserId = id };
@@ -89,7 +89,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpGet("{id}/followings")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     public async Task<ActionResult> GetFollowings(UserId id)
     {
         var request = new GetFollowingsRequest { UserId = id };
@@ -98,7 +98,7 @@ public class UsersController : ApplicationController
     }
 
     [HttpGet("{id}/liked-articles")]
-    [AllowAnonymous]
+    [Auth(AuthLevel.Anonymous)]
     public async Task<ActionResult> GetLikedArticles(UserId id)
     {
         var request = new GetLikedArticlesRequest { UserId = id };

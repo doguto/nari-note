@@ -142,7 +142,7 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
 
     # エンドポイントを抽出
     # [HttpGet], [HttpPost]などのアトリビュートとメソッド、パラメータを見つける
-    # 複数の属性（[RequireAuth]、[AllowAnonymous]、[OptionalAuth]、[ValidateModelState]など）に対応
+    # 複数の属性（[Auth(AuthLevel.Authenticated)]、[ValidateModelState]など）に対応
     method_pattern = r'\[Http(Get|Post|Put|Delete)(?:\("([^"]+)"\))?\](?:\s*\[[^\]]+\])*\s+public\s+(?:async\s+Task<)?ActionResult(?:<(\w+)>)?(?:>)?\s+(\w+)\s*\(([^)]*)\)'
 
     for match in re.finditer(method_pattern, content):
