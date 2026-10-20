@@ -23,6 +23,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetCourseContentForEditResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
   GetCoursesByAuthorRequest,
@@ -393,8 +394,8 @@ export function useGetCourseContent(params: GetCourseContentRequest, options?: O
   });
 }
 
-export function useGetCourseContentForEdit(params: { id: string }, options?: Omit<UseQueryOptions<GetCourseContentResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<GetCourseContentResponse>({
+export function useGetCourseContentForEdit(params: { id: string }, options?: Omit<UseQueryOptions<GetCourseContentForEditResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCourseContentForEditResponse>({
     queryKey: [...queryKeys.courses.getCourseContentForEdit, params],
     queryFn: () => coursesApi.getCourseContentForEdit(params),
     ...options,
