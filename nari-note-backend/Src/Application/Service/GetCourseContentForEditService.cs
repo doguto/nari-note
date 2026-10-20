@@ -22,6 +22,27 @@ public class GetCourseContentForEditService
         if (course.UserId != requesterId)
             throw new ForbiddenException("この講座を編集する権限がありません");
 
-        return GetCourseContentResponse.From(course);
+        return new GetCourseContentResponse
+        {
+            Id = course.Id,
+            Name = course.Name,
+            UserId = course.UserId,
+            UserName = course.User?.Name ?? "",
+            UserIconImageUrl = course.User?.ProfileImage,
+            LikeCount = course.LikeCount,
+            IsPublished = course.IsPublished,
+            PublishedAt = course.PublishedAt,
+            CreatedAt = course.CreatedAt,
+            Articles = course.Articles
+                .OrderBy(a => a.ArticleOrder)
+                .Select(a => new CourseArticleDto
+                {
+                    Id = a.Id,
+                    Title = a.Title,
+                    ArticleOrder = a.ArticleOrder,
+                    IsPublished = a.IsPublished
+                })
+                .ToList()
+        };
     }
 }
