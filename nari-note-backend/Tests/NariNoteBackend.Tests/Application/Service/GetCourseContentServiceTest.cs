@@ -1,5 +1,4 @@
 using NariNoteBackend.Application.Dto.Request;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
@@ -29,7 +28,6 @@ public class GetCourseContentServiceTest
         var course = builder.Build();
         course.Articles.AddRange(articles);
         this.courseRepository.FindByIdWithArticlesAsync(course.Id).Returns(course);
-        this.courseRepository.FindByIdWithAllArticlesAsync(course.Id).Returns(course);
         return course;
     }
 
@@ -74,18 +72,5 @@ public class GetCourseContentServiceTest
 
         this.timeProvider.SetUtcNow(publishAt);
         Assert.Equal(course.Id, (await this.service.ExecuteAsync(request)).Id);
-    }
-
-    [Fact]
-    public async Task 編集用の取得は作成者だけに許可する()
-    {
-        var course = SetupCourse(new CourseBuilder(this.owner).Draft());
-        var request = new GetCourseContentRequest { Id = course.Id };
-
-        await Assert.ThrowsAsync<ForbiddenException>(
-            () => this.service.ExecuteForEditAsync(this.otherUser.Id, request)
-        );
-
-        Assert.Equal(course.Id, (await this.service.ExecuteForEditAsync(this.owner.Id, request)).Id);
     }
 }

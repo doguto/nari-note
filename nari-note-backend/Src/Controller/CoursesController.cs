@@ -14,6 +14,7 @@ public class CoursesController : ApplicationController
     readonly CreateCourseService createCourseService;
     readonly DeleteCourseService deleteCourseService;
     readonly GetCourseContentService getCourseContentService;
+    readonly GetCourseContentForEditService getCourseContentForEditService;
     readonly GetCoursesService getCoursesService;
     readonly GetCoursesByAuthorService getCoursesByAuthorService;
     readonly GetMyCoursesService getMyCoursesService;
@@ -28,6 +29,7 @@ public class CoursesController : ApplicationController
         GetCoursesByAuthorService getCoursesByAuthorService,
         GetMyCoursesService getMyCoursesService,
         GetCourseContentService getCourseContentService,
+        GetCourseContentForEditService getCourseContentForEditService,
         SearchCoursesService searchCoursesService
     )
     {
@@ -35,6 +37,7 @@ public class CoursesController : ApplicationController
         this.deleteCourseService = deleteCourseService;
         this.updateCourseService = updateCourseService;
         this.getCourseContentService = getCourseContentService;
+        this.getCourseContentForEditService = getCourseContentForEditService;
         this.getCoursesService = getCoursesService;
         this.getCoursesByAuthorService = getCoursesByAuthorService;
         this.getMyCoursesService = getMyCoursesService;
@@ -101,7 +104,7 @@ public class CoursesController : ApplicationController
     public async Task<ActionResult<GetCourseContentResponse>> GetCourseContentForEdit(CourseId id)
     {
         var request = new GetCourseContentRequest { Id = id };
-        var response = await getCourseContentService.ExecuteForEditAsync(UserId!.Value, request);
+        var response = await getCourseContentForEditService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
