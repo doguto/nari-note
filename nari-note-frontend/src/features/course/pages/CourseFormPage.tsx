@@ -23,10 +23,11 @@ export function CourseFormPage(props: CourseFormPageProps) {
   const courseId = isEditMode ? props.courseId : undefined;
   
   // 編集モード時の講座データ取得（下書き記事を含む）
-  const { data: course, isLoading: isLoadingCourse, error: courseError, refetch } = useGetCourseContentForEdit(
+  const { data: courseData, isLoading: isLoadingCourse, error: courseError, refetch } = useGetCourseContentForEdit(
     { id: courseId || '' },
     { enabled: !!isEditMode }
   );
+  const course = courseData?.course;
   
   const createCourse = useCreateCourse({
     onSuccess: (data) => {

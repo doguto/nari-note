@@ -40,7 +40,7 @@ public class GetCourseContentServiceTest
             new ArticleBuilder(this.owner).WithTitle("第1回").InCourse(null!, 1).Build()
         );
 
-        var response = await this.service.ExecuteAsync(new GetCourseContentRequest { Id = course.Id });
+        var response = (await this.service.ExecuteAsync(new GetCourseContentRequest { Id = course.Id })).Course;
 
         Assert.Equal("四間飛車講座", response.Name);
         Assert.Equal("owner", response.UserName);
@@ -56,7 +56,7 @@ public class GetCourseContentServiceTest
         await Assert.ThrowsAsync<KeyNotFoundException>(() => this.service.ExecuteAsync(request));
         await Assert.ThrowsAsync<KeyNotFoundException>(() => this.service.ExecuteAsync(request, this.otherUser.Id));
 
-        var response = await this.service.ExecuteAsync(request, this.owner.Id);
+        var response = (await this.service.ExecuteAsync(request, this.owner.Id)).Course;
         Assert.False(response.IsPublished);
     }
 
@@ -71,6 +71,6 @@ public class GetCourseContentServiceTest
         await Assert.ThrowsAsync<KeyNotFoundException>(() => this.service.ExecuteAsync(request));
 
         this.timeProvider.SetUtcNow(publishAt);
-        Assert.Equal(course.Id, (await this.service.ExecuteAsync(request)).Id);
+        Assert.Equal(course.Id, (await this.service.ExecuteAsync(request)).Course.Id);
     }
 }

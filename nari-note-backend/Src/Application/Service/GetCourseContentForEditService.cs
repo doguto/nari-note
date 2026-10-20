@@ -1,3 +1,4 @@
+using NariNoteBackend.Application.Dto;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Exception;
@@ -15,34 +16,37 @@ public class GetCourseContentForEditService
         this.courseRepository = courseRepository;
     }
 
-    public async Task<GetCourseContentResponse> ExecuteAsync(UserId requesterId, GetCourseContentRequest request)
+    public async Task<GetCourseContentForEditResponse> ExecuteAsync(UserId requesterId, GetCourseContentRequest request)
     {
         var course = await courseRepository.FindByIdWithAllArticlesAsync(request.Id);
 
         if (course.UserId != requesterId)
             throw new ForbiddenException("この講座を編集する権限がありません");
 
-        return new GetCourseContentResponse
+        return new GetCourseContentForEditResponse
         {
-            Id = course.Id,
-            Name = course.Name,
-            UserId = course.UserId,
-            UserName = course.User?.Name ?? "",
-            UserIconImageUrl = course.User?.ProfileImage,
-            LikeCount = course.LikeCount,
-            IsPublished = course.IsPublished,
-            PublishedAt = course.PublishedAt,
-            CreatedAt = course.CreatedAt,
-            Articles = course.Articles
-                .OrderBy(a => a.ArticleOrder)
-                .Select(a => new CourseArticleDto
-                {
-                    Id = a.Id,
-                    Title = a.Title,
-                    ArticleOrder = a.ArticleOrder,
-                    IsPublished = a.IsPublished
-                })
-                .ToList()
+            Course = new CourseContentDto
+            {
+                Id = course.Id,
+                Name = course.Name,
+                UserId = course.UserId,
+                UserName = course.User?.Name ?? "",
+                UserIconImageUrl = course.User?.ProfileImage,
+                LikeCount = course.LikeCount,
+                IsPublished = course.IsPublished,
+                PublishedAt = course.PublishedAt,
+                CreatedAt = course.CreatedAt,
+                Articles = course.Articles
+                    .OrderBy(a => a.ArticleOrder)
+                    .Select(a => new CourseArticleDto
+                    {
+                        Id = a.Id,
+                        Title = a.Title,
+                        ArticleOrder = a.ArticleOrder,
+                        IsPublished = a.IsPublished
+                    })
+                    .ToList()
+            }
         };
     }
 }

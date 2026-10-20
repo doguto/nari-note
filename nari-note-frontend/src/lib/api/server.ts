@@ -44,6 +44,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetCourseContentForEditResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
   GetCoursesByAuthorRequest,
@@ -170,10 +171,10 @@ export async function getCourseContent(params: GetCourseContentRequest): Promise
   return serverFetch<GetCourseContentResponse>(url);
 }
 
-export async function getCourseContentForEdit(id: string): Promise<GetCourseContentResponse> {
+export async function getCourseContentForEdit(id: string): Promise<GetCourseContentForEditResponse> {
   const url = `${getBaseUrl()}/api/courses/${id}/for-edit`;
 
-  return serverFetch<GetCourseContentResponse>(url);
+  return serverFetch<GetCourseContentForEditResponse>(url);
 }
 
 // Health Server Functions

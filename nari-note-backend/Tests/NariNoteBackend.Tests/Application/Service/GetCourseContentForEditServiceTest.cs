@@ -37,6 +37,6 @@ public class GetCourseContentForEditServiceTest
             () => this.service.ExecuteAsync(this.otherUser.Id, request)
         );
 
-        Assert.Equal(course.Id, (await this.service.ExecuteAsync(this.owner.Id, request)).Id);
+        Assert.Equal(course.Id, (await this.service.ExecuteAsync(this.owner.Id, request)).Course.Id);
     }
 }

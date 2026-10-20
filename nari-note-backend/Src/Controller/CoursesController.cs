@@ -101,7 +101,7 @@ public class CoursesController : ApplicationController
 
     [HttpGet("{id}/for-edit")]
     [Auth(AuthLevel.Authenticated)]
-    public async Task<ActionResult<GetCourseContentResponse>> GetCourseContentForEdit(CourseId id)
+    public async Task<ActionResult<GetCourseContentForEditResponse>> GetCourseContentForEdit(CourseId id)
     {
         var request = new GetCourseContentRequest { Id = id };
         var response = await getCourseContentForEditService.ExecuteAsync(UserId!.Value, request);

@@ -16,7 +16,8 @@ interface CourseDetailPageProps {
  * データフェッチング、状態管理、ビジネスロジックを担当
  */
 export function CourseDetailPage({ courseId }: CourseDetailPageProps) {
-  const { data: course, isLoading, error, refetch } = useGetCourseContent({ id: courseId });
+  const { data, isLoading, error, refetch } = useGetCourseContent({ id: courseId });
+  const course = data?.course;
 
   if (isLoading) {
     return <LoadingSpinner text="講座を読み込み中..." />;
