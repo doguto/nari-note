@@ -22,6 +22,7 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetCourseContentForEditResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
   GetCoursesByAuthorRequest,
@@ -190,8 +191,8 @@ export const coursesApi = {
     const response = await apiClient.get<GetCourseContentResponse>(`/api/courses/${data.id}`);
     return response;
   },
-  getCourseContentForEdit: async (data: { id: string }): Promise<GetCourseContentResponse> => {
-    const response = await apiClient.get<GetCourseContentResponse>(`/api/courses/${data.id}/for-edit`);
+  getCourseContentForEdit: async (data: { id: string }): Promise<GetCourseContentForEditResponse> => {
+    const response = await apiClient.get<GetCourseContentForEditResponse>(`/api/courses/${data.id}/for-edit`);
     return response;
   },
   deleteCourse: async (data: DeleteCourseRequest): Promise<void> => {

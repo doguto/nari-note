@@ -259,7 +259,7 @@ public class CoursesControllerTest : IntegrationTestBase
         var response = await CreateClient().GetAsync($"/api/courses/{course.Id.Value}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var body = await ReadAsync<GetCourseContentResponse>(response);
+        var body = (await ReadAsync<GetCourseContentResponse>(response)).Course;
         Assert.Equal("四間飛車講座", body.Name);
         Assert.Equal("owner", body.UserName);
         Assert.True(body.IsPublished);
@@ -323,7 +323,7 @@ public class CoursesControllerTest : IntegrationTestBase
         var response = await CreateClientAs(owner).GetAsync($"/api/courses/{course.Id.Value}/for-edit");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var body = await ReadAsync<GetCourseContentResponse>(response);
+        var body = (await ReadAsync<GetCourseContentForEditResponse>(response)).Course;
         Assert.Equal(["第1回", "第2回（下書き）"], body.Articles.Select(a => a.Title));
         Assert.Equal([true, false], body.Articles.Select(a => a.IsPublished));
     }

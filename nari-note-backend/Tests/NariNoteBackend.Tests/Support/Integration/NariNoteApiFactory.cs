@@ -21,7 +21,7 @@ namespace NariNoteBackend.Tests.Support.Integration;
 public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     // docker-compose.yml の db と同じイメージを使用する
-    readonly PostgreSqlContainer postgres = new PostgreSqlBuilder("postgres:16.10-alpine3.22").Build();
+    readonly PostgreSqlContainer postgres = new PostgreSqlBuilder("postgres:17.11-alpine3.24").Build();
 
     Respawner? respawner;
 

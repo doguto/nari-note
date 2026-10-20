@@ -1,5 +1,4 @@
 using NariNoteBackend.Application.Dto.Request;
-using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
@@ -29,7 +28,6 @@ public class GetCourseContentServiceTest
         var course = builder.Build();
         course.Articles.AddRange(articles);
         this.courseRepository.FindByIdWithArticlesAsync(course.Id).Returns(course);
-        this.courseRepository.FindByIdWithAllArticlesAsync(course.Id).Returns(course);
         return course;
     }
 
@@ -42,7 +40,7 @@ public class GetCourseContentServiceTest
             new ArticleBuilder(this.owner).WithTitle("第1回").InCourse(null!, 1).Build()
         );
 
-        var response = await this.service.ExecuteAsync(new GetCourseContentRequest { Id = course.Id });
+        var response = (await this.service.ExecuteAsync(new GetCourseContentRequest { Id = course.Id })).Course;
 
         Assert.Equal("四間飛車講座", response.Name);
         Assert.Equal("owner", response.UserName);
@@ -58,7 +56,7 @@ public class GetCourseContentServiceTest
         await Assert.ThrowsAsync<KeyNotFoundException>(() => this.service.ExecuteAsync(request));
         await Assert.ThrowsAsync<KeyNotFoundException>(() => this.service.ExecuteAsync(request, this.otherUser.Id));
 
-        var response = await this.service.ExecuteAsync(request, this.owner.Id);
+        var response = (await this.service.ExecuteAsync(request, this.owner.Id)).Course;
         Assert.False(response.IsPublished);
     }
 
@@ -73,19 +71,6 @@ public class GetCourseContentServiceTest
         await Assert.ThrowsAsync<KeyNotFoundException>(() => this.service.ExecuteAsync(request));
 
         this.timeProvider.SetUtcNow(publishAt);
-        Assert.Equal(course.Id, (await this.service.ExecuteAsync(request)).Id);
-    }
-
-    [Fact]
-    public async Task 編集用の取得は作成者だけに許可する()
-    {
-        var course = SetupCourse(new CourseBuilder(this.owner).Draft());
-        var request = new GetCourseContentRequest { Id = course.Id };
-
-        await Assert.ThrowsAsync<ForbiddenException>(
-            () => this.service.ExecuteForEditAsync(this.otherUser.Id, request)
-        );
-
-        Assert.Equal(course.Id, (await this.service.ExecuteForEditAsync(this.owner.Id, request)).Id);
+        Assert.Equal(course.Id, (await this.service.ExecuteAsync(request)).Course.Id);
     }
 }

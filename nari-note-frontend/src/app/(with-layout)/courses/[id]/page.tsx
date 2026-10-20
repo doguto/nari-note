@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: CoursePageProps): Promise<Met
   const { id } = await params;
 
   try {
-    const course = await getCourseContent({ id });
+    const { course } = await getCourseContent({ id });
     const description = `${course.userName}による将棋コース「${course.name}」。${course.articles.length}本の記事を収録。`;
 
     return {

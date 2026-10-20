@@ -54,6 +54,19 @@ export interface CourseArticleDto {
   isPublished: boolean;
 }
 
+export interface CourseContentDto {
+  id: string;
+  name: string;
+  userId: string;
+  userName: string;
+  userIconImageUrl?: string;
+  likeCount: number;
+  isPublished: boolean;
+  publishedAt?: string;
+  createdAt: string;
+  articles: CourseArticleDto[];
+}
+
 export interface CourseDto {
   id: string;
   userId: string;
@@ -170,21 +183,16 @@ export interface GetArticlesResponse {
   articles: ArticleDto[];
 }
 
+export interface GetCourseContentForEditResponse {
+  course: CourseContentDto;
+}
+
 export interface GetCourseContentRequest {
   id?: string;
 }
 
 export interface GetCourseContentResponse {
-  id: string;
-  name: string;
-  userId: string;
-  userName: string;
-  userIconImageUrl?: string;
-  likeCount: number;
-  isPublished: boolean;
-  publishedAt?: string;
-  createdAt: string;
-  articles: CourseArticleDto[];
+  course: CourseContentDto;
 }
 
 export interface GetCoursesByAuthorRequest {

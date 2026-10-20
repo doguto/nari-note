@@ -1,8 +1,8 @@
-import { GetCourseContentResponse } from '@/lib/api/types';
+import { CourseContentDto } from '@/lib/api/types';
 import { CourseDetailHeader, CourseArticleList } from '../organisms';
 
 interface CourseDetailTemplateProps {
-  course: GetCourseContentResponse;
+  course: CourseContentDto;
 }
 
 
