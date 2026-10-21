@@ -42,7 +42,7 @@
     "@types/react-dom": "^19",
     "esbuild": "latest",
     "eslint": "^9",
-    "eslint-config-next": "^15.5.15",
+    "eslint-config-next": "^16.4.2",
     "tailwindcss": "^4",
     "typescript": "5.9.3",
     "wrangler": "^4.81.0"
