@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Dto.Response;
@@ -402,6 +402,35 @@ public class ArticlesControllerTest : IntegrationTestBase
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(["第1局"], await QueryAsync(db => db.Kifus.Select(k => k.Name).ToListAsync()));
+    }
+
+    [Fact]
+    public async Task 先頭の棋譜を削除して更新すると残りの棋譜が内容と順番を保って残る()
+    {
+        var author = new UserBuilder().Build();
+        var article = new ArticleBuilder(author).Build();
+        await SeedAsync(
+            author,
+            article,
+            TestEntity.Kifu(article, "第1局", 0),
+            TestEntity.Kifu(article, "第2局", 1, "▲2六歩"),
+            TestEntity.Kifu(article, "第3局", 2, "▲5六歩")
+        );
+
+        var response = await CreateClientAs(author).PutAsJsonAsync($"/api/articles/{article.Id.Value}", new
+        {
+            kifus = new[]
+            {
+                new { name = "第2局", kifuText = "▲2六歩", sortOrder = 0 },
+                new { name = "第3局", kifuText = "▲5六歩", sortOrder = 1 }
+            }
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var kifus = await QueryAsync(db => db.Kifus.OrderBy(k => k.SortOrder).ToListAsync());
+        Assert.Equal(["第2局", "第3局"], kifus.Select(k => k.Name));
+        Assert.Equal(["▲2六歩", "▲5六歩"], kifus.Select(k => k.KifuText));
+        Assert.Equal([0, 1], kifus.Select(k => k.SortOrder));
     }
 
     [Fact]
