@@ -388,7 +388,7 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.Equal(["第1局", "第2局"], kifus.Select(k => k.Name));
     }
 
-    [Fact(Skip = "既知の不具合 (#570): KifuRepository.ReplaceAllByArticleIdAsync が余分な既存の棋譜を削除しない")]
+    [Fact]
     public async Task 棋譜を減らして更新すると余分な棋譜は削除される()
     {
         var author = new UserBuilder().Build();
@@ -402,6 +402,22 @@ public class ArticlesControllerTest : IntegrationTestBase
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(["第1局"], await QueryAsync(db => db.Kifus.Select(k => k.Name).ToListAsync()));
+    }
+
+    [Fact]
+    public async Task 棋譜を空にして更新するとすべての棋譜が削除される()
+    {
+        var author = new UserBuilder().Build();
+        var article = new ArticleBuilder(author).Build();
+        await SeedAsync(author, article, TestEntity.Kifu(article, "旧第1局", 0), TestEntity.Kifu(article, "旧第2局", 1));
+
+        var response = await CreateClientAs(author).PutAsJsonAsync($"/api/articles/{article.Id.Value}", new
+        {
+            kifus = Array.Empty<object>()
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Empty(await QueryAsync(db => db.Kifus.ToListAsync()));
     }
 
     [Fact]
