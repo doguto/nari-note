@@ -110,7 +110,7 @@ public class CourseRepository : ICourseRepository
         var query = context.Courses
                            .Include(c => c.User)
                            .Include(c => c.CourseLikes)
-                           .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue && a.PublishedAt.Value < now))
+                           .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now))
                            .Where(c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now)
                            .OrderByDescending(c => c.CreatedAt);
 
@@ -133,7 +133,7 @@ public class CourseRepository : ICourseRepository
                                    .Include(c => c.CourseLikes)
                                    .Include(
                                        c => c.Articles.Where(
-                                           a => a.PublishedAt.HasValue && a.PublishedAt.Value < now
+                                           a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now
                                        )
                                    )
                                    .Where(searchFilter)
@@ -152,7 +152,7 @@ public class CourseRepository : ICourseRepository
         return await context.Courses
                             .Include(c => c.User)
                             .Include(c => c.CourseLikes)
-                            .Include(c => c.Articles)
+                            .Include(c => c.Articles.Where(a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now))
                             .Where(c => c.UserId == authorId && c.PublishedAt.HasValue && c.PublishedAt.Value <= now)
                             .OrderByDescending(c => c.CreatedAt)
                             .ToListAsync();
