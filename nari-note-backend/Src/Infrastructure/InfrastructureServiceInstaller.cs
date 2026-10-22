@@ -7,6 +7,7 @@ using NariNoteBackend.Infrastructure.Gateway;
 using NariNoteBackend.Infrastructure.Outbox;
 using NariNoteBackend.Infrastructure.Repository;
 using NariNoteBackend.Infrastructure.Security;
+using Npgsql;
 using Resend;
 
 namespace NariNoteBackend.Infrastructure;
@@ -14,6 +15,11 @@ namespace NariNoteBackend.Infrastructure;
 public static class InfrastructureServiceInstaller
 {
     static readonly TimeSpan ExternalRequestTimeout = TimeSpan.FromSeconds(10);
+
+    // 本番 PostgreSQL の max_connections (infrastruture/terraform/prod/app/server/postgresql.conf) より小さく保つこと
+    // 上限を超えた分は DB に拒否されずプール内で Timeout まで待機させる
+    const int DbMaxPoolSize = 20;
+    const string DbApplicationName = "nari-note-backend";
 
     public static void AddInfrastructureServices(
         this IServiceCollection services,
@@ -31,9 +37,14 @@ public static class InfrastructureServiceInstaller
             $"Database={configuration["name"]};" +
             $"Username={configuration["username"]};" +
             $"Password={configuration["password"]}";
+        var connectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString)
+        {
+            MaxPoolSize = DbMaxPoolSize,
+            ApplicationName = DbApplicationName
+        };
         // TransactionMiddleware がリクエスト全体をトランザクション単位にしているため、EnableRetryOnFailure は使用しない
         services.AddDbContext<NariNoteDbContext>(
-            options => options.UseNpgsql(connectionString)
+            options => options.UseNpgsql(connectionStringBuilder.ConnectionString)
         );
 
         // Register repositories
