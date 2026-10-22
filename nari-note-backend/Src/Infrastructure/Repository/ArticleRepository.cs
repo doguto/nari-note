@@ -209,8 +209,12 @@ public class ArticleRepository : IArticleRepository
 
     public async Task<int> CountByAuthorAsync(UserId authorId)
     {
+        var now = timeProvider.UtcNow();
+        var visibilityFilter = IsPubliclyVisible(now);
+
         return await context.Articles
-                            .Where(a => a.AuthorId == authorId && a.PublishedAt.HasValue)
+                            .Where(a => a.AuthorId == authorId)
+                            .Where(visibilityFilter)
                             .CountAsync();
     }
 

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
+using NariNoteBackend.Extension;
 using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Infrastructure.Repository;
@@ -9,10 +10,12 @@ namespace NariNoteBackend.Infrastructure.Repository;
 public class TagRepository : ITagRepository
 {
     readonly NariNoteDbContext context;
+    readonly TimeProvider timeProvider;
 
-    public TagRepository(NariNoteDbContext context)
+    public TagRepository(NariNoteDbContext context, TimeProvider timeProvider)
     {
         this.context = context;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<Tag> CreateAsync(Tag entity)
@@ -56,17 +59,23 @@ public class TagRepository : ITagRepository
 
     public async Task<List<Tag>> GetPopularTagsAsync(DateTime sinceDate, int limit)
     {
+        // 公開日時を過ぎていない予約投稿は集計に含めない
+        var now = timeProvider.UtcNow();
+
         return await context.Tags
             .AsNoTracking()
             .Include(t => t.ArticleTags.Where(at => 
                 at.Article.PublishedAt.HasValue && 
-                at.Article.PublishedAt.Value >= sinceDate))
+                at.Article.PublishedAt.Value >= sinceDate &&
+                at.Article.PublishedAt.Value <= now))
             .Where(t => t.ArticleTags.Any(at => 
                 at.Article.PublishedAt.HasValue && 
-                at.Article.PublishedAt.Value >= sinceDate))
+                at.Article.PublishedAt.Value >= sinceDate &&
+                at.Article.PublishedAt.Value <= now))
             .OrderByDescending(t => t.ArticleTags.Count(at => 
                 at.Article.PublishedAt.HasValue && 
-                at.Article.PublishedAt.Value >= sinceDate))
+                at.Article.PublishedAt.Value >= sinceDate &&
+                at.Article.PublishedAt.Value <= now))
             .Take(limit)
             .ToListAsync();
     }

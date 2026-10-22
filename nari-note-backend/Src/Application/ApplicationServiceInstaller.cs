@@ -34,6 +34,7 @@ public static class ApplicationServiceInstaller
         services.AddScoped<GetCurrentUserService>();
         services.AddScoped<LogoutService>();
         services.AddScoped<HealthCheckService>();
+        services.AddScoped<GetHealthService>();
         services.AddScoped<ToggleLikeService>();
         services.AddScoped<GetDraftArticlesService>();
         services.AddScoped<SearchArticlesService>();

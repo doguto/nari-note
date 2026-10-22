@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Dto.Response;
@@ -388,7 +388,7 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.Equal(["第1局", "第2局"], kifus.Select(k => k.Name));
     }
 
-    [Fact(Skip = "既知の不具合 (#570): KifuRepository.ReplaceAllByArticleIdAsync が余分な既存の棋譜を削除しない")]
+    [Fact]
     public async Task 棋譜を減らして更新すると余分な棋譜は削除される()
     {
         var author = new UserBuilder().Build();
@@ -402,6 +402,51 @@ public class ArticlesControllerTest : IntegrationTestBase
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(["第1局"], await QueryAsync(db => db.Kifus.Select(k => k.Name).ToListAsync()));
+    }
+
+    [Fact]
+    public async Task 先頭の棋譜を削除して更新すると残りの棋譜が内容と順番を保って残る()
+    {
+        var author = new UserBuilder().Build();
+        var article = new ArticleBuilder(author).Build();
+        await SeedAsync(
+            author,
+            article,
+            TestEntity.Kifu(article, "第1局", 0),
+            TestEntity.Kifu(article, "第2局", 1, "▲2六歩"),
+            TestEntity.Kifu(article, "第3局", 2, "▲5六歩")
+        );
+
+        var response = await CreateClientAs(author).PutAsJsonAsync($"/api/articles/{article.Id.Value}", new
+        {
+            kifus = new[]
+            {
+                new { name = "第2局", kifuText = "▲2六歩", sortOrder = 0 },
+                new { name = "第3局", kifuText = "▲5六歩", sortOrder = 1 }
+            }
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var kifus = await QueryAsync(db => db.Kifus.OrderBy(k => k.SortOrder).ToListAsync());
+        Assert.Equal(["第2局", "第3局"], kifus.Select(k => k.Name));
+        Assert.Equal(["▲2六歩", "▲5六歩"], kifus.Select(k => k.KifuText));
+        Assert.Equal([0, 1], kifus.Select(k => k.SortOrder));
+    }
+
+    [Fact]
+    public async Task 棋譜を空にして更新するとすべての棋譜が削除される()
+    {
+        var author = new UserBuilder().Build();
+        var article = new ArticleBuilder(author).Build();
+        await SeedAsync(author, article, TestEntity.Kifu(article, "旧第1局", 0), TestEntity.Kifu(article, "旧第2局", 1));
+
+        var response = await CreateClientAs(author).PutAsJsonAsync($"/api/articles/{article.Id.Value}", new
+        {
+            kifus = Array.Empty<object>()
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Empty(await QueryAsync(db => db.Kifus.ToListAsync()));
     }
 
     [Fact]
@@ -542,7 +587,7 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.Equal(["新しい記事", "古い記事"], body.Articles.Select(a => a.Title));
     }
 
-    [Fact(Skip = "既知の不具合 (#571): GetArticlesByAuthorService が公開日時を過ぎていない予約投稿も返す")]
+    [Fact]
     public async Task 作者別の記事一覧に予約投稿は含まれない()
     {
         var author = new UserBuilder().Build();
