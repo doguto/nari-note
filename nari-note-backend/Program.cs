@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Filter;
 using NariNoteBackend.Infrastructure;
 using NariNoteBackend.Infrastructure.Database;
 using NariNoteBackend.Infrastructure.Outbox;
@@ -102,7 +103,8 @@ app.UseMiddleware<TransactionMiddleware>();
 app.UseHttpsRedirection();
 
 app.MapControllers();
-app.MapHealthChecks("/health");
+// ヘルスチェックは監視ツール等から未認証で叩かれるため認証不要にする
+app.MapHealthChecks("/health").WithMetadata(new AuthAttribute(AuthLevel.Anonymous));
 
 app.Run();
 
