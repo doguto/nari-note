@@ -52,40 +52,21 @@ public class KifuRepository : IKifuRepository
 
     public async Task ReplaceAllByArticleIdAsync(ArticleId articleId, List<Kifu> kifus)
     {
-        var existing = await context.Kifus.Where(k => k.ArticleId == articleId).ToListAsync();
+        var existing = await context.Kifus
+                                    .Where(k => k.ArticleId == articleId)
+                                    .OrderBy(k => k.SortOrder)
+                                    .ToListAsync();
 
-        if (existing.Count >= kifus.Count)
+        var updateCount = Math.Min(existing.Count, kifus.Count);
+        for (var i = 0; i < updateCount; i++)
         {
-            var deleteCount = existing.Count - kifus.Count;
-            var updateKifus = kifus.Take(kifus.Count).ToArray();
-            var deleteKifus = kifus.Skip(kifus.Count).Take(deleteCount);
-
-            for (var i = 0; i < kifus.Count; i++)
-            {
-                updateKifus[i] = existing[i];
-                updateKifus[i].Name = kifus[i].Name;
-                updateKifus[i].KifuText = kifus[i].KifuText;
-                updateKifus[i].SortOrder = kifus[i].SortOrder;
-            }
-
-            context.Kifus.UpdateRange(updateKifus);
-            context.Kifus.RemoveRange(deleteKifus);
+            existing[i].Name = kifus[i].Name;
+            existing[i].KifuText = kifus[i].KifuText;
+            existing[i].SortOrder = kifus[i].SortOrder;
         }
-        else if (existing.Count < kifus.Count)
-        {
-            var insertCount = kifus.Count - existing.Count;
-            var insertKifus = kifus.Skip(existing.Count).Take(insertCount);
 
-            for (var i = 0; i < existing.Count; i++)
-            {
-                existing[i].Name = kifus[i].Name;
-                existing[i].KifuText = kifus[i].KifuText;
-                existing[i].SortOrder = kifus[i].SortOrder;
-            }
-
-            context.Kifus.UpdateRange(existing);
-            context.Kifus.AddRange(insertKifus);
-        }
+        context.Kifus.RemoveRange(existing.Skip(kifus.Count));
+        context.Kifus.AddRange(kifus.Skip(existing.Count));
 
         await context.SaveChangesAsync();
     }
