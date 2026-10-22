@@ -36,6 +36,7 @@ public class UsersControllerTest : IntegrationTestBase
             published,
             othersArticle,
             new ArticleBuilder(user).Draft().Build(),
+            new ArticleBuilder(user).PublishedAt(Now.AddDays(1)).Build(),
             TestEntity.Follow(follower, user),
             TestEntity.Follow(user, following1),
             TestEntity.Follow(user, following2),
@@ -52,7 +53,7 @@ public class UsersControllerTest : IntegrationTestBase
         Assert.Equal("https://images.test/taro", body.UserIconImageUrl);
         Assert.Equal(1, body.FollowerCount);
         Assert.Equal(2, body.FollowingCount);
-        // 下書きは記事数に含めない
+        // 下書きと公開日時を過ぎていない予約投稿は記事数に含めない
         Assert.Equal(1, body.ArticleCount);
         Assert.Equal(1, body.LikedArticleCount);
         Assert.False(body.IsFollowing);

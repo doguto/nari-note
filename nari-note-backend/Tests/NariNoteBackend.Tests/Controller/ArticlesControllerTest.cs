@@ -542,7 +542,7 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.Equal(["新しい記事", "古い記事"], body.Articles.Select(a => a.Title));
     }
 
-    [Fact(Skip = "既知の不具合 (#571): GetArticlesByAuthorService が公開日時を過ぎていない予約投稿も返す")]
+    [Fact]
     public async Task 作者別の記事一覧に予約投稿は含まれない()
     {
         var author = new UserBuilder().Build();

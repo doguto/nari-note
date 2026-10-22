@@ -22,26 +22,32 @@ public class TagsControllerTest : IntegrationTestBase
         var normal = TestEntity.Tag("居飛車");
         var old = TestEntity.Tag("古いタグ");
         var draftOnly = TestEntity.Tag("下書きのタグ");
+        var scheduledOnly = TestEntity.Tag("予約投稿のタグ");
         var recent1 = new ArticleBuilder(author).PublishedAt(Now.AddDays(-1)).Build();
         var recent2 = new ArticleBuilder(author).PublishedAt(Now.AddMonths(-2)).Build();
         var oldArticle = new ArticleBuilder(author).PublishedAt(Now.AddMonths(-3).AddDays(-1)).Build();
         var draft = new ArticleBuilder(author).Draft().Build();
+        var scheduled = new ArticleBuilder(author).PublishedAt(Now.AddDays(1)).Build();
         await SeedAsync(
             author,
             popular,
             normal,
             old,
             draftOnly,
+            scheduledOnly,
             recent1,
             recent2,
             oldArticle,
             draft,
+            scheduled,
             TestEntity.ArticleTag(recent1, popular),
             TestEntity.ArticleTag(recent2, popular),
             TestEntity.ArticleTag(oldArticle, popular),
             TestEntity.ArticleTag(recent1, normal),
             TestEntity.ArticleTag(oldArticle, old),
-            TestEntity.ArticleTag(draft, draftOnly)
+            TestEntity.ArticleTag(draft, draftOnly),
+            TestEntity.ArticleTag(scheduled, normal),
+            TestEntity.ArticleTag(scheduled, scheduledOnly)
         );
 
         var response = await CreateClient().GetAsync("/api/tags/popular");
@@ -49,7 +55,7 @@ public class TagsControllerTest : IntegrationTestBase
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await ReadAsync<GetPopularTagsResponse>(response);
         Assert.Equal(["振り飛車", "居飛車"], body.Tags.Select(t => t.Name));
-        // 期間外の記事は件数に含めない
+        // 期間外の記事と公開日時を過ぎていない予約投稿は件数に含めない
         Assert.Equal([2, 1], body.Tags.Select(t => t.ArticleCount));
     }
 
