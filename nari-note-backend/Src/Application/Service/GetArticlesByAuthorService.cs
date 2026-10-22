@@ -2,22 +2,27 @@ using NariNoteBackend.Application.Dto;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Application.Service;
 
 public class GetArticlesByAuthorService
 {
     readonly IArticleRepository articleRepository;
+    readonly TimeProvider timeProvider;
 
-    public GetArticlesByAuthorService(IArticleRepository articleRepository)
+    public GetArticlesByAuthorService(IArticleRepository articleRepository, TimeProvider timeProvider)
     {
         this.articleRepository = articleRepository;
+        this.timeProvider = timeProvider;
     }
 
     public async Task<GetArticlesByAuthorResponse> ExecuteAsync(GetArticlesByAuthorRequest request)
     {
         var articles = await articleRepository.FindByAuthorAsync(request.AuthorId);
-        var publishedArticles = articles.Where(a => a.IsPublished).ToList();
+        // 下書きに加え、公開日時を過ぎていない予約投稿も第三者には見せない
+        var now = timeProvider.UtcNow();
+        var publishedArticles = articles.Where(a => a.IsPubliclyVisibleAt(now)).ToList();
 
         var articleDtos = publishedArticles.Select(a => new ArticleThumbnailDto
         {

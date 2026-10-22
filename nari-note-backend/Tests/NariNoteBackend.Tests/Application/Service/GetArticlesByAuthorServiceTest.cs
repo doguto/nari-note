@@ -13,10 +13,11 @@ public class GetArticlesByAuthorServiceTest
     readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
     readonly User author = new UserBuilder().WithName("author").Build();
     readonly GetArticlesByAuthorService service;
+    readonly TestTimeProvider timeProvider = new();
 
     public GetArticlesByAuthorServiceTest()
     {
-        this.service = new GetArticlesByAuthorService(this.articleRepository);
+        this.service = new GetArticlesByAuthorService(this.articleRepository, this.timeProvider);
     }
 
     void SetupArticles(params Article[] articles)
@@ -52,7 +53,7 @@ public class GetArticlesByAuthorServiceTest
         Assert.Empty(response.Articles);
     }
 
-    [Fact(Skip = "既知の不具合 (#571): 公開日時を過ぎていない予約投稿も返す")]
+    [Fact]
     public async Task 公開日時を過ぎていない予約投稿は返さない()
     {
         SetupArticles(
