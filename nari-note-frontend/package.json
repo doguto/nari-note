@@ -37,7 +37,7 @@
     "@openapitools/openapi-generator-cli": "^2.18.4",
     "@opennextjs/cloudflare": "latest",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "esbuild": "latest",
