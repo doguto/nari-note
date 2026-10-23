@@ -23,11 +23,13 @@ dotnet test --filter "FullyQualifiedName~NariNoteBackend.Tests.Controller"
 |---|---|---|---|
 | 単体テスト | Service | Repository / Gateway の interface を NSubstitute で差し替え | `Tests/NariNoteBackend.Tests/Application/Service/` |
 | 結合テスト | Controller（HTTP 経由） | 実 Service・実 Repository・実 PostgreSQL（Testcontainers） | `Tests/NariNoteBackend.Tests/Controller/` |
+| マイグレーションテスト | 既存データがある DB へのマイグレーション適用 | テストごとに専用の PostgreSQL（Testcontainers） | `Tests/NariNoteBackend.Tests/Migrations/` |
 
 ```
 Tests/NariNoteBackend.Tests/
 ├── Application/Service/     # Service の単体テスト
 ├── Controller/              # Controller の結合テスト
+├── Migrations/              # データ移行を伴うマイグレーションのテスト
 └── Support/
     ├── Builder/             # テストデータの Builder
     ├── Fake/                # 外部サービス（メール・Discord・画像ストレージ）の Fake

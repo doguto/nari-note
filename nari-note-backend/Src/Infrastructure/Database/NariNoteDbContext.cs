@@ -115,10 +115,9 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(at => at.Id)
-             .HasValueGenerator<ArticleTagIdValueGenerator>();
-
-            x.Property(at => at.Id)
-             .HasVogenConversion();
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
 
             x.Property(at => at.ArticleId)
              .HasVogenConversion();
@@ -140,10 +139,9 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(l => l.Id)
-             .HasValueGenerator<LikeIdValueGenerator>();
-
-            x.Property(l => l.Id)
-             .HasVogenConversion();
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
 
             x.Property(l => l.UserId)
              .HasVogenConversion();
@@ -165,10 +163,9 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(c => c.Id)
-             .HasValueGenerator<CommentIdValueGenerator>();
-
-            x.Property(c => c.Id)
-             .HasVogenConversion();
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
 
             x.Property(c => c.UserId)
              .HasVogenConversion();
@@ -190,10 +187,9 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(f => f.Id)
-             .HasValueGenerator<FollowIdValueGenerator>();
-
-            x.Property(f => f.Id)
-             .HasVogenConversion();
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
 
             x.Property(f => f.FollowerId)
              .HasVogenConversion();
@@ -215,10 +211,9 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(n => n.Id)
-             .HasValueGenerator<NotificationIdValueGenerator>();
-
-            x.Property(n => n.Id)
-             .HasVogenConversion();
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
 
             x.Property(n => n.UserId)
              .HasVogenConversion();
@@ -257,10 +252,9 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(cl => cl.Id)
-             .HasValueGenerator<CourseLikeIdValueGenerator>();
-
-            x.Property(cl => cl.Id)
-             .HasVogenConversion();
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
 
             x.Property(cl => cl.UserId)
              .HasVogenConversion();
@@ -277,10 +271,9 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(ev => ev.Id)
-             .HasValueGenerator<EmailVerificationIdValueGenerator>();
-
-            x.Property(ev => ev.Id)
-             .HasVogenConversion();
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
 
             x.Property(ev => ev.UserId)
              .HasVogenConversion();
@@ -294,10 +287,9 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(prt => prt.Id)
-             .HasValueGenerator<PasswordResetTokenIdValueGenerator>();
-
-            x.Property(prt => prt.Id)
-             .HasVogenConversion();
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
 
             x.Property(prt => prt.UserId)
              .HasVogenConversion();
@@ -311,10 +303,9 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(k => k.Id)
-             .HasValueGenerator<KifuIdValueGenerator>();
-
-            x.Property(k => k.Id)
-             .HasVogenConversion();
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
 
             x.Property(k => k.ArticleId)
              .HasVogenConversion();
