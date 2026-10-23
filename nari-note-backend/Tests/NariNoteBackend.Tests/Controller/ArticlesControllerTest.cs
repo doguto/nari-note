@@ -674,6 +674,22 @@ public class ArticlesControllerTest : IntegrationTestBase
     }
 
     [Fact]
+    public async Task 複数ユーザーが同時にいいねしても全件がIDの重複なく保存される()
+    {
+        var author = new UserBuilder().Build();
+        var article = new ArticleBuilder(author).Build();
+        var readers = Enumerable.Range(0, 20).Select(_ => new UserBuilder().Build()).ToArray();
+        await SeedAsync([author, article, ..readers]);
+        var url = $"/api/articles/{article.Id.Value}/like";
+
+        var responses = await Task.WhenAll(readers.Select(r => CreateClientAs(r).PostAsync(url, null)));
+
+        Assert.All(responses, r => Assert.Equal(HttpStatusCode.OK, r.StatusCode));
+        var ids = await QueryAsync(db => db.Likes.Select(l => l.Id).ToListAsync());
+        Assert.Equal(readers.Length, ids.Distinct().Count());
+    }
+
+    [Fact]
     public async Task 未認証ではいいねできない()
     {
         var author = new UserBuilder().Build();
