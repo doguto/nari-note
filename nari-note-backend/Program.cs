@@ -80,6 +80,7 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<NariNoteDbContext>();
     await DataSeeder.SeedAsync(context);
+    await BulkDataSeeder.SeedAsync(context);
 }
 
 // [NoTransaction] 等のエンドポイント情報を後続ミドルウェアで参照するため先頭に置く

@@ -1,3 +1,8 @@
+resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
+  role       = aws_iam_role.app_server.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 resource "aws_iam_role_policy" "ssm_read" {
   name   = "${var.app_name}-ssm-read-policy"
   role   = aws_iam_role.app_server.id
