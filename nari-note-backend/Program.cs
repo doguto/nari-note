@@ -71,6 +71,9 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<NariNoteDbContext>();
+    // アプリ用ロールの statement_timeout で中断させない。接続はプール返却時の DISCARD ALL で元に戻る
+    await context.Database.OpenConnectionAsync();
+    await context.Database.ExecuteSqlRawAsync("SET statement_timeout = 0");
     await context.Database.MigrateAsync();
 }
 

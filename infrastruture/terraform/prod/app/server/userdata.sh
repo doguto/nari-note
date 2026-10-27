@@ -145,6 +145,9 @@ DB_PASSWORD=$(aws ssm get-parameter \
 sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname = '$${DB_USERNAME}'" | grep -q 1 || \
   sudo -u postgres psql -c "CREATE ROLE \"$${DB_USERNAME}\" WITH LOGIN PASSWORD '$${DB_PASSWORD}';"
 
+# バックアップ等の postgres ユーザーの作業を止めないよう、サーバー全体ではなくアプリ用ロールにのみ設定する
+sudo -u postgres psql -c "ALTER ROLE \"$${DB_USERNAME}\" SET statement_timeout = '15s';"
+
 sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname = 'nari_note'" | grep -q 1 || \
   sudo -u postgres psql -c "CREATE DATABASE nari_note OWNER \"$${DB_USERNAME}\";"
 
