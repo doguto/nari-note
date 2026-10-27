@@ -10,7 +10,7 @@ public interface ICourseRepository : IRepository<Course, CourseId>
     Task<Course> FindByIdWithArticlesAsync(CourseId id);
     Task<Course> FindByIdWithAllArticlesAsync(CourseId id);
     Task<(List<Course> Courses, int TotalCount)> FindLatestAsync(int limit, int offset);
-    Task<List<Course>> SearchAsync(string keyword, int limit, int offset);
+    Task<(List<Course> Courses, int TotalCount)> SearchAsync(string keyword, int limit, int offset);
     Task<(List<CourseSummary> Courses, int TotalCount)> FindPublishedSummariesByAuthorAsync(UserId authorId, int limit, int offset);
     Task<List<Course>> FindAllByAuthorAsync(UserId authorId);
 }

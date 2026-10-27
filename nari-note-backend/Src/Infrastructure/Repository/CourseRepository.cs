@@ -124,11 +124,12 @@ public class CourseRepository : ICourseRepository
         return (courses, totalCount);
     }
 
-    public async Task<List<Course>> SearchAsync(string keyword, int limit, int offset)
+    public async Task<(List<Course> Courses, int TotalCount)> SearchAsync(string keyword, int limit, int offset)
     {
         var now = timeProvider.UtcNow();
         var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
 
+        var totalCount = await context.Courses.Where(searchFilter).CountAsync();
         var courses = await context.Courses
                                    .Include(c => c.User)
                                    .Include(c => c.CourseLikes)
@@ -144,7 +145,7 @@ public class CourseRepository : ICourseRepository
                                    .Take(limit)
                                    .ToListAsync();
 
-        return courses;
+        return (courses, totalCount);
     }
 
     public async Task<(List<CourseSummary> Courses, int TotalCount)> FindPublishedSummariesByAuthorAsync(UserId authorId, int limit, int offset)

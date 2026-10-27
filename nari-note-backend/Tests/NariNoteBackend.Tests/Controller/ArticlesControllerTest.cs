@@ -906,7 +906,7 @@ public class ArticlesControllerTest : IntegrationTestBase
     }
 
     [Fact]
-    public async Task 記事検索は件数と位置を指定してページ送りでき次のページの有無を返す()
+    public async Task 記事検索は件数と位置を指定してページ送りでき総件数を返す()
     {
         var author = new UserBuilder().Build();
         await SeedAsync(
@@ -925,9 +925,9 @@ public class ArticlesControllerTest : IntegrationTestBase
         );
 
         Assert.Equal(["四間飛車1", "四間飛車2"], firstPage.Articles.Select(a => a.Title));
-        Assert.True(firstPage.HasNext);
+        Assert.Equal(3, firstPage.TotalCount);
         Assert.Equal(["四間飛車3"], lastPage.Articles.Select(a => a.Title));
-        Assert.False(lastPage.HasNext);
+        Assert.Equal(3, lastPage.TotalCount);
     }
 
     [Theory]

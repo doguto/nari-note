@@ -124,8 +124,8 @@ export function UnifiedSearchPage({ searchKeyword, activeTab, page }: UnifiedSea
       articlePage={articlePage}
       coursePage={coursePage}
       pageSize={PAGE_SIZE}
-      articlesHasNext={articleData?.hasNext ?? false}
-      coursesHasNext={courseData?.hasNext ?? false}
+      articleTotalCount={articleData?.totalCount ?? 0}
+      courseTotalCount={courseData?.totalCount ?? 0}
       paginationQuery={buildSearchQuery(searchKeyword, activeTab)}
       onKeywordChange={setKeyword}
       onSearch={handleSearch}

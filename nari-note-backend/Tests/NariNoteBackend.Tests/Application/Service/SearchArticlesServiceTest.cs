@@ -21,7 +21,7 @@ public class SearchArticlesServiceTest
     public async Task キーワードと件数と位置を指定して検索した記事を返す()
     {
         var summary = Summary("四間飛車の基本");
-        this.articleRepository.SearchSummariesAsync("四間飛車", 11, 20).Returns(new List<ArticleSummary> { summary });
+        this.articleRepository.SearchSummariesAsync("四間飛車", 10, 20).Returns((new List<ArticleSummary> { summary }, 21));
 
         var response = await this.service.ExecuteAsync(
             new SearchArticlesRequest { Keyword = "四間飛車", Limit = 10, Offset = 20 }
@@ -33,21 +33,7 @@ public class SearchArticlesServiceTest
         Assert.Equal("author", dto.AuthorName);
         Assert.Equal(["振り飛車"], dto.Tags);
         Assert.Equal(1, dto.LikeCount);
-        Assert.False(response.HasNext);
-    }
-
-    [Fact]
-    public async Task 指定件数より多く見つかった場合は指定件数だけ返し次のページがあると判定する()
-    {
-        var summaries = Enumerable.Range(1, 3).Select(i => Summary($"記事{i}")).ToList();
-        this.articleRepository.SearchSummariesAsync("記事", 3, 0).Returns(summaries);
-
-        var response = await this.service.ExecuteAsync(
-            new SearchArticlesRequest { Keyword = "記事", Limit = 2, Offset = 0 }
-        );
-
-        Assert.Equal(["記事1", "記事2"], response.Articles.Select(a => a.Title));
-        Assert.True(response.HasNext);
+        Assert.Equal(21, response.TotalCount);
     }
 
     static ArticleSummary Summary(string title)
