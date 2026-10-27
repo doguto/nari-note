@@ -178,10 +178,123 @@ public static class DataSeeder
                 PublishedAt = DateTime.UtcNow.AddHours(-1),
                 CreatedAt = DateTime.UtcNow.AddHours(-1),
                 UpdatedAt = DateTime.UtcNow.AddHours(-1)
+            },
+            new()
+            {
+                Title = "【棋譜付き】乱戦の横歩取りを振り返る",
+                Body = """
+                    先日指した将棋が序盤から大乱戦になったので、棋譜を貼って振り返ります。
+
+                    ## 全体の棋譜
+
+                    まずは最初から最後まで通して見てください。
+
+                    ```kifu
+                    乱戦の一局
+                    ```
+
+                    ## 序盤：飛車先の歩交換
+
+                    15手目の▲３四飛で横歩を取った局面です。ここから一気に激しくなりました。
+
+                    ```kifu
+                    乱戦の一局_15
+                    ```
+
+                    ## 中盤：角交換からの打ち合い
+
+                    △８八角成から角の打ち合いに。22手目の△５五角打が気持ちの良い一手でした。
+
+                    ```kifu
+                    乱戦の一局_22
+                    ```
+
+                    ## 参考：頭金の基本形
+
+                    最後に、終盤でよく出てくる頭金の形を盤面で載せておきます。▲５二金打までの１手詰です。
+
+                    ```bod
+                    後手の持駒：なし
+                      ９ ８ ７ ６ ５ ４ ３ ２ １
+                    +---------------------------+
+                    | ・ ・ ・ ・v玉 ・ ・ ・ ・|一
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|二
+                    | ・ ・ ・ ・ 歩 ・ ・ ・ ・|三
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|四
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|五
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|六
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|七
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|八
+                    | ・ ・ ・ ・ 玉 ・ ・ ・ ・|九
+                    +---------------------------+
+                    先手の持駒：金
+                    ```
+
+                    ## 存在しない棋譜の参照
+
+                    以下は存在しない棋譜名を指定した場合の表示確認用です。
+
+                    ```kifu
+                    存在しない棋譜
+                    ```
+                    """,
+                AuthorId = users[0].Id,
+                PublishedAt = DateTime.UtcNow.AddMinutes(-30),
+                CreatedAt = DateTime.UtcNow.AddMinutes(-30),
+                UpdatedAt = DateTime.UtcNow.AddMinutes(-30)
             }
         };
 
         context.Articles.AddRange(articles);
+        await context.SaveChangesAsync();
+
+        // 棋譜作成
+        var kifus = new List<Kifu>
+        {
+            new()
+            {
+                ArticleId = articles[10].Id,
+                Name = "乱戦の一局",
+                KifuText = """
+                    手合割：平手
+                    先手：羽生九段ファン
+                    後手：振り飛車党
+                    手数----指手---------消費時間--
+                       1 ７六歩(77)
+                       2 ３四歩(33)
+                       3 ２六歩(27)
+                       4 ８四歩(83)
+                       5 ２五歩(26)
+                       6 ８五歩(84)
+                       7 ７八金(69)
+                       8 ３二金(41)
+                       9 ２四歩(25)
+                      10 同　歩(23)
+                      11 同　飛(28)
+                      12 ８六歩(85)
+                      13 同　歩(87)
+                      14 同　飛(82)
+                      15 ３四飛(24)
+                      16 ８八角成(22)
+                      17 同　銀(79)
+                      18 ７六飛(86)
+                      19 ７七角打
+                      20 同　飛成(76)
+                      21 同　金(78)
+                      22 ５五角打
+                      23 ８二飛打
+                      24 ７二銀(71)
+                      25 ８一飛成(82)
+                      26 投了
+                    まで25手で先手の勝ち
+                    """,
+                SortOrder = 0,
+                CreatedAt = DateTime.UtcNow.AddMinutes(-30),
+                UpdatedAt = DateTime.UtcNow.AddMinutes(-30)
+            }
+        };
+
+        context.Kifus.AddRange(kifus);
         await context.SaveChangesAsync();
 
         // 記事とタグの関連付け
@@ -279,8 +392,17 @@ public static class DataSeeder
             new()
             {
                 ArticleId = articles[8].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow
-            }
+            },
             // 将棋ソフトの記事にはタグを付けない(独立記事の例)
+            // 棋譜付き記事 -> 居飛車, 棋譜解説
+            new()
+            {
+                ArticleId = articles[10].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                ArticleId = articles[10].Id, TagId = tags[5].Id, CreatedAt = DateTime.UtcNow
+            }
         };
 
         context.ArticleTags.AddRange(articleTags);
