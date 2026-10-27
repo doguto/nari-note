@@ -138,6 +138,7 @@ public class CourseRepository : ICourseRepository
                                    )
                                    .Where(searchFilter)
                                    .OrderByDescending(c => c.CreatedAt)
+                                   .ThenByDescending(c => c.Id)
                                    .Skip(offset)
                                    .Take(limit)
                                    .ToListAsync();

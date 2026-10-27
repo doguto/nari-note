@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { SearchBar } from '@/components/molecules';
-import { ArticleCard, CourseCard } from '@/components/molecules';
+import { ArticleCard, CourseCard, Pagination } from '@/components/molecules';
 import { EmptyState } from '@/components/ui';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Search, ChevronDown } from 'lucide-react';
@@ -12,6 +11,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ArticleThumbnailDto, CourseDto } from '@/lib/api/types';
 
+export type SearchTab = 'articles' | 'courses';
+
 interface UnifiedSearchTemplateProps {
   keyword: string;
   searchKeyword: string;
@@ -20,8 +21,24 @@ interface UnifiedSearchTemplateProps {
   hasCourseResults: boolean;
   articles: ArticleThumbnailDto[];
   courses: CourseDto[];
+  activeTab: SearchTab;
+  articlePage: number;
+  coursePage: number;
+  pageSize: number;
+  articlesHasNext: boolean;
+  coursesHasNext: boolean;
+  paginationQuery: Record<string, string>;
   onKeywordChange: (keyword: string) => void;
   onSearch: () => void;
+  onTabChange: (tab: SearchTab) => void;
+}
+
+/**
+ * 表示中の検索結果が全体の何件目かを表す文言（総件数は数えていないため範囲だけを出す）
+ */
+function rangeLabel(page: number, pageSize: number, count: number): string {
+  const first = (page - 1) * pageSize + 1;
+  return `${first}〜${first + count - 1}件目`;
 }
 
 
@@ -33,11 +50,17 @@ export function UnifiedSearchTemplate({
   hasCourseResults,
   articles,
   courses,
+  activeTab,
+  articlePage,
+  coursePage,
+  pageSize,
+  articlesHasNext,
+  coursesHasNext,
+  paginationQuery,
   onKeywordChange,
   onSearch,
+  onTabChange,
 }: UnifiedSearchTemplateProps) {
-  const [activeTab, setActiveTab] = useState<'articles' | 'courses'>('articles');
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className='flex justify-center w-full max-w-2xl mx-auto'>
@@ -48,7 +71,7 @@ export function UnifiedSearchTemplate({
         />
       </div>
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'articles' | 'courses')} className="flex flex-col gap-6">
+      <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as SearchTab)} className="flex flex-col gap-6">
         <div className="block md:hidden w-full max-w-2xl mx-auto">
           <DropdownMenu>
             <DropdownMenuTrigger className="flex w-full items-center justify-between rounded-md border border-brand-border bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring">
@@ -56,8 +79,8 @@ export function UnifiedSearchTemplate({
               <ChevronDown className="h-4 w-4 opacity-50" />
             </DropdownMenuTrigger>
             <DropdownMenuContent style={{ width: 'var(--radix-dropdown-menu-trigger-width)' }}>
-              <DropdownMenuItem onSelect={() => setActiveTab('articles')}>記事</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveTab('courses')}>講座</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => onTabChange('articles')}>記事</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => onTabChange('courses')}>講座</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -89,7 +112,7 @@ export function UnifiedSearchTemplate({
               <>
                 <div className="mb-4">
                   <p className="text-gray-600">
-                    {articles.length}件の記事が見つかりました
+                    {rangeLabel(articlePage, pageSize, articles.length)}の記事を表示しています
                   </p>
                 </div>
 
@@ -115,6 +138,17 @@ export function UnifiedSearchTemplate({
                 </div>
               </>
             )}
+
+            {hasSearched && (
+              <div className="mt-6">
+                <Pagination
+                  currentPage={articlePage}
+                  hasNext={articlesHasNext}
+                  basePath="/search"
+                  query={paginationQuery}
+                />
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="courses">
@@ -138,7 +172,7 @@ export function UnifiedSearchTemplate({
               <>
                 <div className="mb-4">
                   <p className="text-gray-600">
-                    {courses.length}件の講座が見つかりました
+                    {rangeLabel(coursePage, pageSize, courses.length)}の講座を表示しています
                   </p>
                 </div>
 
@@ -157,6 +191,17 @@ export function UnifiedSearchTemplate({
                   ))}
                 </div>
               </>
+            )}
+
+            {hasSearched && (
+              <div className="mt-6">
+                <Pagination
+                  currentPage={coursePage}
+                  hasNext={coursesHasNext}
+                  basePath="/search"
+                  query={paginationQuery}
+                />
+              </div>
             )}
           </TabsContent>
         </div>
