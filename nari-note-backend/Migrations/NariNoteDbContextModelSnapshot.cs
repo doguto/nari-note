@@ -283,8 +283,8 @@ namespace NariNoteBackend.Migrations
 
                     b.Property<string>("KifuText")
                         .IsRequired()
-                        .HasMaxLength(8192)
-                        .HasColumnType("character varying(8192)");
+                        .HasMaxLength(20000)
+                        .HasColumnType("character varying(20000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
