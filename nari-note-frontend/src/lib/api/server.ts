@@ -95,9 +95,15 @@ export async function getArticlesByAuthor(params: GetArticlesByAuthorRequest): P
 }
 
 export async function getArticlesByTag(params: GetArticlesByTagRequest): Promise<GetArticlesByTagResponse> {
-  const url = `${getBaseUrl()}/api/articles/tag/${params.tagName}`;
+  const url = new URL(`/api/articles/tag/${params.tagName}`, getBaseUrl());
+  const query = { limit: params.limit, offset: params.offset };
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  });
 
-  return serverFetch<GetArticlesByTagResponse>(url);
+  return serverFetch<GetArticlesByTagResponse>(url.toString());
 }
 
 export async function getMyArticles(): Promise<GetMyArticlesResponse> {

@@ -4,6 +4,7 @@ import { TagArticleListPage } from '@/features/tag/pages';
 
 interface TagPageProps {
   params: Promise<{ name: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
 export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
@@ -16,8 +17,11 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   };
 }
 
-export default async function TagPage({ params }: TagPageProps) {
+export default async function TagPage({ params, searchParams }: TagPageProps) {
   const { name } = await params;
+  const { page } = await searchParams;
+  const parsedPage = Number(page);
+  const currentPage = Number.isInteger(parsedPage) && parsedPage >= 1 ? parsedPage : 1;
 
-  return <TagArticleListPage tagName={name} />;
+  return <TagArticleListPage tagName={name} page={currentPage} />;
 }

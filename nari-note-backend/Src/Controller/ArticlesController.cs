@@ -104,9 +104,11 @@ public class ArticlesController : ApplicationController
 
     [HttpGet("tag/{tagName}")]
     [Auth(AuthLevel.Anonymous)]
-    public async Task<ActionResult<GetArticlesByTagResponse>> GetArticlesByTag(string tagName)
+    public async Task<ActionResult<GetArticlesByTagResponse>> GetArticlesByTag(
+        string tagName, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+    )
     {
-        var request = new GetArticlesByTagRequest { TagName = tagName };
+        var request = new GetArticlesByTagRequest { TagName = tagName, Limit = limit, Offset = offset };
         var response = await getArticlesByTagService.ExecuteAsync(request);
         return Ok(response);
     }

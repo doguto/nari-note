@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ReadModel;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Extension;
@@ -70,23 +71,31 @@ public class ArticleRepository : IArticleRepository
         return await ToListWithLikeCountAsync(query);
     }
 
-    public async Task<List<Article>> FindByTagAsync(string tagName)
+    public async Task<(List<ArticleSummary> Articles, int TotalCount)> FindSummariesByTagAsync(string tagName, int limit, int offset)
     {
         var now = timeProvider.UtcNow();
         var visibilityFilter = IsPubliclyVisible(now);
 
-        var query = context.Articles
-                           .AsNoTracking()
-                           .Include(a => a.Author)
-                           .Include(a => a.ArticleTags)
-                           .ThenInclude(at => at.Tag)
-                           .AsSplitQuery()
-                           .Where(a => a.ArticleTags.Any(at => EF.Functions.ILike(at.Tag.Name, tagName)))
-                           .Where(visibilityFilter)
-                           .OrderByDescending(a => a.PublishedAt)
-                           .ThenByDescending(a => a.Id);
+        // タグ ID を先に確定させ、プランナが ArticleTags.TagId の統計から件数を見積もれるようにする
+        // タグ名は大文字小文字を区別せずに一致させる（大文字小文字違いの別タグも含む）
+        var normalizedTagName = tagName.ToLowerInvariant();
+        var tagIds = await context.Tags
+                                  .Where(t => t.Name.ToLower() == normalizedTagName)
+                                  .Select(t => t.Id)
+                                  .ToListAsync();
+        if (tagIds.Count == 0) return (new List<ArticleSummary>(), 0);
 
-        return await ToListWithLikeCountAsync(query);
+        var query = context.Articles
+                           .Where(a => a.ArticleTags.Any(at => tagIds.Contains(at.TagId)))
+                           .Where(visibilityFilter);
+
+        var totalCount = await query.CountAsync();
+        var articles = await ToSummaryListAsync(query.OrderByDescending(a => a.PublishedAt)
+                                                     .ThenByDescending(a => a.Id)
+                                                     .Skip(offset)
+                                                     .Take(limit));
+
+        return (articles, totalCount);
     }
 
     public async Task<Article> UpdateWithTagAsync(Article article, List<string>? tagNames = null)
@@ -229,6 +238,28 @@ public class ArticleRepository : IArticleRepository
         foreach (var row in rows) row.Article.LikeCount = row.LikeCount;
 
         return rows.Select(row => row.Article).ToList();
+    }
+
+    /// <summary>
+    ///     一覧のサムネイル表示に必要な列だけを射影して取得します。
+    ///     タグを JOIN するため、いいね数のサブクエリは記事 × タグの行ごとに実行されます。
+    ///     AsSplitQuery でタグを分けると、ページングの絞り込みが 2 本目でも再実行され、深いページほど遅くなるため 1 本のクエリにしています。
+    /// </summary>
+    static async Task<List<ArticleSummary>> ToSummaryListAsync(IQueryable<Article> query)
+    {
+        return await query.Select(a => new ArticleSummary
+                          {
+                              Id = a.Id,
+                              Title = a.Title,
+                              AuthorId = a.AuthorId,
+                              AuthorName = a.Author.Name,
+                              AuthorProfileImage = a.Author.ProfileImage,
+                              TagNames = a.ArticleTags.OrderBy(at => at.Id).Select(at => at.Tag.Name).ToList(),
+                              LikeCount = a.Likes.Count(),
+                              PublishedAt = a.PublishedAt,
+                              UpdatedAt = a.UpdatedAt
+                          })
+                          .ToListAsync();
     }
 
     static Expression<Func<Article, bool>> IsPubliclyVisible(DateTime now)

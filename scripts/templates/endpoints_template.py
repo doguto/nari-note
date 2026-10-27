@@ -116,7 +116,10 @@ import type {"""
             if ep.method == "DELETE":
                 lines.append(f"    await apiClient.delete({url_expression});")
             elif ep.method == "GET":
-                if path_params:
+                if path_params and ep.query_params:
+                    query = ", ".join(f"{q}: data.{q}" for q in ep.query_params)
+                    lines.append(f"    const response = await apiClient.get<{response_type}>({url_expression}, {{ params: {{ {query} }} }});")
+                elif path_params:
                     lines.append(f"    const response = await apiClient.get<{response_type}>({url_expression});")
                 else:
                     lines.append(f"    const response = await apiClient.get<{response_type}>({url_expression}, {{ params: data }});")

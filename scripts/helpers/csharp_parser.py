@@ -159,12 +159,19 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
 
         is_form_file = False
         form_file_param = "file"
+        query_params = []
         if parameters:
             # [FromBody] XxxRequest のパターンを探す
             from_body_match = re.search(r'\[FromBody\]\s+(\w+Request)\s+\w+', parameters)
             if from_body_match:
                 request_type = from_body_match.group(1)
                 has_body_param = True
+
+            # [FromQuery] int limit = 20 のような単純型パラメータを探す（DTO ごと受け取る場合は除く）
+            query_params = [
+                m.group(2) for m in re.finditer(r'\[FromQuery\]\s+([\w?]+)\s+(\w+)', parameters)
+                if not m.group(1).endswith("Request")
+            ]
 
             # IFormFile パラメータを探す
             form_file_match = re.search(r'IFormFile\s+(\w+)', parameters)
@@ -214,6 +221,7 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
                 has_body_param=has_body_param,
                 is_form_file=is_form_file,
                 form_file_param=form_file_param,
+                query_params=query_params,
             ))
         else:
             skipped_methods.append(f"{function_name} (no response type found)")
