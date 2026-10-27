@@ -123,7 +123,18 @@ import type {"""
             lines.append(f"export async function {func_name}(params: {request_type}): Promise<{response_type}> {{")
 
         # URLの構築
-        if path_params:
+        has_query = bool(path_params and request_type != "void" and ep.query_params)
+        if has_query:
+            # パスパラメータとクエリパラメータの両方がある場合
+            query = ", ".join(f"{q}: params.{q}" for q in ep.query_params)
+            lines.append(f"  const url = new URL({url_expression}, getBaseUrl());")
+            lines.append(f"  const query = {{ {query} }};")
+            lines.append("  Object.entries(query).forEach(([key, value]) => {")
+            lines.append("    if (value !== undefined && value !== null) {")
+            lines.append("      url.searchParams.append(key, String(value));")
+            lines.append("    }")
+            lines.append("  });")
+        elif path_params:
             # パスパラメータがある場合: バッククォートで囲まれたurl_expressionを使う
             url_path = url_expression.strip('`')
             lines.append(f"  const url = `${{getBaseUrl()}}{url_path}`;")
@@ -143,7 +154,7 @@ import type {"""
 
         # 共通のfetch関数を呼び出し
         lines.append("")
-        if request_type != "void" and not path_params:
+        if (request_type != "void" and not path_params) or has_query:
             lines.append(f"  return serverFetch<{response_type}>(url.toString());")
         else:
             lines.append(f"  return serverFetch<{response_type}>(url);")

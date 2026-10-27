@@ -1,6 +1,6 @@
 """Data models for C# code parsing."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 
@@ -30,3 +30,4 @@ class EndpointInfo:
     has_body_param: bool = False  # [FromBody]パラメータがあるかどうか
     is_form_file: bool = False    # IFormFileパラメータがあるかどうか
     form_file_param: str = "file" # IFormFileパラメータ名
+    query_params: List[str] = field(default_factory=list)  # [FromQuery] で受け取る単純型パラメータ名
