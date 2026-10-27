@@ -18,9 +18,10 @@ remote_state {
   }
 
   config = {
-    bucket = local.s3_bucket
-    key    = "${local.env_name}/${path_relative_to_include()}/terraform.tfstate"
-    region = local.aws_region
+    bucket       = local.s3_bucket
+    key          = "${local.env_name}/${path_relative_to_include()}/terraform.tfstate"
+    region       = local.aws_region
+    use_lockfile = true
   }
 }
 
