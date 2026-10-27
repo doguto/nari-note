@@ -183,7 +183,7 @@ export interface GetArticlesRequest {
 }
 
 export interface GetArticlesResponse {
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
 }
 
 export interface GetCourseContentForEditResponse {
@@ -226,7 +226,7 @@ export interface GetDraftArticlesRequest {
 }
 
 export interface GetDraftArticlesResponse {
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
 }
 
 export interface GetFollowersRequest {

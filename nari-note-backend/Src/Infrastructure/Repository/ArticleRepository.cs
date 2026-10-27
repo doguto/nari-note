@@ -159,43 +159,31 @@ public class ArticleRepository : IArticleRepository
         }
     }
 
-    public async Task<(List<Article> Articles, int TotalCount)> FindLatestSingleArticlesAsync(int limit, int offset)
+    public async Task<List<ArticleSummary>> FindLatestSingleSummariesAsync(int limit, int offset)
     {
         var now = timeProvider.UtcNow();
         var visibilityFilter = IsPubliclyVisible(now);
 
         // 講座の記事は取得しない
         var query = context.Articles
-                           .AsNoTracking()
-                           .Include(a => a.Author)
-                           .Include(a => a.ArticleTags)
-                           .ThenInclude(at => at.Tag)
-                           .AsSplitQuery()
                            .Where(visibilityFilter)
                            .Where(a => !a.CourseId.HasValue)
                            .OrderByDescending(a => a.PublishedAt)
-                           .ThenByDescending(a => a.Id);
+                           .ThenByDescending(a => a.Id)
+                           .Skip(offset)
+                           .Take(limit);
 
-        // 注: ページネーションの標準的な実装として、
-        // 総数取得とデータ取得を別々に実行しています。
-        // 大量データがある場合は、キャッシュの利用を検討してください。
-        var totalCount = await query.CountAsync();
-        var articles = await ToListWithLikeCountAsync(query.Skip(offset).Take(limit));
-
-        return (articles, totalCount);
+        return await ToSummaryListAsync(query);
     }
 
-    public async Task<List<Article>> FindDraftsByAuthorAsync(UserId authorId)
+    public async Task<List<ArticleSummary>> FindDraftSummariesByAuthorAsync(UserId authorId)
     {
-        return await context.Articles
-                            .AsNoTracking()
-                            .Include(a => a.Author)
-                            .Include(a => a.ArticleTags)
-                            .ThenInclude(at => at.Tag)
-                            .AsSplitQuery()
-                            .Where(a => a.AuthorId == authorId && !a.PublishedAt.HasValue)
-                            .OrderByDescending(a => a.UpdatedAt)
-                            .ToListAsync();
+        var query = context.Articles
+                           .Where(a => a.AuthorId == authorId && !a.PublishedAt.HasValue)
+                           .OrderByDescending(a => a.UpdatedAt)
+                           .ThenByDescending(a => a.Id);
+
+        return await ToSummaryListAsync(query);
     }
 
     public async Task<List<Article>> SearchAsync(string keyword, int limit, int offset)
