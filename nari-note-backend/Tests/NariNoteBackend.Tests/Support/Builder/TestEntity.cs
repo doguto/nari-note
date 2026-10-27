@@ -31,9 +31,11 @@ public static class TestEntity
         return new CourseLike { UserId = user.Id, CourseId = course.Id };
     }
 
-    public static Follow Follow(User follower, User following)
+    public static Follow Follow(User follower, User following, DateTime? createdAt = null)
     {
-        return new Follow { FollowerId = follower.Id, FollowingId = following.Id };
+        var follow = new Follow { FollowerId = follower.Id, FollowingId = following.Id };
+        if (createdAt.HasValue) follow.CreatedAt = createdAt.Value;
+        return follow;
     }
 
     public static Comment Comment(User user, Article article, string message, DateTime? createdAt = null)

@@ -338,6 +338,54 @@ public class UsersControllerTest : IntegrationTestBase
         Assert.Equal(["following"], followings.Followings.Select(f => f.Username));
     }
 
+    [Fact]
+    public async Task フォロワーとフォロー中のユーザーは新しい順に指定した範囲と総件数を返す()
+    {
+        var user = new UserBuilder().Build();
+        var oldest = new UserBuilder().WithName("3日前").Build();
+        var middle = new UserBuilder().WithName("2日前").Build();
+        var newest = new UserBuilder().WithName("1日前").Build();
+        await SeedAsync(
+            user,
+            oldest,
+            middle,
+            newest,
+            TestEntity.Follow(oldest, user, Now.AddDays(-3)),
+            TestEntity.Follow(middle, user, Now.AddDays(-2)),
+            TestEntity.Follow(newest, user, Now.AddDays(-1)),
+            TestEntity.Follow(user, oldest, Now.AddDays(-3)),
+            TestEntity.Follow(user, middle, Now.AddDays(-2)),
+            TestEntity.Follow(user, newest, Now.AddDays(-1))
+        );
+        var client = CreateClient();
+
+        var followers = await ReadAsync<GetFollowersResponse>(
+            await client.GetAsync($"/api/users/{user.Id.Value}/followers?limit=1&offset=1")
+        );
+        var followings = await ReadAsync<GetFollowingsResponse>(
+            await client.GetAsync($"/api/users/{user.Id.Value}/followings?limit=2&offset=0")
+        );
+
+        Assert.Equal(["2日前"], followers.Followers.Select(f => f.Username));
+        Assert.Equal(3, followers.TotalCount);
+        Assert.Equal(["1日前", "2日前"], followings.Followings.Select(f => f.Username));
+        Assert.Equal(3, followings.TotalCount);
+    }
+
+    [Theory]
+    [InlineData("followers?limit=0")]
+    [InlineData("followings?offset=-1")]
+    [InlineData("liked-articles?limit=101")]
+    public async Task ユーザーの一覧で範囲外の件数や位置を指定すると400を返す(string pathAndQuery)
+    {
+        var user = new UserBuilder().Build();
+        await SeedAsync(user);
+
+        var response = await CreateClient().GetAsync($"/api/users/{user.Id.Value}/{pathAndQuery}");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     [Theory]
     [InlineData("followers")]
     [InlineData("followings")]
@@ -383,6 +431,34 @@ public class UsersControllerTest : IntegrationTestBase
         Assert.Equal("author", body.Articles[0].AuthorName);
         Assert.Equal(["振り飛車"], body.Articles[0].Tags);
         Assert.Equal(2, body.Articles[0].LikeCount);
+        Assert.Equal(2, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task いいねした記事は指定した範囲と総件数を返す()
+    {
+        var user = new UserBuilder().Build();
+        var author = new UserBuilder().Build();
+        var oldest = new ArticleBuilder(author).WithTitle("3日前").Build();
+        var middle = new ArticleBuilder(author).WithTitle("2日前").Build();
+        var newest = new ArticleBuilder(author).WithTitle("1日前").Build();
+        await SeedAsync(
+            user,
+            author,
+            oldest,
+            middle,
+            newest,
+            TestEntity.Like(user, oldest, Now.AddDays(-3)),
+            TestEntity.Like(user, middle, Now.AddDays(-2)),
+            TestEntity.Like(user, newest, Now.AddDays(-1))
+        );
+
+        var response = await CreateClient().GetAsync($"/api/users/{user.Id.Value}/liked-articles?limit=1&offset=1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await ReadAsync<GetLikedArticlesResponse>(response);
+        Assert.Equal(["2日前"], body.Articles.Select(a => a.Title));
+        Assert.Equal(3, body.TotalCount);
     }
 
     #endregion

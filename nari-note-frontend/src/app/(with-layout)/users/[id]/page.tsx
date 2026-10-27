@@ -1,12 +1,38 @@
-'use client';
-
-
-import { useParams } from 'next/navigation';
+import type { Metadata } from 'next';
 import { UserProfilePage } from '@/features/user/pages';
+import { getUserProfile } from '@/lib/api/server';
 
-export default function UserProfilePageRoute() {
-  const params = useParams();
-  const userId = params.id as string;
+interface UserPageProps {
+  params: Promise<{ id: string }>;
+}
 
-  return <UserProfilePage userId={userId} />;
+export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  try {
+    const user = await getUserProfile({ id });
+    const description = user.bio?.trim()
+      ? user.bio.trim().slice(0, 160)
+      : `${user.username}さんの将棋記事・講座一覧`;
+
+    return {
+      title: user.username,
+      description,
+      openGraph: {
+        type: 'profile',
+        title: user.username,
+        description,
+        username: user.username,
+        images: user.userIconImageUrl ? [user.userIconImageUrl] : undefined,
+      },
+    };
+  } catch {
+    return {};
+  }
+}
+
+export default async function UserProfilePageRoute({ params }: UserPageProps) {
+  const { id } = await params;
+
+  return <UserProfilePage userId={id} />;
 }

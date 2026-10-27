@@ -205,6 +205,57 @@ public class CoursesControllerTest : IntegrationTestBase
         Assert.Equal(["公開記事"], Assert.Single(body.Courses).ArticleNames);
     }
 
+    [Fact]
+    public async Task 作者別の講座一覧の記事は講座内の順に並ぶ()
+    {
+        var owner = new UserBuilder().Build();
+        var course = new CourseBuilder(owner).Build();
+        var second = new ArticleBuilder(owner).WithTitle("第2回").InCourse(course, 2).Build();
+        var first = new ArticleBuilder(owner).WithTitle("第1回").InCourse(course, 1).Build();
+        await SeedAsync(owner, course, second, first);
+
+        var response = await CreateClient().GetAsync($"/api/courses/author/{owner.Id.Value}");
+
+        var body = await ReadAsync<GetCoursesByAuthorResponse>(response);
+        var dto = Assert.Single(body.Courses);
+        Assert.Equal(["第1回", "第2回"], dto.ArticleNames);
+        Assert.Equal([first.Id, second.Id], dto.ArticleIds);
+    }
+
+    [Fact]
+    public async Task 作者別の講座一覧は指定した範囲と公開中の総件数を返す()
+    {
+        var owner = new UserBuilder().Build();
+        var liker = new UserBuilder().Build();
+        var middle = new CourseBuilder(owner).WithName("2日前").CreatedAt(Now.AddDays(-2)).Build();
+        await SeedAsync(
+            owner,
+            liker,
+            new CourseBuilder(owner).WithName("1日前").CreatedAt(Now.AddDays(-1)).Build(),
+            middle,
+            new CourseBuilder(owner).WithName("3日前").CreatedAt(Now.AddDays(-3)).Build(),
+            new CourseBuilder(owner).WithName("下書き").Draft().Build(),
+            TestEntity.CourseLike(liker, middle)
+        );
+
+        var response = await CreateClient().GetAsync($"/api/courses/author/{owner.Id.Value}?limit=1&offset=1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await ReadAsync<GetCoursesByAuthorResponse>(response);
+        var dto = Assert.Single(body.Courses);
+        Assert.Equal("2日前", dto.Name);
+        Assert.Equal(1, dto.LikeCount);
+        Assert.Equal(3, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task 作者別の講座一覧で範囲外の位置を指定すると400を返す()
+    {
+        var response = await CreateClient().GetAsync($"/api/courses/author/{Guid.CreateVersion7()}?offset=-1");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     #endregion
 
     #region POST /api/courses

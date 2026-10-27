@@ -8,6 +8,8 @@ import { useRequireVerifiedEmail } from '@/lib/hooks';
 import { PageWithSidebar } from '@/features/global/organisms';
 import { UserProfileTemplate } from '../templates/UserProfileTemplate';
 
+const PAGE_SIZE = 20;
+
 interface UserProfilePageProps {
   userId: string;
 }
@@ -17,6 +19,9 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTab = searchParams.get('tab') || 'articles';
+  const parsedPage = Number(searchParams.get('page'));
+  const currentPage = Number.isInteger(parsedPage) && parsedPage >= 1 ? parsedPage : 1;
+  const paging = { limit: PAGE_SIZE, offset: (currentPage - 1) * PAGE_SIZE };
   
   // タブコンテキストを判定（content系 or follow系）
   const tabContext = ['followers', 'followings'].includes(activeTab) ? 'follow' : 'content';
@@ -33,25 +38,25 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
   
   // フォロワー一覧取得（タブがfollowersの場合のみ）
   const { data: followersData, isLoading: isFollowersLoading, error: followersError, refetch: refetchFollowers } = useGetFollowers(
-    { userId: userId },
+    { userId: userId, ...paging },
     { enabled: activeTab === 'followers' }
   );
   
   // フォロー中一覧取得（タブがfollowingsの場合のみ）
   const { data: followingsData, isLoading: isFollowingsLoading, error: followingsError, refetch: refetchFollowings } = useGetFollowings(
-    { userId: userId },
+    { userId: userId, ...paging },
     { enabled: activeTab === 'followings' }
   );
   
   // ユーザーの記事取得（タブがarticlesの場合のみ）
   const { data: articlesData, isLoading: isArticlesLoading, error: articlesError, refetch: refetchArticles } = useGetArticlesByAuthor(
-    { authorId: userId },
+    { authorId: userId, ...paging },
     { enabled: activeTab === 'articles' }
   );
   
   // いいねした記事取得（タブがlikesの場合のみ）
   const { data: likedArticlesData, isLoading: isLikedArticlesLoading, error: likedArticlesError, refetch: refetchLikedArticles } = useGetLikedArticles(
-    { userId: userId },
+    { userId: userId, ...paging },
     { enabled: activeTab === 'likes' }
   );
   
@@ -98,6 +103,8 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
         isOwnProfile={isOwnProfile}
         activeTab={activeTab}
         tabContext={tabContext}
+        currentPage={currentPage}
+        pageSize={PAGE_SIZE}
         articlesData={articlesData}
         likedArticlesData={likedArticlesData}
         followersData={followersData}

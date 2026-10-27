@@ -1,15 +1,17 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Service;
-using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ReadModel;
 using NariNoteBackend.Domain.Repository;
-using NariNoteBackend.Tests.Support.Builder;
+using NariNoteBackend.Domain.ValueObject;
 using NSubstitute;
+using System.ComponentModel.DataAnnotations;
 
 namespace NariNoteBackend.Tests.Application.Service;
 
 public class GetLikedArticlesServiceTest
 {
     readonly ILikeRepository likeRepository = Substitute.For<ILikeRepository>();
+    readonly UserId userId = UserId.From(Guid.CreateVersion7());
     readonly GetLikedArticlesService service;
 
     public GetLikedArticlesServiceTest()
@@ -17,21 +19,60 @@ public class GetLikedArticlesServiceTest
         this.service = new GetLikedArticlesService(this.likeRepository);
     }
 
+    static ArticleSummary Summary(string title, int likeCount, params string[] tagNames)
+    {
+        return new ArticleSummary
+        {
+            Id = ArticleId.From(Guid.CreateVersion7()),
+            Title = title,
+            AuthorId = UserId.From(Guid.CreateVersion7()),
+            AuthorName = "author",
+            TagNames = tagNames.ToList(),
+            LikeCount = likeCount,
+            PublishedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+        };
+    }
+
     [Fact]
     public async Task ユーザーがいいねした記事を返す()
     {
-        var user = new UserBuilder().Build();
-        var author = new UserBuilder().WithName("author").Build();
-        var first = new ArticleBuilder(author).WithTitle("1件目").WithTags("振り飛車").LikedBy(user, author).Build();
-        var second = new ArticleBuilder(author).WithTitle("2件目").LikedBy(user).Build();
-        this.likeRepository.FindLikedArticlesByUserAsync(user.Id).Returns(new List<Article> { first, second });
+        this.likeRepository.FindLikedArticleSummariesByUserAsync(this.userId, 20, 0)
+            .Returns((new List<ArticleSummary> { Summary("1件目", 2, "振り飛車"), Summary("2件目", 1) }, 2));
 
-        var response = await this.service.ExecuteAsync(new GetLikedArticlesRequest { UserId = user.Id });
+        var response = await this.service.ExecuteAsync(new GetLikedArticlesRequest { UserId = this.userId });
 
-        Assert.Equal(user.Id, response.UserId);
+        Assert.Equal(this.userId, response.UserId);
         Assert.Equal(["1件目", "2件目"], response.Articles.Select(a => a.Title));
         Assert.Equal("author", response.Articles[0].AuthorName);
         Assert.Equal(["振り飛車"], response.Articles[0].Tags);
         Assert.Equal([2, 1], response.Articles.Select(a => a.LikeCount));
+        Assert.Equal(2, response.TotalCount);
+    }
+
+    [Fact]
+    public async Task 指定した件数と位置でリポジトリから取得する()
+    {
+        this.likeRepository.FindLikedArticleSummariesByUserAsync(this.userId, 10, 30)
+            .Returns((new List<ArticleSummary>(), 45));
+
+        var response = await this.service.ExecuteAsync(
+            new GetLikedArticlesRequest { UserId = this.userId, Limit = 10, Offset = 30 }
+        );
+
+        Assert.Empty(response.Articles);
+        Assert.Equal(45, response.TotalCount);
+    }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(101, 0)]
+    [InlineData(20, -1)]
+    public async Task 範囲外の件数や位置は検索せずにエラーにする(int limit, int offset)
+    {
+        var request = new GetLikedArticlesRequest { UserId = this.userId, Limit = limit, Offset = offset };
+
+        await Assert.ThrowsAsync<ValidationException>(() => this.service.ExecuteAsync(request));
+
+        await this.likeRepository.DidNotReceiveWithAnyArgs().FindLikedArticleSummariesByUserAsync(this.userId, 0, 0);
     }
 }

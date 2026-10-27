@@ -81,27 +81,33 @@ public class UsersController : ApplicationController
 
     [HttpGet("{id}/followers")]
     [Auth(AuthLevel.Anonymous)]
-    public async Task<ActionResult> GetFollowers(UserId id)
+    public async Task<ActionResult> GetFollowers(
+        UserId id, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+    )
     {
-        var request = new GetFollowersRequest { UserId = id };
+        var request = new GetFollowersRequest { UserId = id, Limit = limit, Offset = offset };
         var response = await getFollowersService.ExecuteAsync(request);
         return Ok(response);
     }
 
     [HttpGet("{id}/followings")]
     [Auth(AuthLevel.Anonymous)]
-    public async Task<ActionResult> GetFollowings(UserId id)
+    public async Task<ActionResult> GetFollowings(
+        UserId id, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+    )
     {
-        var request = new GetFollowingsRequest { UserId = id };
+        var request = new GetFollowingsRequest { UserId = id, Limit = limit, Offset = offset };
         var response = await getFollowingsService.ExecuteAsync(request);
         return Ok(response);
     }
 
     [HttpGet("{id}/liked-articles")]
     [Auth(AuthLevel.Anonymous)]
-    public async Task<ActionResult> GetLikedArticles(UserId id)
+    public async Task<ActionResult> GetLikedArticles(
+        UserId id, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+    )
     {
-        var request = new GetLikedArticlesRequest { UserId = id };
+        var request = new GetLikedArticlesRequest { UserId = id, Limit = limit, Offset = offset };
         var response = await getLikedArticlesService.ExecuteAsync(request);
         return Ok(response);
     }

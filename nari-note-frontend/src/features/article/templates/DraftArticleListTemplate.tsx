@@ -2,10 +2,10 @@ import { DraftArticleCard } from '@/components/molecules/DraftArticleCard';
 import { LoadingSpinner } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { ArticleDto } from '@/lib/api/types';
+import { ArticleThumbnailDto } from '@/lib/api/types';
 
 interface DraftArticleListTemplateProps {
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
   deletingId: string | null;
   onNewArticle: () => void;
   onDelete: (id: string, title: string) => void;

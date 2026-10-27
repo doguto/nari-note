@@ -1,10 +1,8 @@
 # AGENTS.md
 
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
-
 ## プロジェクト概要
 
-nari-noteは将棋記事の投稿・共有プラットフォームです。フロントエンドとバックエンドが分離されたモダンなWebアプリケーションです。
+nari-note は将棋記事の投稿・共有プラットフォーム の Web アプリケーション.
 
 ### 技術スタック
 
@@ -24,79 +22,6 @@ nari-noteは将棋記事の投稿・共有プラットフォームです。フ�
 - Tailwind CSS 4
 - shadcn/ui（Radix UI）
 - Tiptap（リッチテキストエディタ）
-
-## よく使うコマンド
-
-### 開発環境の起動
-
-```bash
-# Docker Composeで全サービス起動（推奨）
-docker-compose up
-
-# バックグラウンドで起動
-docker-compose up -d
-
-# サービス停止
-docker-compose down
-```
-
-**アクセスURL:**
-- フロントエンド: http://localhost:3000
-- バックエンドAPI: http://localhost:5243
-- PostgreSQL: localhost:5432
-
-### バックエンド（nari-note-backend/）
-
-```bash
-# 開発サーバー起動（ホットリロード有効）
-dotnet watch run
-
-# 通常起動
-dotnet run
-
-# ビルド
-dotnet build
-
-# テスト実行
-dotnet test
-
-# 依存パッケージの復元
-dotnet restore
-
-# 新しいパッケージの追加
-dotnet add package <パッケージ名>
-
-# EF Core マイグレーション作成
-dotnet ef migrations add <マイグレーション名>
-
-# マイグレーション適用
-dotnet ef database update
-
-# マイグレーション削除（最後に追加されたもの）
-dotnet ef migrations remove
-```
-
-### フロントエンド（nari-note-frontend/）
-
-```bash
-# 開発サーバー起動
-npm run dev
-
-# プロダクションビルド
-npm run build
-
-# プロダクションサーバー起動
-npm start
-
-# Linter実行
-npm run lint
-
-# 依存パッケージのインストール
-npm install
-
-# 新しいパッケージの追加
-npm install <パッケージ名>
-```
 
 ## アーキテクチャ
 
@@ -251,7 +176,7 @@ python scripts/update-agent-docs.py --verbose
 # 特定のエージェントのみ検証
 python scripts/update-agent-docs.py --agent backend-engineer --verbose
 
-# ドライラン（変更せず検証のみ）
+# Dry-run（変更せず検証のみ）
 python scripts/update-agent-docs.py --dry-run --verbose
 ```
 
@@ -289,24 +214,6 @@ python scripts/update-agent-docs.py --dry-run --verbose
    - 完全な機能ブロック
 7. **ページ実装** (`app/`)
    - Next.js App Routerのページコンポーネント
-
-## 環境変数
-
-### バックエンド
-
-設定ファイル: `nari-note-backend/appsettings.json`, `appsettings.Development.json`
-
-- `ConnectionStrings:DefaultConnection`: PostgreSQL接続文字列
-- `Jwt:Secret`: JWT署名用の秘密鍵
-- `Jwt:Issuer`: JWTトークンの発行者（デフォルト: `nari-note-api`）
-- `Jwt:Audience`: JWTトークンの対象者（デフォルト: `nari-note-client`）
-- `Jwt:ExpirationInHours`: 有効期限（デフォルト: 24時間）
-
-### フロントエンド
-
-設定ファイル: `nari-note-frontend/.env.local`
-
-- `NEXT_PUBLIC_API_URL`: バックエンドAPIのURL（デフォルト: `http://localhost:5243`）
 
 ## データベース
 
@@ -364,7 +271,5 @@ Refactor: Repository層のクエリロジックを整理
 ## その他の注意事項
 
 - レビューやコードの説明は**すべて日本語**で行う
-- バックエンドのポート: 5243
-- フロントエンドのポート: 3000
-- PostgreSQLのポート: 5432
-- Docker Compose使用時はサービス名でアクセス（例: `db`, `api`, `web`）
+- Docker Compose の使用
+- GitHub の Default Branch は `develop`. PR は基本的に `develop` をターゲットにする

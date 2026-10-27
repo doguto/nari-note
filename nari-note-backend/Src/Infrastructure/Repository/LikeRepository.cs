@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ReadModel;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Infrastructure.Database;
 
@@ -61,24 +62,21 @@ public class LikeRepository : ILikeRepository
         return await context.Likes.CountAsync(l => l.ArticleId == articleId);
     }
 
-    public async Task<List<Article>> FindLikedArticlesByUserAsync(UserId userId)
+    public async Task<(List<ArticleSummary> Articles, int TotalCount)> FindLikedArticleSummariesByUserAsync(UserId userId, int limit, int offset)
     {
-        var rows = await context.Likes
-            .AsNoTracking()
-            .Where(l => l.UserId == userId)
-            .Where(l => l.Article != null)
-            .Include(l => l.Article)
-                .ThenInclude(a => a.Author)
-            .Include(l => l.Article.ArticleTags)
-                .ThenInclude(at => at.Tag)
-            .OrderByDescending(l => l.CreatedAt)
-            .AsSplitQuery()
-            .Select(l => new { l.Article, LikeCount = l.Article.Likes.Count() })
-            .ToListAsync();
+        var query = context.Likes.Where(l => l.UserId == userId);
 
-        foreach (var row in rows) row.Article.LikeCount = row.LikeCount;
+        // いいねした日時の新しい順に並べる（Likes の (UserId, CreatedAt) インデックスを使う）
+        var totalCount = await query.CountAsync();
+        var articles = await query.OrderByDescending(l => l.CreatedAt)
+                                  .ThenByDescending(l => l.Id)
+                                  .Skip(offset)
+                                  .Take(limit)
+                                  .Select(l => l.Article)
+                                  .Select(ArticleSummaryProjection.FromArticle)
+                                  .ToListAsync();
 
-        return rows.Select(row => row.Article).ToList();
+        return (articles, totalCount);
     }
 
     public async Task<int> CountLikedArticlesByUserAsync(UserId userId)

@@ -604,6 +604,41 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.Equal(["公開記事"], body.Articles.Select(a => a.Title));
     }
 
+    [Fact]
+    public async Task 作者別の記事一覧は指定した範囲と公開済みの総件数を返す()
+    {
+        var author = new UserBuilder().Build();
+        var reader = new UserBuilder().Build();
+        var middle = new ArticleBuilder(author).WithTitle("2日前").WithTags("振り飛車").PublishedAt(Now.AddDays(-2)).Build();
+        await SeedAsync(
+            author,
+            reader,
+            new ArticleBuilder(author).WithTitle("1日前").PublishedAt(Now.AddDays(-1)).Build(),
+            middle,
+            new ArticleBuilder(author).WithTitle("3日前").PublishedAt(Now.AddDays(-3)).Build(),
+            new ArticleBuilder(author).WithTitle("下書き").Draft().Build(),
+            TestEntity.Like(reader, middle)
+        );
+
+        var response = await CreateClient().GetAsync($"/api/articles/author/{author.Id.Value}?limit=1&offset=1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await ReadAsync<GetArticlesByAuthorResponse>(response);
+        var article = Assert.Single(body.Articles);
+        Assert.Equal("2日前", article.Title);
+        Assert.Equal(["振り飛車"], article.Tags);
+        Assert.Equal(1, article.LikeCount);
+        Assert.Equal(3, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task 作者別の記事一覧で範囲外の件数を指定すると400を返す()
+    {
+        var response = await CreateClient().GetAsync($"/api/articles/author/{Guid.CreateVersion7()}?limit=101");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     #endregion
 
     #region GET /api/articles/tag/{tagName}

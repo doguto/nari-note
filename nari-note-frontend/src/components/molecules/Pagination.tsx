@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 interface PaginationBaseProps {
   currentPage: number;
   basePath: string;
-  /** page 以外に URL へ残すクエリ（検索キーワードなど） */
+  /** page 以外に URL へ残すクエリ（タブの種類・検索キーワードなど） */
   query?: Record<string, string>;
 }
 

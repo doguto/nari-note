@@ -16,21 +16,19 @@ public class GetDraftArticlesService
 
     public async Task<GetDraftArticlesResponse> ExecuteAsync(UserId authorId)
     {
-        var articles = await articleRepository.FindDraftsByAuthorAsync(authorId);
+        var articles = await articleRepository.FindDraftSummariesByAuthorAsync(authorId);
 
-        var articleDtos = articles.Select(a => new ArticleDto
+        var articleDtos = articles.Select(a => new ArticleThumbnailDto
         {
             Id = a.Id,
             Title = a.Title,
-            Body = a.Body,
             AuthorId = a.AuthorId,
-            AuthorName = a.Author.Name,
-            UserIconImageUrl = a.Author.ProfileImage,
-            Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
+            AuthorName = a.AuthorName,
+            UserIconImageUrl = a.AuthorProfileImage,
+            Tags = a.TagNames,
             LikeCount = 0, // 下書きにはLikeが存在しない
             IsPublished = a.IsPublished,
             PublishedAt = a.PublishedAt,
-            CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
         }).ToList();
 

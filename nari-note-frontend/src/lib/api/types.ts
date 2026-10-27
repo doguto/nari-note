@@ -158,12 +158,15 @@ export interface GetArticleContentResponse {
 
 export interface GetArticlesByAuthorRequest {
   authorId?: string;
+  limit: number;
+  offset: number;
 }
 
 export interface GetArticlesByAuthorResponse {
   authorId: string;
   authorName: string;
   articles: ArticleThumbnailDto[];
+  totalCount: number;
 }
 
 export interface GetArticlesByTagRequest {
@@ -183,7 +186,7 @@ export interface GetArticlesRequest {
 }
 
 export interface GetArticlesResponse {
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
 }
 
 export interface GetCourseContentForEditResponse {
@@ -200,12 +203,15 @@ export interface GetCourseContentResponse {
 
 export interface GetCoursesByAuthorRequest {
   authorId?: string;
+  limit: number;
+  offset: number;
 }
 
 export interface GetCoursesByAuthorResponse {
   authorId: string;
   authorName: string;
   courses: CourseDto[];
+  totalCount: number;
 }
 
 export interface GetCoursesRequest {
@@ -226,23 +232,29 @@ export interface GetDraftArticlesRequest {
 }
 
 export interface GetDraftArticlesResponse {
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
 }
 
 export interface GetFollowersRequest {
   userId?: string;
+  limit: number;
+  offset: number;
 }
 
 export interface GetFollowersResponse {
   followers: FollowerUserDto[];
+  totalCount: number;
 }
 
 export interface GetFollowingsRequest {
   userId?: string;
+  limit: number;
+  offset: number;
 }
 
 export interface GetFollowingsResponse {
   followings: FollowerUserDto[];
+  totalCount: number;
 }
 
 export interface GetHealthResponse {
@@ -252,11 +264,14 @@ export interface GetHealthResponse {
 
 export interface GetLikedArticlesRequest {
   userId?: string;
+  limit: number;
+  offset: number;
 }
 
 export interface GetLikedArticlesResponse {
   userId: string;
   articles: ArticleThumbnailDto[];
+  totalCount: number;
 }
 
 export interface GetMyArticlesResponse {

@@ -90,10 +90,33 @@ public class ArticleRepository : IArticleRepository
                            .Where(visibilityFilter);
 
         var totalCount = await query.CountAsync();
-        var articles = await ToSummaryListAsync(query.OrderByDescending(a => a.PublishedAt)
-                                                     .ThenByDescending(a => a.Id)
-                                                     .Skip(offset)
-                                                     .Take(limit));
+        var articles = await query.OrderByDescending(a => a.PublishedAt)
+                                  .ThenByDescending(a => a.Id)
+                                  .Skip(offset)
+                                  .Take(limit)
+                                  .Select(ArticleSummaryProjection.FromArticle)
+                                  .ToListAsync();
+
+        return (articles, totalCount);
+    }
+
+    public async Task<(List<ArticleSummary> Articles, int TotalCount)> FindPublishedSummariesByAuthorAsync(UserId authorId, int limit, int offset)
+    {
+        var now = timeProvider.UtcNow();
+        var visibilityFilter = IsPubliclyVisible(now);
+
+        // 下書きに加え、公開日時を過ぎていない予約投稿も第三者には見せない
+        var query = context.Articles
+                           .Where(a => a.AuthorId == authorId)
+                           .Where(visibilityFilter);
+
+        var totalCount = await query.CountAsync();
+        var articles = await query.OrderByDescending(a => a.PublishedAt)
+                                  .ThenByDescending(a => a.Id)
+                                  .Skip(offset)
+                                  .Take(limit)
+                                  .Select(ArticleSummaryProjection.FromArticle)
+                                  .ToListAsync();
 
         return (articles, totalCount);
     }
@@ -159,43 +182,31 @@ public class ArticleRepository : IArticleRepository
         }
     }
 
-    public async Task<(List<Article> Articles, int TotalCount)> FindLatestSingleArticlesAsync(int limit, int offset)
+    public async Task<List<ArticleSummary>> FindLatestSingleSummariesAsync(int limit, int offset)
     {
         var now = timeProvider.UtcNow();
         var visibilityFilter = IsPubliclyVisible(now);
 
         // 講座の記事は取得しない
         var query = context.Articles
-                           .AsNoTracking()
-                           .Include(a => a.Author)
-                           .Include(a => a.ArticleTags)
-                           .ThenInclude(at => at.Tag)
-                           .AsSplitQuery()
                            .Where(visibilityFilter)
                            .Where(a => !a.CourseId.HasValue)
                            .OrderByDescending(a => a.PublishedAt)
-                           .ThenByDescending(a => a.Id);
+                           .ThenByDescending(a => a.Id)
+                           .Skip(offset)
+                           .Take(limit);
 
-        // 注: ページネーションの標準的な実装として、
-        // 総数取得とデータ取得を別々に実行しています。
-        // 大量データがある場合は、キャッシュの利用を検討してください。
-        var totalCount = await query.CountAsync();
-        var articles = await ToListWithLikeCountAsync(query.Skip(offset).Take(limit));
-
-        return (articles, totalCount);
+        return await query.Select(ArticleSummaryProjection.FromArticle).ToListAsync();
     }
 
-    public async Task<List<Article>> FindDraftsByAuthorAsync(UserId authorId)
+    public async Task<List<ArticleSummary>> FindDraftSummariesByAuthorAsync(UserId authorId)
     {
-        return await context.Articles
-                            .AsNoTracking()
-                            .Include(a => a.Author)
-                            .Include(a => a.ArticleTags)
-                            .ThenInclude(at => at.Tag)
-                            .AsSplitQuery()
-                            .Where(a => a.AuthorId == authorId && !a.PublishedAt.HasValue)
-                            .OrderByDescending(a => a.UpdatedAt)
-                            .ToListAsync();
+        var query = context.Articles
+                           .Where(a => a.AuthorId == authorId && !a.PublishedAt.HasValue)
+                           .OrderByDescending(a => a.UpdatedAt)
+                           .ThenByDescending(a => a.Id);
+
+        return await query.Select(ArticleSummaryProjection.FromArticle).ToListAsync();
     }
 
     public async Task<List<ArticleSummary>> SearchSummariesAsync(string keyword, int limit, int offset)
@@ -210,7 +221,7 @@ public class ArticleRepository : IArticleRepository
                            .Skip(offset)
                            .Take(limit);
 
-        return await ToSummaryListAsync(query);
+        return await query.Select(ArticleSummaryProjection.FromArticle).ToListAsync();
     }
 
     public async Task<int> CountByAuthorAsync(UserId authorId)
@@ -235,28 +246,6 @@ public class ArticleRepository : IArticleRepository
         foreach (var row in rows) row.Article.LikeCount = row.LikeCount;
 
         return rows.Select(row => row.Article).ToList();
-    }
-
-    /// <summary>
-    ///     一覧のサムネイル表示に必要な列だけを射影して取得します。
-    ///     タグを JOIN するため、いいね数のサブクエリは記事 × タグの行ごとに実行されます。
-    ///     AsSplitQuery でタグを分けると、ページングの絞り込みが 2 本目でも再実行され、深いページほど遅くなるため 1 本のクエリにしています。
-    /// </summary>
-    static async Task<List<ArticleSummary>> ToSummaryListAsync(IQueryable<Article> query)
-    {
-        return await query.Select(a => new ArticleSummary
-                          {
-                              Id = a.Id,
-                              Title = a.Title,
-                              AuthorId = a.AuthorId,
-                              AuthorName = a.Author.Name,
-                              AuthorProfileImage = a.Author.ProfileImage,
-                              TagNames = a.ArticleTags.OrderBy(at => at.Id).Select(at => at.Tag.Name).ToList(),
-                              LikeCount = a.Likes.Count(),
-                              PublishedAt = a.PublishedAt,
-                              UpdatedAt = a.UpdatedAt
-                          })
-                          .ToListAsync();
     }
 
     static Expression<Func<Article, bool>> IsPubliclyVisible(DateTime now)

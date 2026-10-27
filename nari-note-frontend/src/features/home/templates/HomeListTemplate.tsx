@@ -1,12 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArticleList, CourseList } from '../organisms';
 import { PageWithSidebar } from '@/features/global/organisms';
-import { ArticleDto, CourseDto } from '@/lib/api/types';
+import { ArticleThumbnailDto, CourseDto } from '@/lib/api/types';
 
 interface HomeListTemplateProps {
   activeTab: 'articles' | 'courses';
   onTabChange: (tab: 'articles' | 'courses') => void;
-  articles: ArticleDto[];
+  articles: ArticleThumbnailDto[];
   courses: CourseDto[];
   isLoadingArticles: boolean;
   isLoadingCourses: boolean;
