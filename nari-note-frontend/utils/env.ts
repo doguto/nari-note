@@ -4,10 +4,11 @@ export const getEnv = (key: string): string | undefined => {
   // 1. Cloudflare Workers環境での取得を試みる
   try {
     const cfContext = getCloudflareContext()
-    if (cfContext && cfContext.env && (cfContext.env as any)[key]) {
-      return (cfContext.env as any)[key]
+    const value = (cfContext?.env as Record<string, unknown> | undefined)?.[key]
+    if (typeof value === 'string' && value) {
+      return value
     }
-  } catch (e) {
+  } catch {
     // ローカルの npm run dev など、Cloudflareコンテキストがない場合はこちら
   }
   // 2. フォールバックとして標準の process.env を見る

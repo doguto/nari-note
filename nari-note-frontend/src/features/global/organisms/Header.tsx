@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLogout } from '@/lib/api';
+import { useIsMounted } from '@/lib/hooks';
 import { HeaderLogo } from './HeaderLogo';
 import { HeaderNav } from './HeaderNav';
 import { HeaderNavMobile } from './HeaderNavMobile';
@@ -11,17 +11,13 @@ import { HeaderAuthButtons } from './HeaderAuthButtons';
 
 
 export function Header() {
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useIsMounted();
   const { userId, userName, userIconImageUrl, isLoggedIn, isLoading, refetch } = useAuth();
   const logoutMutation = useLogout({
     onSuccess: () => {
       refetch();
     },
   });
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const handleLogout = () => {
     logoutMutation.mutate();

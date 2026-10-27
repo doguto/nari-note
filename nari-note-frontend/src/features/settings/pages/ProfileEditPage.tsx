@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { useGetUserProfile, useUpdateUserProfile, useUploadUserIcon } from '@/lib/api';
@@ -19,8 +19,16 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
   const { userId } = useAuth();
   const { ensureVerifiedEmail } = useRequireVerifiedEmail();
 
-  const [username, setUsername] = useState('');
-  const [bio, setBio] = useState('');
+  const { data: fetchedUser, isLoading, error: loadError, refetch } = useGetUserProfile(
+    { id: userId || '' },
+    { enabled: !!userId && !initialUserData }
+  );
+
+  const user = initialUserData || fetchedUser;
+
+  const [username, setUsername] = useState(user?.username || '');
+  const [bio, setBio] = useState(user?.bio || '');
+  const [syncedUser, setSyncedUser] = useState(user);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [errors, setErrors] = useState<{
     username?: string;
@@ -28,15 +36,22 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     profileImage?: string;
   }>({});
   const [generalError, setGeneralError] = useState<string>();
-  const [hasChanges, setHasChanges] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  const { data: fetchedUser, isLoading, error: loadError, refetch } = useGetUserProfile(
-    { id: userId || '' },
-    { enabled: !!userId && !initialUserData }
-  );
+  // ユーザー情報が取得・更新されたらフォームの値を同期する
+  if (user !== syncedUser) {
+    setSyncedUser(user);
+    if (user) {
+      setUsername(user.username || '');
+      setBio(user.bio || '');
+    }
+  }
 
-  const user = initialUserData || fetchedUser;
+  const hasChanges =
+    !!user &&
+    (username !== (user.username || '') ||
+      bio !== (user.bio || '') ||
+      profileImage !== null);
 
   const uploadIcon = useUploadUserIcon();
 
@@ -52,23 +67,6 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
       }
     },
   });
-
-  useEffect(() => {
-    if (user) {
-      setUsername(user.username || '');
-      setBio(user.bio || '');
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user) {
-      const changed =
-        username !== (user.username || '') ||
-        bio !== (user.bio || '') ||
-        profileImage !== null;
-      setHasChanges(changed);
-    }
-  }, [username, bio, profileImage, user]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};

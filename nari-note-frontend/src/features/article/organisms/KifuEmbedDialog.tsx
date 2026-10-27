@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -41,7 +41,6 @@ export function KifuEmbedDialog({
   open,
   onOpenChange,
   onConfirm,
-  onConfirmBOD,
   onSaveAsKifu,
   kifuList,
   kifuCount = 0,
@@ -56,7 +55,10 @@ export function KifuEmbedDialog({
 
   const recorder = useFreePlayRecorder();
 
-  useEffect(() => {
+  // ダイアログが開かれたときに状態を初期化する
+  const [prevOpen, setPrevOpen] = useState(false);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       const idx = initialKifuName
         ? Math.max(0, kifuList.findIndex((k) => k.name === initialKifuName))
@@ -67,7 +69,7 @@ export function KifuEmbedDialog({
       setEmbedType('bod');
       setNewKifuName('');
     }
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
   const selectedKifu = kifuList[selectedIndex];
 

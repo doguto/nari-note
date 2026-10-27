@@ -28,19 +28,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const userId = data?.userId ?? null;
   const isEmailVerified = data?.isEmailVerified ?? false;
   const userName = data?.userName ?? null;
-  const [userIconImageUrl, setUserIconImageUrl] = useState<string | null>(null);
+  const rawIconUrl = data?.userIconImageUrl ?? null;
+  const [loadedIconUrl, setLoadedIconUrl] = useState<string | null>(null);
 
+  // 読み込みに成功した画像URLのみ公開する
   useEffect(() => {
-    const rawUrl = data?.userIconImageUrl ?? null;
-    if (!rawUrl) {
-      setUserIconImageUrl(null);
-      return;
-    }
+    if (!rawIconUrl) return;
     const img = new Image();
-    img.onload = () => setUserIconImageUrl(rawUrl);
-    img.onerror = () => setUserIconImageUrl(null);
-    img.src = rawUrl;
-  }, [data?.userIconImageUrl]);
+    img.onload = () => setLoadedIconUrl(rawIconUrl);
+    img.src = rawIconUrl;
+  }, [rawIconUrl]);
+
+  const userIconImageUrl = rawIconUrl !== null && loadedIconUrl === rawIconUrl ? rawIconUrl : null;
 
   return (
     <AuthContext.Provider

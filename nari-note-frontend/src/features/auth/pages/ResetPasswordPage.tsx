@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useResetPassword } from '@/lib/api';
 import { AuthPageLayout } from '@/components/molecules';
 import { ResetPasswordTemplate } from '../templates/ResetPasswordTemplate';
 
 export function ResetPasswordPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 

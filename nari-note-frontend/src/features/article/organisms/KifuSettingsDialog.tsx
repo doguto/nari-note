@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -40,16 +40,19 @@ export function KifuSettingsDialog({
 
   const recorder = useFreePlayRecorder();
 
-  useEffect(() => {
+  // ダイアログが開かれたとき・初期棋譜が変わったときに状態を初期化する
+  const [prevOpen, setPrevOpen] = useState(false);
+  const [prevInitialKifu, setPrevInitialKifu] = useState(initialKifu);
+  if (open !== prevOpen || initialKifu !== prevInitialKifu) {
+    setPrevOpen(open);
+    setPrevInitialKifu(initialKifu);
     if (open) {
       setName(initialKifu?.name ?? '');
       setKifuText(initialKifu?.text ?? '');
       setMode('text');
       recorder.initializeBoard(INITIAL_BOARD, [], []);
     }
-  // initializeBoard is stable (useCallback with [] deps)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, initialKifu]);
+  }
 
   const handleConfirm = () => {
     const text = mode === 'editor' ? recorder.generateKIF('', 0) : kifuText;

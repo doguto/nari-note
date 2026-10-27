@@ -1,7 +1,7 @@
 'use client';
 
-import { ReactNode, useState, useEffect } from 'react';
-import { useRequireAuth } from '@/lib/hooks';
+import { ReactNode } from 'react';
+import { useIsMounted, useRequireAuth } from '@/lib/hooks';
 import { LoadingSpinner } from '@/components/ui';
 
 interface AuthGuardProps {
@@ -12,11 +12,7 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children, redirectPath }: AuthGuardProps) {
   const { isLoggedIn, isLoading } = useRequireAuth(redirectPath);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isMounted = useIsMounted();
 
   // サーバーサイドとクライアントサイドの初期レンダリングで同じコンテンツを返す
   if (!isMounted || isLoading) {

@@ -9,31 +9,30 @@ import { VerifyEmailTemplate } from '../templates/VerifyEmailTemplate';
 
 export function VerifyEmailPage() {
   const searchParams = useSearchParams();
+  const token = searchParams.get('token');
   const { refetch } = useAuth();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [error, setError] = useState<string>();
+  const [verifyStatus, setVerifyStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [verifyError, setVerifyError] = useState<string>();
 
   const verifyEmailMutation = useVerifyEmail({
     onSuccess: () => {
       refetch();
-      setStatus('success');
+      setVerifyStatus('success');
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : '認証に失敗しました');
-      setStatus('error');
+      setVerifyError(err instanceof Error ? err.message : '認証に失敗しました');
+      setVerifyStatus('error');
     },
   });
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    if (!token) {
-      setError('トークンが見つかりません');
-      setStatus('error');
-      return;
-    }
+    if (!token) return;
     verifyEmailMutation.mutate({ token });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const status = token ? verifyStatus : 'error';
+  const error = token ? verifyError : 'トークンが見つかりません';
 
   return (
     <AuthPageLayout>
