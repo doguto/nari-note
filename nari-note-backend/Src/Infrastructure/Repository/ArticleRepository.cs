@@ -196,7 +196,7 @@ public class ArticleRepository : IArticleRepository
                            .Skip(offset)
                            .Take(limit);
 
-        return await ToSummaryListAsync(query);
+        return await query.Select(ArticleSummaryProjection.FromArticle).ToListAsync();
     }
 
     public async Task<List<ArticleSummary>> FindDraftSummariesByAuthorAsync(UserId authorId)
@@ -206,25 +206,22 @@ public class ArticleRepository : IArticleRepository
                            .OrderByDescending(a => a.UpdatedAt)
                            .ThenByDescending(a => a.Id);
 
-        return await ToSummaryListAsync(query);
+        return await query.Select(ArticleSummaryProjection.FromArticle).ToListAsync();
     }
 
-    public async Task<List<Article>> SearchAsync(string keyword, int limit, int offset)
+    public async Task<List<ArticleSummary>> SearchSummariesAsync(string keyword, int limit, int offset)
     {
         var now = timeProvider.UtcNow();
         var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
 
-        var articles = await context.Articles
-                                    .Include(a => a.Author)
-                                    .Include(a => a.ArticleTags)
-                                    .ThenInclude(at => at.Tag)
-                                            .Where(searchFilter)
-                                    .OrderByDescending(a => a.CreatedAt)
-                                    .Skip(offset)
-                                    .Take(limit)
-                                    .ToListAsync();
+        var query = context.Articles
+                           .Where(searchFilter)
+                           .OrderByDescending(a => a.CreatedAt)
+                           .ThenByDescending(a => a.Id)
+                           .Skip(offset)
+                           .Take(limit);
 
-        return articles;
+        return await query.Select(ArticleSummaryProjection.FromArticle).ToListAsync();
     }
 
     public async Task<int> CountByAuthorAsync(UserId authorId)

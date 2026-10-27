@@ -1,14 +1,21 @@
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface PaginationProps {
+interface PaginationBaseProps {
   currentPage: number;
-  totalCount: number;
-  pageSize: number;
   basePath: string;
-  /** page 以外に引き継ぐクエリ（タブの種類など） */
+  /** page 以外に URL へ残すクエリ（タブの種類・検索キーワードなど） */
   query?: Record<string, string>;
 }
+
+/**
+ * 総件数が分かる場合はページ番号を並べ、分からない場合は hasNext だけを渡して「前へ / 次へ」で送る
+ */
+type PaginationProps = PaginationBaseProps &
+  (
+    | { totalCount: number; pageSize: number; hasNext?: never }
+    | { hasNext: boolean; totalCount?: never; pageSize?: never }
+  );
 
 type PageItem = { kind: 'page'; page: number } | { kind: 'ellipsis'; key: string };
 
@@ -47,9 +54,11 @@ const stepClass = 'w-11 sm:w-auto sm:px-3.5 gap-1 font-medium';
  *
  * `?page=N` のクエリでページを切り替えるページ送り
  */
-export function Pagination({ currentPage, totalCount, pageSize, basePath, query }: PaginationProps) {
-  const totalPages = Math.ceil(totalCount / pageSize);
-  if (totalPages <= 1) return null;
+export function Pagination({ currentPage, basePath, query, totalCount, pageSize, hasNext: hasNextPage }: PaginationProps) {
+  const totalPages = totalCount !== undefined && pageSize !== undefined ? Math.ceil(totalCount / pageSize) : undefined;
+  const hasPrev = currentPage > 1;
+  const hasNext = totalPages !== undefined ? currentPage < totalPages : !!hasNextPage;
+  if (!hasPrev && !hasNext) return null;
 
   const hrefOf = (page: number) => {
     const params = new URLSearchParams(query);
@@ -57,8 +66,6 @@ export function Pagination({ currentPage, totalCount, pageSize, basePath, query 
     const search = params.toString();
     return search ? `${basePath}?${search}` : basePath;
   };
-  const firstIndex = (currentPage - 1) * pageSize + 1;
-  const lastIndex = Math.min(currentPage * pageSize, totalCount);
 
   const renderItems = (items: PageItem[]) =>
     items.map((item) =>
@@ -80,7 +87,7 @@ export function Pagination({ currentPage, totalCount, pageSize, basePath, query 
   return (
     <div className="flex flex-col items-center gap-3 pt-2">
       <nav aria-label="ページ送り" className="flex items-center gap-1.5 sm:gap-2">
-        {currentPage > 1 ? (
+        {hasPrev ? (
           <Link href={hrefOf(currentPage - 1)} rel="prev" aria-label="前のページ" className={`${linkClass} ${stepClass}`}>
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             <span className="hidden sm:inline">前へ</span>
@@ -92,11 +99,20 @@ export function Pagination({ currentPage, totalCount, pageSize, basePath, query 
           </span>
         )}
 
-        {/* スマホ幅では前後のページを省き、ボタンが横にはみ出さないようにする */}
-        <div className="contents sm:hidden">{renderItems(buildPageItems(currentPage, totalPages, 0))}</div>
-        <div className="hidden sm:contents">{renderItems(buildPageItems(currentPage, totalPages, 1))}</div>
+        {totalPages !== undefined ? (
+          <>
+            {/* スマホ幅では前後のページを省き、ボタンが横にはみ出さないようにする */}
+            <div className="contents sm:hidden">{renderItems(buildPageItems(currentPage, totalPages, 0))}</div>
+            <div className="hidden sm:contents">{renderItems(buildPageItems(currentPage, totalPages, 1))}</div>
+          </>
+        ) : (
+          // 総ページ数が分からないため、現在のページ番号だけを表示する
+          <span aria-current="page" className={`${currentClass} w-11`}>
+            {currentPage}
+          </span>
+        )}
 
-        {currentPage < totalPages ? (
+        {hasNext ? (
           <Link href={hrefOf(currentPage + 1)} rel="next" aria-label="次のページ" className={`${linkClass} ${stepClass}`}>
             <span className="hidden sm:inline">次へ</span>
             <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -108,9 +124,9 @@ export function Pagination({ currentPage, totalCount, pageSize, basePath, query 
           </span>
         )}
       </nav>
-      {firstIndex <= totalCount && (
+      {totalCount !== undefined && pageSize !== undefined && (currentPage - 1) * pageSize < totalCount && (
         <p className="text-[13px] text-brand-secondary-text">
-          {firstIndex.toLocaleString('ja-JP')}〜{lastIndex.toLocaleString('ja-JP')}件目 / {totalCount.toLocaleString('ja-JP')}件
+          {((currentPage - 1) * pageSize + 1).toLocaleString('ja-JP')}〜{Math.min(currentPage * pageSize, totalCount).toLocaleString('ja-JP')}件目 / {totalCount.toLocaleString('ja-JP')}件
         </p>
       )}
     </div>

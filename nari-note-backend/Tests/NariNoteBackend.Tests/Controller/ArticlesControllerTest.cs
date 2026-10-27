@@ -905,6 +905,31 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.Equal(["四間飛車の基本", "序盤の考え方"], body.Articles.Select(a => a.Title));
     }
 
+    [Fact]
+    public async Task 記事検索は件数と位置を指定してページ送りでき次のページの有無を返す()
+    {
+        var author = new UserBuilder().Build();
+        await SeedAsync(
+            author,
+            new ArticleBuilder(author).WithTitle("四間飛車1").CreatedAt(Now.AddDays(-1)).Build(),
+            new ArticleBuilder(author).WithTitle("四間飛車2").CreatedAt(Now.AddDays(-2)).Build(),
+            new ArticleBuilder(author).WithTitle("四間飛車3").CreatedAt(Now.AddDays(-3)).Build()
+        );
+        var keyword = Uri.EscapeDataString("四間飛車");
+
+        var firstPage = await ReadAsync<SearchArticlesResponse>(
+            await CreateClient().GetAsync($"/api/articles/search?keyword={keyword}&limit=2&offset=0")
+        );
+        var lastPage = await ReadAsync<SearchArticlesResponse>(
+            await CreateClient().GetAsync($"/api/articles/search?keyword={keyword}&limit=2&offset=2")
+        );
+
+        Assert.Equal(["四間飛車1", "四間飛車2"], firstPage.Articles.Select(a => a.Title));
+        Assert.True(firstPage.HasNext);
+        Assert.Equal(["四間飛車3"], lastPage.Articles.Select(a => a.Title));
+        Assert.False(lastPage.HasNext);
+    }
+
     [Theory]
     [InlineData("/api/articles/search")]
     [InlineData("/api/articles/search?keyword=a&limit=0")]
