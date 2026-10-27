@@ -4,7 +4,6 @@ using NariNoteBackend.Domain.ReadModel;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 using NSubstitute;
-using System.ComponentModel.DataAnnotations;
 
 namespace NariNoteBackend.Tests.Application.Service;
 
@@ -61,18 +60,5 @@ public class GetLikedArticlesServiceTest
 
         Assert.Empty(response.Articles);
         Assert.Equal(45, response.TotalCount);
-    }
-
-    [Theory]
-    [InlineData(0, 0)]
-    [InlineData(101, 0)]
-    [InlineData(20, -1)]
-    public async Task 範囲外の件数や位置は検索せずにエラーにする(int limit, int offset)
-    {
-        var request = new GetLikedArticlesRequest { UserId = this.userId, Limit = limit, Offset = offset };
-
-        await Assert.ThrowsAsync<ValidationException>(() => this.service.ExecuteAsync(request));
-
-        await this.likeRepository.DidNotReceiveWithAnyArgs().FindLikedArticleSummariesByUserAsync(this.userId, 0, 0);
     }
 }

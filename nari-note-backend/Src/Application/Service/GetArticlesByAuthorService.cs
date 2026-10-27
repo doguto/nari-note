@@ -1,7 +1,6 @@
 using NariNoteBackend.Application.Dto;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Helper;
 using NariNoteBackend.Domain.Repository;
 
 namespace NariNoteBackend.Application.Service;
@@ -17,8 +16,6 @@ public class GetArticlesByAuthorService
 
     public async Task<GetArticlesByAuthorResponse> ExecuteAsync(GetArticlesByAuthorRequest request)
     {
-        PagingValidator.Validate(request.Limit, request.Offset);
-
         var (articles, totalCount) = await articleRepository.FindPublishedSummariesByAuthorAsync(request.AuthorId, request.Limit, request.Offset);
 
         var articleDtos = articles.Select(a => new ArticleThumbnailDto

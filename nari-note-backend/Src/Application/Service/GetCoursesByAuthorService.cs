@@ -1,7 +1,6 @@
 using NariNoteBackend.Application.Dto;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Helper;
 using NariNoteBackend.Domain.Repository;
 
 namespace NariNoteBackend.Application.Service;
@@ -17,8 +16,6 @@ public class GetCoursesByAuthorService
 
     public async Task<GetCoursesByAuthorResponse> ExecuteAsync(GetCoursesByAuthorRequest request)
     {
-        PagingValidator.Validate(request.Limit, request.Offset);
-
         var (courses, totalCount) = await courseRepository.FindPublishedSummariesByAuthorAsync(request.AuthorId, request.Limit, request.Offset);
 
         var courseDtos = courses.Select(c => new CourseDto

@@ -1,7 +1,6 @@
 using NariNoteBackend.Application.Dto;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Helper;
 using NariNoteBackend.Domain.Repository;
 
 namespace NariNoteBackend.Application.Service;
@@ -17,8 +16,6 @@ public class GetLikedArticlesService
 
     public async Task<GetLikedArticlesResponse> ExecuteAsync(GetLikedArticlesRequest request)
     {
-        PagingValidator.Validate(request.Limit, request.Offset);
-
         var (articles, totalCount) = await likeRepository.FindLikedArticleSummariesByUserAsync(request.UserId, request.Limit, request.Offset);
 
         var articleDtos = articles.Select(a => new ArticleThumbnailDto

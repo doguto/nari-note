@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using NariNoteBackend.Application.Dto;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Helper;
 using NariNoteBackend.Domain.Repository;
 
 namespace NariNoteBackend.Application.Service;
@@ -25,8 +24,6 @@ public class GetArticlesByTagService
         {
             throw new ValidationException("タグ名に使用できない文字が含まれています");
         }
-
-        PagingValidator.Validate(request.Limit, request.Offset);
 
         var (articles, totalCount) = await articleRepository.FindSummariesByTagAsync(request.TagName, request.Limit, request.Offset);
 

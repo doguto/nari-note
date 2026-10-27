@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 ﻿using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
@@ -74,8 +75,11 @@ public class CoursesController : ApplicationController
 
     [HttpGet("author/{authorId}")]
     [Auth(AuthLevel.Anonymous)]
+    [ValidateModelState]
     public async Task<ActionResult<GetCoursesByAuthorResponse>> GetCoursesByAuthor(
-        UserId authorId, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+        UserId authorId,
+        [FromQuery, Range(1, 100, ErrorMessage = "取得件数は1から100の範囲で指定してください")] int limit = 20,
+        [FromQuery, Range(0, int.MaxValue, ErrorMessage = "オフセットは0以上の値を指定してください")] int offset = 0
     )
     {
         var request = new GetCoursesByAuthorRequest { AuthorId = authorId, Limit = limit, Offset = offset };
