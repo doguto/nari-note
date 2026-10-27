@@ -95,9 +95,11 @@ public class ArticlesController : ApplicationController
 
     [HttpGet("author/{authorId}")]
     [Auth(AuthLevel.Anonymous)]
-    public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(UserId authorId)
+    public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(
+        UserId authorId, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+    )
     {
-        var request = new GetArticlesByAuthorRequest { AuthorId = authorId };
+        var request = new GetArticlesByAuthorRequest { AuthorId = authorId, Limit = limit, Offset = offset };
         var response = await getArticlesByAuthorService.ExecuteAsync(request);
         return Ok(response);
     }

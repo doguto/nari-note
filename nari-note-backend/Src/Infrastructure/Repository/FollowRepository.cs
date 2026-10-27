@@ -66,19 +66,35 @@ public class FollowRepository : IFollowRepository
         return await context.Follows.CountAsync(f => f.FollowerId == userId);
     }
 
-    public async Task<List<User>> GetFollowersAsync(UserId userId)
+    public async Task<(List<User> Users, int TotalCount)> GetFollowersAsync(UserId userId, int limit, int offset)
     {
-        return await context.Follows
-            .Where(f => f.FollowingId == userId)
-            .Select(f => f.Follower)
-            .ToListAsync();
+        var query = context.Follows.Where(f => f.FollowingId == userId);
+
+        // フォローされた日時の新しい順に並べる
+        var totalCount = await query.CountAsync();
+        var followers = await query.OrderByDescending(f => f.CreatedAt)
+                                   .ThenByDescending(f => f.Id)
+                                   .Skip(offset)
+                                   .Take(limit)
+                                   .Select(f => f.Follower)
+                                   .ToListAsync();
+
+        return (followers, totalCount);
     }
 
-    public async Task<List<User>> GetFollowingsAsync(UserId userId)
+    public async Task<(List<User> Users, int TotalCount)> GetFollowingsAsync(UserId userId, int limit, int offset)
     {
-        return await context.Follows
-            .Where(f => f.FollowerId == userId)
-            .Select(f => f.Following)
-            .ToListAsync();
+        var query = context.Follows.Where(f => f.FollowerId == userId);
+
+        // フォローした日時の新しい順に並べる
+        var totalCount = await query.CountAsync();
+        var followings = await query.OrderByDescending(f => f.CreatedAt)
+                                    .ThenByDescending(f => f.Id)
+                                    .Skip(offset)
+                                    .Take(limit)
+                                    .Select(f => f.Following)
+                                    .ToListAsync();
+
+        return (followings, totalCount);
     }
 }

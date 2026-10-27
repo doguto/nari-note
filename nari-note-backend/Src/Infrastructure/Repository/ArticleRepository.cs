@@ -90,10 +90,33 @@ public class ArticleRepository : IArticleRepository
                            .Where(visibilityFilter);
 
         var totalCount = await query.CountAsync();
-        var articles = await ToSummaryListAsync(query.OrderByDescending(a => a.PublishedAt)
-                                                     .ThenByDescending(a => a.Id)
-                                                     .Skip(offset)
-                                                     .Take(limit));
+        var articles = await query.OrderByDescending(a => a.PublishedAt)
+                                  .ThenByDescending(a => a.Id)
+                                  .Skip(offset)
+                                  .Take(limit)
+                                  .Select(ArticleSummaryProjection.FromArticle)
+                                  .ToListAsync();
+
+        return (articles, totalCount);
+    }
+
+    public async Task<(List<ArticleSummary> Articles, int TotalCount)> FindPublishedSummariesByAuthorAsync(UserId authorId, int limit, int offset)
+    {
+        var now = timeProvider.UtcNow();
+        var visibilityFilter = IsPubliclyVisible(now);
+
+        // 下書きに加え、公開日時を過ぎていない予約投稿も第三者には見せない
+        var query = context.Articles
+                           .Where(a => a.AuthorId == authorId)
+                           .Where(visibilityFilter);
+
+        var totalCount = await query.CountAsync();
+        var articles = await query.OrderByDescending(a => a.PublishedAt)
+                                  .ThenByDescending(a => a.Id)
+                                  .Skip(offset)
+                                  .Take(limit)
+                                  .Select(ArticleSummaryProjection.FromArticle)
+                                  .ToListAsync();
 
         return (articles, totalCount);
     }
@@ -238,28 +261,6 @@ public class ArticleRepository : IArticleRepository
         foreach (var row in rows) row.Article.LikeCount = row.LikeCount;
 
         return rows.Select(row => row.Article).ToList();
-    }
-
-    /// <summary>
-    ///     一覧のサムネイル表示に必要な列だけを射影して取得します。
-    ///     タグを JOIN するため、いいね数のサブクエリは記事 × タグの行ごとに実行されます。
-    ///     AsSplitQuery でタグを分けると、ページングの絞り込みが 2 本目でも再実行され、深いページほど遅くなるため 1 本のクエリにしています。
-    /// </summary>
-    static async Task<List<ArticleSummary>> ToSummaryListAsync(IQueryable<Article> query)
-    {
-        return await query.Select(a => new ArticleSummary
-                          {
-                              Id = a.Id,
-                              Title = a.Title,
-                              AuthorId = a.AuthorId,
-                              AuthorName = a.Author.Name,
-                              AuthorProfileImage = a.Author.ProfileImage,
-                              TagNames = a.ArticleTags.OrderBy(at => at.Id).Select(at => at.Tag.Name).ToList(),
-                              LikeCount = a.Likes.Count(),
-                              PublishedAt = a.PublishedAt,
-                              UpdatedAt = a.UpdatedAt
-                          })
-                          .ToListAsync();
     }
 
     static Expression<Func<Article, bool>> IsPubliclyVisible(DateTime now)

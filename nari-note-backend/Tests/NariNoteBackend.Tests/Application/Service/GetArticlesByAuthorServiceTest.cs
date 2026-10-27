@@ -1,68 +1,77 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Service;
-using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ReadModel;
 using NariNoteBackend.Domain.Repository;
-using NariNoteBackend.Tests.Support;
-using NariNoteBackend.Tests.Support.Builder;
+using NariNoteBackend.Domain.ValueObject;
 using NSubstitute;
+using System.ComponentModel.DataAnnotations;
 
 namespace NariNoteBackend.Tests.Application.Service;
 
 public class GetArticlesByAuthorServiceTest
 {
     readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
-    readonly User author = new UserBuilder().WithName("author").Build();
+    readonly UserId authorId = UserId.From(Guid.CreateVersion7());
     readonly GetArticlesByAuthorService service;
-    readonly TestTimeProvider timeProvider = new();
 
     public GetArticlesByAuthorServiceTest()
     {
-        this.service = new GetArticlesByAuthorService(this.articleRepository, this.timeProvider);
-    }
-
-    void SetupArticles(params Article[] articles)
-    {
-        this.articleRepository.FindByAuthorAsync(this.author.Id).Returns(articles.ToList());
+        this.service = new GetArticlesByAuthorService(this.articleRepository);
     }
 
     [Fact]
-    public async Task 作者の公開済みの記事だけを返す()
+    public async Task 作者の記事を返す()
     {
-        SetupArticles(
-            new ArticleBuilder(this.author).WithTitle("公開記事").WithTags("振り飛車").Build(),
-            new ArticleBuilder(this.author).WithTitle("下書き").Draft().Build()
-        );
+        var summary = new ArticleSummary
+        {
+            Id = ArticleId.From(Guid.CreateVersion7()),
+            Title = "公開記事",
+            AuthorId = this.authorId,
+            AuthorName = "author",
+            TagNames = ["振り飛車"],
+            LikeCount = 1,
+            PublishedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+        };
+        this.articleRepository.FindPublishedSummariesByAuthorAsync(this.authorId, 20, 0)
+            .Returns((new List<ArticleSummary> { summary }, 1));
 
-        var response = await this.service.ExecuteAsync(new GetArticlesByAuthorRequest { AuthorId = this.author.Id });
+        var response = await this.service.ExecuteAsync(new GetArticlesByAuthorRequest { AuthorId = this.authorId });
 
-        Assert.Equal(this.author.Id, response.AuthorId);
+        Assert.Equal(this.authorId, response.AuthorId);
         Assert.Equal("author", response.AuthorName);
         var dto = Assert.Single(response.Articles);
         Assert.Equal("公開記事", dto.Title);
         Assert.Equal(["振り飛車"], dto.Tags);
+        Assert.Equal(1, dto.LikeCount);
+        Assert.True(dto.IsPublished);
+        Assert.Equal(1, response.TotalCount);
     }
 
     [Fact]
-    public async Task 公開済みの記事が無ければ作者名は空になる()
+    public async Task 指定した件数と位置でリポジトリから取得する()
     {
-        SetupArticles(new ArticleBuilder(this.author).Draft().Build());
+        this.articleRepository.FindPublishedSummariesByAuthorAsync(this.authorId, 10, 30)
+            .Returns((new List<ArticleSummary>(), 45));
 
-        var response = await this.service.ExecuteAsync(new GetArticlesByAuthorRequest { AuthorId = this.author.Id });
+        var response = await this.service.ExecuteAsync(
+            new GetArticlesByAuthorRequest { AuthorId = this.authorId, Limit = 10, Offset = 30 }
+        );
 
         Assert.Equal("", response.AuthorName);
         Assert.Empty(response.Articles);
+        Assert.Equal(45, response.TotalCount);
     }
 
-    [Fact]
-    public async Task 公開日時を過ぎていない予約投稿は返さない()
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(101, 0)]
+    [InlineData(20, -1)]
+    public async Task 範囲外の件数や位置は検索せずにエラーにする(int limit, int offset)
     {
-        SetupArticles(
-            new ArticleBuilder(this.author).WithTitle("公開記事").Build(),
-            new ArticleBuilder(this.author).WithTitle("予約投稿").PublishedAt(TestTimeProvider.DefaultUtcNow.AddDays(1)).Build()
-        );
+        var request = new GetArticlesByAuthorRequest { AuthorId = this.authorId, Limit = limit, Offset = offset };
 
-        var response = await this.service.ExecuteAsync(new GetArticlesByAuthorRequest { AuthorId = this.author.Id });
+        await Assert.ThrowsAsync<ValidationException>(() => this.service.ExecuteAsync(request));
 
-        Assert.Equal(["公開記事"], response.Articles.Select(a => a.Title));
+        await this.articleRepository.DidNotReceiveWithAnyArgs().FindPublishedSummariesByAuthorAsync(this.authorId, 0, 0);
     }
 }

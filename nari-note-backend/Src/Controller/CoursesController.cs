@@ -74,9 +74,11 @@ public class CoursesController : ApplicationController
 
     [HttpGet("author/{authorId}")]
     [Auth(AuthLevel.Anonymous)]
-    public async Task<ActionResult<GetCoursesByAuthorResponse>> GetCoursesByAuthor(UserId authorId)
+    public async Task<ActionResult<GetCoursesByAuthorResponse>> GetCoursesByAuthor(
+        UserId authorId, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+    )
     {
-        var request = new GetCoursesByAuthorRequest { AuthorId = authorId };
+        var request = new GetCoursesByAuthorRequest { AuthorId = authorId, Limit = limit, Offset = offset };
         var response = await getCoursesByAuthorService.ExecuteAsync(request);
         return Ok(response);
     }
