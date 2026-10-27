@@ -31,8 +31,9 @@ resource "aws_instance" "app_server" {
   iam_instance_profile = aws_iam_instance_profile.app_server.name
 
   # AMI のデフォルト(2GiB)だと dnf キャッシュ等ですぐ埋まるため拡張
+  # スワップファイル(1GiB)も置くため 8GiB にしている
   root_block_device {
-    volume_size = 4
+    volume_size = 8
     volume_type = "gp3"
   }
 

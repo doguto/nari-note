@@ -1,6 +1,20 @@
 #!/bin/bash
 set -e
 
+# == Swap ==
+# メモリ急増時に即 OOM Killer が発動しないための保険。常時使われるようならインスタンスサイズを見直す
+# ルートが XFS のため fallocate ではなく dd で作成する。dnf update 等でのメモリ急増にも備えて最初に有効化する
+if [ ! -f /swapfile ]; then
+  dd if=/dev/zero of=/swapfile bs=1M count=1024
+  chmod 600 /swapfile
+  mkswap /swapfile
+fi
+swapon --show | grep -q /swapfile || swapon /swapfile
+grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap defaults 0 0' >> /etc/fstab
+
+echo 'vm.swappiness = 10' > /etc/sysctl.d/90-swap.conf
+sysctl -p /etc/sysctl.d/90-swap.conf
+
 # パッケージの更新
 dnf update -y
 
