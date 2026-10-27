@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { LikeButton, LoadingSpinner, ErrorMessage } from '@/components/ui';
-import { NarinoteMarkdown, CourseBreadcrumb, ArticleAuthorInfo, ArticleTagList } from '@/components/molecules';
+import { NarinoteMarkdown, CourseBreadcrumb, ArticleAuthorInfo, ArticleTagList, ShareButtons } from '@/components/molecules';
 import { CommentForm } from '../organisms/CommentForm';
 import { CommentList } from '../organisms/CommentList';
 import { Comment } from '@/types/comment';
 import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
+import { Pencil, X } from 'lucide-react';
 import { GetArticleContentResponse } from '@/lib/api/types';
 
 interface ArticleDetailTemplateProps {
@@ -15,6 +15,8 @@ interface ArticleDetailTemplateProps {
   comments: Comment[];
   isOwnArticle: boolean;
   isLikePending: boolean;
+  showPublishedBanner: boolean;
+  onDismissPublishedBanner: () => void;
   onRetry: () => void;
   onLikeClick: () => void;
   onCommentSuccess: () => void;
@@ -27,6 +29,8 @@ export function ArticleDetailTemplate({
   comments,
   isOwnArticle,
   isLikePending,
+  showPublishedBanner,
+  onDismissPublishedBanner,
   onRetry,
   onLikeClick,
   onCommentSuccess,
@@ -49,8 +53,27 @@ export function ArticleDetailTemplate({
     );
   }
 
+  const articlePath = `/articles/${article.article.id}`;
+
   return (
     <article className="bg-white rounded-lg shadow-lg p-8">
+      {showPublishedBanner && (
+        <div className="relative mb-6 rounded-lg border border-green-200 bg-green-50 p-4 pr-10" role="status">
+          <p className="mb-3 font-medium text-green-800">
+            記事を公開しました！X でシェアして、たくさんの人に読んでもらいましょう
+          </p>
+          <ShareButtons title={article.article.title} path={articlePath} tags={article.article.tags} />
+          <button
+            type="button"
+            onClick={onDismissPublishedBanner}
+            className="absolute right-3 top-3 text-green-700 hover:text-green-900"
+            aria-label="閉じる"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {article.courseId && article.courseName && (
         <CourseBreadcrumb courseId={article.courseId} courseName={article.courseName} />
       )}
@@ -97,6 +120,10 @@ export function ArticleDetailTemplate({
       {article.article.tags && article.article.tags.length > 0 && (
         <ArticleTagList tags={article.article.tags} />
       )}
+
+      <div className="mt-6">
+        <ShareButtons title={article.article.title} path={articlePath} tags={article.article.tags} />
+      </div>
 
       {/* コメント一覧 */}
       <div className="mt-8">
