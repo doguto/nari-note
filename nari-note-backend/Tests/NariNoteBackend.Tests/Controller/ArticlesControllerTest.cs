@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Tests.Support;
 using NariNoteBackend.Tests.Support.Builder;
 using NariNoteBackend.Tests.Support.Integration;
@@ -671,6 +672,23 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.Equal("2日前", article.Title);
         Assert.Equal(1, article.LikeCount);
         Assert.Equal(3, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task タグ別の記事一覧はタグを付けた順に返す()
+    {
+        var author = new UserBuilder().Build();
+        var shogi = TestEntity.Tag("Shogi");
+        var aigake = TestEntity.Tag("Aigake");
+        var article = new ArticleBuilder(author).Build();
+        await SeedAsync(author, shogi, aigake, article, TestEntity.ArticleTag(article, shogi));
+        // 別の SaveChanges で登録し、後から付けたタグの ID が大きくなるようにする
+        await SeedAsync(new ArticleTag { ArticleId = article.Id, TagId = aigake.Id, Article = null!, Tag = null! });
+
+        var response = await CreateClient().GetAsync("/api/articles/tag/Shogi");
+
+        var body = await ReadAsync<GetArticlesByTagResponse>(response);
+        Assert.Equal(["Shogi", "Aigake"], Assert.Single(body.Articles).Tags);
     }
 
     [Fact]
