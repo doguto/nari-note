@@ -89,7 +89,7 @@ export const articlesApi = {
     return response;
   },
   getArticlesByAuthor: async (data: GetArticlesByAuthorRequest): Promise<GetArticlesByAuthorResponse> => {
-    const response = await apiClient.get<GetArticlesByAuthorResponse>(`/api/articles/author/${data.authorId}`);
+    const response = await apiClient.get<GetArticlesByAuthorResponse>(`/api/articles/author/${data.authorId}`, { params: { limit: data.limit, offset: data.offset } });
     return response;
   },
   getArticlesByTag: async (data: GetArticlesByTagRequest): Promise<GetArticlesByTagResponse> => {
@@ -180,7 +180,7 @@ export const coursesApi = {
     return response;
   },
   getCoursesByAuthor: async (data: GetCoursesByAuthorRequest): Promise<GetCoursesByAuthorResponse> => {
-    const response = await apiClient.get<GetCoursesByAuthorResponse>(`/api/courses/author/${data.authorId}`);
+    const response = await apiClient.get<GetCoursesByAuthorResponse>(`/api/courses/author/${data.authorId}`, { params: { limit: data.limit, offset: data.offset } });
     return response;
   },
   createCourse: async (data: CreateCourseRequest): Promise<CreateCourseResponse> => {
@@ -241,15 +241,15 @@ export const usersApi = {
     return response;
   },
   getFollowers: async (data: GetFollowersRequest): Promise<GetFollowersResponse> => {
-    const response = await apiClient.get<GetFollowersResponse>(`/api/users/${data.userId}/followers`);
+    const response = await apiClient.get<GetFollowersResponse>(`/api/users/${data.userId}/followers`, { params: { limit: data.limit, offset: data.offset } });
     return response;
   },
   getFollowings: async (data: GetFollowingsRequest): Promise<GetFollowingsResponse> => {
-    const response = await apiClient.get<GetFollowingsResponse>(`/api/users/${data.userId}/followings`);
+    const response = await apiClient.get<GetFollowingsResponse>(`/api/users/${data.userId}/followings`, { params: { limit: data.limit, offset: data.offset } });
     return response;
   },
   getLikedArticles: async (data: GetLikedArticlesRequest): Promise<GetLikedArticlesResponse> => {
-    const response = await apiClient.get<GetLikedArticlesResponse>(`/api/users/${data.userId}/liked-articles`);
+    const response = await apiClient.get<GetLikedArticlesResponse>(`/api/users/${data.userId}/liked-articles`, { params: { limit: data.limit, offset: data.offset } });
     return response;
   },
 };
