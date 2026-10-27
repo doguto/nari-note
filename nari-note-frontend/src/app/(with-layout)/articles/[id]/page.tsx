@@ -2,6 +2,7 @@
 import type { Metadata } from 'next';
 import { ArticleDetailPage } from '@/features/article/pages';
 import { getArticleContent } from '@/lib/api/server';
+import { buildPageMetadata, findFirstImageUrl, markdownToPlainText } from '@/lib/metadata';
 
 interface ArticlePageProps {
   params: Promise<{ id: string }>;
@@ -13,21 +14,18 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
   try {
     const { article } = await getArticleContent({ id });
-    const plainText = article.body.replace(/<[^>]+>/g, '');
-    const description = plainText.slice(0, 160);
 
-    return {
+    return buildPageMetadata({
       title: article.title,
-      description,
-      openGraph: {
-        type: 'article',
-        title: article.title,
-        description,
+      description: markdownToPlainText(article.body) || `${article.authorName}さんの将棋記事`,
+      path: `/articles/${id}`,
+      imageUrl: findFirstImageUrl(article.body),
+      article: {
         publishedTime: article.publishedAt,
         authors: [article.authorName],
         tags: article.tags,
       },
-    };
+    });
   } catch {
     return {};
   }
