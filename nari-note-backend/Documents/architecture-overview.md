@@ -48,13 +48,13 @@ nari-note-backend/
 │   │       └── User.cs
 │   ├── Infrastructure/        # インフラストラクチャ層
 │   │   ├── NariNoteDbContext.cs  # EF Core DbContext
-│   │   └── Repository/       # Repository実装
-│   │       ├── ArticleRepository.cs
-│   │       └── UserRepository.cs
+│   │   ├── Repository/       # Repository実装
+│   │   │   ├── ArticleRepository.cs
+│   │   │   └── UserRepository.cs
+│   │   └── Binding/          # ValueObject のモデルバインド・JSON 変換
 │   ├── Middleware/            # カスタムミドルウェア
 │   │   ├── GlobalExceptionHandlerMiddleware.cs
 │   │   └── AuthenticationMiddleware.cs
-│   ├── Binding/               # ValueObject のモデルバインド・JSON 変換
 │   ├── Filter/                # アクションフィルタ
 │   │   └── ValidateModelStateAttribute.cs
 │   └── Extension/             # 拡張メソッド

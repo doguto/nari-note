@@ -59,9 +59,9 @@ nari-note-backend/Src/
 │   └── Security/           # JWT等のセキュリティ関連
 ├── Infrastructure/
 │   ├── NariNoteDbContext.cs  # EF Core DbContext
-│   └── Repository/         # Repository実装
+│   ├── Repository/         # Repository実装
+│   └── Binding/            # ValueObject のモデルバインド・JSON 変換
 ├── Middleware/             # グローバルミドルウェア
-├── Binding/                # ValueObject のモデルバインド・JSON 変換
 └── Filter/                 # アクションフィルタ
 ```
 

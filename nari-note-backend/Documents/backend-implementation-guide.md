@@ -141,11 +141,11 @@ nari-note-backend/
 │   │       └── EntityBase.cs  # 共通Entity基底クラス
 │   ├── Infrastructure/        # インフラストラクチャ層
 │   │   ├── NariNoteDbContext.cs  # EF Core DbContext
-│   │   └── Repository/       # Repository実装
+│   │   ├── Repository/       # Repository実装
+│   │   └── Binding/          # ValueObject のモデルバインド・JSON 変換
 │   ├── Middleware/            # カスタムミドルウェア
 │   │   ├── GlobalExceptionHandlerMiddleware.cs
 │   │   └── AuthenticationMiddleware.cs
-│   ├── Binding/               # ValueObject のモデルバインド・JSON 変換
 │   ├── Filter/                # アクションフィルタ
 │   │   └── ValidateModelStateAttribute.cs
 │   └── Extension/             # 拡張メソッド
