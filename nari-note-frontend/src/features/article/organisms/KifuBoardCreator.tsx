@@ -28,7 +28,7 @@ export function KifuBoardCreator({ recorder }: KifuBoardCreatorProps) {
     initializeBoard,
   } = recorder;
 
-  const HandPanel = ({
+  const renderHandPanel = ({
     owner,
     pieces,
     label,
@@ -76,7 +76,7 @@ export function KifuBoardCreator({ recorder }: KifuBoardCreatorProps) {
         駒をクリックして選択し、移動先をクリックしてください。先手（下側）から交互に指してください。
       </p>
 
-      <HandPanel owner="gote" pieces={goteCaptured} label="後手の持ち駒" />
+      {renderHandPanel({ owner: 'gote', pieces: goteCaptured, label: '後手の持ち駒' })}
 
       <div className="flex justify-center">
         <div className="inline-block">
@@ -131,7 +131,7 @@ export function KifuBoardCreator({ recorder }: KifuBoardCreatorProps) {
         </div>
       </div>
 
-      <HandPanel owner="sente" pieces={senteCaptured} label="先手の持ち駒" />
+      {renderHandPanel({ owner: 'sente', pieces: senteCaptured, label: '先手の持ち駒' })}
 
       {pendingPromotion && (
         <div className="flex items-center gap-3 p-3 border rounded-lg bg-yellow-50 border-yellow-300">

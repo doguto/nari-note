@@ -40,7 +40,7 @@ export function BoardEditorDialog({ open, onOpenChange, onConfirm }: BoardEditor
     resetBoard();
   };
 
-  const HandPanel = ({
+  const renderHandPanel = ({
     owner,
     pieces,
     label,
@@ -94,7 +94,7 @@ export function BoardEditorDialog({ open, onOpenChange, onConfirm }: BoardEditor
           持ち駒エリアをクリックすると盤面の駒を持ち駒に移動できます。
         </p>
 
-        <HandPanel owner="gote" pieces={goteCaptured} label="後手の持ち駒（クリックで盤面の駒を移動）" />
+        {renderHandPanel({ owner: 'gote', pieces: goteCaptured, label: '後手の持ち駒（クリックで盤面の駒を移動）' })}
 
         <div className="flex justify-center">
           <div className="inline-block">
@@ -149,7 +149,7 @@ export function BoardEditorDialog({ open, onOpenChange, onConfirm }: BoardEditor
           </div>
         </div>
 
-        <HandPanel owner="sente" pieces={senteCaptured} label="先手の持ち駒（クリックで盤面の駒を移動）" />
+        {renderHandPanel({ owner: 'sente', pieces: senteCaptured, label: '先手の持ち駒（クリックで盤面の駒を移動）' })}
 
         <DialogFooter className="flex-wrap gap-2">
           <Button variant="outline" onClick={clearBoard} type="button" size="sm">空の盤面</Button>
