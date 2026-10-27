@@ -1,5 +1,5 @@
 import { TextareaField } from '@/components/ui/TextareaField';
-import { CharacterCounter } from '@/components/molecules/CharacterCounter';
+import { CharacterCounter } from '@/components/ui';
 
 interface CommentFieldProps {
   value: string;
