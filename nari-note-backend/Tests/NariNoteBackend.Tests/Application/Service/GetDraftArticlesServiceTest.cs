@@ -1,7 +1,7 @@
 using NariNoteBackend.Application.Service;
-using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ReadModel;
 using NariNoteBackend.Domain.Repository;
-using NariNoteBackend.Tests.Support.Builder;
+using NariNoteBackend.Domain.ValueObject;
 using NSubstitute;
 
 namespace NariNoteBackend.Tests.Application.Service;
@@ -19,20 +19,29 @@ public class GetDraftArticlesServiceTest
     [Fact]
     public async Task 自分の下書きを返す()
     {
-        var author = new UserBuilder().WithName("author").Build();
-        var draft = new ArticleBuilder(author).WithTitle("下書き").WithBody("書きかけ").WithTags("振り飛車").Draft().Build();
-        this.articleRepository.FindDraftsByAuthorAsync(author.Id).Returns(new List<Article> { draft });
+        var authorId = UserId.From(Guid.CreateVersion7());
+        var updatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var draft = new ArticleSummary
+        {
+            Id = ArticleId.From(Guid.CreateVersion7()),
+            Title = "下書き",
+            AuthorId = authorId,
+            AuthorName = "author",
+            TagNames = ["振り飛車"],
+            UpdatedAt = updatedAt
+        };
+        this.articleRepository.FindDraftSummariesByAuthorAsync(authorId).Returns(new List<ArticleSummary> { draft });
 
-        var response = await this.service.ExecuteAsync(author.Id);
+        var response = await this.service.ExecuteAsync(authorId);
 
         var dto = Assert.Single(response.Articles);
         Assert.Equal(draft.Id, dto.Id);
         Assert.Equal("下書き", dto.Title);
-        Assert.Equal("書きかけ", dto.Body);
         Assert.Equal("author", dto.AuthorName);
         Assert.Equal(["振り飛車"], dto.Tags);
         Assert.False(dto.IsPublished);
         Assert.Null(dto.PublishedAt);
+        Assert.Equal(updatedAt, dto.UpdatedAt);
         Assert.Equal(0, dto.LikeCount);
     }
 }
