@@ -1,10 +1,8 @@
 # AGENTS.md
 
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
-
 ## プロジェクト概要
 
-nari-noteは将棋記事の投稿・共有プラットフォームです。フロントエンドとバックエンドが分離されたモダンなWebアプリケーションです。
+nari-note は将棋記事の投稿・共有プラットフォーム の Web アプリケーション.
 
 ### 技術スタック
 
