@@ -73,6 +73,13 @@ export function NarinoteMarkdown({ content, className, kifuList = [] }: Narinote
           blockquote: ({ ...props }) => <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4" {...props} />,
           a: ({ ...props }) => <a className="text-brand-primary hover:underline" {...props} />,
           hr: ({ ...props }) => <hr className="my-6 border-t-2 border-gray-300" {...props} />,
+          img: ({ src, alt, ...props }) => {
+            // アップロード中の仮 URL など、表示できない src は代替テキストだけを出す
+            if (!src) return <span className="text-sm text-gray-400">{alt}</span>;
+            // 外部 URL の画像はサイズが不明なため next/image ではなく img を使う
+            // eslint-disable-next-line @next/next/no-img-element
+            return <img src={src} alt={alt ?? ''} loading="lazy" className="block max-w-full h-auto mx-auto my-4 rounded" {...props} />;
+          },
         }}
       >
         {content}
