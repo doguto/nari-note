@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using NariNoteBackend.Domain.ValueObject;
 
-namespace NariNoteBackend.Middleware;
+namespace NariNoteBackend.Binding;
 
 public class ValueObjectJsonConverterFactory : JsonConverterFactory
 {

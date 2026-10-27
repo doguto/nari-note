@@ -61,6 +61,7 @@ nari-note-backend/Src/
 │   ├── NariNoteDbContext.cs  # EF Core DbContext
 │   └── Repository/         # Repository実装
 ├── Middleware/             # グローバルミドルウェア
+├── Binding/                # ValueObject のモデルバインド・JSON 変換
 └── Filter/                 # アクションフィルタ
 ```
 

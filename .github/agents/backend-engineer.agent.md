@@ -53,6 +53,7 @@ nari-note-backend/
 │   ├── Middleware/            # カスタムミドルウェア
 │   │   ├── GlobalExceptionHandlerMiddleware.cs
 │   │   └── AuthenticationMiddleware.cs
+│   ├── Binding/               # ValueObject のモデルバインド・JSON 変換
 │   ├── Filter/                # アクションフィルタ
 │   │   └── ValidateModelStateAttribute.cs
 │   └── Extension/             # 拡張メソッド

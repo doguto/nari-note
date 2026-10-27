@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application;
 using NariNoteBackend.Application.Service;
+using NariNoteBackend.Binding;
 using NariNoteBackend.Filter;
 using NariNoteBackend.Infrastructure;
 using NariNoteBackend.Infrastructure.Database;

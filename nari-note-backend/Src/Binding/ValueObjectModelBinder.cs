@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace NariNoteBackend.Middleware;
+namespace NariNoteBackend.Binding;
 
 public class ValueObjectModelBinder : IModelBinder
 {
