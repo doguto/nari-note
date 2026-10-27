@@ -16,14 +16,16 @@ public class GetCoursesByAuthorService
 
     public async Task<GetCoursesByAuthorResponse> ExecuteAsync(GetCoursesByAuthorRequest request)
     {
-        var courses = await courseRepository.FindPublishedByAuthorAsync(request.AuthorId);
+        PagingValidator.Validate(request.Limit, request.Offset);
+
+        var (courses, totalCount) = await courseRepository.FindPublishedSummariesByAuthorAsync(request.AuthorId, request.Limit, request.Offset);
 
         var courseDtos = courses.Select(c => new CourseDto
         {
             Id = c.Id,
             UserId = c.UserId,
-            UserName = c.User.Name,
-            UserIconImageUrl = c.User.ProfileImage,
+            UserName = c.UserName,
+            UserIconImageUrl = c.UserProfileImage,
             Name = c.Name,
             ArticleIds = c.Articles.Select(a => a.Id).ToList(),
             ArticleNames = c.Articles.Select(a => a.Title).ToList(),
@@ -35,8 +37,9 @@ public class GetCoursesByAuthorService
         return new GetCoursesByAuthorResponse
         {
             AuthorId = request.AuthorId,
-            AuthorName = courses.FirstOrDefault()?.User.Name ?? "",
-            Courses = courseDtos
+            AuthorName = courses.FirstOrDefault()?.UserName ?? "",
+            Courses = courseDtos,
+            TotalCount = totalCount
         };
     }
 }

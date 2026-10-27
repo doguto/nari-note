@@ -8,6 +8,8 @@ interface UserProfileTemplateProps {
 
   activeTab: string;
   tabContext: 'content' | 'follow';
+  currentPage: number;
+  pageSize: number;
 
   articlesData?: GetArticlesByAuthorResponse;
   likedArticlesData?: GetLikedArticlesResponse;
@@ -41,6 +43,8 @@ export function UserProfileTemplate({
   isOwnProfile,
   activeTab,
   tabContext,
+  currentPage,
+  pageSize,
   articlesData,
   likedArticlesData,
   followersData,
@@ -76,6 +80,9 @@ export function UserProfileTemplate({
       <ProfileTabNav
         activeTab={activeTab}
         tabContext={tabContext}
+        basePath={`/users/${user.id}`}
+        currentPage={currentPage}
+        pageSize={pageSize}
         articlesData={articlesData}
         likedArticlesData={likedArticlesData}
         followersData={followersData}

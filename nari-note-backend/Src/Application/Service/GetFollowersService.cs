@@ -17,10 +17,12 @@ public class GetFollowersService
     
     public async Task<GetFollowersResponse> ExecuteAsync(GetFollowersRequest request)
     {
+        PagingValidator.Validate(request.Limit, request.Offset);
+
         // ユーザーが存在するか確認
         await userRepository.FindForceByIdAsync(request.UserId);
         
-        var followers = await followRepository.GetFollowersAsync(request.UserId);
+        var (followers, totalCount) = await followRepository.GetFollowersAsync(request.UserId, request.Limit, request.Offset);
         
         return new GetFollowersResponse
         {
@@ -29,7 +31,8 @@ public class GetFollowersService
                 Id = user.Id,
                 Username = user.Name,
                 UserIconImageUrl = user.ProfileImage
-            }).ToList()
+            }).ToList(),
+            TotalCount = totalCount
         };
     }
 }

@@ -89,9 +89,15 @@ export async function getArticleContent(params: GetArticleContentRequest): Promi
 }
 
 export async function getArticlesByAuthor(params: GetArticlesByAuthorRequest): Promise<GetArticlesByAuthorResponse> {
-  const url = `${getBaseUrl()}/api/articles/author/${params.authorId}`;
+  const url = new URL(`/api/articles/author/${params.authorId}`, getBaseUrl());
+  const query = { limit: params.limit, offset: params.offset };
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  });
 
-  return serverFetch<GetArticlesByAuthorResponse>(url);
+  return serverFetch<GetArticlesByAuthorResponse>(url.toString());
 }
 
 export async function getArticlesByTag(params: GetArticlesByTagRequest): Promise<GetArticlesByTagResponse> {
@@ -166,9 +172,15 @@ export async function getMyCourses(): Promise<GetMyCoursesResponse> {
 }
 
 export async function getCoursesByAuthor(params: GetCoursesByAuthorRequest): Promise<GetCoursesByAuthorResponse> {
-  const url = `${getBaseUrl()}/api/courses/author/${params.authorId}`;
+  const url = new URL(`/api/courses/author/${params.authorId}`, getBaseUrl());
+  const query = { limit: params.limit, offset: params.offset };
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  });
 
-  return serverFetch<GetCoursesByAuthorResponse>(url);
+  return serverFetch<GetCoursesByAuthorResponse>(url.toString());
 }
 
 export async function getCourseContent(params: GetCourseContentRequest): Promise<GetCourseContentResponse> {
@@ -205,19 +217,37 @@ export async function getUserProfile(params: GetUserProfileRequest): Promise<Get
 }
 
 export async function getFollowers(params: GetFollowersRequest): Promise<GetFollowersResponse> {
-  const url = `${getBaseUrl()}/api/users/${params.userId}/followers`;
+  const url = new URL(`/api/users/${params.userId}/followers`, getBaseUrl());
+  const query = { limit: params.limit, offset: params.offset };
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  });
 
-  return serverFetch<GetFollowersResponse>(url);
+  return serverFetch<GetFollowersResponse>(url.toString());
 }
 
 export async function getFollowings(params: GetFollowingsRequest): Promise<GetFollowingsResponse> {
-  const url = `${getBaseUrl()}/api/users/${params.userId}/followings`;
+  const url = new URL(`/api/users/${params.userId}/followings`, getBaseUrl());
+  const query = { limit: params.limit, offset: params.offset };
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  });
 
-  return serverFetch<GetFollowingsResponse>(url);
+  return serverFetch<GetFollowingsResponse>(url.toString());
 }
 
 export async function getLikedArticles(params: GetLikedArticlesRequest): Promise<GetLikedArticlesResponse> {
-  const url = `${getBaseUrl()}/api/users/${params.userId}/liked-articles`;
+  const url = new URL(`/api/users/${params.userId}/liked-articles`, getBaseUrl());
+  const query = { limit: params.limit, offset: params.offset };
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  });
 
-  return serverFetch<GetLikedArticlesResponse>(url);
+  return serverFetch<GetLikedArticlesResponse>(url.toString());
 }

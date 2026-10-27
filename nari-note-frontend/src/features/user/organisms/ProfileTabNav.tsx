@@ -1,4 +1,5 @@
 import { ArticleList } from '@/components/organisms';
+import { Pagination } from '@/components/molecules';
 import { Button } from '@/components/ui/button';
 import { UserFollowersList } from './UserFollowersList';
 import type { GetArticlesByAuthorResponse, GetLikedArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
@@ -6,6 +7,9 @@ import type { GetArticlesByAuthorResponse, GetLikedArticlesResponse, GetFollower
 interface ProfileTabNavProps {
   activeTab: string;
   tabContext: 'content' | 'follow';
+  basePath: string;
+  currentPage: number;
+  pageSize: number;
   articlesData?: GetArticlesByAuthorResponse;
   likedArticlesData?: GetLikedArticlesResponse;
   followersData?: GetFollowersResponse;
@@ -34,6 +38,9 @@ interface ProfileTabNavProps {
 export function ProfileTabNav({
   activeTab,
   tabContext,
+  basePath,
+  currentPage,
+  pageSize,
   articlesData,
   likedArticlesData,
   followersData,
@@ -52,6 +59,18 @@ export function ProfileTabNav({
   onFollowersRetry,
   onFollowingsRetry,
 }: ProfileTabNavProps) {
+  const renderPagination = (totalCount: number | undefined) => (
+    <div className="mt-6">
+      <Pagination
+        currentPage={currentPage}
+        totalCount={totalCount ?? 0}
+        pageSize={pageSize}
+        basePath={basePath}
+        query={{ tab: activeTab }}
+      />
+    </div>
+  );
+
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="border-b border-gray-200">
@@ -134,6 +153,7 @@ export function ProfileTabNav({
             emptyMessage="まだ記事がありません"
           />
         )}
+        {activeTab === 'articles' && !isArticlesLoading && !articlesError && renderPagination(articlesData?.totalCount)}
 
         {activeTab === 'likes' && (
           <ArticleList
@@ -144,6 +164,7 @@ export function ProfileTabNav({
             emptyMessage="いいねした記事がありません"
           />
         )}
+        {activeTab === 'likes' && !isLikedArticlesLoading && !likedArticlesError && renderPagination(likedArticlesData?.totalCount)}
 
         {activeTab === 'following-tags' && (
           <div className="text-center py-8 text-gray-500">
@@ -162,6 +183,7 @@ export function ProfileTabNav({
             emptyMessage="フォロワーがいません"
           />
         )}
+        {activeTab === 'followers' && !isFollowersLoading && !followersError && renderPagination(followersData?.totalCount)}
 
         {activeTab === 'followings' && (
           <UserFollowersList
@@ -174,6 +196,7 @@ export function ProfileTabNav({
             emptyMessage="フォロー中のユーザーがいません"
           />
         )}
+        {activeTab === 'followings' && !isFollowingsLoading && !followingsError && renderPagination(followingsData?.totalCount)}
       </div>
     </div>
   );

@@ -6,6 +6,8 @@ interface PaginationProps {
   totalCount: number;
   pageSize: number;
   basePath: string;
+  /** page 以外に引き継ぐクエリ（タブの種類など） */
+  query?: Record<string, string>;
 }
 
 type PageItem = { kind: 'page'; page: number } | { kind: 'ellipsis'; key: string };
@@ -45,11 +47,16 @@ const stepClass = 'w-11 sm:w-auto sm:px-3.5 gap-1 font-medium';
  *
  * `?page=N` のクエリでページを切り替えるページ送り
  */
-export function Pagination({ currentPage, totalCount, pageSize, basePath }: PaginationProps) {
+export function Pagination({ currentPage, totalCount, pageSize, basePath, query }: PaginationProps) {
   const totalPages = Math.ceil(totalCount / pageSize);
   if (totalPages <= 1) return null;
 
-  const hrefOf = (page: number) => (page === 1 ? basePath : `${basePath}?page=${page}`);
+  const hrefOf = (page: number) => {
+    const params = new URLSearchParams(query);
+    if (page !== 1) params.set('page', String(page));
+    const search = params.toString();
+    return search ? `${basePath}?${search}` : basePath;
+  };
   const firstIndex = (currentPage - 1) * pageSize + 1;
   const lastIndex = Math.min(currentPage * pageSize, totalCount);
 
