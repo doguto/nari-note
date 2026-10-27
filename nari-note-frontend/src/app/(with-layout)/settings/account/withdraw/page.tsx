@@ -5,7 +5,7 @@ import { WithdrawPage } from '@/features/settings/pages';
 
 export default function SettingsWithdrawPage() {
   return (
-    <AuthGuard redirectPath="/settings/general/withdraw">
+    <AuthGuard redirectPath="/settings/account/withdraw">
       <WithdrawPage />
     </AuthGuard>
   );
