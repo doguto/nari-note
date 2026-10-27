@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getArticles, getCourses, getPopularTags } from '@/lib/api/server';
-import type { ArticleDto, CourseDto } from '@/lib/api/types';
+import type { ArticleThumbnailDto, CourseDto } from '@/lib/api/types';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nari-note.com';
 
@@ -18,7 +18,7 @@ async function fetchAll<T>(fetchPage: (limit: number, offset: number) => Promise
   return items;
 }
 
-async function fetchAllArticles(): Promise<ArticleDto[]> {
+async function fetchAllArticles(): Promise<ArticleThumbnailDto[]> {
   return fetchAll(async (limit, offset) => (await getArticles({ limit, offset })).articles);
 }
 
