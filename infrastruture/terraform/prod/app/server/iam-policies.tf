@@ -68,6 +68,18 @@ data "aws_iam_policy_document" "cloudwatch_agent" {
     ]
     resources = ["*"]
   }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["cloudwatch:PutMetricData"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "cloudwatch:namespace"
+      values   = ["CWAgent"]
+    }
+  }
 }
 
 resource "aws_iam_role_policy" "s3_images_write" {

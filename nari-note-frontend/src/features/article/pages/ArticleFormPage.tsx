@@ -12,6 +12,10 @@ import type { KifuItem } from '../types/kifu';
 const toKifuDtos = (items: KifuItem[]): KifuDto[] =>
   items.map((item, i) => ({ name: item.name, kifuText: item.text, sortOrder: i }));
 
+// 予約投稿ではなく、保存と同時に公開されるか
+const isPublishedImmediately = (request: { isPublished?: boolean; publishedAt?: string }) =>
+  !!request.isPublished && (!request.publishedAt || new Date(request.publishedAt) <= new Date());
+
 const fromKifuDtos = (dtos: KifuDto[]): KifuItem[] =>
   [...dtos].sort((a, b) => a.sortOrder - b.sortOrder).map((dto) => ({ name: dto.name, text: dto.kifuText }));
 
@@ -45,9 +49,9 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
   );
   
   const createArticle = useCreateArticle({
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       setHasUnsavedChanges(false);
-      router.push(`/articles/${data.id}`);
+      router.push(`/articles/${data.id}${isPublishedImmediately(variables) ? '?published=1' : ''}`);
     },
     onError: (error) => {
       console.error('記事の保存に失敗しました:', error);
@@ -56,9 +60,11 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
   });
 
   const updateArticle = useUpdateArticle({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       setHasUnsavedChanges(false);
-      router.push(`/articles/${articleId}`);
+      // 下書きを公開したときだけ案内を出す（公開済み記事の更新では出さない）
+      const isNewlyPublished = !article?.article?.isPublished && isPublishedImmediately(variables);
+      router.push(`/articles/${articleId}${isNewlyPublished ? '?published=1' : ''}`);
     },
     onError: (error) => {
       console.error('記事の保存に失敗しました:', error);

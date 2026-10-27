@@ -94,8 +94,7 @@ src/
 │   ├── molecules/                          # 🔟 汎用複合UI層
 │   │   ├── EmailField.tsx                  # 汎用的な複合コンポーネント
 │   │   ├── PasswordField.tsx
-│   │   ├── TagInput.tsx
-│   │   └── CharacterCounter.tsx
+│   │   └── TagInput.tsx
 │   │       │
 │   │       └─→ 1️⃣1️⃣ Atomsを使用
 │   │
@@ -149,7 +148,7 @@ sequenceDiagram
     Note over Organism: ArticleContent等<br/>Template特有のUI
     
     Organism->>Molecule: ⑦ Moleculesを使用
-    Note over Molecule: TagInput, CharacterCounter等<br/>汎用的な複合UI
+    Note over Molecule: TagInput, EmailField等<br/>汎用的な複合UI
     
     Molecule->>Atom: ⑧ Atomsを使用
     Note over Atom: button, input等<br/>汎用的な最小単位UI<br/>⑨ 最終的なUIを表示
@@ -189,7 +188,7 @@ App Router - Next.js App Router
   - 特定の機能を持つ
   - 汎用的で複数の機能で再利用可能
   - ビジネスロジックは最小限
-- **例**: `EmailField`, `PasswordField`, `TagInput`, `CharacterCounter`
+- **例**: `EmailField`, `PasswordField`, `TagInput`
 
 #### Organisms（`features/{feature}/organisms/`）
 - **責務**: Template特有のUI単位

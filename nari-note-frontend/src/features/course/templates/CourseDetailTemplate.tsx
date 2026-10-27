@@ -10,6 +10,7 @@ export function CourseDetailTemplate({ course }: CourseDetailTemplateProps) {
   return (
     <div>
       <CourseDetailHeader
+        courseId={course.id}
         courseName={course.name || '無題の講座'}
         userId={course.userId || ''}
         userName={course.userName || '不明なユーザー'}

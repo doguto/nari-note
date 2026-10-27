@@ -105,13 +105,13 @@ nari-note-frontend/
 │   │   │   ├── FormField.tsx         # ラベル + 入力フィールド
 │   │   │   ├── ErrorAlert.tsx        # エラー表示
 │   │   │   ├── FormTitle.tsx         # フォームタイトル
-│   │   │   └── TagChip.tsx           # タグチップ
+│   │   │   ├── TagChip.tsx           # タグチップ
+│   │   │   └── CharacterCounter.tsx  # 文字数カウンター
 │   │   ├── molecules/                # Molecule層（汎用複合コンポーネント）
 │   │   │   ├── EmailField.tsx        # メール入力フィールド
 │   │   │   ├── PasswordField.tsx     # パスワード入力フィールド
 │   │   │   ├── NameField.tsx         # 名前入力フィールド
-│   │   │   ├── TagInput.tsx          # タグ入力
-│   │   │   └── CharacterCounter.tsx  # 文字数カウンター
+│   │   │   └── TagInput.tsx          # タグ入力
 │   │   ├── Loading.tsx               # ローディング表示
 │   │   ├── ErrorMessage.tsx          # エラーメッセージ
 │   │   └── EmptyState.tsx            # 空状態表示
@@ -333,7 +333,6 @@ export function ArticleDetail({ article, layout = 'wide' }: ArticleDetailProps) 
 - **PasswordField.tsx** - パスワード入力（FormFieldを使用）
 - **NameField.tsx** - ユーザー名入力（FormFieldを使用）
 - **TagInput.tsx** - タグ入力（Input + Button + TagChipを使用）
-- **CharacterCounter.tsx** - 文字数カウンター
 
 **実装例:**
 ```tsx
@@ -524,7 +523,6 @@ import { ArticleDetailPage } from '@/features/article/pages/ArticleDetailPage';
 - `EmailField.tsx` - メールアドレス入力
 - `PasswordField.tsx` - パスワード入力
 - `TagInput.tsx` - タグ入力
-- `CharacterCounter.tsx` - 文字数カウンター
 
 ### 5. Atom層（汎用最小層）
 
@@ -539,6 +537,7 @@ import { ArticleDetailPage } from '@/features/article/pages/ArticleDetailPage';
 - `FormField.tsx` - フォームフィールド
 - `ErrorAlert.tsx` - エラーアラート
 - `TagChip.tsx` - タグチップ
+- `CharacterCounter.tsx` - 文字数カウンター
 
 ### 6. グローバル機能のOrganism
 

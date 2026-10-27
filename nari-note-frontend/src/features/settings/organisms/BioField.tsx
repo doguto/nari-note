@@ -1,5 +1,4 @@
-import { TextareaField } from '@/components/ui';
-import { CharacterCounter } from '@/components/molecules';
+import { CharacterCounter, TextareaField } from '@/components/ui';
 
 interface BioFieldProps {
   value: string;

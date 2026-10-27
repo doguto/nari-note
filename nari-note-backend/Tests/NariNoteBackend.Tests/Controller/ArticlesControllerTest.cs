@@ -172,6 +172,40 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.Equal(0, await QueryAsync(db => db.Articles.CountAsync()));
     }
 
+    [Fact]
+    public async Task 上限文字数の棋譜を付けて記事を作成できる()
+    {
+        var author = new UserBuilder().Build();
+        await SeedAsync(author);
+
+        var response = await CreateClientAs(author).PostAsJsonAsync("/api/articles", new
+        {
+            title = "タイトル",
+            body = "本文",
+            kifus = new[] { new { name = "第1局", kifuText = new string('歩', 20000), sortOrder = 0 } }
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(20000, (await QueryAsync(db => db.Kifus.SingleAsync())).KifuText.Length);
+    }
+
+    [Fact]
+    public async Task 上限を超える棋譜を付けた記事は作成できない()
+    {
+        var author = new UserBuilder().Build();
+        await SeedAsync(author);
+
+        var response = await CreateClientAs(author).PostAsJsonAsync("/api/articles", new
+        {
+            title = "タイトル",
+            body = "本文",
+            kifus = new[] { new { name = "第1局", kifuText = new string('歩', 20001), sortOrder = 0 } }
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(0, await QueryAsync(db => db.Articles.CountAsync()));
+    }
+
     #endregion
 
     #region GET /api/articles/{id}
@@ -448,6 +482,22 @@ public class ArticlesControllerTest : IntegrationTestBase
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Empty(await QueryAsync(db => db.Kifus.ToListAsync()));
+    }
+
+    [Fact]
+    public async Task 上限を超える棋譜では記事を更新できない()
+    {
+        var author = new UserBuilder().Build();
+        var article = new ArticleBuilder(author).Build();
+        await SeedAsync(author, article, TestEntity.Kifu(article, "旧第1局"));
+
+        var response = await CreateClientAs(author).PutAsJsonAsync($"/api/articles/{article.Id.Value}", new
+        {
+            kifus = new[] { new { name = "第1局", kifuText = new string('歩', 20001), sortOrder = 0 } }
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(["旧第1局"], await QueryAsync(db => db.Kifus.Select(k => k.Name).ToListAsync()));
     }
 
     [Fact]

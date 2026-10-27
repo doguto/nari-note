@@ -2,6 +2,7 @@ using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Tests.Support;
@@ -44,6 +45,7 @@ public class SignUpServiceTest
             this.userRepository,
             this.emailVerificationRepository,
             this.outboxMessageRepository,
+            new EmailMessageStore("https://nari-note.com"),
             new TestTimeProvider()
         );
     }

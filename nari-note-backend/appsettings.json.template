@@ -6,6 +6,14 @@
     }
   },
   "AllowedHosts": "*",
+  "Frontend": {
+    "BaseUrl": "https://nari-note.com"
+  },
+  "Cors": {
+    "AllowedOrigins": [
+      "https://nari-note.com"
+    ]
+  },
   "Jwt": {
     "Secret": "REPLACE_WITH_YOUR_SECRET_KEY_MINIMUM_32_CHARACTERS_OR_USE_ENVIRONMENT_VARIABLE",
     "Issuer": "nari-note-api",
