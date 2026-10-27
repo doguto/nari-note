@@ -10,6 +10,7 @@ namespace NariNoteBackend.Application.Service;
 public class GetArticlesByTagService
 {
     static readonly Regex ValidTagPattern = new(@"^[a-zA-Z0-9\u3040-\u30FF\u4E00-\u9FFF_\-\.]+$", RegexOptions.Compiled);
+    const int MaxLimit = 100;
 
     readonly IArticleRepository articleRepository;
 
@@ -25,7 +26,17 @@ public class GetArticlesByTagService
             throw new ValidationException("タグ名に使用できない文字が含まれています");
         }
 
-        var articles = await articleRepository.FindByTagAsync(request.TagName);
+        if (request.Limit is < 1 or > MaxLimit)
+        {
+            throw new ValidationException($"取得件数は1から{MaxLimit}の範囲で指定してください");
+        }
+
+        if (request.Offset < 0)
+        {
+            throw new ValidationException("オフセットは0以上の値を指定してください");
+        }
+
+        var (articles, totalCount) = await articleRepository.FindSummariesByTagAsync(request.TagName, request.Limit, request.Offset);
 
         return new GetArticlesByTagResponse
         {
@@ -34,14 +45,15 @@ public class GetArticlesByTagService
                 Id = a.Id,
                 Title = a.Title,
                 AuthorId = a.AuthorId,
-                AuthorName = a.Author?.Name ?? "",
-                UserIconImageUrl = a.Author?.ProfileImage,
-                Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
+                AuthorName = a.AuthorName,
+                UserIconImageUrl = a.AuthorProfileImage,
+                Tags = a.TagNames,
                 LikeCount = a.LikeCount,
                 IsPublished = a.IsPublished,
                 PublishedAt = a.PublishedAt,
                 UpdatedAt = a.UpdatedAt
-            }).ToList()
+            }).ToList(),
+            TotalCount = totalCount
         };
     }
 }

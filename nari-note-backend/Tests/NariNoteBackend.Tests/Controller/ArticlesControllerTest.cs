@@ -638,6 +638,58 @@ public class ArticlesControllerTest : IntegrationTestBase
         var body = await ReadAsync<GetArticlesByTagResponse>(response);
         Assert.Equal(["公開記事"], body.Articles.Select(a => a.Title));
         Assert.Equal(["Shogi"], body.Articles[0].Tags);
+        Assert.Equal(1, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task タグ別の記事一覧は公開日時の新しい順に指定した範囲を返す()
+    {
+        var author = new UserBuilder().Build();
+        var reader = new UserBuilder().Build();
+        var tag = TestEntity.Tag("Shogi");
+        var oldest = new ArticleBuilder(author).WithTitle("1日前").PublishedAt(Now.AddDays(-1)).Build();
+        var middle = new ArticleBuilder(author).WithTitle("2日前").PublishedAt(Now.AddDays(-2)).Build();
+        var newest = new ArticleBuilder(author).WithTitle("3日前").PublishedAt(Now.AddDays(-3)).Build();
+        await SeedAsync(
+            author,
+            reader,
+            tag,
+            oldest,
+            middle,
+            newest,
+            TestEntity.ArticleTag(oldest, tag),
+            TestEntity.ArticleTag(middle, tag),
+            TestEntity.ArticleTag(newest, tag),
+            TestEntity.Like(reader, middle)
+        );
+
+        var response = await CreateClient().GetAsync("/api/articles/tag/Shogi?limit=1&offset=1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await ReadAsync<GetArticlesByTagResponse>(response);
+        var article = Assert.Single(body.Articles);
+        Assert.Equal("2日前", article.Title);
+        Assert.Equal(1, article.LikeCount);
+        Assert.Equal(3, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task 存在しないタグの記事一覧は空を返す()
+    {
+        var response = await CreateClient().GetAsync("/api/articles/tag/NoSuchTag");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await ReadAsync<GetArticlesByTagResponse>(response);
+        Assert.Empty(body.Articles);
+        Assert.Equal(0, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task タグ別の記事一覧で範囲外の件数を指定すると400を返す()
+    {
+        var response = await CreateClient().GetAsync("/api/articles/tag/Shogi?limit=101");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
