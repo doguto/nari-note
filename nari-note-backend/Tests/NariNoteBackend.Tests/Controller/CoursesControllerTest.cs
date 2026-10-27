@@ -91,7 +91,7 @@ public class CoursesControllerTest : IntegrationTestBase
     }
 
     [Fact]
-    public async Task 講座検索は件数と位置を指定してページ送りでき次のページの有無を返す()
+    public async Task 講座検索は件数と位置を指定してページ送りでき総件数を返す()
     {
         var owner = new UserBuilder().Build();
         await SeedAsync(
@@ -110,9 +110,9 @@ public class CoursesControllerTest : IntegrationTestBase
         );
 
         Assert.Equal(["四間飛車講座1", "四間飛車講座2"], firstPage.Courses.Select(c => c.Name));
-        Assert.True(firstPage.HasNext);
+        Assert.Equal(3, firstPage.TotalCount);
         Assert.Equal(["四間飛車講座3"], lastPage.Courses.Select(c => c.Name));
-        Assert.False(lastPage.HasNext);
+        Assert.Equal(3, lastPage.TotalCount);
     }
 
     [Fact]
