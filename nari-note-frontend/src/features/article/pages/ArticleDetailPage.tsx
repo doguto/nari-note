@@ -45,7 +45,7 @@ export function ArticleDetailPage({ articleId }: ArticleDetailPageProps) {
   const isOwnArticle = userId === article?.article?.authorId;
 
   return (
-    <PageWithSidebar>
+    <PageWithSidebar wide>
       <ArticleDetailTemplate
       isLoading={isLoading}
       error={error}

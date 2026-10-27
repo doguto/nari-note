@@ -8,7 +8,7 @@ interface CourseDetailTemplateProps {
 
 export function CourseDetailTemplate({ course }: CourseDetailTemplateProps) {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div>
       <CourseDetailHeader
         courseName={course.name || '無題の講座'}
         userId={course.userId || ''}
