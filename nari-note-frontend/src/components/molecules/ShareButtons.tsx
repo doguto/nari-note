@@ -15,12 +15,15 @@ interface ShareButtonsProps {
 
 /**
  * X 投稿画面の URL を組み立てる
- * 本文は「タイトル + #なりノート + 記事のタグ（最大3件）」
+ * 本文は「タイトル / URL / #なりノート / 記事のタグ（最大3件）」を改行区切りで並べる
  */
 function buildXShareUrl(title: string, url: string, tags: string[] = []): string {
-  const hashtags = [SERVICE_HASHTAG, ...tags.slice(0, MAX_TAG_HASHTAGS)].map((tag) => `#${tag}`).join(' ');
-  const text = encodeURIComponent(`${title}\n${hashtags}`);
-  return `https://x.com/intent/post?text=${text}&url=${encodeURIComponent(url)}`;
+  const lines = [title, url, `#${SERVICE_HASHTAG}`];
+  const tagHashtags = tags.slice(0, MAX_TAG_HASHTAGS).map((tag) => `#${tag}`).join(' ');
+  if (tagHashtags) {
+    lines.push(tagHashtags);
+  }
+  return `https://x.com/intent/post?text=${encodeURIComponent(lines.join('\n'))}`;
 }
 
 function XLogo() {
