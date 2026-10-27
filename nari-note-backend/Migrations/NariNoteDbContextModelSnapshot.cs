@@ -71,7 +71,10 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.ArticleTag", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid>("ArticleId")
                         .HasColumnType("uuid");
@@ -98,7 +101,10 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Comment", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid>("ArticleId")
                         .HasColumnType("uuid");
@@ -162,7 +168,10 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.CourseLike", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uuid");
@@ -191,7 +200,10 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.EmailVerification", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -226,7 +238,10 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Follow", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -255,7 +270,10 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Kifu", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid>("ArticleId")
                         .HasColumnType("uuid");
@@ -289,7 +307,10 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Like", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid>("ArticleId")
                         .HasColumnType("uuid");
@@ -318,7 +339,10 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Notification", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid>("ArticleId")
                         .HasColumnType("uuid");
@@ -392,7 +416,10 @@ namespace NariNoteBackend.Migrations
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.PasswordResetToken", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

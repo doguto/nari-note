@@ -1,10 +1,13 @@
-import { ArticleCard } from '@/components/molecules';
+import { ArticleCard, Pagination } from '@/components/molecules';
 import { EmptyState } from '@/components/ui';
 import type { GetArticlesByTagResponse } from '@/lib/api/types';
 
 interface TagArticleListTemplateProps {
   tag: string;
   articles: GetArticlesByTagResponse['articles'];
+  totalCount: number;
+  currentPage: number;
+  pageSize: number;
 }
 
 /**
@@ -13,7 +16,7 @@ interface TagArticleListTemplateProps {
  * タグ別記事一覧ページのUI構成を担当するテンプレートコンポーネント
  * レイアウトとコンポーネント配置を定義
  */
-export function TagArticleListTemplate({ tag, articles }: TagArticleListTemplateProps) {
+export function TagArticleListTemplate({ tag, articles, totalCount, currentPage, pageSize }: TagArticleListTemplateProps) {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
@@ -21,11 +24,11 @@ export function TagArticleListTemplate({ tag, articles }: TagArticleListTemplate
           #{tag}
         </h1>
         <p className="text-gray-600">
-          {articles.length}件の記事
+          {totalCount}件の記事
         </p>
       </div>
 
-      {articles.length === 0 ? (
+      {totalCount === 0 ? (
         <EmptyState
           icon="📝"
           title="記事がありません"
@@ -48,6 +51,13 @@ export function TagArticleListTemplate({ tag, articles }: TagArticleListTemplate
           ))}
         </div>
       )}
+
+      <Pagination
+        currentPage={currentPage}
+        totalCount={totalCount}
+        pageSize={pageSize}
+        basePath={`/tags/${encodeURIComponent(tag)}`}
+      />
     </div>
   );
 }

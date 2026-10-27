@@ -62,7 +62,8 @@ EOF
 
 
 # == PostgreSQL ==
-dnf install -y postgresql17 postgresql17-server
+# contrib は shared_preload_libraries で読み込む pg_stat_statements に必要。無いと PostgreSQL が起動しない
+dnf install -y postgresql17 postgresql17-server postgresql17-contrib
 
 PGDATA="/data/postgresql"
 
@@ -144,8 +145,14 @@ DB_PASSWORD=$(aws ssm get-parameter \
 sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname = '$${DB_USERNAME}'" | grep -q 1 || \
   sudo -u postgres psql -c "CREATE ROLE \"$${DB_USERNAME}\" WITH LOGIN PASSWORD '$${DB_PASSWORD}';"
 
+# バックアップ等の postgres ユーザーの作業を止めないよう、サーバー全体ではなくアプリ用ロールにのみ設定する
+sudo -u postgres psql -c "ALTER ROLE \"$${DB_USERNAME}\" SET statement_timeout = '15s';"
+
 sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname = 'nari_note'" | grep -q 1 || \
   sudo -u postgres psql -c "CREATE DATABASE nari_note OWNER \"$${DB_USERNAME}\";"
+
+# 統計の収集自体はクラスタ全体で行われるが、参照用のビュー・関数は DB ごとに作成が必要
+sudo -u postgres psql -d nari_note -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
 
 
 # == Application ==

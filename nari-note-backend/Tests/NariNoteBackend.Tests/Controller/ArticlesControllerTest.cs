@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Tests.Support;
 using NariNoteBackend.Tests.Support.Builder;
 using NariNoteBackend.Tests.Support.Integration;
@@ -638,6 +639,75 @@ public class ArticlesControllerTest : IntegrationTestBase
         var body = await ReadAsync<GetArticlesByTagResponse>(response);
         Assert.Equal(["公開記事"], body.Articles.Select(a => a.Title));
         Assert.Equal(["Shogi"], body.Articles[0].Tags);
+        Assert.Equal(1, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task タグ別の記事一覧は公開日時の新しい順に指定した範囲を返す()
+    {
+        var author = new UserBuilder().Build();
+        var reader = new UserBuilder().Build();
+        var tag = TestEntity.Tag("Shogi");
+        var oldest = new ArticleBuilder(author).WithTitle("1日前").PublishedAt(Now.AddDays(-1)).Build();
+        var middle = new ArticleBuilder(author).WithTitle("2日前").PublishedAt(Now.AddDays(-2)).Build();
+        var newest = new ArticleBuilder(author).WithTitle("3日前").PublishedAt(Now.AddDays(-3)).Build();
+        await SeedAsync(
+            author,
+            reader,
+            tag,
+            oldest,
+            middle,
+            newest,
+            TestEntity.ArticleTag(oldest, tag),
+            TestEntity.ArticleTag(middle, tag),
+            TestEntity.ArticleTag(newest, tag),
+            TestEntity.Like(reader, middle)
+        );
+
+        var response = await CreateClient().GetAsync("/api/articles/tag/Shogi?limit=1&offset=1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await ReadAsync<GetArticlesByTagResponse>(response);
+        var article = Assert.Single(body.Articles);
+        Assert.Equal("2日前", article.Title);
+        Assert.Equal(1, article.LikeCount);
+        Assert.Equal(3, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task タグ別の記事一覧はタグを付けた順に返す()
+    {
+        var author = new UserBuilder().Build();
+        var shogi = TestEntity.Tag("Shogi");
+        var aigake = TestEntity.Tag("Aigake");
+        var article = new ArticleBuilder(author).Build();
+        await SeedAsync(author, shogi, aigake, article, TestEntity.ArticleTag(article, shogi));
+        // 別の SaveChanges で登録し、後から付けたタグの ID が大きくなるようにする
+        await SeedAsync(new ArticleTag { ArticleId = article.Id, TagId = aigake.Id, Article = null!, Tag = null! });
+
+        var response = await CreateClient().GetAsync("/api/articles/tag/Shogi");
+
+        var body = await ReadAsync<GetArticlesByTagResponse>(response);
+        Assert.Equal(["Shogi", "Aigake"], Assert.Single(body.Articles).Tags);
+    }
+
+    [Fact]
+    public async Task 存在しないタグの記事一覧は空を返す()
+    {
+        var response = await CreateClient().GetAsync("/api/articles/tag/NoSuchTag");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await ReadAsync<GetArticlesByTagResponse>(response);
+        Assert.Empty(body.Articles);
+        Assert.Equal(0, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task タグ別の記事一覧で範囲外の件数を指定すると400を返す()
+    {
+        var response = await CreateClient().GetAsync("/api/articles/tag/Shogi?limit=101");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
@@ -671,6 +741,22 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.False(unliked.IsLiked);
         Assert.Equal(1, unliked.CurrentLikeCount);
         Assert.Equal([otherReader.Id], await QueryAsync(db => db.Likes.Select(l => l.UserId).ToListAsync()));
+    }
+
+    [Fact]
+    public async Task 複数ユーザーが同時にいいねしても全件がIDの重複なく保存される()
+    {
+        var author = new UserBuilder().Build();
+        var article = new ArticleBuilder(author).Build();
+        var readers = Enumerable.Range(0, 20).Select(_ => new UserBuilder().Build()).ToArray();
+        await SeedAsync([author, article, ..readers]);
+        var url = $"/api/articles/{article.Id.Value}/like";
+
+        var responses = await Task.WhenAll(readers.Select(r => CreateClientAs(r).PostAsync(url, null)));
+
+        Assert.All(responses, r => Assert.Equal(HttpStatusCode.OK, r.StatusCode));
+        var ids = await QueryAsync(db => db.Likes.Select(l => l.Id).ToListAsync());
+        Assert.Equal(readers.Length, ids.Distinct().Count());
     }
 
     [Fact]

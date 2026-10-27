@@ -3,12 +3,12 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+    paths:
+      - "nari-note-backend/**/*.cs"
+      - "nari-note-frontend/src/**/*.ts"
+      - "nari-note-frontend/src/**/*.tsx"
+      - "infrastruture/**"
+      - "**/*.md"
 
 jobs:
   claude-review:
@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
-      issues: read
+      pull-requests: write
+      issues: write
       id-token: write
 
     steps:
@@ -36,9 +36,9 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
-          plugins: 'code-review@claude-code-plugins'
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          prompt: '/pr-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }} --comment'
+          # 公式 code-review プラグインはレビュー処理を Task（サブエージェント起動）に依存しており、
+          # allowed-tools に Task が無いためヘッドレスCIでは permission 拒否されコメントが付かない。
+          # そのため自前の単一エージェント構成コマンド (.claude/commands/pr-review.md) を使う。
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
-

@@ -168,10 +168,13 @@ export interface GetArticlesByAuthorResponse {
 
 export interface GetArticlesByTagRequest {
   tagName?: string;
+  limit: number;
+  offset: number;
 }
 
 export interface GetArticlesByTagResponse {
   articles: ArticleThumbnailDto[];
+  totalCount: number;
 }
 
 export interface GetArticlesRequest {

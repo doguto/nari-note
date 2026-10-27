@@ -93,7 +93,7 @@ export const articlesApi = {
     return response;
   },
   getArticlesByTag: async (data: GetArticlesByTagRequest): Promise<GetArticlesByTagResponse> => {
-    const response = await apiClient.get<GetArticlesByTagResponse>(`/api/articles/tag/${data.tagName}`);
+    const response = await apiClient.get<GetArticlesByTagResponse>(`/api/articles/tag/${data.tagName}`, { params: { limit: data.limit, offset: data.offset } });
     return response;
   },
   deleteArticle: async (data: DeleteArticleRequest): Promise<void> => {

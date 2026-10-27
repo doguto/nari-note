@@ -5,6 +5,7 @@ scripts/.env
 
 # archived source
 archive/
+docs/memo/
 
 # solution files
 nari-note.sln

@@ -1,8 +1,8 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Service;
-using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.ReadModel;
 using NariNoteBackend.Domain.Repository;
-using NariNoteBackend.Tests.Support.Builder;
+using NariNoteBackend.Domain.ValueObject;
 using NSubstitute;
 using System.ComponentModel.DataAnnotations;
 
@@ -24,10 +24,17 @@ public class GetArticlesByTagServiceTest
     [InlineData("v1.0-beta")]
     public async Task タグ名に一致する記事を返す(string tagName)
     {
-        var author = new UserBuilder().WithName("author").Build();
-        var liker = new UserBuilder().Build();
-        var article = new ArticleBuilder(author).WithTitle("記事").WithTags(tagName).LikedBy(liker).Build();
-        this.articleRepository.FindByTagAsync(tagName).Returns(new List<Article> { article });
+        var summary = new ArticleSummary
+        {
+            Id = ArticleId.From(Guid.CreateVersion7()),
+            Title = "記事",
+            AuthorId = UserId.From(Guid.CreateVersion7()),
+            AuthorName = "author",
+            TagNames = [tagName],
+            LikeCount = 1,
+            PublishedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+        };
+        this.articleRepository.FindSummariesByTagAsync(tagName, 20, 0).Returns((new List<ArticleSummary> { summary }, 1));
 
         var response = await this.service.ExecuteAsync(new GetArticlesByTagRequest { TagName = tagName });
 
@@ -36,6 +43,19 @@ public class GetArticlesByTagServiceTest
         Assert.Equal("author", dto.AuthorName);
         Assert.Equal([tagName], dto.Tags);
         Assert.Equal(1, dto.LikeCount);
+        Assert.True(dto.IsPublished);
+        Assert.Equal(1, response.TotalCount);
+    }
+
+    [Fact]
+    public async Task 指定した件数と位置でリポジトリから取得する()
+    {
+        this.articleRepository.FindSummariesByTagAsync("Shogi", 10, 30).Returns((new List<ArticleSummary>(), 45));
+
+        var response = await this.service.ExecuteAsync(new GetArticlesByTagRequest { TagName = "Shogi", Limit = 10, Offset = 30 });
+
+        Assert.Empty(response.Articles);
+        Assert.Equal(45, response.TotalCount);
     }
 
     [Theory]
@@ -50,6 +70,19 @@ public class GetArticlesByTagServiceTest
 
         await Assert.ThrowsAsync<ValidationException>(() => this.service.ExecuteAsync(request));
 
-        await this.articleRepository.DidNotReceive().FindByTagAsync(Arg.Any<string>());
+        await this.articleRepository.DidNotReceive().FindSummariesByTagAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<int>());
+    }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(101, 0)]
+    [InlineData(20, -1)]
+    public async Task 範囲外の件数や位置は検索せずにエラーにする(int limit, int offset)
+    {
+        var request = new GetArticlesByTagRequest { TagName = "Shogi", Limit = limit, Offset = offset };
+
+        await Assert.ThrowsAsync<ValidationException>(() => this.service.ExecuteAsync(request));
+
+        await this.articleRepository.DidNotReceive().FindSummariesByTagAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<int>());
     }
 }

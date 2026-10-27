@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Entity;
-using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Infrastructure.Database;
 
@@ -179,10 +178,123 @@ public static class DataSeeder
                 PublishedAt = DateTime.UtcNow.AddHours(-1),
                 CreatedAt = DateTime.UtcNow.AddHours(-1),
                 UpdatedAt = DateTime.UtcNow.AddHours(-1)
+            },
+            new()
+            {
+                Title = "【棋譜付き】乱戦の横歩取りを振り返る",
+                Body = """
+                    先日指した将棋が序盤から大乱戦になったので、棋譜を貼って振り返ります。
+
+                    ## 全体の棋譜
+
+                    まずは最初から最後まで通して見てください。
+
+                    ```kifu
+                    乱戦の一局
+                    ```
+
+                    ## 序盤：飛車先の歩交換
+
+                    15手目の▲３四飛で横歩を取った局面です。ここから一気に激しくなりました。
+
+                    ```kifu
+                    乱戦の一局_15
+                    ```
+
+                    ## 中盤：角交換からの打ち合い
+
+                    △８八角成から角の打ち合いに。22手目の△５五角打が気持ちの良い一手でした。
+
+                    ```kifu
+                    乱戦の一局_22
+                    ```
+
+                    ## 参考：頭金の基本形
+
+                    最後に、終盤でよく出てくる頭金の形を盤面で載せておきます。▲５二金打までの１手詰です。
+
+                    ```bod
+                    後手の持駒：なし
+                      ９ ８ ７ ６ ５ ４ ３ ２ １
+                    +---------------------------+
+                    | ・ ・ ・ ・v玉 ・ ・ ・ ・|一
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|二
+                    | ・ ・ ・ ・ 歩 ・ ・ ・ ・|三
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|四
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|五
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|六
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|七
+                    | ・ ・ ・ ・ ・ ・ ・ ・ ・|八
+                    | ・ ・ ・ ・ 玉 ・ ・ ・ ・|九
+                    +---------------------------+
+                    先手の持駒：金
+                    ```
+
+                    ## 存在しない棋譜の参照
+
+                    以下は存在しない棋譜名を指定した場合の表示確認用です。
+
+                    ```kifu
+                    存在しない棋譜
+                    ```
+                    """,
+                AuthorId = users[0].Id,
+                PublishedAt = DateTime.UtcNow.AddMinutes(-30),
+                CreatedAt = DateTime.UtcNow.AddMinutes(-30),
+                UpdatedAt = DateTime.UtcNow.AddMinutes(-30)
             }
         };
 
         context.Articles.AddRange(articles);
+        await context.SaveChangesAsync();
+
+        // 棋譜作成
+        var kifus = new List<Kifu>
+        {
+            new()
+            {
+                ArticleId = articles[10].Id,
+                Name = "乱戦の一局",
+                KifuText = """
+                    手合割：平手
+                    先手：羽生九段ファン
+                    後手：振り飛車党
+                    手数----指手---------消費時間--
+                       1 ７六歩(77)
+                       2 ３四歩(33)
+                       3 ２六歩(27)
+                       4 ８四歩(83)
+                       5 ２五歩(26)
+                       6 ８五歩(84)
+                       7 ７八金(69)
+                       8 ３二金(41)
+                       9 ２四歩(25)
+                      10 同　歩(23)
+                      11 同　飛(28)
+                      12 ８六歩(85)
+                      13 同　歩(87)
+                      14 同　飛(82)
+                      15 ３四飛(24)
+                      16 ８八角成(22)
+                      17 同　銀(79)
+                      18 ７六飛(86)
+                      19 ７七角打
+                      20 同　飛成(76)
+                      21 同　金(78)
+                      22 ５五角打
+                      23 ８二飛打
+                      24 ７二銀(71)
+                      25 ８一飛成(82)
+                      26 投了
+                    まで25手で先手の勝ち
+                    """,
+                SortOrder = 0,
+                CreatedAt = DateTime.UtcNow.AddMinutes(-30),
+                UpdatedAt = DateTime.UtcNow.AddMinutes(-30)
+            }
+        };
+
+        context.Kifus.AddRange(kifus);
         await context.SaveChangesAsync();
 
         // 記事とタグの関連付け
@@ -191,97 +303,106 @@ public static class DataSeeder
             // 棒銀入門 -> 居飛車, 戦法, 初心者向け
             new()
             {
-                Id = ArticleTagId.From(1), ArticleId = articles[0].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[0].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(2), ArticleId = articles[0].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[0].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(3), ArticleId = articles[0].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[0].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
             },
             // 四間飛車 -> 振り飛車, 戦法, 初心者向け
             new()
             {
-                Id = ArticleTagId.From(4), ArticleId = articles[1].Id, TagId = tags[1].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[1].Id, TagId = tags[1].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(5), ArticleId = articles[1].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[1].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(6), ArticleId = articles[1].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[1].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
             },
             // 詰将棋 -> 詰将棋, 終盤, 初心者向け
             new()
             {
-                Id = ArticleTagId.From(7), ArticleId = articles[2].Id, TagId = tags[2].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[2].Id, TagId = tags[2].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(8), ArticleId = articles[2].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[2].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(9), ArticleId = articles[2].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[2].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
             },
             // 矢倉 -> 居飛車, 戦法
             new()
             {
-                Id = ArticleTagId.From(10), ArticleId = articles[3].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[3].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(11), ArticleId = articles[3].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[3].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
             },
             // 王位戦感想 -> プロ棋戦, 棋譜解説, 終盤
             new()
             {
-                Id = ArticleTagId.From(12), ArticleId = articles[4].Id, TagId = tags[6].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[4].Id, TagId = tags[6].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(13), ArticleId = articles[4].Id, TagId = tags[5].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[4].Id, TagId = tags[5].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(14), ArticleId = articles[4].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[4].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow
             },
             // 角換わり -> 居飛車, 戦法
             new()
             {
-                Id = ArticleTagId.From(15), ArticleId = articles[5].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[5].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(16), ArticleId = articles[5].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[5].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
             },
             // 三間飛車 -> 振り飛車, 戦法
             new()
             {
-                Id = ArticleTagId.From(17), ArticleId = articles[6].Id, TagId = tags[1].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[6].Id, TagId = tags[1].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(18), ArticleId = articles[6].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[6].Id, TagId = tags[3].Id, CreatedAt = DateTime.UtcNow
             },
             // 格言 -> 初心者向け
             new()
             {
-                Id = ArticleTagId.From(19), ArticleId = articles[7].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[7].Id, TagId = tags[4].Id, CreatedAt = DateTime.UtcNow
             },
             // 実戦詰将棋 -> 詰将棋, 終盤
             new()
             {
-                Id = ArticleTagId.From(20), ArticleId = articles[8].Id, TagId = tags[2].Id, CreatedAt = DateTime.UtcNow
+                ArticleId = articles[8].Id, TagId = tags[2].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = ArticleTagId.From(21), ArticleId = articles[8].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow
-            }
+                ArticleId = articles[8].Id, TagId = tags[7].Id, CreatedAt = DateTime.UtcNow
+            },
             // 将棋ソフトの記事にはタグを付けない(独立記事の例)
+            // 棋譜付き記事 -> 居飛車, 棋譜解説
+            new()
+            {
+                ArticleId = articles[10].Id, TagId = tags[0].Id, CreatedAt = DateTime.UtcNow
+            },
+            new()
+            {
+                ArticleId = articles[10].Id, TagId = tags[5].Id, CreatedAt = DateTime.UtcNow
+            }
         };
 
         context.ArticleTags.AddRange(articleTags);
@@ -345,21 +466,18 @@ public static class DataSeeder
             // 初心者のための将棋入門
             new()
             {
-                Id = CourseLikeId.From(1),
                 UserId = users[0].Id,
                 CourseId = courses[0].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-8)
             },
             new()
             {
-                Id = CourseLikeId.From(2),
                 UserId = users[1].Id,
                 CourseId = courses[0].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-7)
             },
             new()
             {
-                Id = CourseLikeId.From(3),
                 UserId = users[2].Id,
                 CourseId = courses[0].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-6)
@@ -367,14 +485,12 @@ public static class DataSeeder
             // 居飛車戦法マスター講座
             new()
             {
-                Id = CourseLikeId.From(4),
                 UserId = users[1].Id,
                 CourseId = courses[1].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-5)
             },
             new()
             {
-                Id = CourseLikeId.From(5),
                 UserId = users[3].Id,
                 CourseId = courses[1].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-4)
@@ -382,21 +498,18 @@ public static class DataSeeder
             // 振り飛車完全攻略
             new()
             {
-                Id = CourseLikeId.From(6),
                 UserId = users[0].Id,
                 CourseId = courses[2].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-3)
             },
             new()
             {
-                Id = CourseLikeId.From(7),
                 UserId = users[2].Id,
                 CourseId = courses[2].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-2)
             },
             new()
             {
-                Id = CourseLikeId.From(8),
                 UserId = users[3].Id,
                 CourseId = courses[2].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-1)
@@ -412,113 +525,113 @@ public static class DataSeeder
             // 棒銀入門へのいいね
             new()
             {
-                Id = LikeId.From(1), UserId = users[1].Id, ArticleId = articles[0].Id,
+                UserId = users[1].Id, ArticleId = articles[0].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-4)
             },
             new()
             {
-                Id = LikeId.From(2), UserId = users[2].Id, ArticleId = articles[0].Id,
+                UserId = users[2].Id, ArticleId = articles[0].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-3)
             },
             new()
             {
-                Id = LikeId.From(3), UserId = users[3].Id, ArticleId = articles[0].Id,
+                UserId = users[3].Id, ArticleId = articles[0].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-2)
             },
             // 四間飛車へのいいね
             new()
             {
-                Id = LikeId.From(4), UserId = users[0].Id, ArticleId = articles[1].Id,
+                UserId = users[0].Id, ArticleId = articles[1].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-3)
             },
             new()
             {
-                Id = LikeId.From(5), UserId = users[2].Id, ArticleId = articles[1].Id,
+                UserId = users[2].Id, ArticleId = articles[1].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-2)
             },
             new()
             {
-                Id = LikeId.From(6), UserId = users[3].Id, ArticleId = articles[1].Id,
+                UserId = users[3].Id, ArticleId = articles[1].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-1)
             },
             // 詰将棋へのいいね
             new()
             {
-                Id = LikeId.From(7), UserId = users[0].Id, ArticleId = articles[2].Id,
+                UserId = users[0].Id, ArticleId = articles[2].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-2)
             },
             new()
             {
-                Id = LikeId.From(8), UserId = users[1].Id, ArticleId = articles[2].Id,
+                UserId = users[1].Id, ArticleId = articles[2].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-1)
             },
             // 矢倉へのいいね
             new()
             {
-                Id = LikeId.From(9), UserId = users[0].Id, ArticleId = articles[3].Id,
+                UserId = users[0].Id, ArticleId = articles[3].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-1)
             },
             new()
             {
-                Id = LikeId.From(10), UserId = users[1].Id, ArticleId = articles[3].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[1].Id, ArticleId = articles[3].Id, CreatedAt = DateTime.UtcNow
             },
             // 王位戦感想へのいいね
             new()
             {
-                Id = LikeId.From(11), UserId = users[0].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[0].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = LikeId.From(12), UserId = users[2].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[2].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = LikeId.From(13), UserId = users[3].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[3].Id, ArticleId = articles[4].Id, CreatedAt = DateTime.UtcNow
             },
             // 角換わりへのいいね
             new()
             {
-                Id = LikeId.From(14), UserId = users[1].Id, ArticleId = articles[5].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[1].Id, ArticleId = articles[5].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = LikeId.From(15), UserId = users[2].Id, ArticleId = articles[5].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[2].Id, ArticleId = articles[5].Id, CreatedAt = DateTime.UtcNow
             },
             // 三間飛車へのいいね
             new()
             {
-                Id = LikeId.From(16), UserId = users[0].Id, ArticleId = articles[6].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[0].Id, ArticleId = articles[6].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = LikeId.From(17), UserId = users[3].Id, ArticleId = articles[6].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[3].Id, ArticleId = articles[6].Id, CreatedAt = DateTime.UtcNow
             },
             // 格言へのいいね
             new()
             {
-                Id = LikeId.From(18), UserId = users[0].Id, ArticleId = articles[7].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[0].Id, ArticleId = articles[7].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = LikeId.From(19), UserId = users[1].Id, ArticleId = articles[7].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[1].Id, ArticleId = articles[7].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = LikeId.From(20), UserId = users[2].Id, ArticleId = articles[7].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[2].Id, ArticleId = articles[7].Id, CreatedAt = DateTime.UtcNow
             },
             // 実戦詰将棋へのいいね
             new()
             {
-                Id = LikeId.From(21), UserId = users[0].Id, ArticleId = articles[8].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[0].Id, ArticleId = articles[8].Id, CreatedAt = DateTime.UtcNow
             },
             new()
             {
-                Id = LikeId.From(22), UserId = users[1].Id, ArticleId = articles[8].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[1].Id, ArticleId = articles[8].Id, CreatedAt = DateTime.UtcNow
             },
             // 将棋ソフトへのいいね
             new()
             {
-                Id = LikeId.From(23), UserId = users[1].Id, ArticleId = articles[9].Id, CreatedAt = DateTime.UtcNow
+                UserId = users[1].Id, ArticleId = articles[9].Id, CreatedAt = DateTime.UtcNow
             }
         };
 
@@ -531,7 +644,6 @@ public static class DataSeeder
             // 棒銀入門へのコメント
             new()
             {
-                Id = CommentId.From(1),
                 UserId = users[1].Id,
                 ArticleId = articles[0].Id,
                 Message = "棒銀はシンプルで分かりやすい戦法ですね！初心者の頃、よく使っていました。",
@@ -540,7 +652,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = CommentId.From(2),
                 UserId = users[2].Id,
                 ArticleId = articles[0].Id,
                 Message = "角頭を攻めるときのタイミングが難しいです。もう少し詳しく知りたいです。",
@@ -550,7 +661,6 @@ public static class DataSeeder
             // 四間飛車へのコメント
             new()
             {
-                Id = CommentId.From(3),
                 UserId = users[0].Id,
                 ArticleId = articles[1].Id,
                 Message = "美濃囲いは本当に堅いですね。私も最初は振り飛車から入りました。",
@@ -560,7 +670,6 @@ public static class DataSeeder
             // 詰将棋へのコメント
             new()
             {
-                Id = CommentId.From(4),
                 UserId = users[3].Id,
                 ArticleId = articles[2].Id,
                 Message = "毎日継続することが大事なんですね。私も頑張ってみます！",
@@ -570,7 +679,6 @@ public static class DataSeeder
             // 角換わりへのコメント
             new()
             {
-                Id = CommentId.From(5),
                 UserId = users[1].Id,
                 ArticleId = articles[5].Id,
                 Message = "AI研究で定跡が変わりましたね。最新の形を勉強してみます！",
@@ -580,7 +688,6 @@ public static class DataSeeder
             // 三間飛車へのコメント
             new()
             {
-                Id = CommentId.From(6),
                 UserId = users[2].Id,
                 ArticleId = articles[6].Id,
                 Message = "石田流は憧れです。三間飛車を練習してみたいです。",
@@ -590,7 +697,6 @@ public static class DataSeeder
             // 格言へのコメント
             new()
             {
-                Id = CommentId.From(7),
                 UserId = users[0].Id,
                 ArticleId = articles[7].Id,
                 Message = "格言は本当に役立ちますね。初心者の頃、これらを意識して将棋が上達しました。",
@@ -599,7 +705,6 @@ public static class DataSeeder
             },
             new()
             {
-                Id = CommentId.From(8),
                 UserId = users[1].Id,
                 ArticleId = articles[7].Id,
                 Message = "「王様は下段に落とせ」は詰将棋でも大事な考え方です！",
@@ -617,7 +722,6 @@ public static class DataSeeder
             // 羽生九段ファンが振り飛車党をフォロー
             new()
             {
-                Id = FollowId.From(1),
                 FollowerId = users[0].Id,
                 FollowingId = users[1].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-10),
@@ -626,7 +730,6 @@ public static class DataSeeder
             // 振り飛車党が詰将棋作家をフォロー
             new()
             {
-                Id = FollowId.From(2),
                 FollowerId = users[1].Id,
                 FollowingId = users[2].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-8),
@@ -635,7 +738,6 @@ public static class DataSeeder
             // 初心者将棋部が羽生九段ファンをフォロー
             new()
             {
-                Id = FollowId.From(3),
                 FollowerId = users[3].Id,
                 FollowingId = users[0].Id,
                 CreatedAt = DateTime.UtcNow.AddDays(-5),
@@ -652,7 +754,6 @@ public static class DataSeeder
             // 羽生九段ファンの記事にいいねがついた通知
             new()
             {
-                Id = NotificationId.From(1),
                 UserId = users[0].Id,
                 ArticleId = articles[3].Id,
                 IsRead = false,
@@ -662,7 +763,6 @@ public static class DataSeeder
             // 振り飛車党の記事にいいねがついた通知
             new()
             {
-                Id = NotificationId.From(2),
                 UserId = users[1].Id,
                 ArticleId = articles[1].Id,
                 IsRead = true,
