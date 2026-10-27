@@ -45,6 +45,7 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
             {Array.from({ length: 81 }, (_, idx) => {
               const ci = idx % 9;
               const ri = Math.floor(idx / 9);
+              const isHL = highlightCell?.colIndex === ci && highlightCell?.rowIndex === ri;
               return (
                 <div
                   key={idx}
@@ -52,7 +53,7 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
                     cellW, cellH,
                     ci < 8 && 'border-r border-gray-700',
                     ri < 8 && 'border-b border-gray-700',
-                    'bg-shogi-board',
+                    isHL ? 'bg-orange-400' : 'bg-shogi-board',
                   )}
                 />
               );
@@ -64,7 +65,6 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
             {board.flat().map((piece, idx) => {
               const ci = idx % 9;
               const ri = Math.floor(idx / 9);
-              const isHL = highlightCell?.colIndex === ci && highlightCell?.rowIndex === ri;
               const isSel = selectedCell?.row === ri && selectedCell?.col === ci;
               return (
                 <div
@@ -82,7 +82,6 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
                       type={piece.type}
                       owner={piece.owner}
                       size={pieceSize}
-                      className={isHL ? 'scale-115' : undefined}
                     />
                   )}
                 </div>
