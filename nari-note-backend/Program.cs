@@ -31,12 +31,13 @@ builder.WebHost.UseSentry(o =>
     o.Debug = builder.Environment.IsDevelopment();
 });
 
-// CORS設定
+// CORS設定（許可する origin は環境ごとの appsettings で指定する）
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://nari-note.com")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();

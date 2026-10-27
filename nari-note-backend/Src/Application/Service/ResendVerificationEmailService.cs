@@ -14,6 +14,7 @@ public class ResendVerificationEmailService
     static readonly TimeSpan ResendCooldown = TimeSpan.FromSeconds(60);
 
     readonly IEmailVerificationRepository emailVerificationRepository;
+    readonly EmailMessageStore emailMessageStore;
     readonly IOutboxMessageRepository outboxMessageRepository;
     readonly TimeProvider timeProvider;
     readonly IUserRepository userRepository;
@@ -22,12 +23,14 @@ public class ResendVerificationEmailService
         IUserRepository userRepository,
         IEmailVerificationRepository emailVerificationRepository,
         IOutboxMessageRepository outboxMessageRepository,
+        EmailMessageStore emailMessageStore,
         TimeProvider timeProvider
     )
     {
         this.userRepository = userRepository;
         this.emailVerificationRepository = emailVerificationRepository;
         this.outboxMessageRepository = outboxMessageRepository;
+        this.emailMessageStore = emailMessageStore;
         this.timeProvider = timeProvider;
     }
 
@@ -54,7 +57,7 @@ public class ResendVerificationEmailService
         await emailVerificationRepository.CreateAsync(emailVerification);
 
         await outboxMessageRepository.AddAsync(
-            OutboxMessage.ForEmail(EmailMessageStore.SignupMessage(user.Email, guid), now)
+            OutboxMessage.ForEmail(this.emailMessageStore.SignupMessage(user.Email, guid), now)
         );
 
         return new ResendVerificationEmailResponse();

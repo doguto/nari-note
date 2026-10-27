@@ -10,13 +10,21 @@ public record EmailMessage(
     string? TextBody = null
 );
 
-public static class EmailMessageStore
+public class EmailMessageStore
 {
     const string From = "noreply@email.nari-note.com";
 
-    public static EmailMessage SignupMessage(string to, Guid guid)
+    // メール本文のリンク先となるフロントエンドの URL（環境ごとの appsettings で指定する）
+    readonly string frontendBaseUrl;
+
+    public EmailMessageStore(string frontendBaseUrl)
     {
-        var url = $"https://nari-note.com/validate?token={guid}";
+        this.frontendBaseUrl = frontendBaseUrl.TrimEnd('/');
+    }
+
+    public EmailMessage SignupMessage(string to, Guid guid)
+    {
+        var url = $"{this.frontendBaseUrl}/validate?token={guid}";
 
         return new EmailMessage(
             From,
@@ -27,10 +35,10 @@ public static class EmailMessageStore
         );
     }
 
-    public static EmailMessage AlreadyRegisteredMessage(string to)
+    public EmailMessage AlreadyRegisteredMessage(string to)
     {
-        const string loginUrl = "https://nari-note.com/login";
-        const string forgotPasswordUrl = "https://nari-note.com/forgot-password";
+        var loginUrl = $"{this.frontendBaseUrl}/login";
+        var forgotPasswordUrl = $"{this.frontendBaseUrl}/forgot-password";
 
         return new EmailMessage(
             From,
@@ -41,9 +49,9 @@ public static class EmailMessageStore
         );
     }
 
-    public static EmailMessage ForgotPasswordMessage(string to, Guid guid)
+    public EmailMessage ForgotPasswordMessage(string to, Guid guid)
     {
-        var url = $"https://nari-note.com/reset-password?token={guid}";
+        var url = $"{this.frontendBaseUrl}/reset-password?token={guid}";
 
         return new EmailMessage(
             From,

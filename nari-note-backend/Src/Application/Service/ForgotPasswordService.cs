@@ -9,6 +9,7 @@ namespace NariNoteBackend.Application.Service;
 
 public class ForgotPasswordService
 {
+    readonly EmailMessageStore emailMessageStore;
     readonly IOutboxMessageRepository outboxMessageRepository;
     readonly IPasswordResetTokenRepository passwordResetTokenRepository;
     readonly TimeProvider timeProvider;
@@ -18,12 +19,14 @@ public class ForgotPasswordService
         IUserRepository userRepository,
         IPasswordResetTokenRepository passwordResetTokenRepository,
         IOutboxMessageRepository outboxMessageRepository,
+        EmailMessageStore emailMessageStore,
         TimeProvider timeProvider
     )
     {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.outboxMessageRepository = outboxMessageRepository;
+        this.emailMessageStore = emailMessageStore;
         this.timeProvider = timeProvider;
     }
 
@@ -45,7 +48,7 @@ public class ForgotPasswordService
 
         await passwordResetTokenRepository.CreateAsync(passwordResetToken);
 
-        var message = EmailMessageStore.ForgotPasswordMessage(user.Email, tokenGuid);
+        var message = this.emailMessageStore.ForgotPasswordMessage(user.Email, tokenGuid);
         await outboxMessageRepository.AddAsync(OutboxMessage.ForEmail(message, now));
 
         return new ForgotPasswordResponse();

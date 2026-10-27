@@ -1,6 +1,7 @@
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Tests.Support;
 using NariNoteBackend.Tests.Support.Builder;
@@ -32,6 +33,7 @@ public class ResendVerificationEmailServiceTest
             this.userRepository,
             this.emailVerificationRepository,
             this.outboxMessageRepository,
+            new EmailMessageStore("https://nari-note.com"),
             new TestTimeProvider()
         );
     }

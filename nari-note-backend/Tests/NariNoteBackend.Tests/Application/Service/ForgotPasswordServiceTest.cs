@@ -1,6 +1,7 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Domain.Entity;
+using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Tests.Support;
 using NariNoteBackend.Tests.Support.Builder;
@@ -23,6 +24,7 @@ public class ForgotPasswordServiceTest
             this.userRepository,
             this.passwordResetTokenRepository,
             this.outboxMessageRepository,
+            new EmailMessageStore("https://nari-note.com"),
             new TestTimeProvider()
         );
     }
