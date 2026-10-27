@@ -3,7 +3,7 @@
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { ShogiBoard } from './ShogiBoard';
-import { KifPlayer } from '@/lib/kif-player';
+import { KifPlayer, parseKifuEmbed } from '@/lib/kif-player';
 
 interface NarinoteMarkdownProps {
   content: string;
@@ -32,22 +32,16 @@ export function NarinoteMarkdown({ content, className, kifuList = [] }: Narinote
 
             // 言語指定が bod の場合は将棋盤面としてレンダリング
             if (className?.includes('language-bod')) {
-              return <ShogiBoard bodText={String(children)} />;
+              return (
+                <div className="flex justify-center">
+                  <ShogiBoard bodText={String(children)} />
+                </div>
+              );
             }
 
             // 言語指定が kifu の場合は棋譜プレイヤーとしてレンダリング
             if (className?.includes('language-kifu')) {
-              const raw = String(children).trim();
-              const lastUnderscore = raw.lastIndexOf('_');
-              let name = raw;
-              let defaultMoveNumber = 0;
-              if (lastUnderscore !== -1) {
-                const possibleMove = parseInt(raw.substring(lastUnderscore + 1));
-                if (!isNaN(possibleMove)) {
-                  name = raw.substring(0, lastUnderscore);
-                  defaultMoveNumber = possibleMove;
-                }
-              }
+              const { name, moveNumber: defaultMoveNumber } = parseKifuEmbed(String(children));
               const kifu = kifuList.find((k) => k.name === name);
               if (!kifu) {
                 return (

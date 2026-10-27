@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 import { MarkdownEditor } from '@/components/molecules/MarkdownEditor';
+import type { EmbedBlock, EmbedLang } from '@/components/molecules/MarkdownEditor';
+import { parseKifuEmbed } from '@/lib/kif-player';
 import { KifuEmbedDialog } from './KifuEmbedDialog';
 import { BoardEditorDialog } from './BoardEditorDialog';
 import type { KifuItem } from '../types/kifu';
@@ -23,6 +25,7 @@ export function ArticleBodyEditor({
   const [showBoardEditorDialog, setShowBoardEditorDialog] = useState(false);
   const [lastEmbedKifuName, setLastEmbedKifuName] = useState<string | undefined>(undefined);
   const [lastEmbedMove, setLastEmbedMove]         = useState<number | undefined>(undefined);
+  const [editingBod, setEditingBod]               = useState<string | undefined>(undefined);
   const insertFnRef      = useRef<((name: string, move: number) => void) | null>(null);
   const insertBODFnRef   = useRef<((bod: string) => void) | null>(null);
   const boardInsertFnRef = useRef<((bod: string) => void) | null>(null);
@@ -59,6 +62,23 @@ export function ArticleBodyEditor({
 
   const handleBoardEditor = (insertFn: (bod: string) => void) => {
     boardInsertFnRef.current = insertFn;
+    setEditingBod(undefined);
+    setShowBoardEditorDialog(true);
+  };
+
+  const handleEditEmbed = (block: EmbedBlock, replaceFn: (lang: EmbedLang, content: string) => void) => {
+    if (block.lang === 'kifu') {
+      const { name, moveNumber } = parseKifuEmbed(block.content);
+      insertFnRef.current    = (kifuName, move) => replaceFn('kifu', `${kifuName}_${move}`);
+      insertBODFnRef.current = (bod) => replaceFn('bod', bod);
+      setLastEmbedKifuName(name);
+      setLastEmbedMove(moveNumber);
+      setShowEmbedDialog(true);
+      return;
+    }
+
+    boardInsertFnRef.current = (bod) => replaceFn('bod', bod);
+    setEditingBod(block.content);
     setShowBoardEditorDialog(true);
   };
 
@@ -76,6 +96,7 @@ export function ArticleBodyEditor({
         placeholder="本文を入力してください... 「/」でコマンドメニューを開きます"
         onKifuEmbed={kifuList.length > 0 ? handleKifuEmbed : undefined}
         onBoardEditor={handleBoardEditor}
+        onEditEmbed={handleEditEmbed}
         kifuList={kifuList.map((k) => ({ name: k.name, kifuText: k.text }))}
       />
       <KifuEmbedDialog
@@ -93,6 +114,7 @@ export function ArticleBodyEditor({
         open={showBoardEditorDialog}
         onOpenChange={setShowBoardEditorDialog}
         onConfirm={handleBoardEditorConfirm}
+        initialBod={editingBod}
       />
     </>
   );
