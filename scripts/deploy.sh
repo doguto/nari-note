@@ -69,16 +69,19 @@ echo "[3/4] latest を更新中..."
 aws-vault exec "${AWS_VAULT_PROFILE}" -- aws s3 cp "${BINARY_PATH}" "s3://${S3_BUCKET}/${S3_LATEST_KEY}" \
   --region "${AWS_REGION}" \
   --no-progress
-aws-vault exec "${AWS_VAULT_PROFILE}" -- aws s3 cp "${PROJECT_DIR}/appsettings.Production.json" "s3://${S3_BUCKET}/latest/appsettings.Production.json" \
-  --region "${AWS_REGION}" \
-  --no-progress
+for SETTINGS_FILE in appsettings.json appsettings.Production.json; do
+  aws-vault exec "${AWS_VAULT_PROFILE}" -- aws s3 cp "${PROJECT_DIR}/${SETTINGS_FILE}" "s3://${S3_BUCKET}/latest/${SETTINGS_FILE}" \
+    --region "${AWS_REGION}" \
+    --no-progress
+done
 
 echo "[4/4] EC2 にデプロイ中 (${EC2_USER}@${EC2_HOST})..."
 scp -i "${SSH_KEY}" \
     -o StrictHostKeyChecking=no \
     -o ConnectTimeout=10 \
+    "${PROJECT_DIR}/appsettings.json" \
     "${PROJECT_DIR}/appsettings.Production.json" \
-    "${EC2_USER}@${EC2_HOST}:/tmp/appsettings.Production.json"
+    "${EC2_USER}@${EC2_HOST}:/tmp/"
 
 ssh -i "${SSH_KEY}" \
     -o StrictHostKeyChecking=no \
@@ -86,8 +89,9 @@ ssh -i "${SSH_KEY}" \
     "${EC2_USER}@${EC2_HOST}" \
     "aws s3 cp s3://${S3_BUCKET}/${S3_LATEST_KEY} /tmp/${BINARY_NAME} --region ${AWS_REGION} \
      && sudo install -o ${BINARY_NAME} -g ${BINARY_NAME} -m 755 /tmp/${BINARY_NAME} /opt/${BINARY_NAME}/${BINARY_NAME} \
+     && sudo install -o ${BINARY_NAME} -g ${BINARY_NAME} -m 644 /tmp/appsettings.json /opt/${BINARY_NAME}/appsettings.json \
      && sudo install -o ${BINARY_NAME} -g ${BINARY_NAME} -m 644 /tmp/appsettings.Production.json /opt/${BINARY_NAME}/appsettings.Production.json \
-     && rm /tmp/${BINARY_NAME} /tmp/appsettings.Production.json \
+     && rm /tmp/${BINARY_NAME} /tmp/appsettings.json /tmp/appsettings.Production.json \
      && sudo systemctl restart ${BINARY_NAME} \
      && sudo systemctl is-active --quiet ${BINARY_NAME} && echo 'サービス起動確認OK'"
 
