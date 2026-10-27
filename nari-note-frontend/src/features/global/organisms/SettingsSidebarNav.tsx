@@ -9,6 +9,7 @@ const NAV_ITEMS = [
     items: [
       { label: 'プロフィール編集', href: '/settings/general/profile' },
       { label: 'パスワード変更', href: '/settings/general/password' },
+      { label: '退会', href: '/settings/general/withdraw' },
     ],
   },
 ];
