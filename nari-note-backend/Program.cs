@@ -4,6 +4,7 @@ using NariNoteBackend.Application;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Filter;
 using NariNoteBackend.Infrastructure;
+using NariNoteBackend.Infrastructure.Binding;
 using NariNoteBackend.Infrastructure.Database;
 using NariNoteBackend.Infrastructure.Outbox;
 using NariNoteBackend.Middleware;
