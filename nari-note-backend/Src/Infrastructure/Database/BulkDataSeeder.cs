@@ -59,7 +59,7 @@ public static class BulkDataSeeder
         SELECT a.id,
                u.id,
                CASE WHEN a.n % 7 = 0 THEN '将棋の研究ノート ' || a.n ELSE 'ダミー記事 ' || a.n END,
-               '## ダミー記事 ' || a.n || E'\n\n' || repeat('居飛車と振り飛車の序盤から終盤までを解説します。', 30),
+               '## ダミー記事 ' || a.n || E'\n\n' || repeat(E'居飛車と振り飛車の序盤から終盤までを解説します。\n戦型ごとの考え方を順に見ていきます。\n\n', 15),
                a.created_at,
                a.created_at,
                CASE WHEN a.is_draft THEN NULL ELSE a.created_at + interval '1 hour' END

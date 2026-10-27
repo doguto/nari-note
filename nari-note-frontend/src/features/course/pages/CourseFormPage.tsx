@@ -14,7 +14,6 @@ type CourseFormPageProps =
 
 export function CourseFormPage(props: CourseFormPageProps) {
   const [name, setName] = useState('');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   
@@ -31,7 +30,6 @@ export function CourseFormPage(props: CourseFormPageProps) {
   
   const createCourse = useCreateCourse({
     onSuccess: (data) => {
-      setHasUnsavedChanges(false);
       if (data.course?.id) {
         router.push(`/courses/${data.course.id}`);
       } else {
@@ -47,7 +45,6 @@ export function CourseFormPage(props: CourseFormPageProps) {
 
   const updateCourse = useUpdateCourse({
     onSuccess: () => {
-      setHasUnsavedChanges(false);
       router.push(`/courses/${courseId}`);
     },
     onError: (error) => {
@@ -57,24 +54,15 @@ export function CourseFormPage(props: CourseFormPageProps) {
   });
 
   // 編集モード時のデータ初期化
-  useEffect(() => {
-    if (isEditMode && course && !isInitialized) {
-      setName(course.name || '');
-      setIsInitialized(true);
-    }
-  }, [isEditMode, course, isInitialized]);
+  if (isEditMode && course && !isInitialized) {
+    setName(course.name || '');
+    setIsInitialized(true);
+  }
 
-  // フォームの変更を追跡
-  useEffect(() => {
-    if (isInitialized && isEditMode) {
-      // 編集モード時は元の値と比較
-      const hasChanges = name !== (course?.name || '');
-      setHasUnsavedChanges(hasChanges);
-    } else if (isInitialized && !isEditMode && name) {
-      // 新規作成モード時は何か入力があれば変更ありとみなす
-      setHasUnsavedChanges(true);
-    }
-  }, [name, isInitialized, isEditMode, course?.name]);
+  // 編集モード時は元の値と比較し、新規作成モード時は何か入力があれば変更ありとみなす
+  const hasUnsavedChanges = isEditMode
+    ? isInitialized && name !== (course?.name || '')
+    : !!name;
 
   // ページ離脱時の確認
   useEffect(() => {
@@ -175,7 +163,6 @@ export function CourseFormPage(props: CourseFormPageProps) {
   const isLoading = createCourse.isPending || updateCourse.isPending;
 
   const pageTitle = isEditMode ? '講座を編集' : '新規講座作成';
-  const pageDescription = '講座を作成して、関連する記事をシリーズとしてまとめることができます。';
 
   return (
     <PageWithoutSidebar title={pageTitle}>

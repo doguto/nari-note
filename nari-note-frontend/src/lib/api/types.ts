@@ -342,7 +342,7 @@ export interface SearchArticlesRequest {
 
 export interface SearchArticlesResponse {
   articles: ArticleThumbnailDto[];
-  hasNext: boolean;
+  totalCount: number;
 }
 
 export interface SearchCoursesRequest {
@@ -353,7 +353,7 @@ export interface SearchCoursesRequest {
 
 export interface SearchCoursesResponse {
   courses: CourseDto[];
-  hasNext: boolean;
+  totalCount: number;
 }
 
 export interface SignInRequest {

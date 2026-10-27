@@ -25,22 +25,13 @@ interface UnifiedSearchTemplateProps {
   articlePage: number;
   coursePage: number;
   pageSize: number;
-  articlesHasNext: boolean;
-  coursesHasNext: boolean;
+  articleTotalCount: number;
+  courseTotalCount: number;
   paginationQuery: Record<string, string>;
   onKeywordChange: (keyword: string) => void;
   onSearch: () => void;
   onTabChange: (tab: SearchTab) => void;
 }
-
-/**
- * 表示中の検索結果が全体の何件目かを表す文言（総件数は数えていないため範囲だけを出す）
- */
-function rangeLabel(page: number, pageSize: number, count: number): string {
-  const first = (page - 1) * pageSize + 1;
-  return `${first}〜${first + count - 1}件目`;
-}
-
 
 export function UnifiedSearchTemplate({
   keyword,
@@ -54,8 +45,8 @@ export function UnifiedSearchTemplate({
   articlePage,
   coursePage,
   pageSize,
-  articlesHasNext,
-  coursesHasNext,
+  articleTotalCount,
+  courseTotalCount,
   paginationQuery,
   onKeywordChange,
   onSearch,
@@ -112,7 +103,7 @@ export function UnifiedSearchTemplate({
               <>
                 <div className="mb-4">
                   <p className="text-gray-600">
-                    {rangeLabel(articlePage, pageSize, articles.length)}の記事を表示しています
+                    {articleTotalCount.toLocaleString('ja-JP')}件の記事が見つかりました
                   </p>
                 </div>
 
@@ -143,7 +134,8 @@ export function UnifiedSearchTemplate({
               <div className="mt-6">
                 <Pagination
                   currentPage={articlePage}
-                  hasNext={articlesHasNext}
+                  totalCount={articleTotalCount}
+                  pageSize={pageSize}
                   basePath="/search"
                   query={paginationQuery}
                 />
@@ -172,7 +164,7 @@ export function UnifiedSearchTemplate({
               <>
                 <div className="mb-4">
                   <p className="text-gray-600">
-                    {rangeLabel(coursePage, pageSize, courses.length)}の講座を表示しています
+                    {courseTotalCount.toLocaleString('ja-JP')}件の講座が見つかりました
                   </p>
                 </div>
 
@@ -197,7 +189,8 @@ export function UnifiedSearchTemplate({
               <div className="mt-6">
                 <Pagination
                   currentPage={coursePage}
-                  hasNext={coursesHasNext}
+                  totalCount={courseTotalCount}
+                  pageSize={pageSize}
                   basePath="/search"
                   query={paginationQuery}
                 />

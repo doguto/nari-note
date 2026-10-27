@@ -16,11 +16,9 @@ public class SearchArticlesService
 
     public async Task<SearchArticlesResponse> ExecuteAsync(SearchArticlesRequest request)
     {
-        // 1 件多く取得し、はみ出した分があれば次のページがあると判定する
-        var articles = await articleRepository.SearchSummariesAsync(request.Keyword, request.Limit + 1, request.Offset);
-        var hasNext = articles.Count > request.Limit;
+        var (articles, totalCount) = await articleRepository.SearchSummariesAsync(request.Keyword, request.Limit, request.Offset);
 
-        var articleDtos = articles.Take(request.Limit).Select(a => new ArticleThumbnailDto
+        var articleDtos = articles.Select(a => new ArticleThumbnailDto
         {
             Id = a.Id,
             Title = a.Title,
@@ -37,7 +35,7 @@ public class SearchArticlesService
         return new SearchArticlesResponse
         {
             Articles = articleDtos,
-            HasNext = hasNext
+            TotalCount = totalCount
         };
     }
 }

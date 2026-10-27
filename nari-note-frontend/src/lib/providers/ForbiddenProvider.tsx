@@ -35,13 +35,6 @@ export function ForbiddenProvider({ children }: { children: ReactNode }) {
 
   const isEmailNotVerified = code === EMAIL_NOT_VERIFIED_CODE;
 
-  // 別タブ等でメール認証が完了したら、認証を促すモーダルは閉じる
-  useEffect(() => {
-    if (isEmailVerified && isEmailNotVerified) {
-      setIsModalOpen(false);
-    }
-  }, [isEmailVerified, isEmailNotVerified]);
-
   return (
     <>
       {children}
@@ -51,7 +44,8 @@ export function ForbiddenProvider({ children }: { children: ReactNode }) {
         onClose={handleClose}
       />
       <EmailVerificationRequiredModal
-        open={isModalOpen && isEmailNotVerified}
+        // 別タブ等でメール認証が完了したら、認証を促すモーダルは閉じる
+        open={isModalOpen && isEmailNotVerified && !isEmailVerified}
         message={message}
         isResending={resendMutation.isPending}
         isResent={resendMutation.isSuccess}

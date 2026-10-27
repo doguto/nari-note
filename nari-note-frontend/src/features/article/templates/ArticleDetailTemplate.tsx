@@ -7,7 +7,6 @@ import { Comment } from '@/types/comment';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { GetArticleContentResponse } from '@/lib/api/types';
-import { PageWithSidebar } from '@/features/global/organisms';
 
 interface ArticleDetailTemplateProps {
   isLoading: boolean;

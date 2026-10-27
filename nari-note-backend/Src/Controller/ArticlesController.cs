@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
@@ -95,8 +96,11 @@ public class ArticlesController : ApplicationController
 
     [HttpGet("author/{authorId}")]
     [Auth(AuthLevel.Anonymous)]
+    [ValidateModelState]
     public async Task<ActionResult<GetArticlesByAuthorResponse>> GetArticlesByAuthor(
-        UserId authorId, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+        UserId authorId,
+        [FromQuery, Range(1, 100, ErrorMessage = "取得件数は1から100の範囲で指定してください")] int limit = 20,
+        [FromQuery, Range(0, int.MaxValue, ErrorMessage = "オフセットは0以上の値を指定してください")] int offset = 0
     )
     {
         var request = new GetArticlesByAuthorRequest { AuthorId = authorId, Limit = limit, Offset = offset };
@@ -106,8 +110,11 @@ public class ArticlesController : ApplicationController
 
     [HttpGet("tag/{tagName}")]
     [Auth(AuthLevel.Anonymous)]
+    [ValidateModelState]
     public async Task<ActionResult<GetArticlesByTagResponse>> GetArticlesByTag(
-        string tagName, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+        string tagName,
+        [FromQuery, Range(1, 100, ErrorMessage = "取得件数は1から100の範囲で指定してください")] int limit = 20,
+        [FromQuery, Range(0, int.MaxValue, ErrorMessage = "オフセットは0以上の値を指定してください")] int offset = 0
     )
     {
         var request = new GetArticlesByTagRequest { TagName = tagName, Limit = limit, Offset = offset };

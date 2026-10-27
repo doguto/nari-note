@@ -209,19 +209,22 @@ public class ArticleRepository : IArticleRepository
         return await query.Select(ArticleSummaryProjection.FromArticle).ToListAsync();
     }
 
-    public async Task<List<ArticleSummary>> SearchSummariesAsync(string keyword, int limit, int offset)
+    public async Task<(List<ArticleSummary> Articles, int TotalCount)> SearchSummariesAsync(string keyword, int limit, int offset)
     {
         var now = timeProvider.UtcNow();
         var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
 
-        var query = context.Articles
-                           .Where(searchFilter)
-                           .OrderByDescending(a => a.CreatedAt)
-                           .ThenByDescending(a => a.Id)
-                           .Skip(offset)
-                           .Take(limit);
+        var query = context.Articles.Where(searchFilter);
 
-        return await query.Select(ArticleSummaryProjection.FromArticle).ToListAsync();
+        var totalCount = await query.CountAsync();
+        var articles = await query.OrderByDescending(a => a.CreatedAt)
+                                  .ThenByDescending(a => a.Id)
+                                  .Skip(offset)
+                                  .Take(limit)
+                                  .Select(ArticleSummaryProjection.FromArticle)
+                                  .ToListAsync();
+
+        return (articles, totalCount);
     }
 
     public async Task<int> CountByAuthorAsync(UserId authorId)

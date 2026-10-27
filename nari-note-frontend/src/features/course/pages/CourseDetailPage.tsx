@@ -37,7 +37,7 @@ export function CourseDetailPage({ courseId }: CourseDetailPageProps) {
   }
 
   return (
-    <PageWithSidebar>
+    <PageWithSidebar wide>
       <CourseDetailTemplate course={course} />
     </PageWithSidebar>
   );

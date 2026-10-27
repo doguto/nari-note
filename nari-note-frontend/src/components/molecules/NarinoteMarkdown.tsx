@@ -1,6 +1,7 @@
 'use client';
 
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 import { ShogiBoard } from './ShogiBoard';
 import { KifPlayer } from '@/lib/kif-player';
 
@@ -20,6 +21,7 @@ export function NarinoteMarkdown({ content, className, kifuList = [] }: Narinote
   return (
     <div className={className}>
       <ReactMarkdown
+        remarkPlugins={[remarkBreaks]}
         components={{
           h1: ({ ...props }) => <h1 className="text-3xl font-bold mt-8 mb-4" {...props} />,
           h2: ({ ...props }) => <h2 className="text-2xl font-bold mt-6 mb-3" {...props} />,

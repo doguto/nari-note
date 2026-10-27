@@ -32,7 +32,6 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
   const [isInitialized, setIsInitialized] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [showKifuDialog, setShowKifuDialog] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
   const [validationError, setValidationError] = useState<string>('');
   
   const router = useRouter();
@@ -49,12 +48,10 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
     onSuccess: (data) => {
       setHasUnsavedChanges(false);
       router.push(`/articles/${data.id}`);
-      setIsPublishing(false);
     },
     onError: (error) => {
       console.error('記事の保存に失敗しました:', error);
       setValidationError('記事の保存に失敗しました。もう一度お試しください。');
-      setIsPublishing(false);
     },
   });
 
@@ -62,34 +59,39 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
     onSuccess: () => {
       setHasUnsavedChanges(false);
       router.push(`/articles/${articleId}`);
-      setIsPublishing(false);
     },
     onError: (error) => {
       console.error('記事の保存に失敗しました:', error);
       setValidationError('記事の保存に失敗しました。もう一度お試しください。');
-      setIsPublishing(false);
     },
   });
 
   // 編集モード時のデータ初期化
-  useEffect(() => {
-    if (isEditMode && article && !isInitialized) {
-      setTitle(article.article.title || '');
-      setBody(article.article.body || '');
-      setTags(article.article.tags || []);
-      setKifuList(fromKifuDtos(article.article.kifus || []));
-      setIsInitialized(true);
-    }
-  }, [isEditMode, article, isInitialized]);
+  if (isEditMode && article && !isInitialized) {
+    setTitle(article.article.title || '');
+    setBody(article.article.body || '');
+    setTags(article.article.tags || []);
+    setKifuList(fromKifuDtos(article.article.kifus || []));
+    setIsInitialized(true);
+  }
 
   const maxCharacters = 65535;
 
   // フォームの変更を追跡
-  useEffect(() => {
-    if (isInitialized && (title || body || tags.length > 0)) {
-      setHasUnsavedChanges(true);
-    }
-  }, [title, body, tags, isInitialized]);
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleBodyChange = (value: string) => {
+    setBody(value);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleTagsChange = (value: string[]) => {
+    setTags(value);
+    setHasUnsavedChanges(true);
+  };
 
   // ページ離脱時の確認
   useEffect(() => {
@@ -127,7 +129,6 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
 
   const handlePublish = (publishedAt?: string) => {
     setValidationError('');
-    setIsPublishing(true);
     if (isEditMode) {
       updateArticle.mutate({
         id: articleId,
@@ -232,7 +233,6 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
   const isLoading = createArticle.isPending || updateArticle.isPending;
 
   const pageTitle = isEditMode ? '記事を編集' : '新規記事作成';
-  const pageDescription = 'マークダウン形式で記事を作成できます。プレビュー機能を使用して、公開前に記事の見た目を確認できます。';
 
   // コンテンツ読み込み状態とエラー状態を判定
   const isLoadingContent = Boolean(isEditMode && isLoadingArticle);
@@ -263,9 +263,9 @@ export function ArticleFormPage({ articleId, mode = 'create', courseId }: Articl
         contentError={contentError}
         onRetry={refetch}
         validationError={validationError}
-        onTitleChange={setTitle}
-        onBodyChange={setBody}
-        onTagsChange={setTags}
+        onTitleChange={handleTitleChange}
+        onBodyChange={handleBodyChange}
+        onTagsChange={handleTagsChange}
         onKifuConfirm={handleKifuConfirm}
         onKifuAdd={handleKifuConfirm}
         onKifuEdit={handleKifuEdit}

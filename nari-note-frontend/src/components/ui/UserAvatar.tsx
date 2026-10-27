@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { UserRoundIcon } from 'lucide-react';
 
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -40,10 +41,12 @@ export function UserAvatar({
   if (shouldShowImage) {
     return (
       <div className={`${sizeConfig.container} relative rounded-full overflow-hidden bg-gray-200 flex-shrink-0 ${className}`}>
-        <img
+        <Image
           src={userIconImageUrl}
           alt={`${username}のアイコン`}
-          className="w-full h-full object-cover"
+          fill
+          unoptimized
+          className="object-cover"
           onError={() => setImageError(true)}
         />
       </div>

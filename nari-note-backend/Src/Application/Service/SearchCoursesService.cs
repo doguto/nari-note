@@ -16,11 +16,9 @@ public class SearchCoursesService
 
     public async Task<SearchCoursesResponse> ExecuteAsync(SearchCoursesRequest request)
     {
-        // 1 件多く取得し、はみ出した分があれば次のページがあると判定する
-        var courses = await courseRepository.SearchAsync(request.Keyword, request.Limit + 1, request.Offset);
-        var hasNext = courses.Count > request.Limit;
+        var (courses, totalCount) = await courseRepository.SearchAsync(request.Keyword, request.Limit, request.Offset);
 
-        var courseDtos = courses.Take(request.Limit).Select(c => new CourseDto
+        var courseDtos = courses.Select(c => new CourseDto
         {
             Id = c.Id,
             UserId = c.UserId,
@@ -37,7 +35,7 @@ public class SearchCoursesService
         return new SearchCoursesResponse
         {
             Courses = courseDtos,
-            HasNext = hasNext
+            TotalCount = totalCount
         };
     }
 }

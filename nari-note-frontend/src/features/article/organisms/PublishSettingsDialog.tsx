@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -45,7 +45,9 @@ export function PublishSettingsDialog({
   const [validationError, setValidationError] = useState('');
 
   // ダイアログが開かれたときに現在時刻の1時間後をデフォルト値として設定
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(false);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       const now = new Date();
       now.setHours(now.getHours() + 1);
@@ -64,7 +66,7 @@ export function PublishSettingsDialog({
       setValidationError('');
       setPublishType('immediate');
     }
-  }, [open]);
+  }
 
   const validateScheduledDateTime = (): boolean => {
     if (publishType === 'immediate') {
