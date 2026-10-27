@@ -4,7 +4,7 @@ interface CharacterCounterProps {
 }
 
 /**
- * CharacterCounter - Molecule Component
+ * CharacterCounter - UI Component
  * 
  * 文字数カウンター（表示のみ）
  */

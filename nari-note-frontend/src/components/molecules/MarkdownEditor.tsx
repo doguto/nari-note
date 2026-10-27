@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { CharacterCounter, NarinoteMarkdown } from '@/components/molecules';
+import { CharacterCounter } from '@/components/ui';
+import { NarinoteMarkdown } from '@/components/molecules';
 import { CheckCircle } from 'lucide-react';
 
 const PREVIEW_PLACEHOLDER = '*プレビューがここに表示されます*';
