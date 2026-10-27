@@ -19,6 +19,8 @@ export { FormPageLayout } from './FormPageLayout';
 export { AuthPageLayout } from './AuthPageLayout';
 export { ShogiBoard } from './ShogiBoard';
 export { NarinoteMarkdown } from './NarinoteMarkdown';
+export { LinkCard } from './LinkCard';
+export { XPostEmbed } from './XPostEmbed';
 export { CourseBreadcrumb } from './CourseBreadcrumb';
 export { ArticleAuthorInfo } from './ArticleAuthorInfo';
 export { ArticleTagList } from './ArticleTagList';

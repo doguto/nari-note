@@ -3,6 +3,9 @@
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { ShogiBoard } from './ShogiBoard';
+import { LinkCard } from './LinkCard';
+import { XPostEmbed } from './XPostEmbed';
+import { remarkLinkCard, LINK_CARD_ATTRIBUTE, getXPostId } from '@/lib/link-preview';
 import { KifPlayer, parseKifuEmbed } from '@/lib/kif-player';
 
 interface NarinoteMarkdownProps {
@@ -21,12 +24,21 @@ export function NarinoteMarkdown({ content, className, kifuList = [] }: Narinote
   return (
     <div className={className}>
       <ReactMarkdown
-        remarkPlugins={[remarkBreaks]}
+        remarkPlugins={[remarkBreaks, remarkLinkCard]}
         components={{
           h1: ({ ...props }) => <h1 className="text-3xl font-bold mt-8 mb-4" {...props} />,
           h2: ({ ...props }) => <h2 className="text-2xl font-bold mt-6 mb-3" {...props} />,
           h3: ({ ...props }) => <h3 className="text-xl font-bold mt-4 mb-2" {...props} />,
           p: ({ ...props }) => <p className="mb-4" {...props} />,
+          div: ({ node, ...props }) => {
+            // URL だけの段落は remarkLinkCard によりリンクカード用の div になる
+            const linkCardUrl = node?.properties?.[LINK_CARD_ATTRIBUTE];
+            if (typeof linkCardUrl === 'string') {
+              const xPostId = getXPostId(linkCardUrl);
+              return xPostId ? <XPostEmbed url={linkCardUrl} postId={xPostId} /> : <LinkCard url={linkCardUrl} />;
+            }
+            return <div {...props} />;
+          },
           code: ({ className, children, ...props }) => {
             const isInline = !className;
 
