@@ -24,3 +24,4 @@ export { CourseBreadcrumb } from './CourseBreadcrumb';
 export { ArticleAuthorInfo } from './ArticleAuthorInfo';
 export { ArticleTagList } from './ArticleTagList';
 export { Pagination } from './Pagination';
+export { ShareButtons } from './ShareButtons';

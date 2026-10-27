@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { Heart, BookOpen } from 'lucide-react';
 import { UserAvatar } from '@/components/ui';
+import { ShareButtons } from '@/components/molecules';
 
 interface CourseDetailHeaderProps {
+  courseId: string;
   courseName: string;
   userId: string;
   userName: string;
@@ -19,6 +21,7 @@ interface CourseDetailHeaderProps {
  * 講座名、作成者、いいね数、記事数などを表示します
  */
 export function CourseDetailHeader({
+  courseId,
   courseName,
   userId,
   userName,
@@ -73,6 +76,10 @@ export function CourseDetailHeader({
             <span className="text-sm">いいね</span>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6">
+        <ShareButtons title={courseName} path={`/courses/${courseId}`} />
       </div>
     </div>
   );

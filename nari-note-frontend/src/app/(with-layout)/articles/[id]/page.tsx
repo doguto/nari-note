@@ -5,6 +5,7 @@ import { getArticleContent } from '@/lib/api/server';
 
 interface ArticlePageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ published?: string }>;
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
@@ -32,8 +33,10 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   }
 }
 
-export default async function ArticleDetailPageRoute({ params }: ArticlePageProps) {
+export default async function ArticleDetailPageRoute({ params, searchParams }: ArticlePageProps) {
   const { id } = await params;
+  // 記事の公開直後は、書き手にシェアを促す案内を表示する
+  const { published } = await searchParams;
 
-  return <ArticleDetailPage articleId={id} />;
+  return <ArticleDetailPage articleId={id} justPublished={published === '1'} />;
 }
