@@ -27,7 +27,6 @@ export async function TagArticleListPage({ tagName, page }: TagArticleListPagePr
   }).catch(() => ({ articles: [], totalCount: 0 }));
   const articles = data?.articles ?? [];
   const totalCount = data?.totalCount ?? 0;
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <PageWithSidebar>
@@ -36,7 +35,7 @@ export async function TagArticleListPage({ tagName, page }: TagArticleListPagePr
         articles={articles}
         totalCount={totalCount}
         currentPage={page}
-        totalPages={totalPages}
+        pageSize={PAGE_SIZE}
       />
     </PageWithSidebar>
   );

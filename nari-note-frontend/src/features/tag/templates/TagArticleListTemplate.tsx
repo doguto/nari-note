@@ -7,7 +7,7 @@ interface TagArticleListTemplateProps {
   articles: GetArticlesByTagResponse['articles'];
   totalCount: number;
   currentPage: number;
-  totalPages: number;
+  pageSize: number;
 }
 
 /**
@@ -16,7 +16,7 @@ interface TagArticleListTemplateProps {
  * タグ別記事一覧ページのUI構成を担当するテンプレートコンポーネント
  * レイアウトとコンポーネント配置を定義
  */
-export function TagArticleListTemplate({ tag, articles, totalCount, currentPage, totalPages }: TagArticleListTemplateProps) {
+export function TagArticleListTemplate({ tag, articles, totalCount, currentPage, pageSize }: TagArticleListTemplateProps) {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
@@ -54,7 +54,8 @@ export function TagArticleListTemplate({ tag, articles, totalCount, currentPage,
 
       <Pagination
         currentPage={currentPage}
-        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={pageSize}
         basePath={`/tags/${encodeURIComponent(tag)}`}
       />
     </div>
