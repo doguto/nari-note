@@ -75,6 +75,9 @@ public static class InfrastructureServiceInstaller
         services.Configure<ResendClientOptions>(o => { o.ApiToken = configuration["resend_api_token"]!; });
         services.AddTransient<IResend, ResendClient>();
         services.AddScoped<IEmailHelper, ResendEmailHelper>();
+        var frontendBaseUrl = configuration["Frontend:BaseUrl"]
+            ?? throw new InvalidOperationException("Frontend:BaseUrl が設定されていません");
+        services.AddSingleton(new EmailMessageStore(frontendBaseUrl));
         services.AddHttpClient<IDiscordNotifier, DiscordWebhookNotifier>(client => client.Timeout = ExternalRequestTimeout);
         if (env.IsDevelopment())
             services.AddScoped<IImageStorageGateway, LocalImageStorageGateway>();

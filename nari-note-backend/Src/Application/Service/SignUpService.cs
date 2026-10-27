@@ -11,6 +11,7 @@ namespace NariNoteBackend.Application.Service;
 public class SignUpService
 {
     readonly IEmailVerificationRepository emailVerificationRepository;
+    readonly EmailMessageStore emailMessageStore;
     readonly IOutboxMessageRepository outboxMessageRepository;
     readonly TimeProvider timeProvider;
     readonly IUserRepository userRepository;
@@ -19,12 +20,14 @@ public class SignUpService
         IUserRepository userRepository,
         IEmailVerificationRepository emailVerificationRepository,
         IOutboxMessageRepository outboxMessageRepository,
+        EmailMessageStore emailMessageStore,
         TimeProvider timeProvider
     )
     {
         this.userRepository = userRepository;
         this.emailVerificationRepository = emailVerificationRepository;
         this.outboxMessageRepository = outboxMessageRepository;
+        this.emailMessageStore = emailMessageStore;
         this.timeProvider = timeProvider;
     }
 
@@ -41,7 +44,7 @@ public class SignUpService
             // 登録済みアドレスには、その旨とパスワード再設定の案内を通知する
             await outboxMessageRepository.AddAsync(
                 OutboxMessage.ForEmail(
-                    EmailMessageStore.AlreadyRegisteredMessage(existingUser.Email),
+                    this.emailMessageStore.AlreadyRegisteredMessage(existingUser.Email),
                     timeProvider.UtcNow()
                 )
             );
@@ -107,7 +110,7 @@ public class SignUpService
         await emailVerificationRepository.CreateAsync(emailVerification);
 
         await outboxMessageRepository.AddAsync(
-            OutboxMessage.ForEmail(EmailMessageStore.SignupMessage(user.Email, guid), now)
+            OutboxMessage.ForEmail(this.emailMessageStore.SignupMessage(user.Email, guid), now)
         );
     }
 }
