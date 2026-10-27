@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Service;
@@ -81,8 +82,11 @@ public class UsersController : ApplicationController
 
     [HttpGet("{id}/followers")]
     [Auth(AuthLevel.Anonymous)]
+    [ValidateModelState]
     public async Task<ActionResult> GetFollowers(
-        UserId id, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+        UserId id,
+        [FromQuery, Range(1, 100, ErrorMessage = "取得件数は1から100の範囲で指定してください")] int limit = 20,
+        [FromQuery, Range(0, int.MaxValue, ErrorMessage = "オフセットは0以上の値を指定してください")] int offset = 0
     )
     {
         var request = new GetFollowersRequest { UserId = id, Limit = limit, Offset = offset };
@@ -92,8 +96,11 @@ public class UsersController : ApplicationController
 
     [HttpGet("{id}/followings")]
     [Auth(AuthLevel.Anonymous)]
+    [ValidateModelState]
     public async Task<ActionResult> GetFollowings(
-        UserId id, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+        UserId id,
+        [FromQuery, Range(1, 100, ErrorMessage = "取得件数は1から100の範囲で指定してください")] int limit = 20,
+        [FromQuery, Range(0, int.MaxValue, ErrorMessage = "オフセットは0以上の値を指定してください")] int offset = 0
     )
     {
         var request = new GetFollowingsRequest { UserId = id, Limit = limit, Offset = offset };
@@ -103,8 +110,11 @@ public class UsersController : ApplicationController
 
     [HttpGet("{id}/liked-articles")]
     [Auth(AuthLevel.Anonymous)]
+    [ValidateModelState]
     public async Task<ActionResult> GetLikedArticles(
-        UserId id, [FromQuery] int limit = 20, [FromQuery] int offset = 0
+        UserId id,
+        [FromQuery, Range(1, 100, ErrorMessage = "取得件数は1から100の範囲で指定してください")] int limit = 20,
+        [FromQuery, Range(0, int.MaxValue, ErrorMessage = "オフセットは0以上の値を指定してください")] int offset = 0
     )
     {
         var request = new GetLikedArticlesRequest { UserId = id, Limit = limit, Offset = offset };

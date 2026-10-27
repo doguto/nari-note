@@ -6,7 +6,6 @@ using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Tests.Support.Builder;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using System.ComponentModel.DataAnnotations;
 
 namespace NariNoteBackend.Tests.Application.Service;
 
@@ -45,19 +44,6 @@ public class GetFollowersServiceTest
         var request = new GetFollowersRequest { UserId = this.user.Id };
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() => this.service.ExecuteAsync(request));
-
-        await this.followRepository.DidNotReceiveWithAnyArgs().GetFollowersAsync(this.user.Id, 0, 0);
-    }
-
-    [Theory]
-    [InlineData(0, 0)]
-    [InlineData(101, 0)]
-    [InlineData(20, -1)]
-    public async Task 範囲外の件数や位置は検索せずにエラーにする(int limit, int offset)
-    {
-        var request = new GetFollowersRequest { UserId = this.user.Id, Limit = limit, Offset = offset };
-
-        await Assert.ThrowsAsync<ValidationException>(() => this.service.ExecuteAsync(request));
 
         await this.followRepository.DidNotReceiveWithAnyArgs().GetFollowersAsync(this.user.Id, 0, 0);
     }

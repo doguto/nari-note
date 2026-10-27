@@ -72,17 +72,4 @@ public class GetArticlesByTagServiceTest
 
         await this.articleRepository.DidNotReceive().FindSummariesByTagAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<int>());
     }
-
-    [Theory]
-    [InlineData(0, 0)]
-    [InlineData(101, 0)]
-    [InlineData(20, -1)]
-    public async Task 範囲外の件数や位置は検索せずにエラーにする(int limit, int offset)
-    {
-        var request = new GetArticlesByTagRequest { TagName = "Shogi", Limit = limit, Offset = offset };
-
-        await Assert.ThrowsAsync<ValidationException>(() => this.service.ExecuteAsync(request));
-
-        await this.articleRepository.DidNotReceive().FindSummariesByTagAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<int>());
-    }
 }

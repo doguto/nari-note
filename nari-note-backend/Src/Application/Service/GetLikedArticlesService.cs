@@ -16,8 +16,6 @@ public class GetLikedArticlesService
 
     public async Task<GetLikedArticlesResponse> ExecuteAsync(GetLikedArticlesRequest request)
     {
-        PagingValidator.Validate(request.Limit, request.Offset);
-
         var (articles, totalCount) = await likeRepository.FindLikedArticleSummariesByUserAsync(request.UserId, request.Limit, request.Offset);
 
         var articleDtos = articles.Select(a => new ArticleThumbnailDto

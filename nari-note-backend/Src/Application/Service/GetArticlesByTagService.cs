@@ -25,8 +25,6 @@ public class GetArticlesByTagService
             throw new ValidationException("タグ名に使用できない文字が含まれています");
         }
 
-        PagingValidator.Validate(request.Limit, request.Offset);
-
         var (articles, totalCount) = await articleRepository.FindSummariesByTagAsync(request.TagName, request.Limit, request.Offset);
 
         return new GetArticlesByTagResponse

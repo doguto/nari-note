@@ -16,8 +16,6 @@ public class GetCoursesByAuthorService
 
     public async Task<GetCoursesByAuthorResponse> ExecuteAsync(GetCoursesByAuthorRequest request)
     {
-        PagingValidator.Validate(request.Limit, request.Offset);
-
         var (courses, totalCount) = await courseRepository.FindPublishedSummariesByAuthorAsync(request.AuthorId, request.Limit, request.Offset);
 
         var courseDtos = courses.Select(c => new CourseDto

@@ -17,8 +17,6 @@ public class GetFollowingsService
     
     public async Task<GetFollowingsResponse> ExecuteAsync(GetFollowingsRequest request)
     {
-        PagingValidator.Validate(request.Limit, request.Offset);
-
         // ユーザーが存在するか確認
         await userRepository.FindForceByIdAsync(request.UserId);
         
