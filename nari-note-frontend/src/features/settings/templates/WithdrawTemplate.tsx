@@ -54,8 +54,8 @@ export function WithdrawTemplate({
         <Button
           type="submit"
           variant="destructive"
+          size="sm"
           disabled={isSubmitting}
-          className="w-full"
           style={{ fontFamily: 'serif' }}
         >
           退会する
