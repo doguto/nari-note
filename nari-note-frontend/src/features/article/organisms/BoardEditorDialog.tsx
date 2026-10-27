@@ -1,9 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useBoardEditor, KomaImage } from '@/lib/kif-player';
+import { useBoardEditor, KomaImage, parseBOD } from '@/lib/kif-player';
 import { COLUMN_LABELS, ROW_LABELS } from '@/lib/kif-player/constants';
 import type { CapturedPiece, PieceOwner, PieceType } from '@/lib/kif-player/types';
 
@@ -11,9 +12,10 @@ interface BoardEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (bod: string) => void;
+  initialBod?: string;
 }
 
-export function BoardEditorDialog({ open, onOpenChange, onConfirm }: BoardEditorDialogProps) {
+export function BoardEditorDialog({ open, onOpenChange, onConfirm, initialBod }: BoardEditorDialogProps) {
   const {
     board,
     senteCaptured,
@@ -27,7 +29,18 @@ export function BoardEditorDialog({ open, onOpenChange, onConfirm }: BoardEditor
     isSelectedBoard,
     isSelectedHand,
     generateCurrentBOD,
+    initializeBoard,
   } = useBoardEditor();
+
+  // 既存の盤面を編集する場合は、ダイアログが開かれたときにその盤面を読み込む
+  const [prevOpen, setPrevOpen] = useState(false);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open && initialBod) {
+      const parsed = parseBOD(initialBod);
+      initializeBoard(parsed.board, parsed.captured.sente, parsed.captured.gote);
+    }
+  }
 
   const handleConfirm = () => {
     onConfirm(generateCurrentBOD());
@@ -155,7 +168,7 @@ export function BoardEditorDialog({ open, onOpenChange, onConfirm }: BoardEditor
           <Button variant="outline" onClick={clearBoard} type="button" size="sm">空の盤面</Button>
           <Button variant="outline" onClick={resetBoard} type="button" size="sm">初期配置に戻す</Button>
           <Button variant="outline" onClick={handleClose} type="button" size="sm">キャンセル</Button>
-          <Button onClick={handleConfirm} type="button" size="sm">挿入</Button>
+          <Button onClick={handleConfirm} type="button" size="sm">{initialBod ? '更新' : '挿入'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

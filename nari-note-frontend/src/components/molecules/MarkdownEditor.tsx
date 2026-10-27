@@ -1,13 +1,38 @@
 'use client';
 
-import { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useMemo, KeyboardEvent, ReactNode } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { CharacterCounter } from '@/components/ui';
 import { NarinoteMarkdown } from '@/components/molecules';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Pencil } from 'lucide-react';
 
 const PREVIEW_PLACEHOLDER = '*プレビューがここに表示されます*';
+
+export type EmbedLang = 'kifu' | 'bod';
+
+export interface EmbedBlock {
+  lang: EmbedLang;
+  content: string;
+}
+
+interface EmbedBlockRange extends EmbedBlock {
+  start: number;
+  end: number;
+  headerEnd: number;
+}
+
+const EMBED_BLOCK_PATTERN = /^```(kifu|bod)[ \t]*\n([\s\S]*?)\n```[ \t]*$/gm;
+
+function findEmbedBlocks(text: string): EmbedBlockRange[] {
+  return Array.from(text.matchAll(EMBED_BLOCK_PATTERN), (m) => ({
+    lang: m[1] as EmbedLang,
+    content: m[2],
+    start: m.index,
+    end: m.index + m[0].length,
+    headerEnd: m.index + m[0].indexOf('\n'),
+  }));
+}
 
 interface MarkdownEditorProps {
   value: string;
@@ -16,6 +41,7 @@ interface MarkdownEditorProps {
   placeholder?: string;
   onKifuEmbed?: (insertKifuFn: (name: string, move: number) => void, insertBODFn: (bod: string) => void) => void;
   onBoardEditor?: (insertFn: (bod: string) => void) => void;
+  onEditEmbed?: (block: EmbedBlock, replaceFn: (lang: EmbedLang, content: string) => void) => void;
   kifuList?: Array<{ name: string; kifuText: string }>;
 }
 
@@ -48,6 +74,7 @@ export function MarkdownEditor({
   placeholder = '本文を入力してください... 「/」でコマンドメニューを開きます',
   onKifuEmbed,
   onBoardEditor,
+  onEditEmbed,
   kifuList = [],
 }: MarkdownEditorProps) {
   const [showCommands, setShowCommands] = useState(false);
@@ -58,6 +85,9 @@ export function MarkdownEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const commandsRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  const embedBlocks = useMemo(() => (onEditEmbed ? findEmbedBlocks(value) : []), [value, onEditEmbed]);
 
   const characterCount = value.length;
   const isOverLimit = characterCount > maxCharacters;
@@ -108,6 +138,59 @@ export function MarkdownEditor({
     if (scrollableHeight <= 0) return;
     const ratio = textarea.scrollTop / scrollableHeight;
     preview.scrollTop = ratio * (preview.scrollHeight - preview.clientHeight);
+  };
+
+  // 編集ボタンのオーバーレイを textarea の折り返し幅・スクロール位置に合わせる
+  const syncOverlay = () => {
+    const textarea = textareaRef.current;
+    const overlay = overlayRef.current;
+    if (!textarea || !overlay) return;
+    const scrollbarWidth = textarea.offsetWidth - textarea.clientWidth - textarea.clientLeft * 2;
+    overlay.style.right = `${scrollbarWidth}px`;
+    overlay.scrollTop = textarea.scrollTop;
+  };
+
+  useLayoutEffect(syncOverlay);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const observer = new ResizeObserver(syncOverlay);
+    observer.observe(textarea);
+    return () => observer.disconnect();
+  }, []);
+
+  const openEmbedEditor = (block: EmbedBlockRange) => {
+    onEditEmbed?.(block, (lang, content) => {
+      const newBlock = `\`\`\`${lang}\n${content}\n\`\`\``;
+      onChange(value.substring(0, block.start) + newBlock + value.substring(block.end));
+    });
+  };
+
+  const renderEmbedOverlay = () => {
+    const nodes: ReactNode[] = [];
+    let cursor = 0;
+    for (const block of embedBlocks) {
+      nodes.push(value.substring(cursor, block.headerEnd));
+      nodes.push(
+        <span key={block.start} className="relative">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => openEmbedEditor(block)}
+            aria-label={block.lang === 'kifu' ? '棋譜プレイヤーを編集' : '盤面を編集'}
+            className="absolute left-2 top-1/2 -translate-y-1/2 h-6 w-6 pointer-events-auto text-gray-400 hover:text-gray-700"
+          >
+            <Pencil size={14} />
+          </Button>
+        </span>
+      );
+      cursor = block.headerEnd;
+    }
+    // 末尾の改行が潰れて行数がずれないよう幅ゼロの文字を足す
+    nodes.push(value.substring(cursor) + '​');
+    return nodes;
   };
 
   // Handle text change
@@ -304,19 +387,33 @@ export function MarkdownEditor({
 
       <div className="md:grid md:grid-cols-2 md:gap-4 md:items-stretch">
         <div className={`relative flex flex-col ${mobileShowPreview ? 'hidden md:flex' : ''}`}>
-          <textarea
-            ref={textareaRef}
-            id="markdown-editor"
-            value={value}
-            onChange={handleChange}
-            onScroll={syncPreviewScroll}
-            onKeyDown={(e) => {
-              handleKeyDown(e);
-              handleTab(e);
-            }}
-            placeholder={placeholder}
-            className="w-full flex-1 min-h-[70vh] p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono text-sm resize-y"
-          />
+          <div className="relative flex-1 flex flex-col">
+            <textarea
+              ref={textareaRef}
+              id="markdown-editor"
+              value={value}
+              onChange={handleChange}
+              onScroll={() => {
+                syncPreviewScroll();
+                syncOverlay();
+              }}
+              onKeyDown={(e) => {
+                handleKeyDown(e);
+                handleTab(e);
+              }}
+              placeholder={placeholder}
+              className="w-full flex-1 min-h-[70vh] p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono text-sm resize-y"
+            />
+
+            {embedBlocks.length > 0 && (
+              <div
+                ref={overlayRef}
+                className="absolute inset-0 overflow-hidden pointer-events-none p-4 border border-transparent font-mono text-sm whitespace-pre-wrap break-words text-transparent"
+              >
+                {renderEmbedOverlay()}
+              </div>
+            )}
+          </div>
 
           {showCommands && filteredCommands.length > 0 && (
             <div
