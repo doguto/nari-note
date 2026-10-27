@@ -130,8 +130,13 @@ export function useCreateArticle(options?: UseMutationOptions<CreateArticleRespo
 }
 
 export function useUploadArticleImage(options?: UseMutationOptions<UploadArticleImageResponse, Error, File>) {
+  const queryClient = useQueryClient();
   return useMutation<UploadArticleImageResponse, Error, File>({
     mutationFn: (file) => articlesApi.uploadArticleImage(file),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      options?.onSuccess?.(...args);
+    },
     ...options,
   });
 }
