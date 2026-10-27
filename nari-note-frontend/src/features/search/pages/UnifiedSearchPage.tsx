@@ -1,27 +1,61 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSearchArticles, useSearchCourses } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { PageWithSidebar } from '@/features/global/organisms';
-import { UnifiedSearchTemplate } from '../templates/UnifiedSearchTemplate';
+import { UnifiedSearchTemplate, type SearchTab } from '../templates/UnifiedSearchTemplate';
+
+const PAGE_SIZE = 20;
+
+interface UnifiedSearchPageProps {
+  searchKeyword: string;
+  activeTab: SearchTab;
+  page: number;
+}
+
+/**
+ * 検索結果ページの URL を組み立てる（1 ページ目と記事タブは既定値なので省略する）
+ */
+function buildSearchQuery(keyword: string, tab: SearchTab): Record<string, string> {
+  const query: Record<string, string> = {};
+  if (keyword) query.q = keyword;
+  if (tab === 'courses') query.tab = tab;
+  return query;
+}
 
 /**
  * UnifiedSearchPage - Page Component
  * 
  * 統合検索ページ（記事・講座）のロジックを管理するコンポーネント
  * データフェッチング、状態管理、ビジネスロジックを担当
+ * キーワード・タブ・ページは URL（`?q=&tab=&page=`）で管理し、ページ送りやブラウザバックで復元できるようにする
  */
-export function UnifiedSearchPage() {
-  const [keyword, setKeyword] = useState('');
-  const [searchKeyword, setSearchKeyword] = useState('');
+export function UnifiedSearchPage({ searchKeyword, activeTab, page }: UnifiedSearchPageProps) {
+  const router = useRouter();
+  const [keyword, setKeyword] = useState(searchKeyword);
 
-  // 検索実行: 検索ボタンクリックまたはEnterキーで実行
+  const navigate = (nextKeyword: string, tab: SearchTab) => {
+    const params = new URLSearchParams(buildSearchQuery(nextKeyword, tab)).toString();
+    router.push(params ? `/search?${params}` : '/search');
+  };
+
+  // 検索実行: 検索ボタンクリックまたはEnterキーで実行（1ページ目に戻す）
   const handleSearch = () => {
     if (keyword.trim()) {
-      setSearchKeyword(keyword.trim());
+      navigate(keyword.trim(), activeTab);
     }
   };
+
+  // タブを切り替えたら 1 ページ目から表示する
+  const handleTabChange = (tab: SearchTab) => {
+    navigate(searchKeyword, tab);
+  };
+
+  // ページ番号は表示中のタブにだけ適用する
+  const articlePage = activeTab === 'articles' ? page : 1;
+  const coursePage = activeTab === 'courses' ? page : 1;
 
   // 記事検索
   const { 
@@ -30,7 +64,7 @@ export function UnifiedSearchPage() {
     error: articleError, 
     refetch: refetchArticles 
   } = useSearchArticles(
-    { keyword: searchKeyword, limit: 20, offset: 0 },
+    { keyword: searchKeyword, limit: PAGE_SIZE, offset: (articlePage - 1) * PAGE_SIZE },
     { enabled: searchKeyword.length > 0 }
   );
 
@@ -41,7 +75,7 @@ export function UnifiedSearchPage() {
     error: courseError, 
     refetch: refetchCourses 
   } = useSearchCourses(
-    { keyword: searchKeyword, limit: 20, offset: 0 },
+    { keyword: searchKeyword, limit: PAGE_SIZE, offset: (coursePage - 1) * PAGE_SIZE },
     { enabled: searchKeyword.length > 0 }
   );
 
@@ -86,8 +120,16 @@ export function UnifiedSearchPage() {
       hasCourseResults={hasCourseResults}
       articles={articlesWithId}
       courses={coursesWithId}
+      activeTab={activeTab}
+      articlePage={articlePage}
+      coursePage={coursePage}
+      pageSize={PAGE_SIZE}
+      articlesHasNext={articleData?.hasNext ?? false}
+      coursesHasNext={courseData?.hasNext ?? false}
+      paginationQuery={buildSearchQuery(searchKeyword, activeTab)}
       onKeywordChange={setKeyword}
       onSearch={handleSearch}
+      onTabChange={handleTabChange}
       />
     </PageWithSidebar>
   );

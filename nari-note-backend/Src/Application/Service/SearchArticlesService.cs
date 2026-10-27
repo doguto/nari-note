@@ -16,16 +16,18 @@ public class SearchArticlesService
 
     public async Task<SearchArticlesResponse> ExecuteAsync(SearchArticlesRequest request)
     {
-        var articles = await articleRepository.SearchAsync(request.Keyword, request.Limit, request.Offset);
+        // 1 件多く取得し、はみ出した分があれば次のページがあると判定する
+        var articles = await articleRepository.SearchSummariesAsync(request.Keyword, request.Limit + 1, request.Offset);
+        var hasNext = articles.Count > request.Limit;
 
-        var articleDtos = articles.Select(a => new ArticleThumbnailDto
+        var articleDtos = articles.Take(request.Limit).Select(a => new ArticleThumbnailDto
         {
             Id = a.Id,
             Title = a.Title,
             AuthorId = a.AuthorId,
-            AuthorName = a.Author.Name,
-            UserIconImageUrl = a.Author.ProfileImage,
-            Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList(),
+            AuthorName = a.AuthorName,
+            UserIconImageUrl = a.AuthorProfileImage,
+            Tags = a.TagNames,
             LikeCount = a.LikeCount,
             IsPublished = a.IsPublished,
             PublishedAt = a.PublishedAt,
@@ -34,7 +36,8 @@ public class SearchArticlesService
 
         return new SearchArticlesResponse
         {
-            Articles = articleDtos
+            Articles = articleDtos,
+            HasNext = hasNext
         };
     }
 }

@@ -327,6 +327,7 @@ export interface SearchArticlesRequest {
 
 export interface SearchArticlesResponse {
   articles: ArticleThumbnailDto[];
+  hasNext: boolean;
 }
 
 export interface SearchCoursesRequest {
@@ -337,6 +338,7 @@ export interface SearchCoursesRequest {
 
 export interface SearchCoursesResponse {
   courses: CourseDto[];
+  hasNext: boolean;
 }
 
 export interface SignInRequest {

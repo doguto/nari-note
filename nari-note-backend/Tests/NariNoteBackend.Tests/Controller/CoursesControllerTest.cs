@@ -91,6 +91,31 @@ public class CoursesControllerTest : IntegrationTestBase
     }
 
     [Fact]
+    public async Task 講座検索は件数と位置を指定してページ送りでき次のページの有無を返す()
+    {
+        var owner = new UserBuilder().Build();
+        await SeedAsync(
+            owner,
+            new CourseBuilder(owner).WithName("四間飛車講座1").CreatedAt(Now.AddDays(-1)).Build(),
+            new CourseBuilder(owner).WithName("四間飛車講座2").CreatedAt(Now.AddDays(-2)).Build(),
+            new CourseBuilder(owner).WithName("四間飛車講座3").CreatedAt(Now.AddDays(-3)).Build()
+        );
+        var keyword = Uri.EscapeDataString("四間飛車");
+
+        var firstPage = await ReadAsync<SearchCoursesResponse>(
+            await CreateClient().GetAsync($"/api/courses/search?keyword={keyword}&limit=2&offset=0")
+        );
+        var lastPage = await ReadAsync<SearchCoursesResponse>(
+            await CreateClient().GetAsync($"/api/courses/search?keyword={keyword}&limit=2&offset=2")
+        );
+
+        Assert.Equal(["四間飛車講座1", "四間飛車講座2"], firstPage.Courses.Select(c => c.Name));
+        Assert.True(firstPage.HasNext);
+        Assert.Equal(["四間飛車講座3"], lastPage.Courses.Select(c => c.Name));
+        Assert.False(lastPage.HasNext);
+    }
+
+    [Fact]
     public async Task キーワードが無い講座検索は400を返す()
     {
         var response = await CreateClient().GetAsync("/api/courses/search");
