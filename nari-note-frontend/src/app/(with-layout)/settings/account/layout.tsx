@@ -7,6 +7,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SettingsWithdrawLayout({ children }: { children: React.ReactNode }) {
+export default function SettingsAccountLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
