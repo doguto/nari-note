@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NariNoteBackend.Application.Service;
+namespace NariNoteBackend.Application.Helper;
 
 // limit / offset でページングする一覧 API の共通の入力チェック
 public static class PagingValidator
