@@ -64,6 +64,7 @@ import type {
   UpdatePasswordResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
+  UploadArticleImageResponse,
   UploadUserIconResponse,
   VerifyEmailRequest,
   WithdrawRequest,
@@ -78,6 +79,12 @@ export const articlesApi = {
   },
   createArticle: async (data: CreateArticleRequest): Promise<CreateArticleResponse> => {
     const response = await apiClient.post<CreateArticleResponse>('/api/articles', data);
+    return response;
+  },
+  uploadArticleImage: async (file: File): Promise<UploadArticleImageResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<UploadArticleImageResponse>('/api/articles/images', formData);
     return response;
   },
   getArticleContent: async (data: GetArticleContentRequest): Promise<GetArticleContentResponse> => {

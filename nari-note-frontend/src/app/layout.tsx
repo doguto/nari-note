@@ -1,5 +1,6 @@
 
 import type { Metadata } from "next";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/metadata";
 import "./globals.css";
 import { Suspense } from "react";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
@@ -13,22 +14,22 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nari-note.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "将棋ブログ投稿サイト ～なりノート～",
+    default: SITE_TITLE,
     template: "%s | なりノート",
   },
-  description: "将棋の記事投稿プラットフォーム。みんなの記事を読んで、将棋の知識を深めよう！",
+  description: SITE_DESCRIPTION,
   openGraph: {
     type: "website",
     locale: "ja_JP",
     url: siteUrl,
-    siteName: "なりノート",
-    title: "将棋ブログ投稿サイト ～なりノート～",
-    description: "将棋の記事投稿プラットフォーム。みんなの記事を読んで、将棋の知識を深めよう！"
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION
   },
   twitter: {
     card: "summary_large_image",
-    title: "将棋ブログ投稿サイト ～なりノート～",
-    description: "将棋の記事投稿プラットフォーム。みんなの記事を読んで、将棋の知識を深めよう！"
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION
   },
   robots: {
     index: true,

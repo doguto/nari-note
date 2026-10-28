@@ -3,6 +3,9 @@
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { ShogiBoard } from './ShogiBoard';
+import { LinkCard } from './LinkCard';
+import { XPostEmbed } from './XPostEmbed';
+import { remarkLinkCard, LINK_CARD_ATTRIBUTE, getXPostId } from '@/lib/link-preview';
 import { KifPlayer, parseKifuEmbed } from '@/lib/kif-player';
 
 interface NarinoteMarkdownProps {
@@ -21,12 +24,21 @@ export function NarinoteMarkdown({ content, className, kifuList = [] }: Narinote
   return (
     <div className={className}>
       <ReactMarkdown
-        remarkPlugins={[remarkBreaks]}
+        remarkPlugins={[remarkBreaks, remarkLinkCard]}
         components={{
           h1: ({ ...props }) => <h1 className="text-3xl font-bold mt-8 mb-4" {...props} />,
           h2: ({ ...props }) => <h2 className="text-2xl font-bold mt-6 mb-3" {...props} />,
           h3: ({ ...props }) => <h3 className="text-xl font-bold mt-4 mb-2" {...props} />,
           p: ({ ...props }) => <p className="mb-4" {...props} />,
+          div: ({ node, ...props }) => {
+            // URL だけの段落は remarkLinkCard によりリンクカード用の div になる
+            const linkCardUrl = node?.properties?.[LINK_CARD_ATTRIBUTE];
+            if (typeof linkCardUrl === 'string') {
+              const xPostId = getXPostId(linkCardUrl);
+              return xPostId ? <XPostEmbed url={linkCardUrl} postId={xPostId} /> : <LinkCard url={linkCardUrl} />;
+            }
+            return <div {...props} />;
+          },
           code: ({ className, children, ...props }) => {
             const isInline = !className;
 
@@ -73,6 +85,13 @@ export function NarinoteMarkdown({ content, className, kifuList = [] }: Narinote
           blockquote: ({ ...props }) => <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4" {...props} />,
           a: ({ ...props }) => <a className="text-brand-primary hover:underline" {...props} />,
           hr: ({ ...props }) => <hr className="my-6 border-t-2 border-gray-300" {...props} />,
+          img: ({ src, alt, ...props }) => {
+            // アップロード中の仮 URL など、表示できない src は代替テキストだけを出す
+            if (!src) return <span className="text-sm text-gray-400">{alt}</span>;
+            // 外部 URL の画像はサイズが不明なため next/image ではなく img を使う
+            // eslint-disable-next-line @next/next/no-img-element
+            return <img src={src} alt={alt ?? ''} loading="lazy" className="block max-w-full h-auto mx-auto my-4 rounded" {...props} />;
+          },
         }}
       >
         {content}

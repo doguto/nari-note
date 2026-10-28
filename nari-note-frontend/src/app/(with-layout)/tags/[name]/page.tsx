@@ -1,5 +1,6 @@
 
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/metadata';
 import { TagArticleListPage } from '@/features/tag/pages';
 
 interface TagPageProps {
@@ -11,10 +12,11 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   const { name } = await params;
   const decodedName = decodeURIComponent(name);
 
-  return {
+  return buildPageMetadata({
     title: `#${decodedName}`,
     description: `「${decodedName}」タグの将棋記事一覧`,
-  };
+    path: `/tags/${name}`,
+  });
 }
 
 export default async function TagPage({ params, searchParams }: TagPageProps) {

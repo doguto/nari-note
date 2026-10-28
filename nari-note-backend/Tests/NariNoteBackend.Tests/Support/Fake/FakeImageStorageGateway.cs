@@ -5,6 +5,7 @@ namespace NariNoteBackend.Tests.Support.Fake;
 public class FakeImageStorageGateway : IImageStorageGateway
 {
     public HashSet<string> UploadedUserIds { get; } = new();
+    public List<string> UploadedArticleImageUrls { get; } = new();
 
     public string GetUserIconUrl(string userId)
     {
@@ -21,5 +22,12 @@ public class FakeImageStorageGateway : IImageStorageGateway
     {
         this.UploadedUserIds.Remove(userId);
         return Task.CompletedTask;
+    }
+
+    public Task<string> UploadArticleImageAsync(string userId, string imageId, Stream imageStream, string contentType)
+    {
+        var url = $"https://images.test/articles/images/{userId}/{imageId}";
+        this.UploadedArticleImageUrls.Add(url);
+        return Task.FromResult(url);
     }
 }

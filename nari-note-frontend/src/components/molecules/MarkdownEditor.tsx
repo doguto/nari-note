@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useLayoutEffect, useMemo, KeyboardEvent, ReactNode } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useMemo, KeyboardEvent, ReactNode, ClipboardEvent, DragEvent } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { CharacterCounter } from '@/components/ui';
@@ -8,6 +8,7 @@ import { NarinoteMarkdown } from '@/components/molecules';
 import { CheckCircle, Pencil } from 'lucide-react';
 
 const PREVIEW_PLACEHOLDER = '*プレビューがここに表示されます*';
+const IMAGE_ACCEPT = 'image/jpeg,image/png,image/webp';
 
 export type EmbedLang = 'kifu' | 'bod';
 
@@ -42,6 +43,7 @@ interface MarkdownEditorProps {
   onKifuEmbed?: (insertKifuFn: (name: string, move: number) => void, insertBODFn: (bod: string) => void) => void;
   onBoardEditor?: (insertFn: (bod: string) => void) => void;
   onEditEmbed?: (block: EmbedBlock, replaceFn: (lang: EmbedLang, content: string) => void) => void;
+  onImageUpload?: (file: File) => Promise<string>;
   kifuList?: Array<{ name: string; kifuText: string }>;
 }
 
@@ -50,12 +52,13 @@ interface Command {
   label: string;
   insert: string;
   description: string;
-  type?: 'insert' | 'kifu' | 'board-editor';
+  type?: 'insert' | 'kifu' | 'board-editor' | 'image';
 }
 
 const MARKDOWN_COMMANDS: Command[] = [
   { trigger: 'board-editor', label: '盤面エディタ', insert: '', description: '盤面を自由に編集して挿入', type: 'board-editor' },
   { trigger: 'kifu', label: '棋譜盤面', insert: '', description: '棋譜から盤面を埋め込む', type: 'kifu' },
+  { trigger: 'image', label: '画像', insert: '', description: '画像をアップロードして挿入', type: 'image' },
   { trigger: 'h1', label: '# 見出し1', insert: '# ', description: '大見出しを挿入' },
   { trigger: 'h2', label: '## 見出し2', insert: '## ', description: '中見出しを挿入' },
   { trigger: 'h3', label: '### 見出し3', insert: '### ', description: '小見出しを挿入' },
@@ -75,6 +78,7 @@ export function MarkdownEditor({
   onKifuEmbed,
   onBoardEditor,
   onEditEmbed,
+  onImageUpload,
   kifuList = [],
 }: MarkdownEditorProps) {
   const [showCommands, setShowCommands] = useState(false);
@@ -86,6 +90,15 @@ export function MarkdownEditor({
   const previewRef = useRef<HTMLDivElement>(null);
   const commandsRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const imageInsertPosRef = useRef(0);
+  const uploadSeqRef = useRef(0);
+  const valueRef = useRef(value);
+  const [imageUploadError, setImageUploadError] = useState<string>();
+
+  useLayoutEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   const embedBlocks = useMemo(() => (onEditEmbed ? findEmbedBlocks(value) : []), [value, onEditEmbed]);
 
@@ -95,6 +108,7 @@ export function MarkdownEditor({
   const filteredCommands = MARKDOWN_COMMANDS.filter(cmd => {
     if (cmd.type === 'kifu' && !onKifuEmbed) return false;
     if (cmd.type === 'board-editor' && !onBoardEditor) return false;
+    if (cmd.type === 'image' && !onImageUpload) return false;
     return (
       cmd.trigger.toLowerCase().includes(commandFilter.toLowerCase()) ||
       cmd.label.toLowerCase().includes(commandFilter.toLowerCase()) ||
@@ -193,6 +207,77 @@ export function MarkdownEditor({
     return nodes;
   };
 
+  // アップロード完了まで仮の画像記法を置き、完了後に URL へ差し替える（アップロード中の編集で位置がずれないようにするため）
+  const insertImages = (files: File[], position: number) => {
+    if (!onImageUpload || files.length === 0) return;
+    setImageUploadError(undefined);
+
+    const placeholders = files.map(() => `![アップロード中...](uploading:${++uploadSeqRef.current})`);
+    const current = valueRef.current;
+    const inserted = `\n${placeholders.join('\n')}\n`;
+    const updateValue = (newValue: string) => {
+      valueRef.current = newValue;
+      onChange(newValue);
+    };
+    updateValue(current.substring(0, position) + inserted + current.substring(position));
+    setTimeout(() => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      const newCursorPos = position + inserted.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+      textarea.focus();
+    }, 0);
+
+    files.forEach((file, i) => {
+      const replacePlaceholder = (text: string) => {
+        if (!valueRef.current.includes(placeholders[i])) return;
+        updateValue(valueRef.current.replace(placeholders[i], text));
+      };
+      onImageUpload(file)
+        .then((url) => replacePlaceholder(`![](${url})`))
+        .catch((err: unknown) => {
+          replacePlaceholder('');
+          setImageUploadError(err instanceof Error && err.message ? err.message : '画像のアップロードに失敗しました');
+        });
+    });
+  };
+
+  const extractImageFiles = (files: FileList) => Array.from(files).filter((file) => file.type.startsWith('image/'));
+
+  const handleImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? extractImageFiles(e.target.files) : [];
+    e.target.value = '';
+    insertImages(files, imageInsertPosRef.current);
+  };
+
+  const handlePaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
+    if (!onImageUpload) return;
+    const files = extractImageFiles(e.clipboardData.files);
+    if (files.length === 0) return;
+    e.preventDefault();
+    const textarea = e.currentTarget;
+    const start = textarea.selectionStart;
+    const current = valueRef.current;
+    // 選択範囲は画像で置き換える
+    const withoutSelection = current.substring(0, start) + current.substring(textarea.selectionEnd);
+    valueRef.current = withoutSelection;
+    insertImages(files, start);
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLTextAreaElement>) => {
+    if (onImageUpload && e.dataTransfer.types.includes('Files')) {
+      e.preventDefault();
+    }
+  };
+
+  const handleDrop = (e: DragEvent<HTMLTextAreaElement>) => {
+    if (!onImageUpload) return;
+    const files = extractImageFiles(e.dataTransfer.files);
+    if (files.length === 0) return;
+    e.preventDefault();
+    insertImages(files, e.currentTarget.selectionStart);
+  };
+
   // Handle text change
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
@@ -262,6 +347,15 @@ export function MarkdownEditor({
         }, 0);
       };
       onKifuEmbed(insertKifuFn, insertBODFn);
+      return;
+    }
+
+    if (command.type === 'image' && onImageUpload) {
+      const newValue = beforeSlash + textAfterCursor;
+      valueRef.current = newValue;
+      onChange(newValue);
+      imageInsertPosRef.current = beforeSlash.length;
+      imageInputRef.current?.click();
       return;
     }
 
@@ -355,6 +449,10 @@ export function MarkdownEditor({
         <CharacterCounter count={characterCount} max={maxCharacters} />
       </div>
 
+      {imageUploadError && (
+        <p className="text-sm text-red-500">{imageUploadError}</p>
+      )}
+
       {isOverLimit && (
         <p className="text-sm text-red-500">
           文字数が上限を超えています。{maxCharacters.toLocaleString()}文字以内に収めてください。
@@ -401,9 +499,23 @@ export function MarkdownEditor({
                 handleKeyDown(e);
                 handleTab(e);
               }}
+              onPaste={handlePaste}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
               placeholder={placeholder}
               className="w-full flex-1 min-h-[70vh] p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono text-sm resize-y"
             />
+
+            {onImageUpload && (
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept={IMAGE_ACCEPT}
+                multiple
+                onChange={handleImageInputChange}
+                className="hidden"
+              />
+            )}
 
             {embedBlocks.length > 0 && (
               <div
@@ -458,6 +570,7 @@ export function MarkdownEditor({
       <p className="text-xs text-gray-500 inline-block">
         <CheckCircle size={16} /> Markdown記法を直接入力できます（例: <code className="bg-gray-100 px-1 rounded">## 見出し</code>）。
         または <code className="bg-gray-100 px-1 rounded">/</code> を入力してコマンドメニューを開いてください。
+        {onImageUpload && '画像は貼り付けやドラッグ&ドロップでも挿入できます。'}
       </p>
     </div>
   );

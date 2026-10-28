@@ -24,6 +24,7 @@ public class ArticlesController : ApplicationController
     readonly SearchArticlesService searchArticlesService;
     readonly ToggleLikeService toggleLikeService;
     readonly UpdateArticleService updateArticleService;
+    readonly UploadArticleImageService uploadArticleImageService;
 
     public ArticlesController(
         CreateArticleService createArticleService,
@@ -37,7 +38,8 @@ public class ArticlesController : ApplicationController
         GetDraftArticlesService getDraftArticlesService,
         SearchArticlesService searchArticlesService,
         CreateCommentService createCommentService,
-        GetMyArticlesService getMyArticlesService
+        GetMyArticlesService getMyArticlesService,
+        UploadArticleImageService uploadArticleImageService
     )
     {
         this.createArticleService = createArticleService;
@@ -52,6 +54,7 @@ public class ArticlesController : ApplicationController
         this.searchArticlesService = searchArticlesService;
         this.createCommentService = createCommentService;
         this.getMyArticlesService = getMyArticlesService;
+        this.uploadArticleImageService = uploadArticleImageService;
     }
 
     [HttpGet]
@@ -72,6 +75,16 @@ public class ArticlesController : ApplicationController
     {
         request.AuthorId = UserId!.Value;
         var response = await createArticleService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpPost("images")]
+    [Auth(AuthLevel.VerifiedEmail)]
+    [NoTransaction]
+    [RequestSizeLimit(5_000_000)]
+    public async Task<ActionResult<UploadArticleImageResponse>> UploadArticleImage(IFormFile file)
+    {
+        var response = await uploadArticleImageService.ExecuteAsync(UserId!.Value, file);
         return Ok(response);
     }
 

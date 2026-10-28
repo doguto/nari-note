@@ -2,9 +2,14 @@ import { useRef, useState } from 'react';
 import { MarkdownEditor } from '@/components/molecules/MarkdownEditor';
 import type { EmbedBlock, EmbedLang } from '@/components/molecules/MarkdownEditor';
 import { parseKifuEmbed } from '@/lib/kif-player';
+import { useUploadArticleImage } from '@/lib/api';
+import { useRequireVerifiedEmail } from '@/lib/hooks';
 import { KifuEmbedDialog } from './KifuEmbedDialog';
 import { BoardEditorDialog } from './BoardEditorDialog';
 import type { KifuItem } from '../types/kifu';
+
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_IMAGE_SIZE_MB = 5;
 
 interface ArticleBodyEditorProps {
   value: string;
@@ -29,6 +34,23 @@ export function ArticleBodyEditor({
   const insertFnRef      = useRef<((name: string, move: number) => void) | null>(null);
   const insertBODFnRef   = useRef<((bod: string) => void) | null>(null);
   const boardInsertFnRef = useRef<((bod: string) => void) | null>(null);
+  const uploadImage = useUploadArticleImage();
+  const { ensureVerifiedEmail } = useRequireVerifiedEmail();
+
+  const handleImageUpload = async (file: File) => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      throw new Error('対応していない画像形式です。JPEG、PNG、WebPのみ対応しています。');
+    }
+    // バックエンドの上限（5,000,000 バイト）に合わせる
+    if (file.size > MAX_IMAGE_SIZE_MB * 1_000_000) {
+      throw new Error(`ファイルサイズは${MAX_IMAGE_SIZE_MB}MB以内にしてください。`);
+    }
+    if (!ensureVerifiedEmail()) {
+      throw new Error('画像をアップロードするにはメールアドレスの認証が必要です。');
+    }
+    const { imageUrl } = await uploadImage.mutateAsync(file);
+    return imageUrl;
+  };
 
   const handleKifuEmbed = (insertKifuFn: (name: string, move: number) => void, insertBODFn: (bod: string) => void) => {
     insertFnRef.current    = insertKifuFn;
@@ -97,6 +119,7 @@ export function ArticleBodyEditor({
         onKifuEmbed={kifuList.length > 0 ? handleKifuEmbed : undefined}
         onBoardEditor={handleBoardEditor}
         onEditEmbed={handleEditEmbed}
+        onImageUpload={handleImageUpload}
         kifuList={kifuList.map((k) => ({ name: k.name, kifuText: k.text }))}
       />
       <KifuEmbedDialog

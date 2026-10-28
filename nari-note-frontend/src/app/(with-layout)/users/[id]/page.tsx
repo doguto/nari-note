@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { UserProfilePage } from '@/features/user/pages';
 import { getUserProfile } from '@/lib/api/server';
+import { buildPageMetadata } from '@/lib/metadata';
 
 interface UserPageProps {
   params: Promise<{ id: string }>;
@@ -11,21 +12,16 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
 
   try {
     const user = await getUserProfile({ id });
-    const description = user.bio?.trim()
-      ? user.bio.trim().slice(0, 160)
-      : `${user.username}さんの将棋記事・講座一覧`;
+    const description = user.bio?.trim() || `${user.username}さんの将棋記事・講座一覧`;
 
-    return {
+    return buildPageMetadata({
       title: user.username,
       description,
-      openGraph: {
-        type: 'profile',
-        title: user.username,
-        description,
-        username: user.username,
-        images: user.userIconImageUrl ? [user.userIconImageUrl] : undefined,
-      },
-    };
+      path: `/users/${id}`,
+      imageUrl: user.userIconImageUrl,
+      isSquareImage: true,
+      profile: { username: user.username },
+    });
   } catch {
     return {};
   }

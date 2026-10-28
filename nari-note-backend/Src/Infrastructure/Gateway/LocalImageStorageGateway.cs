@@ -10,4 +10,7 @@ public class LocalImageStorageGateway : IImageStorageGateway
         => Task.FromResult(GetUserIconUrl(userId));
 
     public Task DeleteUserIconAsync(string userId) => Task.CompletedTask;
+
+    public Task<string> UploadArticleImageAsync(string userId, string imageId, Stream imageStream, string contentType)
+        => Task.FromResult($"https://placeholder.example.com/articles/images/{userId}/{imageId}");
 }
