@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import type { BoardState, BoardSize } from '../types';
 import { COLUMN_LABELS, ROW_LABELS } from '../constants';
 import { KomaImage } from './KomaImage';
+import { StarPoints } from './StarPoints';
 
 interface BoardProps {
   board: BoardState;
@@ -30,7 +31,7 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
       {/* 列ラベル */}
       <div className="flex">
         {COLUMN_LABELS.map((l) => (
-          <div key={l} className={cn('flex items-center justify-center font-serif font-bold text-black', cellW, cellH, text)}>
+          <div key={l} className={cn('flex items-center justify-center font-koma text-shogi-line', cellW, cellH, text)}>
             {l}
           </div>
         ))}
@@ -39,7 +40,7 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
 
       <div className="flex items-stretch">
         {/* 盤面 */}
-        <div className="relative border-2 border-black">
+        <div className="relative border-2 border-shogi-line!">
           {/* Layer 1: グリッド線 + ハイライト背景 */}
           <div className="grid grid-cols-9">
             {Array.from({ length: 81 }, (_, idx) => {
@@ -51,14 +52,16 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
                   key={idx}
                   className={cn(
                     cellW, cellH,
-                    ci < 8 && 'border-r border-gray-700',
-                    ri < 8 && 'border-b border-gray-700',
-                    isHL ? 'bg-orange-400' : 'bg-shogi-board',
+                    ci < 8 && 'border-r border-shogi-line!',
+                    ri < 8 && 'border-b border-shogi-line!',
+                    isHL ? 'bg-shogi-highlight' : 'bg-shogi-board',
                   )}
                 />
               );
             })}
           </div>
+
+          <StarPoints />
 
           {/* Layer 2: 駒の文字 */}
           <div className="absolute inset-0 grid grid-cols-9">
@@ -93,7 +96,7 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
         {/* 段ラベル */}
         <div className="flex flex-col">
           {ROW_LABELS.map((l) => (
-            <div key={l} className={cn('flex items-center justify-center font-serif font-bold text-black', cellH, labelW, text)}>
+            <div key={l} className={cn('flex items-center justify-center font-koma text-shogi-line', cellH, labelW, text)}>
               {l}
             </div>
           ))}

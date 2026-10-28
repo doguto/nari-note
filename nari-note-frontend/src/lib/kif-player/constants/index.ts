@@ -1,4 +1,3 @@
-import { Koma } from '@/types/koma';
 import type { BoardState, Piece, PieceType } from '../types';
 
 const s = (type: Piece['type']): Piece => ({ type, owner: 'sente' });
@@ -64,21 +63,26 @@ export const KANJI_NUMBER_MAP: Record<string, number> = {
 
 export const EMPTY_SQUARE = '・';
 
-// 駒種（漢字表記） → public/koma 配下のpngファイル名（拡張子なし）
-export const KOMA_IMAGE_MAP: Record<PieceType, string> = {
-  '玉': Koma.Gyoku,
-  '王': Koma.Ou,
-  '飛': Koma.Hisha,
-  '角': Koma.Kaku,
-  '金': Koma.Kin,
-  '銀': Koma.Gin,
-  '桂': Koma.Keima,
-  '香': Koma.Kyousha,
-  '歩': Koma.Hu,
-  '龍': Koma.Ryu,
-  '馬': Koma.Uma,
-  '成銀': Koma.Narigin,
-  '成桂': Koma.Narikei,
-  '成香': Koma.Narikyousha,
-  'と': Koma.ToKin,
+// 駒に書く一文字（成銀・成桂・成香は一般的な略字で表す）
+export const KOMA_LABEL_MAP: Record<PieceType, string> = {
+  '玉': '玉',
+  '王': '王',
+  '飛': '飛',
+  '角': '角',
+  '金': '金',
+  '銀': '銀',
+  '桂': '桂',
+  '香': '香',
+  '歩': '歩',
+  '龍': '龍',
+  '馬': '馬',
+  '成銀': '全',
+  '成桂': '圭',
+  '成香': '杏',
+  'と': 'と',
 };
+
+export const PROMOTED_PIECES: ReadonlySet<PieceType> = new Set(['龍', '馬', '成銀', '成桂', '成香', 'と']);
+
+// 駒の五角形（viewBox 0 0 60 60、先手向き）
+export const KOMA_SHAPE_POINTS = '30,5 49,12 54,56 6,56 11,12';

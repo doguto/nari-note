@@ -24,9 +24,9 @@ export function Piece({ piece, size = 'md', isHighlighted = false }: PieceProps)
     <div
       className={cn(
         'flex items-center justify-center',
-        'border border-gray-700',
+        'border border-shogi-line!',
         container,
-        isHighlighted ? 'bg-orange-400' : 'bg-shogi-board',
+        isHighlighted ? 'bg-shogi-highlight' : 'bg-shogi-board',
       )}
     >
       <KomaImage type={piece.type} owner={piece.owner} size={imageSize} />
