@@ -53,16 +53,16 @@ public class UpdateArticleService
             article.ArticleOrder = request.ArticleOrder.Value;
         }
 
-        var wasPublished = article.IsPublished;
+        var wasPubliclyVisible = article.IsPubliclyVisibleAt(timeProvider.UtcNow());
 
         // PublishedAtが明示的に指定されている場合はそれを使用
-        // 下書きを公開する際に予約投稿日時が未設定の場合は現在時刻を自動設定
+        // 下書き・予約投稿を公開する際に日時が未指定の場合は現在時刻を自動設定
         // （既に公開済みの記事を更新する場合は自動設定しない）
         if (request.PublishedAt.HasValue)
         {
             article.PublishedAt = request.PublishedAt!;
         }
-        else if (!wasPublished && request.IsPublished.HasValue && request.IsPublished.Value)
+        else if (!wasPubliclyVisible && request.IsPublished.HasValue && request.IsPublished.Value)
         {
             article.PublishedAt = timeProvider.UtcNow();
         }
