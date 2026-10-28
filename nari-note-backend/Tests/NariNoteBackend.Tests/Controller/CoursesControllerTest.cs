@@ -502,6 +502,32 @@ public class CoursesControllerTest : IntegrationTestBase
     }
 
     [Fact]
+    public async Task 予約公開中の講座を即時公開すると講座に合わせて予約された記事も公開される()
+    {
+        var scheduledAt = Now.AddDays(3);
+        var ownScheduledAt = Now.AddDays(7);
+        var owner = new UserBuilder().Build();
+        var course = new CourseBuilder(owner).PublishedAt(scheduledAt).Build();
+        await SeedAsync(
+            owner,
+            course,
+            new ArticleBuilder(owner).InCourse(course, 1).PublishedAt(scheduledAt).Build(),
+            new ArticleBuilder(owner).InCourse(course, 2).PublishedAt(ownScheduledAt).Build()
+        );
+
+        var response = await CreateClientAs(owner).PutAsJsonAsync(
+            $"/api/courses/{course.Id.Value}",
+            new { isPublished = true }
+        );
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(Now, (await QueryAsync(db => db.Courses.SingleAsync())).PublishedAt);
+        var articles = await QueryAsync(db => db.Articles.OrderBy(a => a.ArticleOrder).ToListAsync());
+        // 記事個別に設定した予約日時は維持する
+        Assert.Equal([Now, ownScheduledAt], articles.Select(a => a.PublishedAt!.Value));
+    }
+
+    [Fact]
     public async Task 作成者以外は講座を更新できない()
     {
         var owner = new UserBuilder().Build();

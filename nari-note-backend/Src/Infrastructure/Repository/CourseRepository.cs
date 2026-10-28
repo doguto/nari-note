@@ -54,17 +54,22 @@ public class CourseRepository : ICourseRepository
                      .ExecuteDeleteAsync();
     }
 
-    public async Task<Course> UpdateWithArticlesAsync(Course course)
+    public async Task<Course> UpdateWithArticlesAsync(Course course, DateTime? previousPublishedAt)
     {
         context.Courses.Update(course);
 
         if (course.IsPublished)
         {
+            var now = timeProvider.UtcNow();
+            // 下書きの記事に加え、講座の予約公開に合わせて予約されたままの記事も講座の公開日時に揃える
             var articles = await context.Articles
-                                        .Where(a => a.CourseId == course.Id && !a.PublishedAt.HasValue)
+                                        .Where(
+                                            a => a.CourseId == course.Id
+                                                 && (!a.PublishedAt.HasValue
+                                                     || (a.PublishedAt == previousPublishedAt && a.PublishedAt > now))
+                                        )
                                         .ToListAsync();
 
-            var now = timeProvider.UtcNow();
             foreach (var article in articles)
             {
                 article.PublishedAt = course.PublishedAt ?? now;

@@ -25,20 +25,22 @@ public class UpdateCourseService
 
         if (!request.Name.IsNullOrEmpty()) course.Name = request.Name!;
 
-        var wasPublished = course.IsPublished;
+        var previousPublishedAt = course.PublishedAt;
+        var wasPubliclyVisible = course.IsPubliclyVisibleAt(timeProvider.UtcNow());
 
+        // 予約公開中の講座を即時公開した場合も現在時刻を公開日時にする
         if (request.PublishedAt.HasValue)
         {
             course.PublishedAt = request.PublishedAt.Value;
         }
-        else if (!wasPublished && request.IsPublished.HasValue && request.IsPublished.Value)
+        else if (!wasPubliclyVisible && request.IsPublished.HasValue && request.IsPublished.Value)
         {
             course.PublishedAt = timeProvider.UtcNow();
         }
 
         course.UpdatedAt = timeProvider.UtcNow();
 
-        await courseRepository.UpdateWithArticlesAsync(course);
+        await courseRepository.UpdateWithArticlesAsync(course, previousPublishedAt);
 
         return new UpdateCourseResponse
         {
