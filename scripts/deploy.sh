@@ -47,6 +47,7 @@ dotnet publish "${PROJECT_FILE}" \
   --self-contained true \
   --output "${PUBLISH_DIR}" \
   -p:PublishSingleFile=true \
+  -p:IncludeNativeLibrariesForSelfExtract=true \
   -p:PublishTrimmed=false \
   --nologo \
   -v minimal
