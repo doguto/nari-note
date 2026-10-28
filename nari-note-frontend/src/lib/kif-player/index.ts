@@ -1,4 +1,4 @@
-export { KifPlayer, ShogiBoard, Board, Piece, CapturedPieces, KomaImage } from './components';
+export { KifPlayer, ShogiBoard, Board, Piece, CapturedPieces, KomaImage, StarPoints } from './components';
 export { parseKif, getBoardAtMove, parseBOD, parseCapturedPieces, parseKifuEmbed, deepCopyBoard, addToCaptured, removeFromCaptured, formatCapturedBOD, generateBOD, DEMOTE_MAP } from './utils';
 export { useBoardEditor } from './hooks/useBoardEditor';
 export type { BoardEditorSelection, BoardEditorState } from './hooks/useBoardEditor';

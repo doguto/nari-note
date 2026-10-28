@@ -4,3 +4,4 @@ export { Board } from './Board';
 export { Piece } from './Piece';
 export { KomaImage } from './KomaImage';
 export { CapturedPieces } from './CapturedPieces';
+export { StarPoints } from './StarPoints';

@@ -1,11 +1,10 @@
 import { ImageResponse } from 'next/og';
 import type { NextRequest } from 'next/server';
 import { getArticleContent } from '@/lib/api/server';
-import { KOMA_IMAGE_MAP } from '@/lib/kif-player/constants';
-import type { PieceType } from '@/lib/kif-player/types';
+import { KOMA_LABEL_MAP } from '@/lib/kif-player/constants';
 import { findArticleBoard } from '@/lib/og/findArticleBoard';
-import { ArticleOgImage, OG_IMAGE_SIZE, formatCaptured } from '@/lib/og/ArticleOgImage';
-import { loadGoogleFont, loadPublicAsset, toDataUri } from '@/lib/og/assets';
+import { ArticleOgImage, KOMA_FONT_FAMILY, OG_IMAGE_SIZE, formatCaptured } from '@/lib/og/ArticleOgImage';
+import { loadGoogleFont } from '@/lib/og/assets';
 
 // /api/[...path] のバックエンドプロキシより優先され、ここだけは Next.js 側で処理する。
 // URL に記事の更新日時（?v=）を付けて参照されるため、同じ URL の内容は変わらない前提で長くキャッシュする
@@ -25,9 +24,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const board = findArticleBoard(article);
   if (!board) return new Response(null, { status: 404 });
 
-  const pieceTypes = new Set<PieceType>();
-  board.board.flat().forEach((piece) => piece && pieceTypes.add(piece.type));
-
   const text = [
     article.title,
     article.authorName,
@@ -35,25 +31,22 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     formatCaptured(board.captured.sente),
     formatCaptured(board.captured.gote),
   ].join('');
+  const komaText = [...new Set(board.board.flat().map((piece) => (piece ? KOMA_LABEL_MAP[piece.type] : '')))].join('');
 
-  const [font, ...images] = await Promise.all([
+  const [font, komaFont] = await Promise.all([
     loadGoogleFont(FONT_FAMILY, 700, text),
-    ...[...pieceTypes].map(async (type) => {
-      const data = await loadPublicAsset(`/koma/${KOMA_IMAGE_MAP[type]}.png`, request.url);
-      return [type, data ? toDataUri(data, 'image/png') : undefined] as const;
-    }),
+    komaText ? loadGoogleFont(KOMA_FONT_FAMILY, 700, komaText) : null,
   ]);
+  const fonts = [
+    font && { name: FONT_FAMILY, data: font, weight: 700 as const, style: 'normal' as const },
+    komaFont && { name: KOMA_FONT_FAMILY, data: komaFont, weight: 700 as const, style: 'normal' as const },
+  ].filter((f) => !!f);
 
   return new ImageResponse(
-    <ArticleOgImage
-      title={article.title}
-      authorName={article.authorName}
-      board={board}
-      pieceImages={Object.fromEntries(images)}
-    />,
+    <ArticleOgImage title={article.title} authorName={article.authorName} board={board} />,
     {
       ...OG_IMAGE_SIZE,
-      fonts: font ? [{ name: FONT_FAMILY, data: font, weight: 700, style: 'normal' }] : undefined,
+      fonts: fonts.length > 0 ? fonts : undefined,
       headers: { 'Cache-Control': CACHE_CONTROL },
     },
   );
