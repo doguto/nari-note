@@ -440,6 +440,10 @@ export interface UpdateUserProfileRequest {
 export interface UpdateUserProfileResponse {
 }
 
+export interface UploadArticleImageResponse {
+  imageUrl: string;
+}
+
 export interface UploadUserIconResponse {
   userIconImageUrl: string;
 }

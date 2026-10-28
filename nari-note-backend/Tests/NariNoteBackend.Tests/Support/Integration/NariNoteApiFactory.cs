@@ -68,6 +68,7 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         this.DiscordNotifier.Messages.Clear();
         this.DiscordNotifier.Embeds.Clear();
         this.ImageStorageGateway.UploadedUserIds.Clear();
+        this.ImageStorageGateway.UploadedArticleImageUrls.Clear();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

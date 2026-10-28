@@ -45,4 +45,21 @@ public class S3ImageStorageGateway : IImageStorageGateway
 
         await s3Client.Value.DeleteObjectAsync(request);
     }
+
+    public async Task<string> UploadArticleImageAsync(string userId, string imageId, Stream imageStream, string contentType)
+    {
+        var key = $"articles/images/{userId}/{imageId}";
+
+        var request = new PutObjectRequest
+        {
+            BucketName = bucketName,
+            Key = key,
+            InputStream = imageStream,
+            ContentType = contentType,
+        };
+
+        await s3Client.Value.PutObjectAsync(request);
+
+        return $"https://{domain}/{key}";
+    }
 }

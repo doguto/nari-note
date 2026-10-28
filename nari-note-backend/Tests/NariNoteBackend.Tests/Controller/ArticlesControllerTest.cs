@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Application.Dto.Response;
@@ -204,6 +205,83 @@ public class ArticlesControllerTest : IntegrationTestBase
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal(0, await QueryAsync(db => db.Articles.CountAsync()));
+    }
+
+    #endregion
+
+    #region POST /api/articles/images
+
+    static MultipartFormDataContent CreateImageContent(byte[] bytes, string contentType)
+    {
+        var file = new ByteArrayContent(bytes);
+        file.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        return new MultipartFormDataContent { { file, "file", "image" } };
+    }
+
+    // 1x1 ピクセルの PNG 画像
+    static byte[] CreatePngBytes()
+    {
+        return Convert.FromBase64String(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+        );
+    }
+
+    [Fact]
+    public async Task 記事用の画像をアップロードすると画像URLを返す()
+    {
+        var user = new UserBuilder().Build();
+        await SeedAsync(user);
+
+        var response = await CreateClientAs(user).PostAsync(
+            "/api/articles/images",
+            CreateImageContent(CreatePngBytes(), "image/png")
+        );
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var imageUrl = (await ReadAsync<UploadArticleImageResponse>(response)).ImageUrl;
+        Assert.StartsWith($"https://images.test/articles/images/{user.Id.Value}/", imageUrl);
+        Assert.Equal([imageUrl], Factory.ImageStorageGateway.UploadedArticleImageUrls);
+    }
+
+    [Fact]
+    public async Task 対応していない形式や画像でないファイルは記事用にアップロードできない()
+    {
+        var user = new UserBuilder().Build();
+        await SeedAsync(user);
+        var client = CreateClientAs(user);
+
+        var unsupportedType = await client.PostAsync("/api/articles/images", CreateImageContent(CreatePngBytes(), "image/gif"));
+        var notImage = await client.PostAsync("/api/articles/images", CreateImageContent("not an image"u8.ToArray(), "image/png"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, unsupportedType.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, notImage.StatusCode);
+        Assert.Empty(Factory.ImageStorageGateway.UploadedArticleImageUrls);
+    }
+
+    [Fact]
+    public async Task 未認証では記事用の画像をアップロードできない()
+    {
+        var response = await CreateClient().PostAsync(
+            "/api/articles/images",
+            CreateImageContent(CreatePngBytes(), "image/png")
+        );
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task メール未認証のユーザーは記事用の画像をアップロードできない()
+    {
+        var user = new UserBuilder().EmailUnverified().Build();
+        await SeedAsync(user);
+
+        var response = await CreateClientAs(user).PostAsync(
+            "/api/articles/images",
+            CreateImageContent(CreatePngBytes(), "image/png")
+        );
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Empty(Factory.ImageStorageGateway.UploadedArticleImageUrls);
     }
 
     #endregion

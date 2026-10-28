@@ -65,6 +65,7 @@ import type {
   UpdatePasswordResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
+  UploadArticleImageResponse,
   UploadUserIconResponse,
   VerifyEmailRequest,
   WithdrawRequest,
@@ -120,6 +121,18 @@ export function useCreateArticle(options?: UseMutationOptions<CreateArticleRespo
   const queryClient = useQueryClient();
   return useMutation<CreateArticleResponse, Error, CreateArticleRequest>({
     mutationFn: (data) => articlesApi.createArticle(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+  });
+}
+
+export function useUploadArticleImage(options?: UseMutationOptions<UploadArticleImageResponse, Error, File>) {
+  const queryClient = useQueryClient();
+  return useMutation<UploadArticleImageResponse, Error, File>({
+    mutationFn: (file) => articlesApi.uploadArticleImage(file),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       options?.onSuccess?.(...args);

@@ -123,6 +123,30 @@ def parse_csharp_class(file_path: Path) -> Optional[CSharpClass]:
     return CSharpClass(name=class_name, properties=properties, namespace=namespace)
 
 
+def _extract_parameters(content: str, start: int) -> str:
+    """開き括弧の直後から対応する閉じ括弧までを返す（属性引数の括弧や文字列リテラル内の括弧を考慮する）"""
+    depth = 1
+    in_string = False
+    i = start
+    while i < len(content):
+        c = content[i]
+        if in_string:
+            if c == '\\':
+                i += 1
+            elif c == '"':
+                in_string = False
+        elif c == '"':
+            in_string = True
+        elif c == '(':
+            depth += 1
+        elif c == ')':
+            depth -= 1
+            if depth == 0:
+                return content[start:i]
+        i += 1
+    return content[start:]
+
+
 def parse_controller(file_path: Path, all_request_types: set, all_response_types: set) -> Tuple[List[EndpointInfo], List[str]]:
     """コントローラーをパースしてエンドポイント情報とスキップされたメソッドを返す"""
     try:
@@ -143,14 +167,14 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
     # エンドポイントを抽出
     # [HttpGet], [HttpPost]などのアトリビュートとメソッド、パラメータを見つける
     # 複数の属性（[Auth(AuthLevel.Authenticated)]、[ValidateModelState]など）に対応
-    method_pattern = r'\[Http(Get|Post|Put|Delete)(?:\("([^"]+)"\))?\](?:\s*\[[^\]]+\])*\s+public\s+(?:async\s+Task<)?ActionResult(?:<(\w+)>)?(?:>)?\s+(\w+)\s*\(([^)]*)\)'
+    method_pattern = r'\[Http(Get|Post|Put|Delete)(?:\("([^"]+)"\))?\](?:\s*\[[^\]]+\])*\s+public\s+(?:async\s+Task<)?ActionResult(?:<(\w+)>)?(?:>)?\s+(\w+)\s*\('
 
     for match in re.finditer(method_pattern, content):
         http_method = match.group(1).upper()
         route = match.group(2) or ""
         explicit_response_type = match.group(3)
         function_name = match.group(4)
-        parameters = match.group(5)
+        parameters = _extract_parameters(content, match.end())
 
         # パラメータからリクエスト型を抽出
         request_type = None
@@ -169,7 +193,7 @@ def parse_controller(file_path: Path, all_request_types: set, all_response_types
 
             # [FromQuery] int limit = 20 のような単純型パラメータを探す（DTO ごと受け取る場合は除く）
             query_params = [
-                m.group(2) for m in re.finditer(r'\[FromQuery\]\s+([\w?]+)\s+(\w+)', parameters)
+                m.group(2) for m in re.finditer(r'\[FromQuery(?:\s*,[^\]]*)?\]\s+([\w?]+)\s+(\w+)', parameters)
                 if not m.group(1).endswith("Request")
             ]
 
