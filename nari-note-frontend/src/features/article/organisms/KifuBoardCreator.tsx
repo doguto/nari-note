@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { INITIAL_BOARD, COLUMN_LABELS, ROW_LABELS } from '@/lib/kif-player/constants';
-import { KomaImage } from '@/lib/kif-player';
+import { KomaImage, StarPoints } from '@/lib/kif-player';
 import type { CapturedPiece, PieceOwner, PieceType, FreePlayRecorderState } from '@/lib/kif-player';
 
 interface KifuBoardCreatorProps {
@@ -82,13 +82,13 @@ export function KifuBoardCreator({ recorder }: KifuBoardCreatorProps) {
         <div className="inline-block">
           <div className="flex">
             {COLUMN_LABELS.map(l => (
-              <div key={l} className="w-8 h-6 flex items-center justify-center text-xs font-serif font-bold">{l}</div>
+              <div key={l} className="w-8 h-6 flex items-center justify-center text-xs font-koma text-shogi-line">{l}</div>
             ))}
             <div className="w-5" />
           </div>
 
           <div className="flex">
-            <div className="relative border-2 border-black">
+            <div className="relative border-2 border-shogi-line!">
               <div className="grid grid-cols-9">
                 {Array.from({ length: 81 }, (_, idx) => {
                   const ci    = idx % 9;
@@ -102,8 +102,8 @@ export function KifuBoardCreator({ recorder }: KifuBoardCreatorProps) {
                       onClick={() => handleBoardClick(ri, ci)}
                       className={cn(
                         'w-8 h-8 flex items-center justify-center cursor-pointer transition-colors',
-                        ci < 8 && 'border-r border-gray-700',
-                        ri < 8 && 'border-b border-gray-700',
+                        ci < 8 && 'border-r border-shogi-line!',
+                        ri < 8 && 'border-b border-shogi-line!',
                         isSel
                           ? 'bg-yellow-200'
                           : selected && !piece
@@ -120,11 +120,12 @@ export function KifuBoardCreator({ recorder }: KifuBoardCreatorProps) {
                   );
                 })}
               </div>
+              <StarPoints />
             </div>
 
             <div className="flex flex-col">
               {ROW_LABELS.map(l => (
-                <div key={l} className="w-5 h-8 flex items-center justify-center text-xs font-serif font-bold">{l}</div>
+                <div key={l} className="w-5 h-8 flex items-center justify-center text-xs font-koma text-shogi-line">{l}</div>
               ))}
             </div>
           </div>

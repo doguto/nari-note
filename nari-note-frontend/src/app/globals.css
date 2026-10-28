@@ -25,6 +25,7 @@
   /* Nari-note brand colors for Tailwind */
   --color-brand-primary: #88b04b;
   --color-brand-primary-hover: #769939;
+  --color-brand-primary-dark: #4e6b22;
   --color-brand-text: #2d3e1f;
   --color-brand-text-dark: #1a2515;
   --color-brand-text-hover: #3d4e2f;
@@ -34,8 +35,16 @@
   --color-brand-border: #d4cdb3;
   --color-brand-secondary-text: #555;
 
-  /* Shogi board color */
-  --color-shogi-board: #dcb35c;
+  /* Shogi board colors */
+  --color-shogi-board: #e9c98a;
+  --color-shogi-line: #5a4320;
+  --color-shogi-highlight: #f7e7a8;
+  --color-shogi-koma: #f6e2b3;
+  --color-shogi-koma-edge: #8a6a3a;
+  --color-shogi-ink: #2a1d0c;
+  --color-shogi-promoted: #b3261e;
+
+  --font-koma: var(--font-shippori-mincho), serif;
 }
 
 :root {

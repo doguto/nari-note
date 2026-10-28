@@ -1,5 +1,6 @@
 
 import type { Metadata } from "next";
+import { Shippori_Mincho } from "next/font/google";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/metadata";
 import "./globals.css";
 import { Suspense } from "react";
@@ -10,6 +11,15 @@ import { ForbiddenProvider } from "@/lib/providers/ForbiddenProvider";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nari-note.com";
+
+// 駒の文字用
+const shipporiMincho = Shippori_Mincho({
+  weight: "700",
+  subsets: ["latin"],
+  display: "swap",
+  preload: false,
+  variable: "--font-shippori-mincho",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -46,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html lang="ja" className={shipporiMincho.variable}>
       <body className="antialiased">
         <QueryProvider>
           <AuthProvider>
