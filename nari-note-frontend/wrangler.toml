@@ -8,6 +8,11 @@ main = ".open-next/worker.js"
 directory = ".open-next/assets"
 binding = "ASSETS"
 
+# 自ドメインへの fetch は Worker 自身に届かないため、自サイトのページを読むときはこのバインディング経由で呼ぶ
+[[services]]
+binding = "WORKER_SELF_REFERENCE"
+service = "nari-note"
+
 [observability]
 enabled = true
 head_sampling_rate = 1
