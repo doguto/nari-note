@@ -43,7 +43,7 @@ public class UpdateCourseServiceTest
         Assert.Equal("新講座名", course.Name);
         Assert.Equal(Now, course.UpdatedAt);
         Assert.Equal(Now, response.UpdatedAt);
-        await this.courseRepository.Received(1).UpdateWithArticlesAsync(course);
+        await this.courseRepository.Received(1).UpdateWithArticlesAsync(course, course.PublishedAt);
     }
 
     [Fact]
@@ -54,6 +54,18 @@ public class UpdateCourseServiceTest
         await this.service.ExecuteAsync(this.owner.Id, new UpdateCourseRequest { Id = course.Id, IsPublished = true });
 
         Assert.Equal(Now, course.PublishedAt);
+    }
+
+    [Fact]
+    public async Task 予約公開中の講座を即時公開すると現在時刻が公開日時になる()
+    {
+        var scheduledAt = Now.AddDays(3);
+        var course = SetupCourse(new CourseBuilder(this.owner).PublishedAt(scheduledAt));
+
+        await this.service.ExecuteAsync(this.owner.Id, new UpdateCourseRequest { Id = course.Id, IsPublished = true });
+
+        Assert.Equal(Now, course.PublishedAt);
+        await this.courseRepository.Received(1).UpdateWithArticlesAsync(course, scheduledAt);
     }
 
     [Fact]
@@ -94,6 +106,6 @@ public class UpdateCourseServiceTest
         await Assert.ThrowsAsync<ForbiddenException>(() => this.service.ExecuteAsync(otherUserId, request));
 
         Assert.Equal("講座名", course.Name);
-        await this.courseRepository.DidNotReceive().UpdateWithArticlesAsync(Arg.Any<Course>());
+        await this.courseRepository.DidNotReceive().UpdateWithArticlesAsync(Arg.Any<Course>(), Arg.Any<DateTime?>());
     }
 }

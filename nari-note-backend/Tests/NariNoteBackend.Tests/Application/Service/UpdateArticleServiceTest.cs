@@ -67,6 +67,19 @@ public class UpdateArticleServiceTest
     }
 
     [Fact]
+    public async Task 予約投稿の記事を即時公開すると現在時刻が公開日時になる()
+    {
+        var article = SetupArticle(new ArticleBuilder(this.author).PublishedAt(Now.AddDays(3)));
+
+        await this.service.ExecuteAsync(
+            this.author.Id,
+            new UpdateArticleRequest { Id = article.Id, IsPublished = true }
+        );
+
+        Assert.Equal(Now, article.PublishedAt);
+    }
+
+    [Fact]
     public async Task 公開済みの記事を更新しても公開日時は変わらない()
     {
         var publishedAt = Now.AddDays(-5);
