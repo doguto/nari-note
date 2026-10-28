@@ -1,3 +1,4 @@
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { type NextRequest, NextResponse } from 'next/server';
 import { parseOgp } from '@/lib/link-preview/parseOgp';
 import type { LinkPreviewResponse } from '@/lib/link-preview/types';
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
   const cached = await cache?.match(cacheKey);
   if (cached) return cached;
 
-  const body = await fetchPreview(target);
+  const body = await fetchPreview(target, target.host === request.nextUrl.host ? getSelfReference() : undefined);
   const succeeded = body.title !== undefined || body.isImage === true;
   const response = NextResponse.json(body, {
     headers: { 'Cache-Control': succeeded ? SUCCESS_CACHE_CONTROL : FAILURE_CACHE_CONTROL },
@@ -53,10 +54,24 @@ function getEdgeCache(): Cache | undefined {
   return (globalThis as { caches?: { default?: Cache } }).caches?.default;
 }
 
-async function fetchPreview(url: URL): Promise<LinkPreviewResponse> {
+interface ServiceBinding {
+  fetch(input: URL, init?: RequestInit): Promise<Response>;
+}
+
+// Workers 上では自ドメインへの fetch が Worker 自身に届かないため、自サイトのページはサービスバインディング（wrangler.toml の WORKER_SELF_REFERENCE）経由で読む
+function getSelfReference(): ServiceBinding | undefined {
+  try {
+    return (getCloudflareContext().env as { WORKER_SELF_REFERENCE?: ServiceBinding }).WORKER_SELF_REFERENCE;
+  } catch {
+    // next dev（Node.js）では Cloudflare のコンテキストが無い
+    return undefined;
+  }
+}
+
+async function fetchPreview(url: URL, fetcher?: ServiceBinding): Promise<LinkPreviewResponse> {
   const empty: LinkPreviewResponse = { url: url.href };
   try {
-    const response = await fetch(url, {
+    const response = await (fetcher ? fetcher.fetch.bind(fetcher) : fetch)(url, {
       headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': USER_AGENT },
       redirect: 'follow',
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
