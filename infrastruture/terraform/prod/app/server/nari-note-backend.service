@@ -12,6 +12,9 @@ RestartSec=5
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=ASPNETCORE_URLS=http://localhost:5000
 Environment=APP_NAME=${app_name}
+# 単一ファイル発行に同梱したネイティブライブラリの展開先。サービスユーザーにはホームが無いため明示する
+CacheDirectory=nari-note-backend
+Environment=DOTNET_BUNDLE_EXTRACT_BASE_DIR=/var/cache/nari-note-backend
 
 [Install]
 WantedBy=multi-user.target
