@@ -46,7 +46,7 @@ export function ProfileEditTemplate({
   onCancelConfirmClose,
 }: ProfileEditTemplateProps) {
   return (
-    <div className="max-w-2xl bg-white rounded-lg p-6">
+    <div className="max-w-2xl bg-white rounded-lg p-4 md:p-6">
       <FormTitle>プロフィール編集</FormTitle>
 
       {generalError && <ErrorAlert message={generalError} />}
