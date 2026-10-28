@@ -27,7 +27,7 @@ export function WithdrawTemplate({
   onConfirm,
 }: WithdrawTemplateProps) {
   return (
-    <div className="max-w-2xl bg-white rounded-lg p-6">
+    <div className="max-w-2xl bg-white rounded-lg p-4 md:p-6">
       <FormTitle>退会</FormTitle>
       <div className="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700 space-y-1">
         <p>退会すると、アカウントと以下のデータがすべて削除され、元に戻すことはできません。</p>
