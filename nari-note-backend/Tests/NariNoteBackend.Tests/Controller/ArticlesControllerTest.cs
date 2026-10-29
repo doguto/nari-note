@@ -1034,6 +1034,25 @@ public class ArticlesControllerTest : IntegrationTestBase
     }
 
     [Fact]
+    public async Task 講座に属する記事は記事検索の結果に含まれない()
+    {
+        var author = new UserBuilder().Build();
+        var course = new CourseBuilder(author).WithName("序盤講座").Build();
+        await SeedAsync(
+            author,
+            course,
+            new ArticleBuilder(author).WithTitle("四間飛車の基本").Build(),
+            new ArticleBuilder(author).WithTitle("四間飛車の組み方").InCourse(course, 1).Build()
+        );
+
+        var response = await CreateClient().GetAsync($"/api/articles/search?keyword={Uri.EscapeDataString("四間飛車")}");
+
+        var body = await ReadAsync<SearchArticlesResponse>(response);
+        Assert.Equal(["四間飛車の基本"], body.Articles.Select(a => a.Title));
+        Assert.Equal(1, body.TotalCount);
+    }
+
+    [Fact]
     public async Task 記事検索は件数と位置を指定してページ送りでき総件数を返す()
     {
         var author = new UserBuilder().Build();
