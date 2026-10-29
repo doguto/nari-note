@@ -91,6 +91,26 @@ public class CoursesControllerTest : IntegrationTestBase
     }
 
     [Fact]
+    public async Task 公開中の記事本文にキーワードを含む講座を検索できる()
+    {
+        var owner = new UserBuilder().Build();
+        var matched = new CourseBuilder(owner).WithName("序盤講座").Build();
+        var unmatched = new CourseBuilder(owner).WithName("中盤講座").Build();
+        await SeedAsync(
+            owner,
+            matched,
+            unmatched,
+            new ArticleBuilder(owner).WithTitle("第1回").WithBody("四間飛車を例に解説").InCourse(matched, 1).Build(),
+            new ArticleBuilder(owner).WithTitle("第1回").WithBody("四間飛車の下書き").Draft().InCourse(unmatched, 1).Build()
+        );
+
+        var response = await CreateClient().GetAsync($"/api/courses/search?keyword={Uri.EscapeDataString("四間飛車")}");
+
+        var body = await ReadAsync<SearchCoursesResponse>(response);
+        Assert.Equal(["序盤講座"], body.Courses.Select(c => c.Name));
+    }
+
+    [Fact]
     public async Task 講座検索は件数と位置を指定してページ送りでき総件数を返す()
     {
         var owner = new UserBuilder().Build();
