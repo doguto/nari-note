@@ -79,6 +79,7 @@ public static class InfrastructureServiceInstaller
             ?? throw new InvalidOperationException("Frontend:BaseUrl が設定されていません");
         services.AddSingleton(new EmailMessageStore(frontendBaseUrl));
         services.AddHttpClient<IDiscordNotifier, DiscordWebhookNotifier>(client => client.Timeout = ExternalRequestTimeout);
+        services.AddHttpClient<IFontGateway, GoogleFontGateway>(client => client.Timeout = ExternalRequestTimeout);
         if (env.IsDevelopment())
             services.AddScoped<IImageStorageGateway, LocalImageStorageGateway>();
         else
