@@ -259,6 +259,7 @@ public class ArticleRepository : IArticleRepository
 
     /// <summary>
     ///     公開記事かつキーワードを含む記事のフィルタ条件を生成します。
+    ///     講座に属する記事は講座検索側で講座としてヒットさせるため除外します。
     /// </summary>
     /// <param name="now">現在時刻（UTC）</param>
     /// <param name="keyword">検索キーワード</param>
@@ -266,6 +267,7 @@ public class ArticleRepository : IArticleRepository
     static Expression<Func<Article, bool>> IsPubliclyVisibleAndContainsKeyword(DateTime now, string keyword)
     {
         return a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now &&
+                    a.CourseId == null &&
                     (a.Title.Contains(keyword) || a.Body.Contains(keyword));
     }
 }

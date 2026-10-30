@@ -132,7 +132,15 @@ public class CourseRepository : ICourseRepository
     public async Task<(List<Course> Courses, int TotalCount)> SearchAsync(string keyword, int limit, int offset)
     {
         var now = timeProvider.UtcNow();
-        var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
+        // 講座内の記事を先に検索して講座 ID を確定させ、本文の照合を講座に属する記事だけに 1 回で済ませる
+        var matchedCourseIds = await context.Articles
+                                            .Where(a => a.CourseId != null)
+                                            .Where(a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now)
+                                            .Where(a => a.Title.Contains(keyword) || a.Body.Contains(keyword))
+                                            .Select(a => a.CourseId!.Value)
+                                            .Distinct()
+                                            .ToListAsync();
+        var searchFilter = IsPubliclyVisibleAndMatched(now, keyword, matchedCourseIds);
 
         var totalCount = await context.Courses.Where(searchFilter).CountAsync();
         var courses = await context.Courses
@@ -198,9 +206,9 @@ public class CourseRepository : ICourseRepository
                             .ToListAsync();
     }
 
-    static Expression<Func<Course, bool>> IsPubliclyVisibleAndContainsKeyword(DateTime now, string keyword)
+    static Expression<Func<Course, bool>> IsPubliclyVisibleAndMatched(DateTime now, string keyword, List<CourseId> matchedCourseIds)
     {
         return c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now &&
-                    (c.Name.Contains(keyword) || c.Articles.Any(a => a.Title.Contains(keyword)));
+                    (c.Name.Contains(keyword) || matchedCourseIds.Contains(c.Id));
     }
 }
