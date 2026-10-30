@@ -129,7 +129,8 @@ function OgKoma({ piece }: { piece: Piece }) {
         display: 'flex',
         width: PIECE_SIZE,
         height: PIECE_SIZE,
-        transform: piece.owner === 'gote' ? 'rotate(180deg)' : undefined,
+        // satori は transform: undefined を不正な値として例外にするため、後手のときだけ指定する
+        ...(piece.owner === 'gote' && { transform: 'rotate(180deg)' }),
       }}
     >
       <svg width={PIECE_SIZE} height={PIECE_SIZE} viewBox="0 0 60 60" style={{ position: 'absolute', left: 0, top: 0 }}>
