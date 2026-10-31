@@ -4,13 +4,14 @@ namespace NariNoteBackend.Application.Asset;
 
 /// <summary>
 ///     OG 画像の盤面に置く駒の画像（先手向き）
-///     Koma/ 配下の PNG（埋め込みリソース）は Scripts/generate_koma_images.py で事前に生成する
+///     Koma/ 配下の PNG（埋め込みリソース）は scripts/generate_koma_assets.py（リポジトリ直下）で、
+///     フロントエンドの駒（KomaImage）と同じ SVG から事前に生成する
 /// </summary>
 public static class KomaImages
 {
     const string ResourcePrefix = "NariNoteBackend.Application.Asset.Koma.";
 
-    // 駒の種類 → ファイル名。generate_koma_images.py の PIECES と揃える
+    // 駒の種類 → ファイル名。generate_koma_assets.py の PNG_FILE_NAMES と揃える
     static readonly Dictionary<string, string> FileNames = new()
     {
         ["玉"] = "gyoku", ["王"] = "ou", ["飛"] = "hisha", ["角"] = "kaku", ["金"] = "kin",

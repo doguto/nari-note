@@ -22,7 +22,7 @@
     <EmbeddedResource Include="Src/Domain/Template/Email/**" LogicalName="NariNoteBackend.Domain.Template.Email.%(Filename)%(Extension)" />
   </ItemGroup>
 
-  <!-- OG 画像の駒の画像（Scripts/generate_koma_images.py で生成）は埋め込みリソースとして読み込む -->
+  <!-- OG 画像の駒の画像（scripts/generate_koma_assets.py で生成）は埋め込みリソースとして読み込む -->
   <ItemGroup>
     <None Remove="Src/Application/Asset/Koma/**" />
     <Content Remove="Src/Application/Asset/Koma/**" />

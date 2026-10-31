@@ -64,6 +64,7 @@ export const KANJI_NUMBER_MAP: Record<string, number> = {
 export const EMPTY_SQUARE = '・';
 
 // 駒に書く一文字（成銀・成桂・成香は一般的な略字で表す）
+// 駒の文字は scripts/generate_koma_assets.py でアウトライン化して使う。変更したら再生成する
 export const KOMA_LABEL_MAP: Record<PieceType, string> = {
   '玉': '玉',
   '王': '王',
@@ -85,4 +86,5 @@ export const KOMA_LABEL_MAP: Record<PieceType, string> = {
 export const PROMOTED_PIECES: ReadonlySet<PieceType> = new Set(['龍', '馬', '成銀', '成桂', '成香', 'と']);
 
 // 駒の五角形（viewBox 0 0 60 60、先手向き）
+// OG 画像用の駒の画像も scripts/generate_koma_assets.py でここから生成する。変更したら再生成する
 export const KOMA_SHAPE_POINTS = '30,5 49,12 54,56 6,56 11,12';
