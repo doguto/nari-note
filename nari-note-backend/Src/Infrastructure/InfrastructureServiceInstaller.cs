@@ -60,6 +60,8 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<IKifuRepository, KifuRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IOutboxMessageRepository, OutboxMessageRepository>();
+        // 埋め込みリソースから読み込んだ駒の画像をプロセス内で保持するためシングルトンにする
+        services.AddSingleton<IKomaImageRepository, KomaImageRepository>();
 
         services.AddScoped<OutboxProcessor>();
         services.AddHostedService<OutboxWorker>();
@@ -79,6 +81,8 @@ public static class InfrastructureServiceInstaller
             ?? throw new InvalidOperationException("Frontend:BaseUrl が設定されていません");
         services.AddSingleton(new EmailMessageStore(frontendBaseUrl));
         services.AddHttpClient<IDiscordNotifier, DiscordWebhookNotifier>(client => client.Timeout = ExternalRequestTimeout);
+        services.AddMemoryCache();
+        services.AddHttpClient<IFontGateway, GoogleFontGateway>(client => client.Timeout = ExternalRequestTimeout);
         if (env.IsDevelopment())
             services.AddScoped<IImageStorageGateway, LocalImageStorageGateway>();
         else

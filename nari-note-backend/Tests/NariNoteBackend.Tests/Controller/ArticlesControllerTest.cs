@@ -375,6 +375,37 @@ public class ArticlesControllerTest : IntegrationTestBase
 
     #endregion
 
+    #region GET /api/articles/{id}/og-image
+
+    [Fact]
+    public async Task 棋譜埋め込みのある記事はOG画像をキャッシュ可能なPNGで返す()
+    {
+        var author = new UserBuilder().Build();
+        var article = new ArticleBuilder(author).WithBody("```kifu\n第1局_1\n```").WithKifu("第1局", "   1 ７六歩(77)").Build();
+        await SeedAsync(author, article);
+
+        var response = await CreateClient().GetAsync($"/api/articles/{article.Id}/og-image");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("image/png", response.Content.Headers.ContentType?.MediaType);
+        Assert.True(response.Headers.CacheControl?.Public);
+        Assert.NotEmpty(await response.Content.ReadAsByteArrayAsync());
+    }
+
+    [Fact]
+    public async Task 盤面の埋め込みが無い記事のOG画像は404を返す()
+    {
+        var author = new UserBuilder().Build();
+        var article = new ArticleBuilder(author).WithBody("本文だけ").Build();
+        await SeedAsync(author, article);
+
+        var response = await CreateClient().GetAsync($"/api/articles/{article.Id}/og-image");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    #endregion
+
     #region PUT /api/articles/{id}
 
     [Fact]

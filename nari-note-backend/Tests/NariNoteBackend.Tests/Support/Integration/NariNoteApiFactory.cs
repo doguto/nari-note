@@ -29,6 +29,7 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public FakeEmailHelper EmailHelper { get; } = new();
     public FakeDiscordNotifier DiscordNotifier { get; } = new();
     public FakeImageStorageGateway ImageStorageGateway { get; } = new();
+    public FakeFontGateway FontGateway { get; } = new();
 
     public async ValueTask InitializeAsync()
     {
@@ -69,6 +70,7 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         this.DiscordNotifier.Embeds.Clear();
         this.ImageStorageGateway.UploadedUserIds.Clear();
         this.ImageStorageGateway.UploadedArticleImageUrls.Clear();
+        this.FontGateway.RequestedFamilies.Clear();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -91,6 +93,8 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             services.AddSingleton<IDiscordNotifier>(this.DiscordNotifier);
             services.RemoveAll<IImageStorageGateway>();
             services.AddSingleton<IImageStorageGateway>(this.ImageStorageGateway);
+            services.RemoveAll<IFontGateway>();
+            services.AddSingleton<IFontGateway>(this.FontGateway);
 
             // Outbox はバックグラウンドで処理させず、必要なテストが OutboxProcessor を直接呼ぶ
             var outboxWorker = services.Single(d =>

@@ -15,9 +15,10 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
   try {
     const { article } = await getArticleContent({ id });
-    // 盤面埋め込み > 棋譜埋め込み（いずれも局面を描いた画像を生成する） > 本文の画像 > サイト既定の画像
+    // 盤面埋め込み > 棋譜埋め込み（いずれも局面を描いた画像をバックエンドで生成する） > 本文の画像 > サイト既定の画像
+    // Workers の CPU 時間の上限に収まらないため、画像の生成はバックエンドで行い /api のプロキシ経由で返す
     const imageUrl = findArticleBoard(article)
-      ? `/api/og/articles/${id}?v=${encodeURIComponent(article.updatedAt)}`
+      ? `/api/articles/${id}/og-image?v=${encodeURIComponent(article.updatedAt)}`
       : findFirstImageUrl(article.body);
 
     return buildPageMetadata({
