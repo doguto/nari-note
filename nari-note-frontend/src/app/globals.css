@@ -39,6 +39,7 @@
   --color-shogi-board: #e9c98a;
   --color-shogi-line: #5a4320;
   --color-shogi-highlight: #f7e7a8;
+  /* 駒の色を変えたら scripts/generate_koma_assets.py で OG 画像用の駒の画像を再生成する */
   --color-shogi-koma: #f6e2b3;
   --color-shogi-koma-edge: #8a6a3a;
   --color-shogi-ink: #2a1d0c;

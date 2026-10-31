@@ -29,7 +29,7 @@ public class EmailMessageStore
         return new EmailMessage(
             From,
             [to],
-            "【なりノート】メールアドレスの確認",
+            $"【{Brand.Name}】メールアドレスの確認",
             EmailTemplate.SignupVerificationHtml(url),
             EmailTemplate.SignupVerificationText(url)
         );
@@ -43,7 +43,7 @@ public class EmailMessageStore
         return new EmailMessage(
             From,
             [to],
-            "【なりノート】このメールアドレスは登録済みです",
+            $"【{Brand.Name}】このメールアドレスは登録済みです",
             EmailTemplate.AlreadyRegisteredHtml(loginUrl, forgotPasswordUrl),
             EmailTemplate.AlreadyRegisteredText(loginUrl, forgotPasswordUrl)
         );
@@ -56,7 +56,7 @@ public class EmailMessageStore
         return new EmailMessage(
             From,
             [to],
-            "【なりノート】パスワードの再設定",
+            $"【{Brand.Name}】パスワードの再設定",
             EmailTemplate.PasswordResetHtml(url),
             EmailTemplate.PasswordResetText(url)
         );

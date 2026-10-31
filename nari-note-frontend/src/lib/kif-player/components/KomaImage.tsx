@@ -1,7 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { KOMA_LABEL_MAP, KOMA_SHAPE_POINTS, PROMOTED_PIECES } from '../constants';
+import { KOMA_SHAPE_POINTS, PROMOTED_PIECES } from '../constants';
+import { KOMA_GLYPH_PATHS } from '../constants/komaGlyphPaths';
 import type { PieceOwner, PieceType } from '../types';
 
 interface KomaImageProps {
@@ -21,7 +22,7 @@ export function KomaImage({ type, owner, size, className, rotate = true }: KomaI
       viewBox="0 0 60 60"
       role="img"
       aria-label={type}
-      className={cn('select-none pointer-events-none font-koma', rotate && owner === 'gote' && 'rotate-180', className)}
+      className={cn('select-none pointer-events-none', rotate && owner === 'gote' && 'rotate-180', className)}
     >
       <polygon
         points={KOMA_SHAPE_POINTS}
@@ -29,17 +30,11 @@ export function KomaImage({ type, owner, size, className, rotate = true }: KomaI
         strokeWidth={2.5}
         strokeLinejoin="round"
       />
-      <text
-        x={30}
-        y={35}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontSize={30}
-        fontWeight={700}
+      {/* 文字はフォントの読み込みを待たずに表示できるよう、アウトライン化したパスで描く */}
+      <path
+        d={KOMA_GLYPH_PATHS[type]}
         className={PROMOTED_PIECES.has(type) ? 'fill-shogi-promoted' : 'fill-shogi-ink'}
-      >
-        {KOMA_LABEL_MAP[type]}
-      </text>
+      />
     </svg>
   );
 }

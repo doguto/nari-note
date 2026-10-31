@@ -10,6 +10,7 @@ public class ArticleBuilder
 {
     readonly User author;
     readonly ArticleId id = ArticleId.From(Guid.CreateVersion7());
+    readonly List<(string Name, string KifuText)> kifus = new();
     readonly List<User> likers = new();
     readonly List<string> tagNames = new();
     int? articleOrder;
@@ -68,6 +69,12 @@ public class ArticleBuilder
         return this;
     }
 
+    public ArticleBuilder WithKifu(string name, string kifuText)
+    {
+        this.kifus.Add((name, kifuText));
+        return this;
+    }
+
     public ArticleBuilder LikedBy(params User[] users)
     {
         this.likers.AddRange(users);
@@ -95,6 +102,11 @@ public class ArticleBuilder
         foreach (var name in this.tagNames)
         {
             article.ArticleTags.Add(TestEntity.ArticleTag(article, TestEntity.Tag(name)));
+        }
+
+        foreach (var (kifu, index) in this.kifus.Select((k, i) => (k, i)))
+        {
+            article.Kifus.Add(TestEntity.Kifu(article, kifu.Name, index, kifu.KifuText));
         }
 
         foreach (var liker in this.likers)

@@ -16,6 +16,7 @@ public class ArticlesController : ApplicationController
     readonly CreateCommentService createCommentService;
     readonly DeleteArticleService deleteArticleService;
     readonly GetArticleContentService getArticleContentService;
+    readonly GetArticleOgImageService getArticleOgImageService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticlesByTagService getArticlesByTagService;
     readonly GetArticlesService getArticlesService;
@@ -39,7 +40,8 @@ public class ArticlesController : ApplicationController
         SearchArticlesService searchArticlesService,
         CreateCommentService createCommentService,
         GetMyArticlesService getMyArticlesService,
-        UploadArticleImageService uploadArticleImageService
+        UploadArticleImageService uploadArticleImageService,
+        GetArticleOgImageService getArticleOgImageService
     )
     {
         this.createArticleService = createArticleService;
@@ -55,6 +57,7 @@ public class ArticlesController : ApplicationController
         this.createCommentService = createCommentService;
         this.getMyArticlesService = getMyArticlesService;
         this.uploadArticleImageService = uploadArticleImageService;
+        this.getArticleOgImageService = getArticleOgImageService;
     }
 
     [HttpGet]
@@ -95,6 +98,17 @@ public class ArticlesController : ApplicationController
         var request = new GetArticleContentRequest { Id = id };
         var response = await getArticleContentService.ExecuteAsync(request, UserId);
         return Ok(response);
+    }
+
+    // 記事ページの og:image。URL に記事の更新日時（?v=）を付けて参照されるため、同じ URL の内容は変わらない前提で長くキャッシュする
+    [HttpGet("{id}/og-image")]
+    [Auth(AuthLevel.Anonymous)]
+    [NoTransaction]
+    public async Task<ActionResult> GetArticleOgImage(ArticleId id)
+    {
+        var png = await getArticleOgImageService.ExecuteAsync(id);
+        Response.Headers.CacheControl = "public, max-age=86400, s-maxage=604800";
+        return File(png, "image/png");
     }
 
     [HttpPut("{id}")]
