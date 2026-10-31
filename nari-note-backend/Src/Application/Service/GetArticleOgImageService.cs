@@ -1,4 +1,5 @@
 using NariNoteBackend.Application.Helper;
+using NariNoteBackend.Domain;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Shogi;
@@ -12,6 +13,7 @@ public class GetArticleOgImageService
 {
     const string TextFontFamily = "Noto Sans JP";
     const int FontWeight = 700;
+    const string FixedText = "△▲持駒なし0123456789 …";
 
     readonly IArticleRepository articleRepository;
     readonly IFontGateway fontGateway;
@@ -40,7 +42,15 @@ public class GetArticleOgImageService
         var position = ArticleBoardFinder.Find(article.Body, article.Kifus)
             ?? throw new KeyNotFoundException($"記事{id}に盤面の埋め込みがありません");
 
-        var font = await this.fontGateway.LoadGoogleFontAsync(TextFontFamily, FontWeight);
+        var text = string.Concat(
+            article.Title,
+            article.Author.Name,
+            Brand.Name,
+            FixedText,
+            ArticleOgImageRenderer.FormatCaptured(position.SenteCaptured),
+            ArticleOgImageRenderer.FormatCaptured(position.GoteCaptured)
+        );
+        var font = await this.fontGateway.LoadGoogleFontAsync(TextFontFamily, FontWeight, text);
         using var textTypeface = ToTypeface(font);
 
         var komaImages = position.Board.Cast<ShogiPiece?>()

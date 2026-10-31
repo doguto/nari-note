@@ -1,21 +1,24 @@
-using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Caching.Memory;
 using NariNoteBackend.Domain.Gateway;
 
 namespace NariNoteBackend.Infrastructure.Gateway;
 
 public partial class GoogleFontGateway : IFontGateway
 {
-    // 取得したフォントはプロセス内で使い回す（Noto Sans JP の Bold で約 5.7MB）
+    // 取得したサブセットはしばらく使い回す。同じ記事の OG 画像は同じ文字の組み合わせになるため、
+    // クローラーの再取得やキャッシュの再検証では Google Fonts に問い合わせずに済む
     // 取得に失敗した場合はキャッシュせず、次のリクエストで取得し直す
-    static readonly ConcurrentDictionary<(string Family, int Weight), byte[]> Cache = new();
+    static readonly TimeSpan CacheExpiration = TimeSpan.FromDays(1);
 
     readonly HttpClient httpClient;
+    readonly IMemoryCache cache;
     readonly ILogger<GoogleFontGateway> logger;
 
-    public GoogleFontGateway(HttpClient httpClient, ILogger<GoogleFontGateway> logger)
+    public GoogleFontGateway(HttpClient httpClient, IMemoryCache cache, ILogger<GoogleFontGateway> logger)
     {
         this.httpClient = httpClient;
+        this.cache = cache;
         this.logger = logger;
     }
 
@@ -23,11 +26,12 @@ public partial class GoogleFontGateway : IFontGateway
     [GeneratedRegex(@"src: url\((.+?)\) format\('(?:opentype|truetype)'\)")]
     private static partial Regex FontUrlPattern();
 
-    public async Task<byte[]?> LoadGoogleFontAsync(string family, int weight)
+    public async Task<byte[]?> LoadGoogleFontAsync(string family, int weight, string text)
     {
-        if (Cache.TryGetValue((family, weight), out var cached)) return cached;
+        var cacheKey = (nameof(GoogleFontGateway), family, weight, text);
+        if (this.cache.TryGetValue(cacheKey, out byte[]? cached)) return cached;
 
-        var cssUrl = $"https://fonts.googleapis.com/css2?family={Uri.EscapeDataString(family)}:wght@{weight}";
+        var cssUrl = $"https://fonts.googleapis.com/css2?family={Uri.EscapeDataString(family)}:wght@{weight}&text={Uri.EscapeDataString(text)}";
         try
         {
             var css = await this.httpClient.GetStringAsync(cssUrl);
@@ -39,7 +43,7 @@ public partial class GoogleFontGateway : IFontGateway
             }
 
             var font = await this.httpClient.GetByteArrayAsync(fontUrl.Groups[1].Value);
-            return Cache.GetOrAdd((family, weight), font);
+            return this.cache.Set(cacheKey, font, CacheExpiration);
         }
         catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
         {

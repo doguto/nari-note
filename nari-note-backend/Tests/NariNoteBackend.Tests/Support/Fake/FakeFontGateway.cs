@@ -7,7 +7,7 @@ public class FakeFontGateway : IFontGateway
 {
     public List<string> RequestedFamilies { get; } = new();
 
-    public Task<byte[]?> LoadGoogleFontAsync(string family, int weight)
+    public Task<byte[]?> LoadGoogleFontAsync(string family, int weight, string text)
     {
         this.RequestedFamilies.Add(family);
         return Task.FromResult<byte[]?>(null);
