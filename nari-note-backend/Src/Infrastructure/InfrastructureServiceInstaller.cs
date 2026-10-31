@@ -60,6 +60,8 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<IKifuRepository, KifuRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IOutboxMessageRepository, OutboxMessageRepository>();
+        // 埋め込みリソースから読み込んだ駒の画像をプロセス内で保持するためシングルトンにする
+        services.AddSingleton<IKomaImageRepository, KomaImageRepository>();
 
         services.AddScoped<OutboxProcessor>();
         services.AddHostedService<OutboxWorker>();

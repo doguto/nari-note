@@ -3,7 +3,7 @@
 駒の素材を生成する
 
 - フロントエンド: 駒の文字をアウトライン化した SVG のパス（lib/kif-player/constants/komaGlyphPaths.ts）
-- バックエンド: OG 画像の盤面に貼る駒の PNG（Src/Application/Asset/Koma/*.png、先手向き 44px）
+- バックエンド: OG 画像の盤面に貼る駒の PNG（Src/Infrastructure/Asset/Koma/*.png、先手向き 44px）
 
 駒の形・文字・配色はフロントエンドの定義（constants/index.ts、globals.css）から読み取り、
 PNG はフロントエンドの KomaImage と同じ SVG を描いて作るため、両者の見た目は常に一致する
@@ -30,7 +30,7 @@ FRONTEND_SRC = REPO_ROOT / "nari-note-frontend" / "src"
 CONSTANTS_FILE = FRONTEND_SRC / "lib" / "kif-player" / "constants" / "index.ts"
 GLOBALS_CSS = FRONTEND_SRC / "app" / "globals.css"
 GLYPH_PATHS_FILE = FRONTEND_SRC / "lib" / "kif-player" / "constants" / "komaGlyphPaths.ts"
-KOMA_IMAGE_DIR = REPO_ROOT / "nari-note-backend" / "Src" / "Application" / "Asset" / "Koma"
+KOMA_IMAGE_DIR = REPO_ROOT / "nari-note-backend" / "Src" / "Infrastructure" / "Asset" / "Koma"
 
 FONT_FAMILY = "Shippori Mincho"
 FONT_WEIGHT = 700
@@ -44,7 +44,7 @@ GLYPH_CENTER_Y = 35
 # バックエンドの PNG の大きさ。ArticleOgImageRenderer は等倍で貼る
 PNG_SIZE = 44
 
-# 駒の種類 → バックエンドの PNG のファイル名。KomaImages.FileNames と揃える
+# 駒の種類 → バックエンドの PNG のファイル名。KomaImageRepository.FileNames と揃える
 PNG_FILE_NAMES = {
     "玉": "gyoku", "王": "ou", "飛": "hisha", "角": "kaku", "金": "kin",
     "銀": "gin", "桂": "keima", "香": "kyosha", "歩": "fu",

@@ -1,6 +1,7 @@
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
+using NariNoteBackend.Infrastructure.Repository;
 using NariNoteBackend.Tests.Support;
 using NariNoteBackend.Tests.Support.Builder;
 using NariNoteBackend.Tests.Support.Fake;
@@ -29,7 +30,12 @@ public class GetArticleOgImageServiceTest
 
     public GetArticleOgImageServiceTest()
     {
-        this.service = new GetArticleOgImageService(this.articleRepository, this.fontGateway, this.timeProvider);
+        this.service = new GetArticleOgImageService(
+            this.articleRepository,
+            this.fontGateway,
+            new KomaImageRepository(),
+            this.timeProvider
+        );
     }
 
     Article SetupArticle(ArticleBuilder builder)
