@@ -1,4 +1,5 @@
 using NariNoteBackend.Application.Helper;
+using NariNoteBackend.Domain;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Shogi;
@@ -11,7 +12,6 @@ namespace NariNoteBackend.Application.Service;
 public class GetArticleOgImageService
 {
     const string TextFontFamily = "Noto Sans JP";
-    const string KomaFontFamily = "Shippori Mincho";
     const int FontWeight = 700;
     const string FixedText = "△▲持駒なし0123456789 …";
 
@@ -38,23 +38,16 @@ public class GetArticleOgImageService
         var text = string.Concat(
             article.Title,
             article.Author.Name,
-            ArticleOgImageRenderer.BrandName,
+            Brand.Name,
             FixedText,
             ArticleOgImageRenderer.FormatCaptured(position.SenteCaptured),
             ArticleOgImageRenderer.FormatCaptured(position.GoteCaptured)
         );
-        var komaText = string.Concat(
-            position.Board.Cast<ShogiPiece?>().OfType<ShogiPiece>().Select(p => ArticleOgImageRenderer.KomaLabel(p.Type)).Distinct()
-        );
+        // 駒は事前に生成した画像を貼るため、取得するのはタイトル等の文字のフォントだけ
+        var font = await this.fontGateway.LoadGoogleFontAsync(TextFontFamily, FontWeight, text);
 
-        var fonts = await Task.WhenAll(
-            this.fontGateway.LoadGoogleFontAsync(TextFontFamily, FontWeight, text),
-            komaText == "" ? Task.FromResult<byte[]?>(null) : this.fontGateway.LoadGoogleFontAsync(KomaFontFamily, FontWeight, komaText)
-        );
-
-        using var textTypeface = ToTypeface(fonts[0]);
-        using var komaTypeface = ToTypeface(fonts[1]);
-        return ArticleOgImageRenderer.Render(article.Title, article.Author.Name, position, textTypeface, komaTypeface);
+        using var textTypeface = ToTypeface(font);
+        return ArticleOgImageRenderer.Render(article.Title, article.Author.Name, position, textTypeface);
     }
 
     // フォントが取得できなくても画像は返す（文字は既定のフォントで描く）

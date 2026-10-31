@@ -49,7 +49,7 @@ public class GetArticleOgImageServiceTest
         using var codec = SKCodec.Create(new MemoryStream(png));
         Assert.Equal(SKEncodedImageFormat.Png, codec.EncodedFormat);
         Assert.Equal(new SKSizeI(1200, 630), codec.Info.Size);
-        Assert.Equal(["Noto Sans JP", "Shippori Mincho"], this.fontGateway.RequestedFamilies);
+        Assert.Equal(["Noto Sans JP"], this.fontGateway.RequestedFamilies);
     }
 
     [Fact]

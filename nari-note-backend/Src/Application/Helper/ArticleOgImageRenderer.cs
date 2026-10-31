@@ -1,4 +1,6 @@
 using System.Globalization;
+using NariNoteBackend.Application.Asset;
+using NariNoteBackend.Domain;
 using NariNoteBackend.Domain.Shogi;
 using SkiaSharp;
 
@@ -6,19 +8,17 @@ namespace NariNoteBackend.Application.Helper;
 
 /// <summary>
 ///     記事の OG 画像（左に局面、右にタイトル）を描く。
-///     見た目はフロントエンドの盤面（globals.css の --color-shogi-*、lib/kif-player/constants の KOMA_SHAPE_POINTS）に揃える
+///     見た目はフロントエンドの盤面（globals.css の --color-shogi-*）に揃える。駒は事前に生成した画像（KomaImages）を貼る
 /// </summary>
 public static class ArticleOgImageRenderer
 {
     public const int Width = 1200;
     public const int Height = 630;
-    public const string BrandName = "なりノート";
 
     const float Padding = 40;
     const float CellSize = 50;
     const float BoardBorder = 3;
     const float BoardSize = CellSize * ShogiPosition.Size + BoardBorder * 2;
-    const float PieceSize = 44;
     const float CapturedRowHeight = 36;
     const float CapturedRowGap = 8;
     const float TitleFontSize = 54;
@@ -31,26 +31,9 @@ public static class ArticleOgImageRenderer
     static readonly SKColor Background = SKColor.Parse("#f5f3e8");
     static readonly SKColor BoardColor = SKColor.Parse("#e9c98a");
     static readonly SKColor BoardLine = SKColor.Parse("#5a4320");
-    static readonly SKColor Koma = SKColor.Parse("#f6e2b3");
-    static readonly SKColor KomaEdge = SKColor.Parse("#8a6a3a");
-    static readonly SKColor KomaInk = SKColor.Parse("#2a1d0c");
-    static readonly SKColor KomaPromoted = SKColor.Parse("#b3261e");
     static readonly SKColor TitleColor = SKColor.Parse("#1a2515");
     static readonly SKColor TextColor = SKColor.Parse("#2d3e1f");
     static readonly SKColor BrandColor = SKColor.Parse("#88b04b");
-
-    // viewBox 0 0 60 60 の五角形（先手向き）
-    static readonly SKPoint[] KomaShape = [new(30, 5), new(49, 12), new(54, 56), new(6, 56), new(11, 12)];
-
-    static readonly Dictionary<string, string> KomaLabels = new()
-    {
-        ["成銀"] = "全", ["成桂"] = "圭", ["成香"] = "杏"
-    };
-
-    public static string KomaLabel(string type)
-    {
-        return KomaLabels.GetValueOrDefault(type, type);
-    }
 
     public static string FormatCaptured(List<CapturedPiece> pieces)
     {
@@ -58,7 +41,7 @@ public static class ArticleOgImageRenderer
         return string.Join(" ", pieces.Select(p => p.Count > 1 ? $"{p.Type}{p.Count}" : p.Type));
     }
 
-    public static byte[] Render(string title, string authorName, ShogiPosition position, SKTypeface textTypeface, SKTypeface komaTypeface)
+    public static byte[] Render(string title, string authorName, ShogiPosition position, SKTypeface textTypeface)
     {
         using var surface = SKSurface.Create(new SKImageInfo(Width, Height));
         var canvas = surface.Canvas;
@@ -71,7 +54,7 @@ public static class ArticleOgImageRenderer
 
         using var capturedFont = new SKFont(textTypeface, 26);
         DrawTextCentered(canvas, $"△ 持駒 {FormatCaptured(position.GoteCaptured)}", columnCenterX, top + CapturedRowHeight / 2, capturedFont, TextColor);
-        DrawBoard(canvas, position, Padding, boardTop, komaTypeface);
+        DrawBoard(canvas, position, Padding, boardTop);
         DrawTextCentered(canvas, $"▲ 持駒 {FormatCaptured(position.SenteCaptured)}", columnCenterX, boardTop + BoardSize + CapturedRowGap + CapturedRowHeight / 2, capturedFont, TextColor);
 
         var textLeft = Padding + BoardSize + 56;
@@ -84,7 +67,7 @@ public static class ArticleOgImageRenderer
         return data.ToArray();
     }
 
-    static void DrawBoard(SKCanvas canvas, ShogiPosition position, float left, float top, SKTypeface komaTypeface)
+    static void DrawBoard(SKCanvas canvas, ShogiPosition position, float left, float top)
     {
         using var boardPaint = new SKPaint { Color = BoardColor, IsAntialias = true };
         canvas.DrawRect(left, top, BoardSize, BoardSize, boardPaint);
@@ -112,7 +95,6 @@ public static class ArticleOgImageRenderer
             }
         }
 
-        using var komaFont = new SKFont(komaTypeface, 22);
         for (var row = 0; row < ShogiPosition.Size; row++)
         {
             for (var col = 0; col < ShogiPosition.Size; col++)
@@ -120,30 +102,19 @@ public static class ArticleOgImageRenderer
                 var piece = position.Board[row, col];
                 if (piece == null) continue;
 
-                DrawKoma(canvas, piece, innerLeft + CellSize * (col + 0.5f), innerTop + CellSize * (row + 0.5f), komaFont);
+                DrawKoma(canvas, piece, innerLeft + CellSize * (col + 0.5f), innerTop + CellSize * (row + 0.5f));
             }
         }
     }
 
-    static void DrawKoma(SKCanvas canvas, ShogiPiece piece, float centerX, float centerY, SKFont font)
+    static void DrawKoma(SKCanvas canvas, ShogiPiece piece, float centerX, float centerY)
     {
+        var image = KomaImages.Get(piece.Type);
         canvas.Save();
         canvas.Translate(centerX, centerY);
         if (piece.Owner == PieceOwner.Gote) canvas.RotateDegrees(180);
 
-        var scale = PieceSize / 60;
-        using var path = new SKPath();
-        path.AddPoly(KomaShape.Select(p => new SKPoint(p.X * scale - PieceSize / 2, p.Y * scale - PieceSize / 2)).ToArray());
-
-        using var fillPaint = new SKPaint { Color = Koma, IsAntialias = true };
-        canvas.DrawPath(path, fillPaint);
-        using var edgePaint = new SKPaint
-        {
-            Color = KomaEdge, Style = SKPaintStyle.Stroke, StrokeWidth = 2.5f * scale, StrokeJoin = SKStrokeJoin.Round, IsAntialias = true
-        };
-        canvas.DrawPath(path, edgePaint);
-
-        DrawTextCentered(canvas, KomaLabel(piece.Type), 0, 3, font, piece.IsPromoted ? KomaPromoted : KomaInk);
+        canvas.DrawImage(image, -image.Width / 2f, -image.Height / 2f);
         canvas.Restore();
     }
 
@@ -163,7 +134,7 @@ public static class ArticleOgImageRenderer
         var authorHeight = AuthorFontSize * FooterLineHeightRatio;
 
         using var brandFont = new SKFont(typeface, BrandFontSize);
-        DrawTextLeft(canvas, BrandName, left, bottom - brandHeight / 2, brandFont, BrandColor);
+        DrawTextLeft(canvas, Brand.Name, left, bottom - brandHeight / 2, brandFont, BrandColor);
 
         using var authorFont = new SKFont(typeface, AuthorFontSize);
         DrawTextLeft(canvas, authorName, left, bottom - brandHeight - 16 - authorHeight / 2, authorFont, TextColor);
