@@ -18,7 +18,7 @@ from pathlib import Path
 import skia
 
 BACKEND_ROOT = Path(__file__).parent.parent
-OUTPUT_DIR = BACKEND_ROOT / "Src" / "Application" / "Asset" / "Koma"
+OUTPUT_DIR = BACKEND_ROOT / "Src" / "Infrastructure" / "Asset" / "Koma"
 
 # ArticleOgImageRenderer.PieceSize と同じ値にする（等倍で貼るため）
 PIECE_SIZE = 44
@@ -34,7 +34,7 @@ KOMA_PROMOTED = skia.Color(0xB3, 0x26, 0x1E)
 # viewBox 0 0 60 60 の五角形（先手向き）
 KOMA_SHAPE = [(30, 5), (49, 12), (54, 56), (6, 56), (11, 12)]
 
-# ファイル名 → (駒に書く文字, 成駒か)。ファイル名は KomaImages.FileNames と揃える
+# ファイル名 → (駒に書く文字, 成駒か)。ファイル名は KomaImageRepository.FileNames と揃える
 PIECES = {
     "gyoku": ("玉", False),
     "ou": ("王", False),

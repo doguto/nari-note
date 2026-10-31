@@ -24,9 +24,9 @@
 
   <!-- OG 画像の駒の画像（Scripts/generate_koma_images.py で生成）は埋め込みリソースとして読み込む -->
   <ItemGroup>
-    <None Remove="Src/Application/Asset/Koma/**" />
-    <Content Remove="Src/Application/Asset/Koma/**" />
-    <EmbeddedResource Include="Src/Application/Asset/Koma/**" LogicalName="NariNoteBackend.Application.Asset.Koma.%(Filename)%(Extension)" />
+    <None Remove="Src/Infrastructure/Asset/Koma/**" />
+    <Content Remove="Src/Infrastructure/Asset/Koma/**" />
+    <EmbeddedResource Include="Src/Infrastructure/Asset/Koma/**" LogicalName="NariNoteBackend.Infrastructure.Asset.Koma.%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,4 @@
 using System.Globalization;
-using NariNoteBackend.Application.Asset;
 using NariNoteBackend.Domain;
 using NariNoteBackend.Domain.Shogi;
 using SkiaSharp;
@@ -8,7 +7,7 @@ namespace NariNoteBackend.Application.Helper;
 
 /// <summary>
 ///     記事の OG 画像（左に局面、右にタイトル）を描く。
-///     見た目はフロントエンドの盤面（globals.css の --color-shogi-*）に揃える。駒は事前に生成した画像（KomaImages）を貼る
+///     見た目はフロントエンドの盤面（globals.css の --color-shogi-*）に揃える。駒は事前に生成した画像（KomaImage）を貼る
 /// </summary>
 public static class ArticleOgImageRenderer
 {
@@ -41,7 +40,14 @@ public static class ArticleOgImageRenderer
         return string.Join(" ", pieces.Select(p => p.Count > 1 ? $"{p.Type}{p.Count}" : p.Type));
     }
 
-    public static byte[] Render(string title, string authorName, ShogiPosition position, SKTypeface textTypeface)
+    /// <param name="komaImages">駒の種類 → 先手向きの画像。盤上にある駒の種類をすべて含むこと</param>
+    public static byte[] Render(
+        string title,
+        string authorName,
+        ShogiPosition position,
+        SKTypeface textTypeface,
+        IReadOnlyDictionary<string, SKImage> komaImages
+    )
     {
         using var surface = SKSurface.Create(new SKImageInfo(Width, Height));
         var canvas = surface.Canvas;
@@ -54,7 +60,7 @@ public static class ArticleOgImageRenderer
 
         using var capturedFont = new SKFont(textTypeface, 26);
         DrawTextCentered(canvas, $"△ 持駒 {FormatCaptured(position.GoteCaptured)}", columnCenterX, top + CapturedRowHeight / 2, capturedFont, TextColor);
-        DrawBoard(canvas, position, Padding, boardTop);
+        DrawBoard(canvas, position, Padding, boardTop, komaImages);
         DrawTextCentered(canvas, $"▲ 持駒 {FormatCaptured(position.SenteCaptured)}", columnCenterX, boardTop + BoardSize + CapturedRowGap + CapturedRowHeight / 2, capturedFont, TextColor);
 
         var textLeft = Padding + BoardSize + 56;
@@ -67,7 +73,7 @@ public static class ArticleOgImageRenderer
         return data.ToArray();
     }
 
-    static void DrawBoard(SKCanvas canvas, ShogiPosition position, float left, float top)
+    static void DrawBoard(SKCanvas canvas, ShogiPosition position, float left, float top, IReadOnlyDictionary<string, SKImage> komaImages)
     {
         using var boardPaint = new SKPaint { Color = BoardColor, IsAntialias = true };
         canvas.DrawRect(left, top, BoardSize, BoardSize, boardPaint);
@@ -102,14 +108,13 @@ public static class ArticleOgImageRenderer
                 var piece = position.Board[row, col];
                 if (piece == null) continue;
 
-                DrawKoma(canvas, piece, innerLeft + CellSize * (col + 0.5f), innerTop + CellSize * (row + 0.5f));
+                DrawKoma(canvas, piece, innerLeft + CellSize * (col + 0.5f), innerTop + CellSize * (row + 0.5f), komaImages[piece.Type]);
             }
         }
     }
 
-    static void DrawKoma(SKCanvas canvas, ShogiPiece piece, float centerX, float centerY)
+    static void DrawKoma(SKCanvas canvas, ShogiPiece piece, float centerX, float centerY, SKImage image)
     {
-        var image = KomaImages.Get(piece.Type);
         canvas.Save();
         canvas.Translate(centerX, centerY);
         if (piece.Owner == PieceOwner.Gote) canvas.RotateDegrees(180);
