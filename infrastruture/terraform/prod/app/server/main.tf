@@ -15,6 +15,12 @@ resource "aws_ebs_volume" "postgres_data" {
 
   tags = {
     Name = "${var.app_name}-postgres-data"
+    # DLM のスナップショット対象を識別するタグ
+    Snapshot = "${var.app_name}-postgres-data"
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
@@ -137,4 +143,72 @@ data "aws_iam_policy_document" "app_server_assume_role" {
       identifiers = ["ec2.amazonaws.com"]
     }
   }
+}
+
+# PostgreSQL データボリュームの定期スナップショット
+# WAL も同一ボリュームにあるため、クラッシュ整合のスナップショットでも復元時に WAL リカバリで整合状態に戻る
+resource "aws_dlm_lifecycle_policy" "postgres_data" {
+  description        = "${var.app_name} postgres data snapshot"
+  execution_role_arn = aws_iam_role.dlm.arn
+  state              = "ENABLED"
+
+  policy_details {
+    resource_types = ["VOLUME"]
+    target_tags = {
+      Snapshot = aws_ebs_volume.postgres_data.tags["Snapshot"]
+    }
+
+    schedule {
+      name = "daily"
+      create_rule {
+        interval      = 24
+        interval_unit = "HOURS"
+        times         = ["18:00"] # JST 03:00
+      }
+      retain_rule {
+        count = 7
+      }
+      copy_tags = true
+    }
+
+    schedule {
+      name = "weekly"
+      create_rule {
+        cron_expression = "cron(30 18 ? * SUN *)" # JST 月曜 03:30
+      }
+      retain_rule {
+        count = 4
+      }
+      copy_tags = true
+    }
+  }
+
+  tags = {
+    Name = "${var.app_name}-postgres-data-snapshot"
+  }
+}
+
+resource "aws_iam_role" "dlm" {
+  name               = "${var.app_name}-dlm-role"
+  assume_role_policy = data.aws_iam_policy_document.dlm_assume_role.json
+
+  tags = {
+    Name = "${var.app_name}-dlm-role"
+  }
+}
+
+data "aws_iam_policy_document" "dlm_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["dlm.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "dlm" {
+  role       = aws_iam_role.dlm.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSDataLifecycleManagerServiceRole"
 }
