@@ -187,28 +187,3 @@ resource "aws_dlm_lifecycle_policy" "postgres_data" {
     Name = "${var.app_name}-postgres-data-snapshot"
   }
 }
-
-resource "aws_iam_role" "dlm" {
-  name               = "${var.app_name}-dlm-role"
-  assume_role_policy = data.aws_iam_policy_document.dlm_assume_role.json
-
-  tags = {
-    Name = "${var.app_name}-dlm-role"
-  }
-}
-
-data "aws_iam_policy_document" "dlm_assume_role" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["dlm.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "dlm" {
-  role       = aws_iam_role.dlm.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSDataLifecycleManagerServiceRole"
-}
