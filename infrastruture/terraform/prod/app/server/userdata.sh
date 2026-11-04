@@ -26,6 +26,15 @@ cat > /etc/nginx/conf.d/nari-note-backend.conf <<'EOF'
 ${nginx_conf_file}
 EOF
 
+# Blue/Green の向き先ファイル。nginx の起動に必要なため、アプリ配置前に blue を向けた状態で用意しておく
+# (以降は nari-note-deploy が書き換える)
+mkdir -p /etc/nginx/nari-note-backend
+cat > /etc/nginx/nari-note-backend/active-upstream.conf <<'EOF'
+# active: blue
+# このファイルは nari-note-deploy が書き換える。手で編集しないこと
+server 127.0.0.1:5001;
+EOF
+
 # Cloudflare Origin 証明書を SSM から取得して設置 (nginx 起動前に必要)
 mkdir -p /etc/nginx/ssl
 chmod 700 /etc/nginx/ssl
@@ -172,37 +181,42 @@ sudo -u postgres psql -d nari_note -c "CREATE EXTENSION IF NOT EXISTS pg_stat_st
 # == Application ==
 dnf install -y aspnetcore-runtime-9.0
 
-# S3 からバイナリを取得
 APP_NAME="nari-note-backend"
 S3_BUCKET="${app_name}-deploy"
 AWS_REGION="ap-northeast-1"
-INSTALL_DIR="/opt/$${APP_NAME}"
-
-mkdir -p "$${INSTALL_DIR}"
-aws s3 cp "s3://$${S3_BUCKET}/latest/$${APP_NAME}" "$${INSTALL_DIR}/$${APP_NAME}" \
-  --region "$${AWS_REGION}"
-chmod +x "$${INSTALL_DIR}/$${APP_NAME}"
-for SETTINGS_FILE in appsettings.json appsettings.Production.json; do
-  aws s3 cp "s3://$${S3_BUCKET}/latest/$${SETTINGS_FILE}" "$${INSTALL_DIR}/$${SETTINGS_FILE}" \
-    --region "$${AWS_REGION}"
-done
+BOOTSTRAP_DIR="/var/tmp/$${APP_NAME}-bootstrap"
 
 # 専用ユーザーを作成
 useradd --system --no-create-home --shell /sbin/nologin "$${APP_NAME}" || true
-chown "$${APP_NAME}:$${APP_NAME}" "$${INSTALL_DIR}/$${APP_NAME}"
-chown "$${APP_NAME}:$${APP_NAME}" "$${INSTALL_DIR}/appsettings.json" "$${INSTALL_DIR}/appsettings.Production.json"
 
-# ログディレクトリを作成
-mkdir -p /var/log/$${APP_NAME}
-chown "$${APP_NAME}:$${APP_NAME}" /var/log/$${APP_NAME}
-
-# systemd サービスを配置
-cat > /etc/systemd/system/$${APP_NAME}.service <<'EOF'
+# Blue/Green 用のテンプレートユニットを配置 (nari-note-backend@blue / nari-note-backend@green)
+cat > "/etc/systemd/system/$${APP_NAME}@.service" <<'EOF'
 ${service_file}
 EOF
-
 systemctl daemon-reload
-systemctl enable --now "$${APP_NAME}"
+
+# Blue/Green デプロイスクリプトを配置 (以降のデプロイでは scripts/deploy.sh がリポジトリの最新版で上書きする)
+aws s3 cp "s3://$${S3_BUCKET}/${deploy_script_key}" /usr/local/bin/nari-note-deploy \
+  --region "$${AWS_REGION}"
+chmod 755 /usr/local/bin/nari-note-deploy
+
+# S3 から最新のバイナリと設定を取得し、デプロイスクリプト経由で配置・起動する
+mkdir -p "$${BOOTSTRAP_DIR}"
+for FILE in "$${APP_NAME}" appsettings.json appsettings.Production.json; do
+  aws s3 cp "s3://$${S3_BUCKET}/latest/$${FILE}" "$${BOOTSTRAP_DIR}/$${FILE}" \
+    --region "$${AWS_REGION}"
+done
+
+# 初回は旧系統が動いていないため、ドレイン待ちは不要
+DRAIN_SECONDS=0 /usr/local/bin/nari-note-deploy deploy \
+  "$${BOOTSTRAP_DIR}/$${APP_NAME}" \
+  "$${BOOTSTRAP_DIR}/appsettings.json" \
+  "$${BOOTSTRAP_DIR}/appsettings.Production.json"
+
+for FILE in "$${APP_NAME}" appsettings.json appsettings.Production.json; do
+  rm -f "$${BOOTSTRAP_DIR}/$${FILE}"
+done
+rmdir "$${BOOTSTRAP_DIR}"
 
 # dnf のパッケージキャッシュを削除しディスク容量を回収する
 dnf clean all

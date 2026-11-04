@@ -1,0 +1,25 @@
+# Blue/Green デプロイ用のテンプレートユニット。%i には blue / green が入る
+# 系統ごとのポート・ログ出力先は nari-note-deploy が生成する /etc/nari-note-backend/%i.env で指定する
+[Unit]
+Description=nari-note-backend ASP.NET Core App (%i)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=nari-note-backend
+WorkingDirectory=/opt/nari-note-backend/%i
+ExecStart=/opt/nari-note-backend/%i/nari-note-backend
+Restart=always
+RestartSec=5
+# 停止時は処理中のリクエストを捌き切ってから終了させる (ASP.NET Core の既定のシャットダウン猶予は 30 秒)
+TimeoutStopSec=35
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=APP_NAME=${app_name}
+EnvironmentFile=/etc/nari-note-backend/%i.env
+# 単一ファイル発行に同梱したネイティブライブラリの展開先。サービスユーザーにはホームが無いため明示する
+# 2 系統が同時に動くため、展開先も系統ごとに分ける
+CacheDirectory=nari-note-backend/%i
+Environment=DOTNET_BUNDLE_EXTRACT_BASE_DIR=/var/cache/nari-note-backend/%i
+
+[Install]
+WantedBy=multi-user.target

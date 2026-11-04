@@ -76,28 +76,41 @@ for SETTINGS_FILE in appsettings.json appsettings.Production.json; do
     --no-progress
 done
 
-echo "[4/4] EC2 にデプロイ中 (${EC2_USER}@${EC2_HOST})..."
-scp -i "${SSH_KEY}" \
-    -o StrictHostKeyChecking=no \
-    -o ConnectTimeout=10 \
-    "${PROJECT_DIR}/appsettings.json" \
-    "${PROJECT_DIR}/appsettings.Production.json" \
-    "${EC2_USER}@${EC2_HOST}:/tmp/"
+echo "[4/4] EC2 に Blue/Green デプロイ中 (${EC2_USER}@${EC2_HOST})..."
+# 待機系に配置 → ヘルスチェック → nginx 切り替え → 旧系統停止 は EC2 上の nari-note-deploy が行う
+# スクリプト自体もリポジトリの最新版で毎回上書きし、EC2 起動時点の版に固定されないようにする
+DEPLOY_SCRIPT="${REPO_ROOT}/infrastruture/terraform/prod/app/server/nari-note-deploy.sh"
+REMOTE_DIR="/tmp/${BINARY_NAME}-deploy"
 
 ssh -i "${SSH_KEY}" \
     -o StrictHostKeyChecking=no \
     -o ConnectTimeout=10 \
     "${EC2_USER}@${EC2_HOST}" \
-    "aws s3 cp s3://${S3_BUCKET}/${S3_LATEST_KEY} /tmp/${BINARY_NAME} --region ${AWS_REGION} \
-     && sudo install -o ${BINARY_NAME} -g ${BINARY_NAME} -m 755 /tmp/${BINARY_NAME} /opt/${BINARY_NAME}/${BINARY_NAME} \
-     && sudo install -o ${BINARY_NAME} -g ${BINARY_NAME} -m 644 /tmp/appsettings.json /opt/${BINARY_NAME}/appsettings.json \
-     && sudo install -o ${BINARY_NAME} -g ${BINARY_NAME} -m 644 /tmp/appsettings.Production.json /opt/${BINARY_NAME}/appsettings.Production.json \
-     && rm /tmp/${BINARY_NAME} /tmp/appsettings.json /tmp/appsettings.Production.json \
-     && sudo systemctl restart ${BINARY_NAME} \
-     && sudo systemctl is-active --quiet ${BINARY_NAME} && echo 'サービス起動確認OK'"
+    "mkdir -p ${REMOTE_DIR}"
+
+scp -i "${SSH_KEY}" \
+    -o StrictHostKeyChecking=no \
+    -o ConnectTimeout=10 \
+    "${PROJECT_DIR}/appsettings.json" \
+    "${PROJECT_DIR}/appsettings.Production.json" \
+    "${DEPLOY_SCRIPT}" \
+    "${EC2_USER}@${EC2_HOST}:${REMOTE_DIR}/"
+
+ssh -i "${SSH_KEY}" \
+    -o StrictHostKeyChecking=no \
+    -o ConnectTimeout=10 \
+    "${EC2_USER}@${EC2_HOST}" \
+    "set -e
+     cd ${REMOTE_DIR}
+     aws s3 cp s3://${S3_BUCKET}/${S3_LATEST_KEY} ./${BINARY_NAME} --region ${AWS_REGION} --no-progress
+     sudo install -m 755 ./nari-note-deploy.sh /usr/local/bin/nari-note-deploy
+     sudo /usr/local/bin/nari-note-deploy deploy ./${BINARY_NAME} ./appsettings.json ./appsettings.Production.json
+     rm -f ./${BINARY_NAME} ./appsettings.json ./appsettings.Production.json ./nari-note-deploy.sh
+     sudo /usr/local/bin/nari-note-deploy status"
 
 echo ""
 echo "=== デプロイ完了 ==="
 echo "  リリース : s3://${S3_BUCKET}/${S3_KEY}"
 echo "  latest   : s3://${S3_BUCKET}/${S3_LATEST_KEY}"
 echo "  EC2      : ${EC2_USER}@${EC2_HOST}"
+echo "  ロールバック: EC2_HOST=${EC2_HOST} ./scripts/rollback.sh"
