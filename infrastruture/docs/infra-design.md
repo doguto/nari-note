@@ -2,36 +2,10 @@
 
 ## 概要図
 
-### API
-
-```mermaid
-architecture-beta
-    service user(logos:chrome)[User]
-
-    group aws(logos:aws)[AWS]
-    group vpc(logos:aws-vpc)[VPC] in aws
-    group public-subnet(cloud)[Public Subnet] in vpc
-    group private-subnet(cloud)[Private Subnet] in vpc
-
-    service ec2(logos:aws-ec2)[EC2] in public-subnet
-
-    service rds(logos:aws-rds)[RDS] in private-subnet
-    service redis(logos:aws-elasticache)[Redis] in private-subnet
-
-    service s3(logos:aws-s3)[S3] in private-subnet
-
-    service secrets-manager(logos:aws-secrets-manager)[Secret Manager] in aws
-    service cloudwatch(logos:aws-cloudwatch)[CloudWatch] in aws
-
-    user:R -- L:ec2
-
-    ec2:R -- L:rds
-    ec2:R -- L:redis
-    ec2:R -- L:s3
-
-    ec2:B -- T:secrets-manager
-    ec2:B -- T:cloudwatch
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="nari-note-infra-dark.png">
+  <img src="nari-note-infra.png" alt="nari-note 本番インフラ構成図: User から Cloudflare Workers 上の Next.js、Cloudflare プロキシを経由して EC2 上の nginx・ASP.NET Core・PostgreSQL に到達する。画像は S3 から CloudFront で配信し、EC2 は SSM・CloudWatch・デプロイ用 S3・EBS と連携する" width="100%">
+</picture>
 
 ## 各サービス設定
 
