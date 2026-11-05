@@ -114,10 +114,81 @@ public class AuthControllerTest : IntegrationTestBase
         });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // 名前・パスワードは認証されるまで変更せず、確認トークンに保存する
         var user = await QueryAsync(db => db.Users.SingleAsync());
         Assert.Equal("taro", user.Name);
         Assert.Equal(existing.PasswordHash, user.PasswordHash);
-        Assert.Equal(1, await QueryAsync(db => db.EmailVerifications.CountAsync()));
+        var verification = await QueryAsync(db => db.EmailVerifications.SingleAsync());
+        Assert.Equal("changed", verification.Name);
+        Assert.True(BCrypt.Net.BCrypt.Verify("another-password", verification.PasswordHash));
+    }
+
+    [Fact]
+    public async Task 同じメールアドレスで続けてサインアップしても60秒経過するまでメールは1通しか送らない()
+    {
+        var client = CreateClient();
+        var request = new { name = "taro", email = "taro@example.com", password = Password };
+
+        await client.PostAsJsonAsync("/api/auth/signup", request);
+        TimeProvider.Advance(TimeSpan.FromSeconds(59));
+        var second = await client.PostAsJsonAsync("/api/auth/signup", request);
+        await ProcessOutboxAsync();
+
+        // 登録有無が漏れないよう、2 回目も同じレスポンスを返す
+        Assert.Equal(HttpStatusCode.OK, second.StatusCode);
+        Assert.Single(Factory.EmailHelper.SentMessages);
+
+        TimeProvider.Advance(TimeSpan.FromSeconds(1));
+        await client.PostAsJsonAsync("/api/auth/signup", request);
+        await ProcessOutboxAsync();
+
+        Assert.Equal(2, Factory.EmailHelper.SentMessages.Count);
+    }
+
+    [Fact]
+    public async Task 他人が先に未認証で登録していても本人が確認メールで認証すれば本人のパスワードだけが有効になる()
+    {
+        const string email = "victim@example.com";
+        var client = CreateClient();
+
+        // 攻撃者が他人のメールアドレスで登録し、未認証のままサインインしておく
+        await client.PostAsJsonAsync("/api/auth/signup", new { name = "attacker", email, password = "attacker-password" });
+        var attackerSignIn = await client.PostAsJsonAsync(
+            "/api/auth/signin",
+            new { usernameOrEmail = email, password = "attacker-password" }
+        );
+        var attackerToken = GetAuthToken(attackerSignIn);
+        Assert.False(string.IsNullOrEmpty(attackerToken));
+
+        // メールアドレスの持ち主が後日登録し、届いた確認メールのリンクで認証する
+        TimeProvider.Advance(TimeSpan.FromHours(1));
+        await client.PostAsJsonAsync("/api/auth/signup", new { name = "victim", email, password = "victim-password" });
+        var victimToken = await QueryAsync(db =>
+            db.EmailVerifications.Where(ev => ev.Name == "victim").Select(ev => ev.Token).SingleAsync()
+        );
+        var verifyResponse = await client.PostAsJsonAsync("/api/auth/verify-email", new { token = victimToken });
+        Assert.Equal(HttpStatusCode.OK, verifyResponse.StatusCode);
+
+        var user = await QueryAsync(db => db.Users.SingleAsync());
+        Assert.Equal("victim", user.Name);
+        Assert.True(user.IsEmailVerified);
+        // 攻撃者のパスワードではサインインできず、本人のパスワードでサインインできる
+        var attackerRetry = await client.PostAsJsonAsync(
+            "/api/auth/signin",
+            new { usernameOrEmail = email, password = "attacker-password" }
+        );
+        Assert.Equal(HttpStatusCode.BadRequest, attackerRetry.StatusCode);
+        var victimSignIn = await client.PostAsJsonAsync(
+            "/api/auth/signin",
+            new { usernameOrEmail = email, password = "victim-password" }
+        );
+        Assert.Equal(HttpStatusCode.OK, victimSignIn.StatusCode);
+        // 攻撃者が認証前に取得した認証トークンは無効になる
+        var attackerMe = await CreateClientWithToken(attackerToken!).GetAsync("/api/auth/me");
+        Assert.Null((await ReadAsync<AuthResponse>(attackerMe)).UserId);
+        // 認証時に発行された認証トークンは有効
+        var victimMe = await CreateClientWithToken(GetAuthToken(verifyResponse)!).GetAsync("/api/auth/me");
+        Assert.Equal(user.Id, (await ReadAsync<AuthResponse>(victimMe)).UserId);
     }
 
     [Fact]

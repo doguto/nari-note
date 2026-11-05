@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Extension;
@@ -10,6 +11,8 @@ namespace NariNoteBackend.Infrastructure.Security;
 
 public class JwtHelper : IJwtHelper
 {
+    const string SecurityStampClaimType = "security_stamp";
+
     readonly string audience;
     readonly int expirationInHours;
     readonly string issuer;
@@ -87,16 +90,17 @@ public class JwtHelper : IJwtHelper
         return null;
     }
 
-    public string GenerateToken(UserId userId, string userName)
+    public string GenerateToken(User user)
     {
         var credentials = new SigningCredentials(SymmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, userId.Value.ToString()),
-            new Claim(JwtRegisteredClaimNames.Name, userName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new(JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
+            new(JwtRegisteredClaimNames.Name, user.Name),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+        if (user.SecurityStamp != null) claims.Add(new Claim(SecurityStampClaimType, user.SecurityStamp));
 
         var token = new JwtSecurityToken(
             issuer,
@@ -107,6 +111,12 @@ public class JwtHelper : IJwtHelper
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string? GetSecurityStampFromToken(string token)
+    {
+        var principal = ValidateToken(token);
+        return principal?.FindFirst(SecurityStampClaimType)?.Value;
     }
 
     public string? GetUserNameFromToken(string token)

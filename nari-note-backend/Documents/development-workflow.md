@@ -114,9 +114,7 @@ public interface IArticleRepository
 {
     // 既存のメソッド...
     
-    /// <summary>
-    /// 記事を更新する
-    /// </summary>
+    // 記事を更新する
     Task<Article> UpdateAsync(Article article);
 }
 ```

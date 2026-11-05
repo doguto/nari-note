@@ -3,10 +3,8 @@ using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Tests.Support.Builder;
 
-/// <summary>
-///     設定項目が少なく Builder を用意するほどでもない Entity を組み立てる。
-///     ID は保存時に採番されるため、結合テストのデータ投入に使用する。
-/// </summary>
+// 設定項目が少なく Builder を用意するほどでもない Entity を組み立てる。
+// ID は保存時に採番されるため、結合テストのデータ投入に使用する。
 public static class TestEntity
 {
     public static Tag Tag(string name)

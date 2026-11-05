@@ -6,10 +6,8 @@ using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Migrations
 {
-    /// <summary>
-    /// Users.Email の大文字小文字を区別しない一意制約と、Users.Name の一意制約を追加する。
-    /// EF Core の属性では式インデックスを表現できないため、生 SQL で作成する（モデルスナップショットは変更なし）。
-    /// </summary>
+    // Users.Email の大文字小文字を区別しない一意制約と、Users.Name の一意制約を追加する。
+    // EF Core の属性では式インデックスを表現できないため、生 SQL で作成する（モデルスナップショットは変更なし）。
     [DbContext(typeof(NariNoteDbContext))]
     [Migration("20261007000000_AddUniqueLowerEmailIndexToUsers")]
     public partial class AddUniqueLowerEmailIndexToUsers : Migration

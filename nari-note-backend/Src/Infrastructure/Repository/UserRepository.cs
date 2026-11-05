@@ -66,6 +66,17 @@ public class UserRepository : IUserRepository
         return await context.Users.AnyAsync(u => u.Name == name && (excludeUserId == null || u.Id != excludeUserId));
     }
 
+    public async Task<int> DeleteStaleUnverifiedAsync(DateTime createdBefore, DateTime now)
+    {
+        // 条件の判定と削除を 1 つの DELETE で行い、判定後に認証されたユーザーを削除しないようにする
+        // 確認トークン等の関連データは Cascade で削除される
+        return await context.Users
+            .Where(u => !u.IsEmailVerified
+                        && u.CreatedAt < createdBefore
+                        && !u.EmailVerifications.Any(ev => !ev.IsUsed && ev.ExpiresAt >= now))
+            .ExecuteDeleteAsync();
+    }
+
     public async Task<User> CreateAsync(User user)
     {
         context.Users.Add(user);

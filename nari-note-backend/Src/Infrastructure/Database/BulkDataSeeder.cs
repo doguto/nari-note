@@ -4,10 +4,8 @@ using Npgsql;
 
 namespace NariNoteBackend.Infrastructure.Database;
 
-/// <summary>
-///     実行計画やパフォーマンスを本番の将来規模で確認するための大量ダミーデータを投入します。
-///     EF Core 経由では件数に対して遅すぎるため、generate_series で DB 側に生成させます。
-/// </summary>
+// 実行計画やパフォーマンスを本番の将来規模で確認するための大量ダミーデータを投入します。
+// EF Core 経由では件数に対して遅すぎるため、generate_series で DB 側に生成させます。
 public static class BulkDataSeeder
 {
     const string MarkerEmail = "bulk-user1@example.com";

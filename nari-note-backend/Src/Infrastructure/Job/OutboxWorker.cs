@@ -1,4 +1,4 @@
-namespace NariNoteBackend.Infrastructure.Outbox;
+namespace NariNoteBackend.Infrastructure.Job;
 
 public class OutboxWorker : BackgroundService
 {

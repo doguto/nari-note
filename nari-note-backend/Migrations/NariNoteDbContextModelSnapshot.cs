@@ -214,6 +214,14 @@ namespace NariNoteBackend.Migrations
                     b.Property<bool>("IsUsed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -480,6 +488,9 @@ namespace NariNoteBackend.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("AlreadyRegisteredNotifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Bio")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
@@ -508,6 +519,10 @@ namespace NariNoteBackend.Migrations
                     b.Property<string>("ProfileImage")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

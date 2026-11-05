@@ -4,11 +4,9 @@ using System.Reflection;
 
 namespace NariNoteBackend.Domain.Template;
 
-/// <summary>
-/// メール本文のテンプレート
-/// 本文は Email/ 配下の .html / .txt ファイル（埋め込みリソース）で管理し、
-/// {{key}} 形式のプレースホルダーを置換して生成する
-/// </summary>
+// メール本文のテンプレート
+// 本文は Email/ 配下の .html / .txt ファイル（埋め込みリソース）で管理し、
+// {{key}} 形式のプレースホルダーを置換して生成する
 public static class EmailTemplate
 {
     const string ResourcePrefix = "NariNoteBackend.Domain.Template.Email.";

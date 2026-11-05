@@ -1,6 +1,7 @@
 using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Application.Exception;
+using NariNoteBackend.Application.Helper;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
@@ -41,21 +42,40 @@ public class SignUpService
         }
         else if (existingUser.IsEmailVerified)
         {
-            // 登録済みアドレスには、その旨とパスワード再設定の案内を通知する
-            await outboxMessageRepository.AddAsync(
-                OutboxMessage.ForEmail(
-                    this.emailMessageStore.AlreadyRegisteredMessage(existingUser.Email),
-                    timeProvider.UtcNow()
-                )
-            );
+            await NotifyAlreadyRegisteredAsync(existingUser);
         }
         else
         {
-            // 未認証のアカウントは確認メールを再送する（既存の名前・パスワードは変更しない）
-            await SendVerificationEmailAsync(existingUser);
+            // 未認証のアカウントは、今回の入力内容を載せた確認メールを送る
+            // 名前・パスワードは確認メールのリンクで認証されたときに反映する（メールアドレスの持ち主が入力した値を使うため）
+            if (await userRepository.ExistsByNameAsync(request.Name, existingUser.Id))
+            {
+                throw new ConflictException("このユーザー名は既に使用されています");
+            }
+
+            // 同じアドレスへの連続送信を防ぐ。登録有無が漏れないよう、エラーにはせず送信だけを止める
+            var latest = await emailVerificationRepository.FindLatestByUserIdAsync(existingUser.Id);
+            if (AuthEmailCooldown.IsActive(latest?.CreatedAt, timeProvider.UtcNow())) return new SignUpResponse();
+
+            await SendVerificationEmailAsync(existingUser, request.Name, HashPassword(request.Password));
         }
 
         return new SignUpResponse();
+    }
+
+    // 登録済みアドレスには、その旨とパスワード再設定の案内を通知する
+    async Task NotifyAlreadyRegisteredAsync(User user)
+    {
+        // 同じアドレスへの連続送信を防ぐ。登録有無が漏れないよう、エラーにはせず送信だけを止める
+        var now = timeProvider.UtcNow();
+        if (AuthEmailCooldown.IsActive(user.AlreadyRegisteredNotifiedAt, now)) return;
+
+        user.AlreadyRegisteredNotifiedAt = now;
+        await userRepository.UpdateAsync(user);
+
+        await outboxMessageRepository.AddAsync(
+            OutboxMessage.ForEmail(this.emailMessageStore.AlreadyRegisteredMessage(user.Email), now)
+        );
     }
 
     async Task CreateUserAsync(SignUpRequest request)
@@ -66,7 +86,7 @@ public class SignUpService
             throw new ConflictException("このユーザー名は既に使用されています");
         }
 
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+        var passwordHash = HashPassword(request.Password);
 
         var user = new User
         {
@@ -77,7 +97,7 @@ public class SignUpService
 
         var createdUser = await userRepository.CreateAsync(user);
 
-        await SendVerificationEmailAsync(createdUser);
+        await SendVerificationEmailAsync(createdUser, createdUser.Name, createdUser.PasswordHash);
 
         var now = timeProvider.UtcNow();
         await outboxMessageRepository.AddAsync(OutboxMessage.ForDiscordEmbed(
@@ -97,7 +117,12 @@ public class SignUpService
         ));
     }
 
-    async Task SendVerificationEmailAsync(User user)
+    static string HashPassword(string password)
+    {
+        return BCrypt.Net.BCrypt.HashPassword(password);
+    }
+
+    async Task SendVerificationEmailAsync(User user, string name, string passwordHash)
     {
         var now = timeProvider.UtcNow();
         var guid = Guid.NewGuid();
@@ -105,7 +130,9 @@ public class SignUpService
         {
             UserId = user.Id,
             Token = guid.ToString(),
-            ExpiresAt = now.AddHours(24)
+            ExpiresAt = now.AddHours(24),
+            Name = name,
+            PasswordHash = passwordHash
         };
         await emailVerificationRepository.CreateAsync(emailVerification);
 

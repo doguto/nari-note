@@ -3,9 +3,7 @@ using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Tests.Support.Builder;
 
-/// <summary>
-///     既定値で「公開済みの単体記事」を組み立てる。
-/// </summary>
+// 既定値で「公開済みの単体記事」を組み立てる。
 public class ArticleBuilder
 {
     readonly User author;
@@ -61,7 +59,7 @@ public class ArticleBuilder
         return this;
     }
 
-    /// <summary>タグを新規作成して紐づける（結合テストで既存のタグを使う場合は TestEntity.ArticleTag を使用する）</summary>
+    // タグを新規作成して紐づける（結合テストで既存のタグを使う場合は TestEntity.ArticleTag を使用する）
     public ArticleBuilder WithTags(params string[] names)
     {
         this.tagNames.AddRange(names);
