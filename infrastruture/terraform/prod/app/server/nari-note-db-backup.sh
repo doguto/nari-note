@@ -27,8 +27,8 @@ set -euo pipefail
 
 WALG_VERSION="v3.0.9"
 # Ubuntu 20.04 向けビルドは glibc 2.31 以上で動くため、AL2023 (glibc 2.34) でそのまま使える
-WALG_ASSET="wal-g-pg-20.04-amd64"
-WALG_SHA256="965a7147852435bc4b54f272799b63df826b54ef65cf7c4fc688c82b96c0c4eb"
+WALG_ASSET="wal-g-pg-20.04-aarch64"
+WALG_SHA256="89f0cea535eed8c5b742358bff5151e65b302eab90689d0afb38750f8d505936"
 WALG_BIN="/usr/local/bin/wal-g"
 WALG_CONFIG="/etc/wal-g/config.json"
 

@@ -16,7 +16,7 @@ fi
 S3_BUCKET="${S3_BUCKET:-nari-note-deploy}"
 AWS_REGION="ap-northeast-1"
 AWS_VAULT_PROFILE="${AWS_VAULT_PROFILE:-narinote}"
-RUNTIME="linux-x64"
+RUNTIME="linux-arm64"
 BINARY_NAME="nari-note-backend"
 
 EC2_USER="ec2-user"

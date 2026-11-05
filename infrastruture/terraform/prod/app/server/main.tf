@@ -11,9 +11,9 @@ locals {
   # DB バックアップ (WAL-G) の導入・リストア用スクリプト。配布方法はデプロイスクリプトと同じ
   db_backup_script_key = "scripts/nari-note-db-backup.sh"
 
-  # Amazon Linux 2023 (minimal, x86_64)
+  # Amazon Linux 2023 (minimal, arm64)
   # NOTE: most_recent で動的に解決すると、AMI の公開のたびに apply でインスタンスが再作成されるうえ、ルートボリュームに収まらない別系統の AMI を選ぶことがあるため、IDで固定する
-  app_server_ami_id = "ami-005c30c039bdcb2b7"
+  app_server_ami_id = "ami-0512fdcd748428ebe"
 }
 
 resource "aws_ebs_volume" "postgres_data" {
