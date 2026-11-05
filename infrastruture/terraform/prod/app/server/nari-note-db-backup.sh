@@ -144,6 +144,9 @@ write_recovery_conf() {
     echo "# nari-note-db-backup が復元のために一時的に配置する。復元完了後に削除される"
     echo "restore_command = '${WALG_BIN} --config ${WALG_CONFIG} wal-fetch %f %p'"
     echo "recovery_target_action = 'promote'"
+    # 既定の latest だと、取り消した restore で分岐したタイムラインが S3 に残っている場合にそちらを辿ってしまう。
+    # finalize で分岐直後にベースバックアップを取るため、ベースバックアップと同じタイムラインを辿れば常に正しい履歴になる
+    echo "recovery_target_timeline = 'current'"
     if [[ "${target}" != "latest" ]]; then
       echo "recovery_target_time = '${target}'"
     fi
