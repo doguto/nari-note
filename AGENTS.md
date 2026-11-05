@@ -60,6 +60,7 @@ nari-note-backend/Src/
 ├── Infrastructure/
 │   ├── NariNoteDbContext.cs  # EF Core DbContext
 │   ├── Repository/         # Repository実装
+│   ├── Job/                # バックグラウンドジョブ（Outbox 配送、未認証ユーザーの削除等）
 │   └── Binding/            # ValueObject のモデルバインド・JSON 変換
 ├── Middleware/             # グローバルミドルウェア
 └── Filter/                 # アクションフィルタ

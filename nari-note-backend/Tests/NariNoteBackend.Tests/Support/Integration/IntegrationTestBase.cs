@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Infrastructure.Database;
-using NariNoteBackend.Infrastructure.Outbox;
+using NariNoteBackend.Infrastructure.Job;
 
 namespace NariNoteBackend.Tests.Support.Integration;
 

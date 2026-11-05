@@ -1,27 +1,27 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NariNoteBackend.Domain.Entity;
-using NariNoteBackend.Infrastructure.Cleanup;
+using NariNoteBackend.Infrastructure.Job;
 using NariNoteBackend.Tests.Support;
 using NariNoteBackend.Tests.Support.Builder;
 using NariNoteBackend.Tests.Support.Integration;
 
 namespace NariNoteBackend.Tests.Infrastructure;
 
-// 削除条件のクエリを検証するため、実 DB に接続して UnverifiedUserCleanupProcessor を実行する。
-public class UnverifiedUserCleanupProcessorTest : IntegrationTestBase
+// 削除条件のクエリを検証するため、実 DB に接続して UnverifiedUserDeletionProcessor を実行する。
+public class UnverifiedUserDeletionProcessorTest : IntegrationTestBase
 {
     static readonly DateTime Now = TestTimeProvider.DefaultUtcNow;
-    static readonly DateTime Expired = Now - UnverifiedUserCleanupProcessor.Retention;
+    static readonly DateTime Expired = Now - UnverifiedUserDeletionProcessor.Retention;
 
-    public UnverifiedUserCleanupProcessorTest(NariNoteApiFactory factory) : base(factory)
+    public UnverifiedUserDeletionProcessorTest(NariNoteApiFactory factory) : base(factory)
     {
     }
 
     async Task<int> ProcessAsync()
     {
         using var scope = Factory.Services.CreateScope();
-        return await scope.ServiceProvider.GetRequiredService<UnverifiedUserCleanupProcessor>().ProcessAsync();
+        return await scope.ServiceProvider.GetRequiredService<UnverifiedUserDeletionProcessor>().ProcessAsync();
     }
 
     async Task<bool> ExistsAsync(User user)

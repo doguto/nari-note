@@ -5,7 +5,7 @@ using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Extension;
 using Serilog.Context;
 
-namespace NariNoteBackend.Infrastructure.Outbox;
+namespace NariNoteBackend.Infrastructure.Job;
 
 public class OutboxProcessor
 {

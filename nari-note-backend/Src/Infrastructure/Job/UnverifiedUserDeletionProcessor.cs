@@ -1,22 +1,22 @@
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Extension;
 
-namespace NariNoteBackend.Infrastructure.Cleanup;
+namespace NariNoteBackend.Infrastructure.Job;
 
 // メールアドレスの認証が完了しないまま放置されたユーザーを削除する。
 // 他人のメールアドレスや存在しないメールアドレスで登録されたユーザーが、名前・メールアドレスを使えない状態のまま残らないようにする。
-public class UnverifiedUserCleanupProcessor
+public class UnverifiedUserDeletionProcessor
 {
     // 作成からこの期間が経過しても認証されていないユーザーを削除対象にする
     public static readonly TimeSpan Retention = TimeSpan.FromDays(7);
 
-    readonly ILogger<UnverifiedUserCleanupProcessor> logger;
+    readonly ILogger<UnverifiedUserDeletionProcessor> logger;
     readonly TimeProvider timeProvider;
     readonly IUserRepository userRepository;
 
-    public UnverifiedUserCleanupProcessor(
+    public UnverifiedUserDeletionProcessor(
         IUserRepository userRepository,
-        ILogger<UnverifiedUserCleanupProcessor> logger,
+        ILogger<UnverifiedUserDeletionProcessor> logger,
         TimeProvider timeProvider
     )
     {

@@ -1,13 +1,13 @@
-namespace NariNoteBackend.Infrastructure.Cleanup;
+namespace NariNoteBackend.Infrastructure.Job;
 
-public class UnverifiedUserCleanupWorker : BackgroundService
+public class UnverifiedUserDeletionWorker : BackgroundService
 {
     static readonly TimeSpan Interval = TimeSpan.FromDays(1);
 
-    readonly ILogger<UnverifiedUserCleanupWorker> logger;
+    readonly ILogger<UnverifiedUserDeletionWorker> logger;
     readonly IServiceScopeFactory scopeFactory;
 
-    public UnverifiedUserCleanupWorker(IServiceScopeFactory scopeFactory, ILogger<UnverifiedUserCleanupWorker> logger)
+    public UnverifiedUserDeletionWorker(IServiceScopeFactory scopeFactory, ILogger<UnverifiedUserDeletionWorker> logger)
     {
         this.scopeFactory = scopeFactory;
         this.logger = logger;
@@ -28,11 +28,11 @@ public class UnverifiedUserCleanupWorker : BackgroundService
         try
         {
             using var scope = scopeFactory.CreateScope();
-            await scope.ServiceProvider.GetRequiredService<UnverifiedUserCleanupProcessor>().ProcessAsync();
+            await scope.ServiceProvider.GetRequiredService<UnverifiedUserDeletionProcessor>().ProcessAsync();
         }
         catch (System.Exception ex)
         {
-            logger.LogError(ex, "Unverified user cleanup failed");
+            logger.LogError(ex, "Unverified user deletion failed");
         }
     }
 
