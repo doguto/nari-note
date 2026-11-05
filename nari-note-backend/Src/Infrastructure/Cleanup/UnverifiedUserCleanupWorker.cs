@@ -2,7 +2,7 @@ namespace NariNoteBackend.Infrastructure.Cleanup;
 
 public class UnverifiedUserCleanupWorker : BackgroundService
 {
-    static readonly TimeSpan Interval = TimeSpan.FromHours(1);
+    static readonly TimeSpan Interval = TimeSpan.FromDays(1);
 
     readonly ILogger<UnverifiedUserCleanupWorker> logger;
     readonly IServiceScopeFactory scopeFactory;

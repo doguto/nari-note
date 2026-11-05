@@ -690,7 +690,7 @@ public class Session
 
 #### 放置された未認証ユーザーの削除
 
-`UnverifiedUserCleanupWorker` が 1 時間ごとに、次の条件をすべて満たすユーザーを削除します（関連データは Cascade で削除）。
+`UnverifiedUserCleanupWorker` が 1 日ごと（およびアプリ起動時）に、次の条件をすべて満たすユーザーを削除します（関連データは Cascade で削除）。
 
 - メールアドレスが未認証
 - 作成から 7 日以上経過
