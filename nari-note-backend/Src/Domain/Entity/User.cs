@@ -35,6 +35,9 @@ public class User : EntityBase
     [MaxLength(64)]
     public string? SecurityStamp { get; set; }
 
+    // 登録済みのメールアドレスでサインアップされたときに、その旨の案内メールを最後に送った日時（連続送信の防止に使う）
+    public DateTime? AlreadyRegisteredNotifiedAt { get; set; }
+
     // 発行済みの認証トークンをすべて無効にする
     public void RotateSecurityStamp()
     {

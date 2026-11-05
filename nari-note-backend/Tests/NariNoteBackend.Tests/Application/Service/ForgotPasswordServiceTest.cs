@@ -16,6 +16,7 @@ public class ForgotPasswordServiceTest
     readonly IOutboxMessageRepository outboxMessageRepository = Substitute.For<IOutboxMessageRepository>();
     readonly IPasswordResetTokenRepository passwordResetTokenRepository = Substitute.For<IPasswordResetTokenRepository>();
     readonly ForgotPasswordService service;
+    readonly TestTimeProvider timeProvider = new();
     readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
 
     public ForgotPasswordServiceTest()
@@ -25,7 +26,7 @@ public class ForgotPasswordServiceTest
             this.passwordResetTokenRepository,
             this.outboxMessageRepository,
             new EmailMessageStore("https://nari-note.com"),
-            new TestTimeProvider()
+            this.timeProvider
         );
     }
 
@@ -45,6 +46,27 @@ public class ForgotPasswordServiceTest
         await this.outboxMessageRepository.Received(1).AddAsync(
             Arg.Is<OutboxMessage>(m => m.Type == OutboxMessage.EmailType && m.Payload.Contains(created.Token))
         );
+    }
+
+    [Fact]
+    public async Task 直近の送信から60秒経過するまでは再設定メールを送らない()
+    {
+        var user = new UserBuilder().WithEmail(Email).Build();
+        this.userRepository.FindByEmailAsync(Email).Returns(user);
+        var latest = TestEntity.PasswordResetToken(user, "latest-token", TestTimeProvider.DefaultUtcNow.AddHours(1));
+        latest.CreatedAt = TestTimeProvider.DefaultUtcNow.AddSeconds(-59);
+        this.passwordResetTokenRepository.FindLatestByUserIdAsync(user.Id).Returns(latest);
+
+        // 登録有無が漏れないよう、エラーにはせず送信だけを止める
+        await this.service.ExecuteAsync(new ForgotPasswordRequest { Email = Email });
+        await this.passwordResetTokenRepository.DidNotReceive().CreateAsync(Arg.Any<PasswordResetToken>());
+        await this.outboxMessageRepository.DidNotReceive().AddAsync(Arg.Any<OutboxMessage>());
+
+        this.timeProvider.Advance(TimeSpan.FromSeconds(1));
+        await this.service.ExecuteAsync(new ForgotPasswordRequest { Email = Email });
+
+        await this.passwordResetTokenRepository.Received(1).CreateAsync(Arg.Any<PasswordResetToken>());
+        await this.outboxMessageRepository.Received(1).AddAsync(Arg.Any<OutboxMessage>());
     }
 
     [Fact]

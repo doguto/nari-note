@@ -21,6 +21,7 @@ public class SignUpServiceTest
     readonly List<OutboxMessage> outboxMessages = new();
     readonly IOutboxMessageRepository outboxMessageRepository = Substitute.For<IOutboxMessageRepository>();
     readonly SignUpService service;
+    readonly TestTimeProvider timeProvider = new();
     readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
 
     public SignUpServiceTest()
@@ -46,7 +47,7 @@ public class SignUpServiceTest
             this.emailVerificationRepository,
             this.outboxMessageRepository,
             new EmailMessageStore("https://nari-note.com"),
-            new TestTimeProvider()
+            this.timeProvider
         );
     }
 
@@ -131,6 +132,45 @@ public class SignUpServiceTest
 
         Assert.Empty(this.createdVerifications);
         Assert.Empty(this.outboxMessages);
+    }
+
+    [Fact]
+    public async Task 認証済みのメールアドレスへの案内は直近の送信から60秒経過するまで送らない()
+    {
+        var existing = new UserBuilder().WithEmail(Email).Build();
+        existing.AlreadyRegisteredNotifiedAt = TestTimeProvider.DefaultUtcNow.AddSeconds(-59);
+        this.userRepository.FindByEmailAsync(Email).Returns(existing);
+
+        await this.service.ExecuteAsync(CreateRequest());
+        Assert.Empty(this.outboxMessages);
+
+        this.timeProvider.Advance(TimeSpan.FromSeconds(1));
+        await this.service.ExecuteAsync(CreateRequest());
+
+        Assert.Single(this.outboxMessages);
+        Assert.Equal(this.timeProvider.GetUtcNow().UtcDateTime, existing.AlreadyRegisteredNotifiedAt);
+        await this.userRepository.Received(1).UpdateAsync(existing);
+    }
+
+    [Fact]
+    public async Task 未認証のメールアドレスへの確認メールは直近の送信から60秒経過するまで送らない()
+    {
+        var existing = new UserBuilder().WithEmail(Email).EmailUnverified().Build();
+        this.userRepository.FindByEmailAsync(Email).Returns(existing);
+        var latest = TestEntity.EmailVerification(existing, "latest-token", TestTimeProvider.DefaultUtcNow.AddHours(24));
+        latest.CreatedAt = TestTimeProvider.DefaultUtcNow.AddSeconds(-59);
+        this.emailVerificationRepository.FindLatestByUserIdAsync(existing.Id).Returns(latest);
+
+        // 登録有無が漏れないよう、エラーにはせず送信だけを止める
+        await this.service.ExecuteAsync(CreateRequest());
+        Assert.Empty(this.createdVerifications);
+        Assert.Empty(this.outboxMessages);
+
+        this.timeProvider.Advance(TimeSpan.FromSeconds(1));
+        await this.service.ExecuteAsync(CreateRequest());
+
+        Assert.Single(this.createdVerifications);
+        Assert.Single(this.outboxMessages);
     }
 
     [Fact]

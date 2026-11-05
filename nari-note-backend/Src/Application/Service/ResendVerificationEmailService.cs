@@ -10,9 +10,6 @@ namespace NariNoteBackend.Application.Service;
 
 public class ResendVerificationEmailService
 {
-    // 連続送信を防ぐため、直近の送信からこの時間が経過するまで再送を拒否する
-    static readonly TimeSpan ResendCooldown = TimeSpan.FromSeconds(60);
-
     readonly IEmailVerificationRepository emailVerificationRepository;
     readonly EmailMessageStore emailMessageStore;
     readonly IOutboxMessageRepository outboxMessageRepository;
@@ -41,7 +38,8 @@ public class ResendVerificationEmailService
 
         var now = timeProvider.UtcNow();
         var latest = await emailVerificationRepository.FindLatestByUserIdAsync(userId);
-        if (latest != null && now - latest.CreatedAt < ResendCooldown)
+        // 連続送信を防ぐため、直近の送信から一定時間が経過するまで再送を拒否する
+        if (AuthEmailCooldown.IsActive(latest?.CreatedAt, now))
         {
             throw new TooManyRequestsException("確認メールは送信済みです。しばらくしてから再度お試しください。");
         }

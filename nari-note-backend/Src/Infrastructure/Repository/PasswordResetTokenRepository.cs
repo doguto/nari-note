@@ -41,6 +41,14 @@ public class PasswordResetTokenRepository : IPasswordResetTokenRepository
             .FirstOrDefaultAsync(prt => prt.Token == token);
     }
 
+    public async Task<PasswordResetToken?> FindLatestByUserIdAsync(UserId userId)
+    {
+        return await context.PasswordResetTokens
+            .Where(prt => prt.UserId == userId)
+            .OrderByDescending(prt => prt.CreatedAt)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<PasswordResetToken> UpdateAsync(PasswordResetToken entity)
     {
         context.PasswordResetTokens.Update(entity);

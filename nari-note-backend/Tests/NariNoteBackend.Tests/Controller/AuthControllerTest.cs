@@ -124,6 +124,28 @@ public class AuthControllerTest : IntegrationTestBase
     }
 
     [Fact]
+    public async Task 同じメールアドレスで続けてサインアップしても60秒経過するまでメールは1通しか送らない()
+    {
+        var client = CreateClient();
+        var request = new { name = "taro", email = "taro@example.com", password = Password };
+
+        await client.PostAsJsonAsync("/api/auth/signup", request);
+        TimeProvider.Advance(TimeSpan.FromSeconds(59));
+        var second = await client.PostAsJsonAsync("/api/auth/signup", request);
+        await ProcessOutboxAsync();
+
+        // 登録有無が漏れないよう、2 回目も同じレスポンスを返す
+        Assert.Equal(HttpStatusCode.OK, second.StatusCode);
+        Assert.Single(Factory.EmailHelper.SentMessages);
+
+        TimeProvider.Advance(TimeSpan.FromSeconds(1));
+        await client.PostAsJsonAsync("/api/auth/signup", request);
+        await ProcessOutboxAsync();
+
+        Assert.Equal(2, Factory.EmailHelper.SentMessages.Count);
+    }
+
+    [Fact]
     public async Task 他人が先に未認証で登録していても本人が確認メールで認証すれば本人のパスワードだけが有効になる()
     {
         const string email = "victim@example.com";
@@ -138,7 +160,8 @@ public class AuthControllerTest : IntegrationTestBase
         var attackerToken = GetAuthToken(attackerSignIn);
         Assert.False(string.IsNullOrEmpty(attackerToken));
 
-        // メールアドレスの持ち主が登録し、届いた確認メールのリンクで認証する
+        // メールアドレスの持ち主が後日登録し、届いた確認メールのリンクで認証する
+        TimeProvider.Advance(TimeSpan.FromHours(1));
         await client.PostAsJsonAsync("/api/auth/signup", new { name = "victim", email, password = "victim-password" });
         var victimToken = await QueryAsync(db =>
             db.EmailVerifications.Where(ev => ev.Name == "victim").Select(ev => ev.Token).SingleAsync()

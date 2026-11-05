@@ -41,13 +41,7 @@ public class SignUpService
         }
         else if (existingUser.IsEmailVerified)
         {
-            // 登録済みアドレスには、その旨とパスワード再設定の案内を通知する
-            await outboxMessageRepository.AddAsync(
-                OutboxMessage.ForEmail(
-                    this.emailMessageStore.AlreadyRegisteredMessage(existingUser.Email),
-                    timeProvider.UtcNow()
-                )
-            );
+            await NotifyAlreadyRegisteredAsync(existingUser);
         }
         else
         {
@@ -58,10 +52,29 @@ public class SignUpService
                 throw new ConflictException("このユーザー名は既に使用されています");
             }
 
+            // 同じアドレスへの連続送信を防ぐ。登録有無が漏れないよう、エラーにはせず送信だけを止める
+            var latest = await emailVerificationRepository.FindLatestByUserIdAsync(existingUser.Id);
+            if (AuthEmailCooldown.IsActive(latest?.CreatedAt, timeProvider.UtcNow())) return new SignUpResponse();
+
             await SendVerificationEmailAsync(existingUser, request.Name, HashPassword(request.Password));
         }
 
         return new SignUpResponse();
+    }
+
+    // 登録済みアドレスには、その旨とパスワード再設定の案内を通知する
+    async Task NotifyAlreadyRegisteredAsync(User user)
+    {
+        // 同じアドレスへの連続送信を防ぐ。登録有無が漏れないよう、エラーにはせず送信だけを止める
+        var now = timeProvider.UtcNow();
+        if (AuthEmailCooldown.IsActive(user.AlreadyRegisteredNotifiedAt, now)) return;
+
+        user.AlreadyRegisteredNotifiedAt = now;
+        await userRepository.UpdateAsync(user);
+
+        await outboxMessageRepository.AddAsync(
+            OutboxMessage.ForEmail(this.emailMessageStore.AlreadyRegisteredMessage(user.Email), now)
+        );
     }
 
     async Task CreateUserAsync(SignUpRequest request)
