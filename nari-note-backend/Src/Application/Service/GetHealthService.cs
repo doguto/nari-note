@@ -6,12 +6,12 @@ namespace NariNoteBackend.Application.Service;
 
 public class GetHealthService
 {
-    public async Task<GetHealthResponse> ExecuteAsync()
+    public Task<GetHealthResponse> ExecuteAsync()
     {
-        return new GetHealthResponse()
+        return Task.FromResult(new GetHealthResponse()
         {
             StatusCode = HttpStatusCode.OK.AsInt(),
             Message = "",
-        };
+        });
     }
 }

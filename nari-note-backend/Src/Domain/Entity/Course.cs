@@ -23,7 +23,7 @@ public class Course : EntityBase
     public DateTime? PublishedAt { get; set; }
 
     // Navigation Properties
-    public User User { get; set; }
+    public User User { get; set; } = null!;
     public List<CourseLike> CourseLikes { get; set; } = new();
     public List<Article> Articles { get; set; } = new();
     
