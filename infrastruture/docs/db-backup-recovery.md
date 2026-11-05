@@ -111,7 +111,7 @@ archive_timeout = 60s
 
 ## リストア
 
-リストアは EC2 上の `nari-note-db-backup` で行う。
+リストアは EC2 上の `nari-note-db-backup` で行う。実際の作業手順は [db-restore-runbook.md](db-restore-runbook.md) を参照。
 
 | コマンド | 内容 |
 | --- | --- |
@@ -268,11 +268,10 @@ sequenceDiagram
     participant PG as PostgreSQL
     participant S3 as S3 (WAL-G)
 
-    Op->>EBS: 空の gp3 ボリュームを同じ AZ に作成
     Op->>TF: state rm aws_ebs_volume.postgres_data
-    Op->>TF: import aws_ebs_volume.postgres_data vol-xxxx
-    Note over TF: prevent_destroy のため<br/>state の付け替えで置き換える
+    Note over TF: prevent_destroy のため<br/>壊れた EBS は削除せず管理から外す
     Op->>TF: apply
+    TF->>EBS: 新しい空の EBS を作成
     TF->>EC2: ボリューム ID 変更により再作成
     EC2->>EBS: mkfs + マウント
     EC2->>PG: initdb + 起動 (空の DB)
@@ -303,7 +302,7 @@ sequenceDiagram
 
     Note over Op,S3: EBS は AZ を跨げないため S3 から復元する
     Op->>TF: app_server の subnet を別 AZ<br/>(public_subnet_ids[1] 等) に変更
-    Op->>TF: 新 AZ に空の EBS を作成し import
+    Op->>TF: state rm aws_ebs_volume.postgres_data
     Op->>TF: apply
     TF->>EC2: 新 AZ にインスタンス作成
     Note over Op,S3: 以降は ④ の restore latest 以降と同じ
