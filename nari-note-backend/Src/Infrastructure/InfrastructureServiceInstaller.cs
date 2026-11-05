@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Security;
+using NariNoteBackend.Infrastructure.Cleanup;
 using NariNoteBackend.Infrastructure.Database;
 using NariNoteBackend.Infrastructure.Gateway;
 using NariNoteBackend.Infrastructure.Outbox;
@@ -63,6 +64,9 @@ public static class InfrastructureServiceInstaller
 
         services.AddScoped<OutboxProcessor>();
         services.AddHostedService<OutboxWorker>();
+
+        services.AddScoped<UnverifiedUserCleanupProcessor>();
+        services.AddHostedService<UnverifiedUserCleanupWorker>();
 
         // Register helpers
         services.AddSingleton(TimeProvider.System);

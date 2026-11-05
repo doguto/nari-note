@@ -13,6 +13,7 @@ public class UserBuilder
 
     readonly UserId id = UserId.From(Guid.CreateVersion7());
     string? bio;
+    DateTime createdAt = TestTimeProvider.DefaultUtcNow.AddDays(-30);
     string email;
     bool isEmailVerified = true;
     string name;
@@ -63,6 +64,12 @@ public class UserBuilder
         return this;
     }
 
+    public UserBuilder CreatedAt(DateTime value)
+    {
+        this.createdAt = value;
+        return this;
+    }
+
     public User Build()
     {
         return new User
@@ -74,8 +81,8 @@ public class UserBuilder
             Bio = this.bio,
             ProfileImage = this.profileImage,
             IsEmailVerified = this.isEmailVerified,
-            CreatedAt = TestTimeProvider.DefaultUtcNow.AddDays(-30),
-            UpdatedAt = TestTimeProvider.DefaultUtcNow.AddDays(-30)
+            CreatedAt = this.createdAt,
+            UpdatedAt = this.createdAt
         };
     }
 }
