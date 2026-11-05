@@ -11,6 +11,7 @@ dependencies {
     "../../network/vpc",
     "../../network/gateway",
     "../../deploy/bucket",
+    "../../db/backup",
     "../secret",
     "../../db/secret",
     "../../image_delivery/storage"

@@ -21,3 +21,9 @@ variable "cpu_alarm_period" {
   type        = number
   default     = 300
 }
+
+variable "wal_archive_pending_threshold" {
+  description = "Number of WAL segments waiting to be archived that triggers the alarm. With archive_timeout = 60s, this is roughly the backlog in minutes."
+  type        = number
+  default     = 5
+}

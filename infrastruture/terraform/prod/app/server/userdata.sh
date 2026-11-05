@@ -148,6 +148,11 @@ CONF
 chown postgres:postgres "$${PG_CONF_DIR}/nari-note.conf"
 chmod 600 "$${PG_CONF_DIR}/nari-note.conf"
 
+# WAL-G・バックアップ用 timer を配置する。archive_command が WAL-G を使うため PostgreSQL の起動前に行う
+aws s3 cp "s3://${app_name}-deploy/${db_backup_script_key}" /usr/local/bin/nari-note-db-backup   --region ap-northeast-1
+chmod 755 /usr/local/bin/nari-note-db-backup
+/usr/local/bin/nari-note-db-backup install "${app_name}" "${db_backup_bucket_name}"
+
 systemctl enable --now postgresql
 
 # アプリ用のロール・データベースを作成 (冪等)

@@ -3,9 +3,13 @@ locals {
   public_subnet_ids            = data.terraform_remote_state.vpc.outputs.public_subnet_ids
   app_server_availability_zone = data.aws_subnet.app_server.availability_zone
   deploy_bucket_name           = data.terraform_remote_state.deploy_bucket.outputs.bucket_name
+  db_backup_bucket_name        = data.terraform_remote_state.db_backup.outputs.bucket_name
+  db_backup_bucket_arn         = data.terraform_remote_state.db_backup.outputs.bucket_arn
 
   # Blue/Green デプロイスクリプトの S3 キー。userdata の上限 (16KB) を超えないよう、埋め込まずに S3 経由で配布する
   deploy_script_key = "scripts/nari-note-deploy.sh"
+  # DB バックアップ (WAL-G) の導入・リストア用スクリプト。配布方法はデプロイスクリプトと同じ
+  db_backup_script_key = "scripts/nari-note-db-backup.sh"
 
   # Amazon Linux 2023 (minimal, x86_64)
   # NOTE: most_recent で動的に解決すると、AMI の公開のたびに apply でインスタンスが再作成されるうえ、ルートボリュームに収まらない別系統の AMI を選ぶことがあるため、IDで固定する
@@ -48,14 +52,16 @@ resource "aws_instance" "app_server" {
   }
 
   user_data = templatefile("${path.module}/userdata.sh", {
-    service_file       = templatefile("${path.module}/nari-note-backend@.service", { app_name = var.app_name })
-    nginx_conf_file    = file("${path.module}/nari-note-backend.nginx.conf")
-    cloudwatch_conf    = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
-    postgresql_conf    = file("${path.module}/postgresql.conf")
-    pg_hba_conf        = file("${path.module}/pg_hba.conf")
-    app_name           = var.app_name
-    postgres_volume_id = replace(aws_ebs_volume.postgres_data.id, "-", "")
-    deploy_script_key  = aws_s3_object.deploy_script.key
+    service_file          = templatefile("${path.module}/nari-note-backend@.service", { app_name = var.app_name })
+    nginx_conf_file       = file("${path.module}/nari-note-backend.nginx.conf")
+    cloudwatch_conf       = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
+    postgresql_conf       = file("${path.module}/postgresql.conf")
+    pg_hba_conf           = file("${path.module}/pg_hba.conf")
+    app_name              = var.app_name
+    postgres_volume_id    = replace(aws_ebs_volume.postgres_data.id, "-", "")
+    deploy_script_key     = aws_s3_object.deploy_script.key
+    db_backup_script_key  = aws_s3_object.db_backup_script.key
+    db_backup_bucket_name = local.db_backup_bucket_name
   })
   user_data_replace_on_change = true
 
@@ -71,6 +77,15 @@ resource "aws_s3_object" "deploy_script" {
   key    = local.deploy_script_key
   source = "${path.module}/nari-note-deploy.sh"
   etag   = filemd5("${path.module}/nari-note-deploy.sh")
+}
+
+# 初回起動時に userdata が取得する DB バックアップスクリプト
+# NOTE: 内容を変更してもインスタンスは再作成されない。稼働中インスタンスへは手動で再配置する (infrastruture/docs/db-backup-recovery.md)
+resource "aws_s3_object" "db_backup_script" {
+  bucket = local.deploy_bucket_name
+  key    = local.db_backup_script_key
+  source = "${path.module}/nari-note-db-backup.sh"
+  etag   = filemd5("${path.module}/nari-note-db-backup.sh")
 }
 
 resource "aws_volume_attachment" "postgres_data" {

@@ -34,3 +34,55 @@ resource "aws_cloudwatch_metric_alarm" "app_server_cpu" {
     Name = "${var.app_name}-app-server-cpu-alarm"
   }
 }
+
+# 日次ベースバックアップが 26 時間成功していない (1 時間毎に評価し、26 回連続でデータ無しなら発報)
+resource "aws_cloudwatch_metric_alarm" "db_base_backup_missing" {
+  alarm_name          = "${var.app_name}-db-base-backup-missing"
+  alarm_description   = "PostgreSQL base backup (WAL-G) has not succeeded for 26 hours"
+  namespace           = "CWAgent"
+  metric_name         = "DbBackupSuccess"
+  statistic           = "Sum"
+  period              = 3600
+  evaluation_periods  = 26
+  datapoints_to_alarm = 26
+  threshold           = 1
+  comparison_operator = "LessThanThreshold"
+  treat_missing_data  = "breaching"
+
+  dimensions = {
+    AppName = var.app_name
+    Type    = "base"
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+
+  tags = {
+    Name = "${var.app_name}-db-base-backup-missing-alarm"
+  }
+}
+
+# S3 へ未送信の WAL が溜まっている。チェック自体が止まった場合 (データ無し) も異常とみなす
+resource "aws_cloudwatch_metric_alarm" "db_wal_archive_backlog" {
+  alarm_name          = "${var.app_name}-db-wal-archive-backlog"
+  alarm_description   = "PostgreSQL WAL segments are not being archived to S3"
+  namespace           = "CWAgent"
+  metric_name         = "DbWalArchivePendingFiles"
+  statistic           = "Maximum"
+  period              = 300
+  evaluation_periods  = 2
+  threshold           = var.wal_archive_pending_threshold
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "breaching"
+
+  dimensions = {
+    AppName = var.app_name
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+
+  tags = {
+    Name = "${var.app_name}-db-wal-archive-backlog-alarm"
+  }
+}
