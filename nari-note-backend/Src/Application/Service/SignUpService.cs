@@ -51,8 +51,14 @@ public class SignUpService
         }
         else
         {
-            // 未認証のアカウントは確認メールを再送する（既存の名前・パスワードは変更しない）
-            await SendVerificationEmailAsync(existingUser);
+            // 未認証のアカウントは、今回の入力内容を載せた確認メールを送る
+            // 名前・パスワードは確認メールのリンクで認証されたときに反映する（メールアドレスの持ち主が入力した値を使うため）
+            if (await userRepository.ExistsByNameAsync(request.Name, existingUser.Id))
+            {
+                throw new ConflictException("このユーザー名は既に使用されています");
+            }
+
+            await SendVerificationEmailAsync(existingUser, request.Name, HashPassword(request.Password));
         }
 
         return new SignUpResponse();
@@ -66,7 +72,7 @@ public class SignUpService
             throw new ConflictException("このユーザー名は既に使用されています");
         }
 
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+        var passwordHash = HashPassword(request.Password);
 
         var user = new User
         {
@@ -77,7 +83,7 @@ public class SignUpService
 
         var createdUser = await userRepository.CreateAsync(user);
 
-        await SendVerificationEmailAsync(createdUser);
+        await SendVerificationEmailAsync(createdUser, createdUser.Name, createdUser.PasswordHash);
 
         var now = timeProvider.UtcNow();
         await outboxMessageRepository.AddAsync(OutboxMessage.ForDiscordEmbed(
@@ -97,7 +103,12 @@ public class SignUpService
         ));
     }
 
-    async Task SendVerificationEmailAsync(User user)
+    static string HashPassword(string password)
+    {
+        return BCrypt.Net.BCrypt.HashPassword(password);
+    }
+
+    async Task SendVerificationEmailAsync(User user, string name, string passwordHash)
     {
         var now = timeProvider.UtcNow();
         var guid = Guid.NewGuid();
@@ -105,7 +116,9 @@ public class SignUpService
         {
             UserId = user.Id,
             Token = guid.ToString(),
-            ExpiresAt = now.AddHours(24)
+            ExpiresAt = now.AddHours(24),
+            Name = name,
+            PasswordHash = passwordHash
         };
         await emailVerificationRepository.CreateAsync(emailVerification);
 

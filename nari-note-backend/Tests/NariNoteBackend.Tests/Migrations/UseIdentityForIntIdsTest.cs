@@ -41,18 +41,28 @@ public class UseIdentityForIntIdsTest : IAsyncLifetime
         {
             await context.GetService<IMigrator>().MigrateAsync(PreviousMigration);
 
+            // 移行前のスキーマに投入するため、現在のモデル（後のマイグレーションで追加した列を含む）を使わずに SQL で投入する
             // 移行前はアプリ側で採番していたため、ID を明示して投入する
-            context.AddRange(author, article);
-            context.AddRange(readers);
-            context.Likes.AddRange(
-                readers.Select((r, i) =>
-                {
-                    var like = TestEntity.Like(r, article);
-                    like.Id = LikeId.From(i + 1);
-                    return like;
-                })
+            var now = TestTimeProvider.DefaultUtcNow;
+            foreach (var user in readers.Prepend(author))
+            {
+                await context.Database.ExecuteSqlAsync(
+                    $@"INSERT INTO ""Users"" (""Id"", ""Name"", ""Email"", ""PasswordHash"", ""IsEmailVerified"", ""CreatedAt"", ""UpdatedAt"")
+                       VALUES ({user.Id.Value}, {user.Name}, {user.Email}, {user.PasswordHash}, {user.IsEmailVerified}, {now}, {now})"
+                );
+            }
+
+            await context.Database.ExecuteSqlAsync(
+                $@"INSERT INTO ""Articles"" (""Id"", ""AuthorId"", ""Title"", ""Body"", ""CreatedAt"", ""UpdatedAt"")
+                   VALUES ({article.Id.Value}, {author.Id.Value}, {article.Title}, {article.Body}, {now}, {now})"
             );
-            await context.SaveChangesAsync();
+            for (var i = 0; i < readers.Length; i++)
+            {
+                await context.Database.ExecuteSqlAsync(
+                    $@"INSERT INTO ""Likes"" (""Id"", ""UserId"", ""ArticleId"", ""CreatedAt"", ""UpdatedAt"")
+                       VALUES ({i + 1}, {readers[i].Id.Value}, {article.Id.Value}, {now}, {now})"
+                );
+            }
 
             await context.Database.MigrateAsync();
         }

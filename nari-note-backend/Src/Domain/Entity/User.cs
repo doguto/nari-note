@@ -30,6 +30,17 @@ public class User : EntityBase
 
     public bool IsEmailVerified { get; set; } = false;
 
+    // 発行済みの認証トークン（JWT）を一括で無効にするための値。JWT に同じ値を埋め込み、一致しないトークンは無効として扱う
+    // null の間は照合しない（導入前に発行されたトークンを無効にしないため）
+    [MaxLength(64)]
+    public string? SecurityStamp { get; set; }
+
+    // 発行済みの認証トークンをすべて無効にする
+    public void RotateSecurityStamp()
+    {
+        SecurityStamp = Guid.NewGuid().ToString("N");
+    }
+
     // メールアドレスは小文字・前後空白除去で正規化して保存・照合する
     public static string NormalizeEmail(string email)
     {

@@ -57,7 +57,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
     protected HttpClient CreateClientAs(User user)
     {
         using var scope = Factory.Services.CreateScope();
-        var token = scope.ServiceProvider.GetRequiredService<IJwtHelper>().GenerateToken(user.Id, user.Name);
+        var token = scope.ServiceProvider.GetRequiredService<IJwtHelper>().GenerateToken(user);
 
         return CreateClientWithToken(token);
     }

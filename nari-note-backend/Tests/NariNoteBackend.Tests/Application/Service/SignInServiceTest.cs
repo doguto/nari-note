@@ -23,7 +23,7 @@ public class SignInServiceTest
     public SignInServiceTest()
     {
         this.userRepository.FindByUsernameOrEmailAsync("taro").Returns(this.user);
-        this.jwtHelper.GenerateToken(this.user.Id, "taro").Returns("jwt-token");
+        this.jwtHelper.GenerateToken(this.user).Returns("jwt-token");
         this.jwtHelper.GetExpiration().Returns(24);
         this.cookieOptionsHelper
             .CreateAuthCookieOptions(Arg.Any<TimeSpan>())
@@ -56,7 +56,7 @@ public class SignInServiceTest
         await Assert.ThrowsAsync<ArgumentException>(() => this.service.ExecuteAsync(request, this.httpResponse));
 
         Assert.Equal("", SetCookieHeader);
-        this.jwtHelper.DidNotReceiveWithAnyArgs().GenerateToken(this.user.Id, "");
+        this.jwtHelper.DidNotReceiveWithAnyArgs().GenerateToken(null!);
     }
 
     [Fact]

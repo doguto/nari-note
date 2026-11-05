@@ -69,6 +69,8 @@ public class SignUpServiceTest
         Assert.Equal(user.Id, verification.UserId);
         Assert.Equal(TestTimeProvider.DefaultUtcNow.AddHours(24), verification.ExpiresAt);
         Assert.True(Guid.TryParse(verification.Token, out _));
+        Assert.Equal("taro", verification.Name);
+        Assert.Equal(user.PasswordHash, verification.PasswordHash);
     }
 
     [Fact]
@@ -98,16 +100,37 @@ public class SignUpServiceTest
     }
 
     [Fact]
-    public async Task 未認証のメールアドレスなら既存ユーザーに確認メールを再送する()
+    public async Task 未認証のメールアドレスなら今回の入力内容を載せた確認メールを送る()
     {
-        var existing = new UserBuilder().WithEmail(Email).EmailUnverified().Build();
+        var existing = new UserBuilder().WithName("other").WithEmail(Email).EmailUnverified().Build();
+        var existingPasswordHash = existing.PasswordHash;
         this.userRepository.FindByEmailAsync(Email).Returns(existing);
 
         await this.service.ExecuteAsync(CreateRequest());
 
         await this.userRepository.DidNotReceive().CreateAsync(Arg.Any<User>());
-        Assert.Equal(existing.Id, Assert.Single(this.createdVerifications).UserId);
+        var verification = Assert.Single(this.createdVerifications);
+        Assert.Equal(existing.Id, verification.UserId);
+        Assert.Equal("taro", verification.Name);
+        Assert.True(BCrypt.Net.BCrypt.Verify("password123", verification.PasswordHash));
         Assert.Equal([OutboxMessage.EmailType], this.outboxMessages.Select(m => m.Type));
+        // ユーザーの名前・パスワードは認証されるまで変更しない
+        Assert.Equal("other", existing.Name);
+        Assert.Equal(existingPasswordHash, existing.PasswordHash);
+        await this.userRepository.DidNotReceive().UpdateAsync(Arg.Any<User>());
+    }
+
+    [Fact]
+    public async Task 未認証のメールアドレスでもユーザー名が他のユーザーに使われていればエラーにする()
+    {
+        var existing = new UserBuilder().WithName("other").WithEmail(Email).EmailUnverified().Build();
+        this.userRepository.FindByEmailAsync(Email).Returns(existing);
+        this.userRepository.ExistsByNameAsync("taro", existing.Id).Returns(true);
+
+        await Assert.ThrowsAsync<ConflictException>(() => this.service.ExecuteAsync(CreateRequest()));
+
+        Assert.Empty(this.createdVerifications);
+        Assert.Empty(this.outboxMessages);
     }
 
     [Fact]
