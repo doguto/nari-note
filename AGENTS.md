@@ -124,6 +124,9 @@ nari-note-frontend/src/
   - 良い例: `readonly NariNoteDbContext context;`
   - 悪い例: `private readonly NariNoteDbContext context;`
 
+**コメント:**
+- XML ドキュメントコメント（`/// <summary>` 等）は使わず、`//` のコメントで書く
+
 **ValueObject（ID型）:**
 - エンティティのIDにはVogenライブラリを使用した型安全なValueObjectを使用
   - 例: `ArticleId`, `UserId`, `TagId`

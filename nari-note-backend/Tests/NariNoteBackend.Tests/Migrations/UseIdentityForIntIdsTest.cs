@@ -9,10 +9,8 @@ using Testcontainers.PostgreSql;
 
 namespace NariNoteBackend.Tests.Migrations;
 
-/// <summary>
-///     既存データがある状態で UseIdentityForIntIds を適用し、IDENTITY の採番位置が既存の ID と衝突しないことを検証する。
-///     途中のマイグレーションまでしか適用しない DB が必要なため、結合テストとは別のコンテナを使う。
-/// </summary>
+// 既存データがある状態で UseIdentityForIntIds を適用し、IDENTITY の採番位置が既存の ID と衝突しないことを検証する。
+// 途中のマイグレーションまでしか適用しない DB が必要なため、結合テストとは別のコンテナを使う。
 public class UseIdentityForIntIdsTest : IAsyncLifetime
 {
     const string PreviousMigration = "20261009132911_AddOutboxMessages";

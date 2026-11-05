@@ -8,9 +8,7 @@ using NariNoteBackend.Tests.Support.Integration;
 
 namespace NariNoteBackend.Tests.Infrastructure;
 
-/// <summary>
-///     削除条件のクエリを検証するため、実 DB に接続して UnverifiedUserCleanupProcessor を実行する。
-/// </summary>
+// 削除条件のクエリを検証するため、実 DB に接続して UnverifiedUserCleanupProcessor を実行する。
 public class UnverifiedUserCleanupProcessorTest : IntegrationTestBase
 {
     static readonly DateTime Now = TestTimeProvider.DefaultUtcNow;

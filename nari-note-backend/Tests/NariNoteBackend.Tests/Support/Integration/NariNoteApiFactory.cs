@@ -15,10 +15,8 @@ using Testcontainers.PostgreSql;
 
 namespace NariNoteBackend.Tests.Support.Integration;
 
-/// <summary>
-///     実 PostgreSQL（Testcontainers）に接続した API を起動する。
-///     起動コストが高いため、結合テスト全体で 1 インスタンスを共有する。
-/// </summary>
+// 実 PostgreSQL（Testcontainers）に接続した API を起動する。
+// 起動コストが高いため、結合テスト全体で 1 インスタンスを共有する。
 public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     // docker-compose.yml の db と同じイメージを使用する
@@ -55,9 +53,7 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    ///     DB の全データ・時計・Fake の記録を初期状態に戻す。
-    /// </summary>
+    // DB の全データ・時計・Fake の記録を初期状態に戻す。
     public async Task ResetAsync()
     {
         await using var connection = new NpgsqlConnection(this.postgres.GetConnectionString());

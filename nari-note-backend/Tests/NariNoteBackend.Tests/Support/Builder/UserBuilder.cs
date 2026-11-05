@@ -3,9 +3,7 @@ using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Tests.Support.Builder;
 
-/// <summary>
-///     既定値で有効な User を組み立てる。テストに関係する項目だけ With* で上書きする。
-/// </summary>
+// 既定値で有効な User を組み立てる。テストに関係する項目だけ With* で上書きする。
 public class UserBuilder
 {
     // Name / Email は一意制約があるため連番で重複を避ける

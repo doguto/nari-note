@@ -238,9 +238,7 @@ public class ArticleRepository : IArticleRepository
                             .CountAsync();
     }
 
-    /// <summary>
-    ///     Likes 行をロードせず、サブクエリ COUNT でいいね数を取得して Article.LikeCount に設定します。
-    /// </summary>
+    // Likes 行をロードせず、サブクエリ COUNT でいいね数を取得して Article.LikeCount に設定します。
     static async Task<List<Article>> ToListWithLikeCountAsync(IQueryable<Article> query)
     {
         var rows = await query.Select(a => new { Article = a, LikeCount = a.Likes.Count() })
@@ -257,13 +255,8 @@ public class ArticleRepository : IArticleRepository
         return a => a.PublishedAt.HasValue && a.PublishedAt!.Value <= now;
     }
 
-    /// <summary>
-    ///     公開記事かつキーワードを含む記事のフィルタ条件を生成します。
-    ///     講座に属する記事は講座検索側で講座としてヒットさせるため除外します。
-    /// </summary>
-    /// <param name="now">現在時刻（UTC）</param>
-    /// <param name="keyword">検索キーワード</param>
-    /// <returns>フィルタ条件</returns>
+    // 公開記事かつキーワードを含む記事のフィルタ条件を生成します。
+    // 講座に属する記事は講座検索側で講座としてヒットさせるため除外します。
     static Expression<Func<Article, bool>> IsPubliclyVisibleAndContainsKeyword(DateTime now, string keyword)
     {
         return a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now &&

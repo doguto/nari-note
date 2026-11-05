@@ -3,10 +3,8 @@ using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Infrastructure.Cleanup;
 
-/// <summary>
-///     メールアドレスの認証が完了しないまま放置されたユーザーを削除する。
-///     他人のメールアドレスや存在しないメールアドレスで登録されたユーザーが、名前・メールアドレスを使えない状態のまま残らないようにする。
-/// </summary>
+// メールアドレスの認証が完了しないまま放置されたユーザーを削除する。
+// 他人のメールアドレスや存在しないメールアドレスで登録されたユーザーが、名前・メールアドレスを使えない状態のまま残らないようにする。
 public class UnverifiedUserCleanupProcessor
 {
     // 作成からこの期間が経過しても認証されていないユーザーを削除対象にする

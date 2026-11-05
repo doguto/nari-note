@@ -16,10 +16,8 @@ public class IntegrationTestCollection : ICollectionFixture<NariNoteApiFactory>
     public const string Name = "Integration";
 }
 
-/// <summary>
-///     HTTP 経由で API を検証する結合テストの基底クラス。
-///     テストごとに DB を空にするため、必要なデータは各テストの Arrange で投入する。
-/// </summary>
+// HTTP 経由で API を検証する結合テストの基底クラス。
+// テストごとに DB を空にするため、必要なデータは各テストの Arrange で投入する。
 [Collection(IntegrationTestCollection.Name)]
 public abstract class IntegrationTestBase : IAsyncLifetime
 {
@@ -47,13 +45,13 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         return ValueTask.CompletedTask;
     }
 
-    /// <summary>未認証のクライアント</summary>
+    // 未認証のクライアント
     protected HttpClient CreateClient()
     {
         return Factory.CreateClient();
     }
 
-    /// <summary>指定ユーザーとして認証済みのクライアント</summary>
+    // 指定ユーザーとして認証済みのクライアント
     protected HttpClient CreateClientAs(User user)
     {
         using var scope = Factory.Services.CreateScope();
@@ -62,7 +60,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         return CreateClientWithToken(token);
     }
 
-    /// <summary>指定した認証トークンを Cookie に持つクライアント</summary>
+    // 指定した認証トークンを Cookie に持つクライアント
     protected HttpClient CreateClientWithToken(string token)
     {
         var client = Factory.CreateClient();
@@ -70,7 +68,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         return client;
     }
 
-    /// <summary>レスポンスの Set-Cookie から認証トークンを取り出す（無ければ null）</summary>
+    // レスポンスの Set-Cookie から認証トークンを取り出す（無ければ null）
     protected static string? GetAuthToken(HttpResponseMessage response)
     {
         const string prefix = "authToken=";
@@ -80,14 +78,14 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         return cookie?[prefix.Length..].Split(';')[0];
     }
 
-    /// <summary>Outbox に溜まったメッセージを配送する（本番では OutboxWorker が定期実行する処理）</summary>
+    // Outbox に溜まったメッセージを配送する（本番では OutboxWorker が定期実行する処理）
     protected async Task ProcessOutboxAsync()
     {
         using var scope = Factory.Services.CreateScope();
         await scope.ServiceProvider.GetRequiredService<OutboxProcessor>().ProcessBatchAsync();
     }
 
-    /// <summary>テストデータを DB に投入する</summary>
+    // テストデータを DB に投入する
     protected async Task SeedAsync(params object[] entities)
     {
         using var scope = Factory.Services.CreateScope();
@@ -96,7 +94,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         await context.SaveChangesAsync();
     }
 
-    /// <summary>DB の状態を検証するためのクエリを実行する</summary>
+    // DB の状態を検証するためのクエリを実行する
     protected async Task<T> QueryAsync<T>(Func<NariNoteDbContext, Task<T>> query)
     {
         using var scope = Factory.Services.CreateScope();
