@@ -125,3 +125,28 @@ resource "aws_iam_role_policy_attachment" "dlm" {
   role       = aws_iam_role.dlm.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSDataLifecycleManagerServiceRole"
 }
+
+# WAL-G による WAL・ベースバックアップの保存と復元
+# 乗っ取り・誤操作でバックアップを消されないよう、s3:DeleteObject は付与しない (世代削除はライフサイクルで行う)
+resource "aws_iam_role_policy" "s3_db_backup" {
+  name   = "${var.app_name}-s3-db-backup-policy"
+  role   = aws_iam_role.app_server.id
+  policy = data.aws_iam_policy_document.s3_db_backup.json
+}
+
+data "aws_iam_policy_document" "s3_db_backup" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject",
+    ]
+    resources = ["${local.db_backup_bucket_arn}/*"]
+  }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = [local.db_backup_bucket_arn]
+  }
+}

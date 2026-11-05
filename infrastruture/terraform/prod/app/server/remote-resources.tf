@@ -28,3 +28,12 @@ data "terraform_remote_state" "images_storage" {
 data "aws_subnet" "app_server" {
   id = local.public_subnet_ids[0]
 }
+
+data "terraform_remote_state" "db_backup" {
+  backend = "s3"
+  config = {
+    bucket = var.state_bucket_name
+    key    = "${var.env_name}/db/backup/terraform.tfstate"
+    region = var.region
+  }
+}
