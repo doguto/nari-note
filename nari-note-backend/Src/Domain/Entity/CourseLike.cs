@@ -22,6 +22,6 @@ public class CourseLike : EntityBase
     public CourseId CourseId { get; set; }
 
     // Navigation Properties
-    public User User { get; set; }
-    public Course Course { get; set; }
+    public User User { get; set; } = null!;
+    public Course Course { get; set; } = null!;
 }

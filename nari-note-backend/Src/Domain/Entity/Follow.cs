@@ -22,6 +22,6 @@ public class Follow : EntityBase
     public UserId FollowingId { get; set; }
 
     // Navigation Properties
-    public User Follower { get; set; }  // フォローする側
-    public User Following { get; set; }  // フォローされる側
+    public User Follower { get; set; } = null!;  // フォローする側
+    public User Following { get; set; } = null!;  // フォローされる側
 }

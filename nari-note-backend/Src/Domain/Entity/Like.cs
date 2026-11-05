@@ -23,6 +23,6 @@ public class Like : EntityBase
 
 
     // Navigation Properties
-    public User User { get; set; }
-    public Article Article { get; set; }
+    public User User { get; set; } = null!;
+    public Article Article { get; set; } = null!;
 }
