@@ -12,8 +12,6 @@ locals {
   db_backup_script_key = "scripts/nari-note-db-backup.sh"
 
   # Amazon Linux 2023 (standard, arm64)
-  # SSH を閉じており Session Manager が唯一の接続手段のため、userdata の成否に関わらず SSM Agent が起動している standard を使う
-  # NOTE: most_recent で動的に解決すると、AMI の公開のたびに apply でインスタンスが再作成されるうえ、ルートボリュームに収まらない別系統の AMI を選ぶことがあるため、IDで固定する
   app_server_ami_id = "ami-0726b213222e0072c"
 }
 
@@ -68,7 +66,6 @@ resource "aws_instance" "app_server" {
 }
 
 # 初回起動時に userdata が取得する Blue/Green デプロイスクリプト
-# NOTE: 内容を変更してもインスタンスは再作成されない。稼働中インスタンスへは scripts/deploy.sh が毎回最新版を配置する
 resource "aws_s3_object" "deploy_script" {
   bucket = local.deploy_bucket_name
   key    = local.deploy_script_key
@@ -77,7 +74,6 @@ resource "aws_s3_object" "deploy_script" {
 }
 
 # 初回起動時に userdata が取得する DB バックアップスクリプト
-# NOTE: 内容を変更してもインスタンスは再作成されない。稼働中インスタンスへは手動で再配置する (infrastruture/docs/db-backup-recovery.md)
 resource "aws_s3_object" "db_backup_script" {
   bucket = local.deploy_bucket_name
   key    = local.db_backup_script_key
@@ -95,8 +91,6 @@ resource "aws_security_group" "app_server" {
   name        = "${var.app_name}-app-server-sg"
   description = "Security group for app server"
   vpc_id      = local.vpc_id
-
-  # シェル操作・デプロイは SSM Session Manager / Run Command で行うため、SSH (22) は受け付けない
 
   ingress {
     description = "HTTP"
