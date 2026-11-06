@@ -1,1 +1,4 @@
 *.sh text eol=lf
+
+# EC2 の userdata に埋め込むため、チェックアウト環境に関わらず LF に固定する (CRLF だと userdata が変わり EC2 が再作成される)
+infrastruture/terraform/modules/app/server/** text eol=lf
