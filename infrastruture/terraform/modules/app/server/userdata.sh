@@ -15,11 +15,6 @@ grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap defaults 0 0' >> /
 echo 'vm.swappiness = 10' > /etc/sysctl.d/90-swap.conf
 sysctl -p /etc/sysctl.d/90-swap.conf
 
-# == SSM Agent ==
-# minimal AMI には含まれないため導入する。以降の処理が失敗しても Session Manager で調査できるよう、先に起動しておく
-dnf install -y amazon-ssm-agent
-systemctl enable --now amazon-ssm-agent
-
 # パッケージの更新
 dnf update -y
 

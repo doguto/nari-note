@@ -11,9 +11,10 @@ locals {
   # DB バックアップ (WAL-G) の導入・リストア用スクリプト。配布方法はデプロイスクリプトと同じ
   db_backup_script_key = "scripts/nari-note-db-backup.sh"
 
-  # Amazon Linux 2023 (minimal, arm64)
+  # Amazon Linux 2023 (standard, arm64)
+  # SSH を閉じており Session Manager が唯一の接続手段のため、userdata の成否に関わらず SSM Agent が起動している standard を使う
   # NOTE: most_recent で動的に解決すると、AMI の公開のたびに apply でインスタンスが再作成されるうえ、ルートボリュームに収まらない別系統の AMI を選ぶことがあるため、IDで固定する
-  app_server_ami_id = "ami-0512fdcd748428ebe"
+  app_server_ami_id = "ami-0726b213222e0072c"
 }
 
 resource "aws_ebs_volume" "postgres_data" {
@@ -41,8 +42,7 @@ resource "aws_instance" "app_server" {
   # EC2 への IAM ロールの割り当て
   iam_instance_profile = aws_iam_instance_profile.app_server.name
 
-  # AMI のデフォルト(2GiB)だと dnf キャッシュ等ですぐ埋まるため拡張
-  # スワップファイル(1GiB)も置くため 8GiB にしている
+  # dnf キャッシュとスワップファイル(1GiB)を置くため 8GiB にしている
   root_block_device {
     volume_size = 8
     volume_type = "gp3"
