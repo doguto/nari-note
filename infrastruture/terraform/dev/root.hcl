@@ -42,13 +42,9 @@ generate "terraform" {
   })
 }
 
-generate "global-variables" {
-  path      = "global-variables.tf"
-  if_exists = "overwrite"
-  contents = templatefile("${local.template_dir}/global-variables.tf.tpl", {
-    aws_region = local.aws_region
-    env_name   = local.env_name
-    app_name   = local.app_name
-    s3_bucket  = local.s3_bucket
-  })
+inputs = {
+  region            = local.aws_region
+  env_name          = local.env_name
+  app_name          = local.app_name
+  state_bucket_name = local.s3_bucket
 }

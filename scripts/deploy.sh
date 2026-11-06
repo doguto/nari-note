@@ -79,7 +79,7 @@ done
 echo "[4/4] EC2 に Blue/Green デプロイ中 (${EC2_USER}@${EC2_HOST})..."
 # 待機系に配置 → ヘルスチェック → nginx 切り替え → 旧系統停止 は EC2 上の nari-note-deploy が行う
 # スクリプト自体もリポジトリの最新版で毎回上書きし、EC2 起動時点の版に固定されないようにする
-DEPLOY_SCRIPT="${REPO_ROOT}/infrastruture/terraform/prod/app/server/nari-note-deploy.sh"
+DEPLOY_SCRIPT="${REPO_ROOT}/infrastruture/terraform/modules/app/server/nari-note-deploy.sh"
 REMOTE_DIR="/tmp/${BINARY_NAME}-deploy"
 
 ssh -i "${SSH_KEY}" \

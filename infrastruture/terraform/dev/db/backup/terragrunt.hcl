@@ -3,7 +3,7 @@ include "root" {
 }
 
 terraform {
-  source = "${get_repo_root()}/infrastruture/terraform/prod/db/backup"
+  source = "${get_repo_root()}/infrastruture/terraform/modules/db/backup"
 }
 
 inputs = {
