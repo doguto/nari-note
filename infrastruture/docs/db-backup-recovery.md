@@ -1,6 +1,6 @@
 # DB バックアップ・リストア設計
 
-> 実装: `terraform/prod/db/backup` (S3)、`terraform/prod/app/server/nari-note-db-backup.sh` (導入・バックアップ・リストア)、`terraform/prod/app/observer` (アラーム)
+> 実装: `terraform/modules/db/backup` (S3)、`terraform/modules/app/server/nari-note-db-backup.sh` (導入・バックアップ・リストア)、`terraform/modules/app/observer` (アラーム)
 
 ## 背景
 

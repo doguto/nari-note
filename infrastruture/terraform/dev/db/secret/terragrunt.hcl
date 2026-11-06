@@ -3,5 +3,5 @@ include "root" {
 }
 
 terraform {
-  source = "${get_repo_root()}/infrastruture/terraform/prod/db/secret"
+  source = "${get_repo_root()}/infrastruture/terraform/modules/db/secret"
 }
