@@ -11,9 +11,8 @@ locals {
   # DB バックアップ (WAL-G) の導入・リストア用スクリプト。配布方法はデプロイスクリプトと同じ
   db_backup_script_key = "scripts/nari-note-db-backup.sh"
 
-  # Amazon Linux 2023 (minimal, arm64)
-  # NOTE: most_recent で動的に解決すると、AMI の公開のたびに apply でインスタンスが再作成されるうえ、ルートボリュームに収まらない別系統の AMI を選ぶことがあるため、IDで固定する
-  app_server_ami_id = "ami-0512fdcd748428ebe"
+  # Amazon Linux 2023 (standard, arm64)
+  app_server_ami_id = "ami-0726b213222e0072c"
 }
 
 resource "aws_ebs_volume" "postgres_data" {
@@ -38,14 +37,10 @@ resource "aws_instance" "app_server" {
   subnet_id              = local.public_subnet_ids[0]
   vpc_security_group_ids = [aws_security_group.app_server.id]
 
-  # SSH 接続のためのキーペア
-  key_name = aws_key_pair.app_server.key_name
-
   # EC2 への IAM ロールの割り当て
   iam_instance_profile = aws_iam_instance_profile.app_server.name
 
-  # AMI のデフォルト(2GiB)だと dnf キャッシュ等ですぐ埋まるため拡張
-  # スワップファイル(1GiB)も置くため 8GiB にしている
+  # dnf キャッシュとスワップファイル(1GiB)を置くため 8GiB にしている
   root_block_device {
     volume_size = 8
     volume_type = "gp3"
@@ -71,7 +66,6 @@ resource "aws_instance" "app_server" {
 }
 
 # 初回起動時に userdata が取得する Blue/Green デプロイスクリプト
-# NOTE: 内容を変更してもインスタンスは再作成されない。稼働中インスタンスへは scripts/deploy.sh が毎回最新版を配置する
 resource "aws_s3_object" "deploy_script" {
   bucket = local.deploy_bucket_name
   key    = local.deploy_script_key
@@ -80,7 +74,6 @@ resource "aws_s3_object" "deploy_script" {
 }
 
 # 初回起動時に userdata が取得する DB バックアップスクリプト
-# NOTE: 内容を変更してもインスタンスは再作成されない。稼働中インスタンスへは手動で再配置する (infrastruture/docs/db-backup-recovery.md)
 resource "aws_s3_object" "db_backup_script" {
   bucket = local.deploy_bucket_name
   key    = local.db_backup_script_key
@@ -98,14 +91,6 @@ resource "aws_security_group" "app_server" {
   name        = "${var.app_name}-app-server-sg"
   description = "Security group for app server"
   vpc_id      = local.vpc_id
-
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   ingress {
     description = "HTTP"
@@ -133,11 +118,6 @@ resource "aws_security_group" "app_server" {
   tags = {
     Name = "${var.app_name}-app-server-sg"
   }
-}
-
-resource "aws_key_pair" "app_server" {
-  key_name   = "${var.app_name}-app-server-key"
-  public_key = file(var.public_key_path)
 }
 
 resource "aws_eip" "app_server" {

@@ -4,12 +4,6 @@ variable "instance_type" {
   default     = "t4g.micro"
 }
 
-variable "public_key_path" {
-  description = "Path to the SSH public key file"
-  type        = string
-  default     = "~/.ssh/nari-note.pub"
-}
-
 variable "postgres_data_volume_size" {
   description = "Size in GB of the EBS volume used for the PostgreSQL data directory"
   type        = number
