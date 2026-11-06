@@ -11,13 +11,15 @@ if [[ -f "${ENV_FILE}" ]]; then
   source "${ENV_FILE}"
 fi
 
-EC2_USER="ec2-user"
-EC2_HOST="${EC2_HOST:?EC2_HOST が未設定やわ。例: EC2_HOST=1.2.3.4 ./scripts/rollback.sh}"
-SSH_KEY="${SSH_KEY:-${HOME}/.ssh/nari-note}"
+APP_NAME="${APP_NAME:-nari-note}"
+AWS_REGION="ap-northeast-1"
+AWS_VAULT_PROFILE="${AWS_VAULT_PROFILE:-narinote}"
 
-echo "=== nari-note-backend ロールバック (${EC2_USER}@${EC2_HOST}) ==="
-ssh -i "${SSH_KEY}" \
-    -o StrictHostKeyChecking=no \
-    -o ConnectTimeout=10 \
-    "${EC2_USER}@${EC2_HOST}" \
-    "sudo /usr/local/bin/nari-note-deploy rollback && sudo /usr/local/bin/nari-note-deploy status"
+# shellcheck source=lib/ssm.sh
+source "${SCRIPT_DIR}/lib/ssm.sh"
+
+INSTANCE_ID=$(resolve_instance_id)
+
+echo "=== nari-note-backend ロールバック (SSM Run Command: ${INSTANCE_ID}) ==="
+ssm_run "${INSTANCE_ID}" "rollback" \
+  "/usr/local/bin/nari-note-deploy rollback && /usr/local/bin/nari-note-deploy status"

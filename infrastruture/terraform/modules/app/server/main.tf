@@ -38,9 +38,6 @@ resource "aws_instance" "app_server" {
   subnet_id              = local.public_subnet_ids[0]
   vpc_security_group_ids = [aws_security_group.app_server.id]
 
-  # SSH 接続のためのキーペア
-  key_name = aws_key_pair.app_server.key_name
-
   # EC2 への IAM ロールの割り当て
   iam_instance_profile = aws_iam_instance_profile.app_server.name
 
@@ -99,13 +96,7 @@ resource "aws_security_group" "app_server" {
   description = "Security group for app server"
   vpc_id      = local.vpc_id
 
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # シェル操作・デプロイは SSM Session Manager / Run Command で行うため、SSH (22) は受け付けない
 
   ingress {
     description = "HTTP"
@@ -133,11 +124,6 @@ resource "aws_security_group" "app_server" {
   tags = {
     Name = "${var.app_name}-app-server-sg"
   }
-}
-
-resource "aws_key_pair" "app_server" {
-  key_name   = "${var.app_name}-app-server-key"
-  public_key = file(var.public_key_path)
 }
 
 resource "aws_eip" "app_server" {

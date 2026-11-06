@@ -9,15 +9,13 @@
 
 ### EC2 へ接続する
 
-```bash
-# SSH
-ssh -i ~/.ssh/nari-note ec2-user@<EIP>
+SSH (22) は閉じているため、SSM Session Manager で接続する。手元に [Session Manager プラグイン](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html) が必要。
 
-# SSM Session Manager (SSH を使わない場合)
+```bash
 aws-vault exec narinote -- aws ssm start-session --target <instance-id> --region ap-northeast-1
 ```
 
-EIP・インスタンス ID は `terragrunt output` (`prod/app/server`) で確認できる。
+インスタンス ID は `terragrunt output` (`prod/app/server`) で確認できる。セッションは `ssm-user` で開始されるため、以降のコマンドは `sudo` を付けて実行する。
 
 ### 現状を確認する
 
