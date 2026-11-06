@@ -24,18 +24,20 @@ state のキーは `<env_name>/<group>/<unit>/terraform.tfstate` となる。
 
 ```
 xxx/
+  ├── global-variables.tf  # 全体で使用する変数定義（値は root.hcl の inputs から渡す）
   ├── main.tf              # Terraform のリソース定義
   ├── outputs.tf           # Terraform の出力定義
   ├── remote-resources.tf  # リモートリソース定義 (data ソースなど)
   └── variables.tf         # Terraform の変数定義
 ```
 
+`global-variables.tf`（`region` / `env_name` / `app_name` / `state_bucket_name`）は全モジュールで同じ内容とし、default は設定しない。
+
 以下は Terragrunt が `root.hcl` から実行時に生成するため、`modules/` には置かない。
 
 - `backend.tf`: バックエンド設定
 - `provider.tf`: プロバイダ設定
 - `terraform.tf`: Terraform / プロバイダのバージョン指定
-- `global-variables.tf`: 全体で使用する変数定義（`region` / `env_name` / `app_name` / `state_bucket_name`）
 
 別ユニットの state を参照する際は、環境名をハードコードせず `${var.env_name}` を使うこと。
 
