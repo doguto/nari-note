@@ -216,6 +216,7 @@ EOF
   "AWS_REGION": "${AWS_REGION}",
   "WALG_COMPRESSION_METHOD": "zstd",
   "WALG_UPLOAD_CONCURRENCY": "1",
+  "WALG_VERIFY_PAGE_CHECKSUMS": "true",
   "PGHOST": "/run/postgresql"
 }
 EOF
