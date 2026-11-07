@@ -86,3 +86,25 @@ resource "aws_cloudwatch_metric_alarm" "db_wal_archive_backlog" {
     Name = "${var.app_name}-db-wal-archive-backlog-alarm"
   }
 }
+
+# PostgreSQL ログの ERROR / FATAL / PANIC が多発している (メトリクスは app/logger のメトリクスフィルタで生成)
+# statement_timeout によるキャンセル等で単発の ERROR は起こり得るため、件数の閾値で判定する
+resource "aws_cloudwatch_metric_alarm" "db_error_log" {
+  alarm_name          = "${var.app_name}-db-error-log"
+  alarm_description   = "PostgreSQL ERROR/FATAL/PANIC log entries exceeded threshold"
+  namespace           = "${var.app_name}/PostgreSQL"
+  metric_name         = "ErrorLogCount"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  threshold           = var.db_error_log_threshold
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  treat_missing_data  = "notBreaching"
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+
+  tags = {
+    Name = "${var.app_name}-db-error-log-alarm"
+  }
+}

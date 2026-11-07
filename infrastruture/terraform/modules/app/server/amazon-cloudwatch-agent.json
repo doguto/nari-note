@@ -36,6 +36,13 @@
             "log_stream_name": "{instance_id}",
             "timezone": "UTC",
             "multi_line_start_pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}"
+          },
+          {
+            "file_path": "/data/postgresql/log/postgresql-*.log",
+            "log_group_name": "/${app_name}/postgresql",
+            "log_stream_name": "{instance_id}",
+            "timezone": "UTC",
+            "multi_line_start_pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3} UTC"
           }
         ]
       }

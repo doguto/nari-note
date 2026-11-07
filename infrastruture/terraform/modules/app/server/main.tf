@@ -11,6 +11,17 @@ locals {
   # DB バックアップ (WAL-G) の導入・リストア用スクリプト。配布方法はデプロイスクリプトと同じ
   db_backup_script_key = "scripts/nari-note-db-backup.sh"
 
+  # userdata が配置する設定ファイル。userdata の上限 (16KB) を超えないよう、埋め込まずに S3 経由で配布する
+  server_config_files = {
+    "nari-note-backend.nginx.conf" = file("${path.module}/nari-note-backend.nginx.conf")
+    "nari-note-backend@.service"   = templatefile("${path.module}/nari-note-backend@.service", { app_name = var.app_name })
+    "amazon-cloudwatch-agent.json" = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
+    "postgresql.conf"              = file("${path.module}/postgresql.conf")
+    "pg_hba.conf"                  = file("${path.module}/pg_hba.conf")
+  }
+  # 内容のハッシュをキーに含め、設定ファイルの変更で userdata が変わり EC2 が再作成されるようにする (起動時は userdata と同じ版を必ず取得する)
+  server_config_prefix = "server-config/${md5(jsonencode(local.server_config_files))}"
+
   # Amazon Linux 2023 (standard, arm64)
   app_server_ami_id = "ami-0726b213222e0072c"
 }
@@ -47,11 +58,7 @@ resource "aws_instance" "app_server" {
   }
 
   user_data = templatefile("${path.module}/userdata.sh", {
-    service_file          = templatefile("${path.module}/nari-note-backend@.service", { app_name = var.app_name })
-    nginx_conf_file       = file("${path.module}/nari-note-backend.nginx.conf")
-    cloudwatch_conf       = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
-    postgresql_conf       = file("${path.module}/postgresql.conf")
-    pg_hba_conf           = file("${path.module}/pg_hba.conf")
+    server_config_prefix  = local.server_config_prefix
     app_name              = var.app_name
     postgres_volume_id    = replace(aws_ebs_volume.postgres_data.id, "-", "")
     deploy_script_key     = aws_s3_object.deploy_script.key
@@ -60,9 +67,22 @@ resource "aws_instance" "app_server" {
   })
   user_data_replace_on_change = true
 
+  # userdata は prefix を文字列で受け取るだけなので、起動前に設定ファイルが S3 にあるよう明示する
+  depends_on = [aws_s3_object.server_config]
+
   tags = {
     Name = "${var.app_name}-app-server"
   }
+}
+
+# 初回起動時に userdata が取得する設定ファイル
+resource "aws_s3_object" "server_config" {
+  for_each = local.server_config_files
+
+  bucket  = local.deploy_bucket_name
+  key     = "${local.server_config_prefix}/${each.key}"
+  content = each.value
+  etag    = md5(each.value)
 }
 
 # 初回起動時に userdata が取得する Blue/Green デプロイスクリプト
