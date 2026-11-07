@@ -22,6 +22,8 @@ resource "aws_cloudwatch_metric_alarm" "app_server_cpu" {
   evaluation_periods  = var.cpu_alarm_evaluation_periods
   threshold           = var.cpu_alarm_threshold
   comparison_operator = "GreaterThanThreshold"
+  # EC2 の再作成後に observer を apply し忘れ、旧インスタンスを監視し続けている場合も発報させる
+  treat_missing_data = "breaching"
 
   dimensions = {
     InstanceId = local.instance_id
@@ -32,6 +34,33 @@ resource "aws_cloudwatch_metric_alarm" "app_server_cpu" {
 
   tags = {
     Name = "${var.app_name}-app-server-cpu-alarm"
+  }
+}
+
+# EC2 のステータスチェック (システム / インスタンス) が失敗している。dnf-automatic による再起動後に OS が起動しない場合等を検知する
+# 正常な再起動でも一時的に失敗し得るため、5 分連続で失敗した場合に発報する
+resource "aws_cloudwatch_metric_alarm" "app_server_status_check" {
+  alarm_name          = "${var.app_name}-app-server-status-check-failed"
+  alarm_description   = "EC2 instance status check failed"
+  namespace           = "AWS/EC2"
+  metric_name         = "StatusCheckFailed"
+  statistic           = "Maximum"
+  period              = 60
+  evaluation_periods  = 5
+  threshold           = 1
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  # EC2 の再作成後に observer を apply し忘れ、旧インスタンスを監視し続けている場合も発報させる
+  treat_missing_data = "breaching"
+
+  dimensions = {
+    InstanceId = local.instance_id
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+
+  tags = {
+    Name = "${var.app_name}-app-server-status-check-alarm"
   }
 }
 

@@ -35,6 +35,8 @@ WALG_CONFIG="/etc/wal-g/config.json"
 ENV_FILE="/etc/nari-note-db-backup.env"
 STATE_DIR="/var/lib/nari-note-db-backup"
 PENDING_RESTORE_FILE="${STATE_DIR}/pending-restore"
+# mtime が最後にベースバックアップが成功した時刻。dnf-automatic が更新前の確認に使う
+LAST_BASE_SUCCESS_FILE="${STATE_DIR}/last-base-success"
 LOCK_FILE="/run/nari-note-db-backup.lock"
 SELF="/usr/local/bin/nari-note-db-backup"
 
@@ -273,6 +275,7 @@ run_base_backup() {
   systemctl is-active --quiet postgresql || die "PostgreSQL が起動していません"
   log "ベースバックアップを取得します"
   walg backup-push "${PGDATA}"
+  touch "${LAST_BASE_SUCCESS_FILE}"
   put_metric DbBackupSuccess 1 Count "Type=base"
   log "ベースバックアップ完了"
 }
