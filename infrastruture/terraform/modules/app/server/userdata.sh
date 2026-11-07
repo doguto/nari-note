@@ -15,6 +15,10 @@ grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap defaults 0 0' >> /
 echo 'vm.swappiness = 10' > /etc/sysctl.d/90-swap.conf
 sysctl -p /etc/sysctl.d/90-swap.conf
 
+# AL2023 のリポジトリは AMI のリリースバージョンに固定されており、そのままでは新しい更新が配信されない
+# セキュリティ更新を受け取れるよう、常に最新のリリースを参照させる
+echo 'latest' > /etc/dnf/vars/releasever
+
 # パッケージの更新
 dnf update -y
 
@@ -23,6 +27,15 @@ CONFIG_DIR="/var/tmp/nari-note-server-config"
 mkdir -p "$${CONFIG_DIR}"
 aws s3 cp --recursive "s3://${app_name}-deploy/${server_config_prefix}/" "$${CONFIG_DIR}/" \
   --region ap-northeast-1
+
+# == dnf-automatic ==
+# OS のセキュリティ更新を毎日自動で適用する (postgresql17* は除外し、手動で更新する)
+dnf install -y dnf-automatic
+install -m 644 "$${CONFIG_DIR}/dnf-automatic.conf" /etc/dnf/automatic.conf
+mkdir -p /etc/systemd/system/dnf-automatic.timer.d
+install -m 644 "$${CONFIG_DIR}/dnf-automatic.timer.conf" /etc/systemd/system/dnf-automatic.timer.d/override.conf
+systemctl daemon-reload
+systemctl enable --now dnf-automatic.timer
 
 # == nginx ==
 dnf install -y nginx
