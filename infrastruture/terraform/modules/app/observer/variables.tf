@@ -27,3 +27,9 @@ variable "wal_archive_pending_threshold" {
   type        = number
   default     = 5
 }
+
+variable "db_error_log_threshold" {
+  description = "Number of PostgreSQL ERROR/FATAL/PANIC log entries within 5 minutes that triggers the alarm."
+  type        = number
+  default     = 5
+}
