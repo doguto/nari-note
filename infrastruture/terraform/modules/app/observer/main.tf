@@ -22,6 +22,8 @@ resource "aws_cloudwatch_metric_alarm" "app_server_cpu" {
   evaluation_periods  = var.cpu_alarm_evaluation_periods
   threshold           = var.cpu_alarm_threshold
   comparison_operator = "GreaterThanThreshold"
+  # EC2 の再作成後に observer を apply し忘れ、旧インスタンスを監視し続けている場合も発報させる
+  treat_missing_data = "breaching"
 
   dimensions = {
     InstanceId = local.instance_id
@@ -47,6 +49,8 @@ resource "aws_cloudwatch_metric_alarm" "app_server_status_check" {
   evaluation_periods  = 5
   threshold           = 1
   comparison_operator = "GreaterThanOrEqualToThreshold"
+  # EC2 の再作成後に observer を apply し忘れ、旧インスタンスを監視し続けている場合も発報させる
+  treat_missing_data = "breaching"
 
   dimensions = {
     InstanceId = local.instance_id
