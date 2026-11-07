@@ -29,7 +29,7 @@ aws s3 cp --recursive "s3://${app_name}-deploy/${server_config_prefix}/" "$${CON
   --region ap-northeast-1
 
 # == dnf-automatic ==
-# OS のセキュリティ更新を毎日自動で適用する (postgresql17* は除外し、手動で更新する)
+# PostgreSQL を含む OS のセキュリティ更新を毎日自動で適用し、必要な時だけ OS を再起動する
 dnf install -y dnf-automatic
 install -m 644 "$${CONFIG_DIR}/dnf-automatic.conf" /etc/dnf/automatic.conf
 mkdir -p /etc/systemd/system/dnf-automatic.timer.d
