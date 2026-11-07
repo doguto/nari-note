@@ -20,6 +20,7 @@ locals {
     "pg_hba.conf"                  = file("${path.module}/pg_hba.conf")
     "dnf-automatic.conf"           = file("${path.module}/dnf-automatic.conf")
     "dnf-automatic.timer.conf"     = file("${path.module}/dnf-automatic.timer.conf")
+    "dnf-automatic.service.conf"   = file("${path.module}/dnf-automatic.service.conf")
   }
   # 内容のハッシュをキーに含め、設定ファイルの変更で userdata が変わり EC2 が再作成されるようにする (起動時は userdata と同じ版を必ず取得する)
   server_config_prefix = "server-config/${md5(jsonencode(local.server_config_files))}"

@@ -34,6 +34,8 @@ dnf install -y dnf-automatic
 install -m 644 "$${CONFIG_DIR}/dnf-automatic.conf" /etc/dnf/automatic.conf
 mkdir -p /etc/systemd/system/dnf-automatic.timer.d
 install -m 644 "$${CONFIG_DIR}/dnf-automatic.timer.conf" /etc/systemd/system/dnf-automatic.timer.d/override.conf
+mkdir -p /etc/systemd/system/dnf-automatic.service.d
+install -m 644 "$${CONFIG_DIR}/dnf-automatic.service.conf" /etc/systemd/system/dnf-automatic.service.d/override.conf
 systemctl daemon-reload
 systemctl enable --now dnf-automatic.timer
 

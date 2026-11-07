@@ -35,6 +35,31 @@ resource "aws_cloudwatch_metric_alarm" "app_server_cpu" {
   }
 }
 
+# EC2 のステータスチェック (システム / インスタンス) が失敗している。dnf-automatic による再起動後に OS が起動しない場合等を検知する
+# 正常な再起動でも一時的に失敗し得るため、5 分連続で失敗した場合に発報する
+resource "aws_cloudwatch_metric_alarm" "app_server_status_check" {
+  alarm_name          = "${var.app_name}-app-server-status-check-failed"
+  alarm_description   = "EC2 instance status check failed"
+  namespace           = "AWS/EC2"
+  metric_name         = "StatusCheckFailed"
+  statistic           = "Maximum"
+  period              = 60
+  evaluation_periods  = 5
+  threshold           = 1
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+
+  dimensions = {
+    InstanceId = local.instance_id
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+
+  tags = {
+    Name = "${var.app_name}-app-server-status-check-alarm"
+  }
+}
+
 # 日次ベースバックアップが 26 時間成功していない (1 時間毎に評価し、26 回連続でデータ無しなら発報)
 resource "aws_cloudwatch_metric_alarm" "db_base_backup_missing" {
   alarm_name          = "${var.app_name}-db-base-backup-missing"
