@@ -18,13 +18,17 @@ sysctl -p /etc/sysctl.d/90-swap.conf
 # パッケージの更新
 dnf update -y
 
+# 設定ファイルを S3 から取得 (userdata の上限 16KB を超えないよう、埋め込まずに Terraform が S3 へ配置している)
+CONFIG_DIR="/var/tmp/nari-note-server-config"
+mkdir -p "$${CONFIG_DIR}"
+aws s3 cp --recursive "s3://${app_name}-deploy/${server_config_prefix}/" "$${CONFIG_DIR}/" \
+  --region ap-northeast-1
+
 # == nginx ==
 dnf install -y nginx
 
 # nginx のリバースプロキシ設定を配置
-cat > /etc/nginx/conf.d/nari-note-backend.conf <<'EOF'
-${nginx_conf_file}
-EOF
+install -m 644 "$${CONFIG_DIR}/nari-note-backend.nginx.conf" /etc/nginx/conf.d/nari-note-backend.conf
 
 # Blue/Green の向き先ファイル。nginx の起動に必要なため、アプリ配置前に blue を向けた状態で用意しておく
 # (以降は nari-note-deploy が書き換える)
@@ -73,9 +77,7 @@ systemctl enable --now nginx
 # == CloudWatch Agent ==
 dnf install -y amazon-cloudwatch-agent
 
-cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<'EOF'
-${cloudwatch_conf}
-EOF
+install -m 644 "$${CONFIG_DIR}/amazon-cloudwatch-agent.json" /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
   -a fetch-config \
@@ -140,9 +142,7 @@ fi
 
 # 設定ファイルは initdb 済みの既存データボリュームにも変更が反映されるよう、毎回上書きする
 # 外部ネットワークには一切公開せず、localhost からの接続のみ許可する
-cat > "$${PGDATA}/pg_hba.conf" <<'HBA'
-${pg_hba_conf}
-HBA
+install -o postgres -g postgres -m 600 "$${CONFIG_DIR}/pg_hba.conf" "$${PGDATA}/pg_hba.conf"
 
 # postgresql.conf 本体は initdb の生成物のまま残し、上書きしたい設定だけを conf.d に配置する
 PG_CONF_DIR="$${PGDATA}/conf.d"
@@ -150,11 +150,7 @@ install -d -o postgres -g postgres -m 700 "$${PG_CONF_DIR}"
 grep -q "^include_dir = 'conf.d'" "$${PGDATA}/postgresql.conf" || \
   echo "include_dir = 'conf.d'" >> "$${PGDATA}/postgresql.conf"
 
-cat > "$${PG_CONF_DIR}/nari-note.conf" <<'CONF'
-${postgresql_conf}
-CONF
-chown postgres:postgres "$${PG_CONF_DIR}/nari-note.conf"
-chmod 600 "$${PG_CONF_DIR}/nari-note.conf"
+install -o postgres -g postgres -m 600 "$${CONFIG_DIR}/postgresql.conf" "$${PG_CONF_DIR}/nari-note.conf"
 
 # WAL-G・バックアップ用 timer を配置する。archive_command が WAL-G を使うため PostgreSQL の起動前に行う
 aws s3 cp "s3://${app_name}-deploy/${db_backup_script_key}" /usr/local/bin/nari-note-db-backup   --region ap-northeast-1
@@ -203,9 +199,7 @@ BOOTSTRAP_DIR="/var/tmp/$${APP_NAME}-bootstrap"
 useradd --system --no-create-home --shell /sbin/nologin "$${APP_NAME}" || true
 
 # Blue/Green 用のテンプレートユニットを配置 (nari-note-backend@blue / nari-note-backend@green)
-cat > "/etc/systemd/system/$${APP_NAME}@.service" <<'EOF'
-${service_file}
-EOF
+install -m 644 "$${CONFIG_DIR}/$${APP_NAME}@.service" "/etc/systemd/system/$${APP_NAME}@.service"
 systemctl daemon-reload
 
 # Blue/Green デプロイスクリプトを配置 (以降のデプロイでは scripts/deploy.sh がリポジトリの最新版で上書きする)
@@ -230,6 +224,7 @@ for FILE in "$${APP_NAME}" appsettings.json appsettings.Production.json; do
   rm -f "$${BOOTSTRAP_DIR}/$${FILE}"
 done
 rmdir "$${BOOTSTRAP_DIR}"
+rm -rf "$${CONFIG_DIR}"
 
 # dnf のパッケージキャッシュを削除しディスク容量を回収する
 dnf clean all
