@@ -126,8 +126,16 @@ Environment=PGDATA=$${PGDATA}
 EOF
 systemctl daemon-reload
 
+# ストレージ上のページ破損を読み込み時に検知できるよう data checksums を有効にする
 if [ ! -f "$${PGDATA}/PG_VERSION" ]; then
-  PGDATA="$${PGDATA}" /usr/bin/postgresql-setup --initdb
+  PGDATA="$${PGDATA}" PGSETUP_INITDB_OPTIONS="--data-checksums" /usr/bin/postgresql-setup --initdb
+fi
+
+# checksums 無しで initdb された既存クラスタは、PostgreSQL の起動前 (停止中) に有効化する
+# 異常終了したクラスタでは pg_checksums が失敗するため、その場合は起動を優先して後で手動で有効化する
+if sudo -u postgres /usr/bin/pg_controldata "$${PGDATA}" | grep -q '^Data page checksum version:[[:space:]]*0$'; then
+  sudo -u postgres /usr/bin/pg_checksums --enable --progress -D "$${PGDATA}" || \
+    echo "Failed to enable data checksums on $${PGDATA}. Enable them manually with pg_checksums." >&2
 fi
 
 # 設定ファイルは initdb 済みの既存データボリュームにも変更が反映されるよう、毎回上書きする

@@ -94,9 +94,30 @@ archive_timeout = 60s
   "AWS_REGION": "ap-northeast-1",
   "WALG_COMPRESSION_METHOD": "zstd",
   "WALG_UPLOAD_CONCURRENCY": "1",
+  "WALG_VERIFY_PAGE_CHECKSUMS": "true",
   "PGHOST": "/run/postgresql"
 }
 ```
+
+`WALG_VERIFY_PAGE_CHECKSUMS` により、`backup-push` 時に各ページのチェックサムを検証し、破損したページがあれば警告する。
+
+### data checksums
+
+ストレージ上のページ破損 (サイレントなデータ化け) を読み込み時にエラーとして検知するため、data checksums を有効にしている。
+
+- 新規 initdb (EBS 喪失時の再構築など) では userdata が `PGSETUP_INITDB_OPTIONS="--data-checksums"` を渡す
+- 既存クラスタが無効の場合は、userdata が PostgreSQL の起動前に `pg_checksums --enable` で有効化する。異常終了したクラスタでは失敗するため、その場合は以下で手動で有効化する
+
+  ```bash
+  COLOR=$(systemctl is-active --quiet nari-note-backend@blue && echo blue || echo green)
+  sudo systemctl stop "nari-note-backend@${COLOR}" postgresql
+  sudo -u postgres pg_checksums --enable --progress -D /data/postgresql
+  sudo systemctl start postgresql "nari-note-backend@${COLOR}"
+  sudo nari-note-db-backup base
+  ```
+
+- 有効化前に取得したベースバックアップからリストアすると checksums は無効に戻る。**有効化後は必ず `sudo nari-note-db-backup base` でベースバックアップを取り直す**
+- 状態は `SHOW data_checksums;`、検知したチェックサム失敗の件数は `SELECT datname, checksum_failures FROM pg_stat_database;` で確認できる
 
 ### 監視 (`app/observer`)
 
