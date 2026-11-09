@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { KifPlayer, Board, CapturedPieces, useFreePlayRecorder, getBoardAtMove, parseKif } from '@/lib/kif-player';
+import { KifPlayer, Board, CapturedPieces, useFreePlayRecorder, getBoardAtMove, moverOf, parseKif } from '@/lib/kif-player';
 import type { KifMove, PieceOwner } from '@/lib/kif-player/types';
 import type { KifuItem } from '../types/kifu';
 
@@ -98,7 +98,8 @@ export function KifuEmbedDialog({
   const handleEnterFreePlay = () => {
     if (!parsedGame) return;
     const parsed = getBoardAtMove(parsedGame, move);
-    const initialTurn: PieceOwner = move % 2 === 0 ? 'sente' : 'gote';
+    // move 手まで指した局面から再開するので、次の (move + 1) 手目を指す側が手番になる
+    const initialTurn: PieceOwner = moverOf(move + 1, parsedGame.firstTurn);
     // 初期は BOD モード（手番強制なし）
     recorder.initializeBoard(parsed.board, parsed.captured.sente, parsed.captured.gote, initialTurn, false);
     setFreePlayMode(true);
