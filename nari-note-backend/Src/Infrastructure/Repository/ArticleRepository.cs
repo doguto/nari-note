@@ -106,8 +106,9 @@ public class ArticleRepository : IArticleRepository
         var visibilityFilter = IsPubliclyVisible(now);
 
         // 下書きに加え、公開日時を過ぎていない予約投稿も第三者には見せない
+        // 講座に属する記事は講座一覧側で表示するため除外する
         var query = context.Articles
-                           .Where(a => a.AuthorId == authorId)
+                           .Where(a => a.AuthorId == authorId && !a.CourseId.HasValue)
                            .Where(visibilityFilter);
 
         var totalCount = await query.CountAsync();
@@ -232,8 +233,9 @@ public class ArticleRepository : IArticleRepository
         var now = timeProvider.UtcNow();
         var visibilityFilter = IsPubliclyVisible(now);
 
+        // 作者別の記事一覧と件数を揃えるため、講座に属する記事は数えない
         return await context.Articles
-                            .Where(a => a.AuthorId == authorId)
+                            .Where(a => a.AuthorId == authorId && !a.CourseId.HasValue)
                             .Where(visibilityFilter)
                             .CountAsync();
     }

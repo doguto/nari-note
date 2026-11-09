@@ -1,6 +1,6 @@
 import { ProfileCard } from '../organisms/ProfileCard';
 import { ProfileTabNav } from '../organisms/ProfileTabNav';
-import type { GetUserProfileResponse, GetArticlesByAuthorResponse, GetLikedArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
+import type { GetUserProfileResponse, GetArticlesByAuthorResponse, GetCoursesByAuthorResponse, GetLikedArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
 interface UserProfileTemplateProps {
   user: GetUserProfileResponse;
@@ -12,16 +12,19 @@ interface UserProfileTemplateProps {
   pageSize: number;
 
   articlesData?: GetArticlesByAuthorResponse;
+  coursesData?: GetCoursesByAuthorResponse;
   likedArticlesData?: GetLikedArticlesResponse;
   followersData?: GetFollowersResponse;
   followingsData?: GetFollowingsResponse;
 
   isArticlesLoading: boolean;
+  isCoursesLoading: boolean;
   isLikedArticlesLoading: boolean;
   isFollowersLoading: boolean;
   isFollowingsLoading: boolean;
 
   articlesError: Error | null;
+  coursesError: Error | null;
   likedArticlesError: Error | null;
   followersError: Error | null;
   followingsError: Error | null;
@@ -32,6 +35,7 @@ interface UserProfileTemplateProps {
   onArticlesClick: () => void;
   onFollowClick: () => void;
   onArticlesRetry: () => void;
+  onCoursesRetry: () => void;
   onLikedArticlesRetry: () => void;
   onFollowersRetry: () => void;
   onFollowingsRetry: () => void;
@@ -46,14 +50,17 @@ export function UserProfileTemplate({
   currentPage,
   pageSize,
   articlesData,
+  coursesData,
   likedArticlesData,
   followersData,
   followingsData,
   isArticlesLoading,
+  isCoursesLoading,
   isLikedArticlesLoading,
   isFollowersLoading,
   isFollowingsLoading,
   articlesError,
+  coursesError,
   likedArticlesError,
   followersError,
   followingsError,
@@ -62,6 +69,7 @@ export function UserProfileTemplate({
   onArticlesClick,
   onFollowClick,
   onArticlesRetry,
+  onCoursesRetry,
   onLikedArticlesRetry,
   onFollowersRetry,
   onFollowingsRetry,
@@ -84,19 +92,23 @@ export function UserProfileTemplate({
         currentPage={currentPage}
         pageSize={pageSize}
         articlesData={articlesData}
+        coursesData={coursesData}
         likedArticlesData={likedArticlesData}
         followersData={followersData}
         followingsData={followingsData}
         isArticlesLoading={isArticlesLoading}
+        isCoursesLoading={isCoursesLoading}
         isLikedArticlesLoading={isLikedArticlesLoading}
         isFollowersLoading={isFollowersLoading}
         isFollowingsLoading={isFollowingsLoading}
         articlesError={articlesError}
+        coursesError={coursesError}
         likedArticlesError={likedArticlesError}
         followersError={followersError}
         followingsError={followingsError}
         onTabChange={onTabChange}
         onArticlesRetry={onArticlesRetry}
+        onCoursesRetry={onCoursesRetry}
         onLikedArticlesRetry={onLikedArticlesRetry}
         onFollowersRetry={onFollowersRetry}
         onFollowingsRetry={onFollowingsRetry}
