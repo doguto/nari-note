@@ -278,6 +278,135 @@ public class CoursesControllerTest : IntegrationTestBase
 
     #endregion
 
+    #region GET /api/courses/tag/{tagName}
+
+    [Fact]
+    public async Task タグ別の講座一覧は公開中の記事にタグが付いた公開中の講座だけを返す()
+    {
+        var owner = new UserBuilder().WithName("owner").Build();
+        var tag = TestEntity.Tag("Shogi");
+        var otherTag = TestEntity.Tag("囲碁");
+        var tagged = new CourseBuilder(owner).WithName("タグ付きの講座").Build();
+        var draftCourse = new CourseBuilder(owner).WithName("下書きの講座").Draft().Build();
+        var draftArticleOnly = new CourseBuilder(owner).WithName("下書きの記事だけタグ付きの講座").Build();
+        var otherTagged = new CourseBuilder(owner).WithName("別タグの講座").Build();
+        var taggedArticle = new ArticleBuilder(owner).WithTitle("第1回").InCourse(tagged, 1).Build();
+        var untaggedArticle = new ArticleBuilder(owner).WithTitle("第2回").InCourse(tagged, 2).Build();
+        var draftCourseArticle = new ArticleBuilder(owner).InCourse(draftCourse, 1).Draft().Build();
+        var draftArticle = new ArticleBuilder(owner).InCourse(draftArticleOnly, 1).Draft().Build();
+        var otherTaggedArticle = new ArticleBuilder(owner).InCourse(otherTagged, 1).Build();
+        var single = new ArticleBuilder(owner).Build();
+        await SeedAsync(
+            owner,
+            tag,
+            otherTag,
+            tagged,
+            draftCourse,
+            draftArticleOnly,
+            otherTagged,
+            taggedArticle,
+            untaggedArticle,
+            draftCourseArticle,
+            draftArticle,
+            otherTaggedArticle,
+            single,
+            TestEntity.ArticleTag(taggedArticle, tag),
+            TestEntity.ArticleTag(draftCourseArticle, tag),
+            TestEntity.ArticleTag(draftArticle, tag),
+            TestEntity.ArticleTag(otherTaggedArticle, otherTag),
+            TestEntity.ArticleTag(single, tag)
+        );
+
+        // タグ名の大文字小文字は区別しない
+        var response = await CreateClient().GetAsync("/api/courses/tag/shogi");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await ReadAsync<GetCoursesByTagResponse>(response);
+        var dto = Assert.Single(body.Courses);
+        Assert.Equal("タグ付きの講座", dto.Name);
+        Assert.Equal("owner", dto.UserName);
+        Assert.Equal(["第1回", "第2回"], dto.ArticleNames);
+        Assert.Equal(1, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task タグ別の講座一覧は複数の記事に同じタグが付いていても講座を1件として返す()
+    {
+        var owner = new UserBuilder().Build();
+        var tag = TestEntity.Tag("Shogi");
+        var course = new CourseBuilder(owner).Build();
+        var first = new ArticleBuilder(owner).InCourse(course, 1).Build();
+        var second = new ArticleBuilder(owner).InCourse(course, 2).Build();
+        await SeedAsync(
+            owner,
+            tag,
+            course,
+            first,
+            second,
+            TestEntity.ArticleTag(first, tag),
+            TestEntity.ArticleTag(second, tag)
+        );
+
+        var response = await CreateClient().GetAsync("/api/courses/tag/Shogi");
+
+        var body = await ReadAsync<GetCoursesByTagResponse>(response);
+        Assert.Single(body.Courses);
+        Assert.Equal(1, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task タグ別の講座一覧は作成日時の新しい順に指定した範囲を返す()
+    {
+        var owner = new UserBuilder().Build();
+        var tag = TestEntity.Tag("Shogi");
+        var newest = new CourseBuilder(owner).WithName("1日前").CreatedAt(Now.AddDays(-1)).Build();
+        var middle = new CourseBuilder(owner).WithName("2日前").CreatedAt(Now.AddDays(-2)).Build();
+        var oldest = new CourseBuilder(owner).WithName("3日前").CreatedAt(Now.AddDays(-3)).Build();
+        var newestArticle = new ArticleBuilder(owner).InCourse(newest, 1).Build();
+        var middleArticle = new ArticleBuilder(owner).InCourse(middle, 1).Build();
+        var oldestArticle = new ArticleBuilder(owner).InCourse(oldest, 1).Build();
+        await SeedAsync(
+            owner,
+            tag,
+            newest,
+            middle,
+            oldest,
+            newestArticle,
+            middleArticle,
+            oldestArticle,
+            TestEntity.ArticleTag(newestArticle, tag),
+            TestEntity.ArticleTag(middleArticle, tag),
+            TestEntity.ArticleTag(oldestArticle, tag)
+        );
+
+        var response = await CreateClient().GetAsync("/api/courses/tag/Shogi?limit=1&offset=1");
+
+        var body = await ReadAsync<GetCoursesByTagResponse>(response);
+        Assert.Equal(["2日前"], body.Courses.Select(c => c.Name));
+        Assert.Equal(3, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task タグ別の講座一覧で存在しないタグを指定すると空を返す()
+    {
+        var response = await CreateClient().GetAsync("/api/courses/tag/存在しないタグ");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await ReadAsync<GetCoursesByTagResponse>(response);
+        Assert.Empty(body.Courses);
+        Assert.Equal(0, body.TotalCount);
+    }
+
+    [Fact]
+    public async Task タグ別の講座一覧で範囲外の件数を指定すると400を返す()
+    {
+        var response = await CreateClient().GetAsync("/api/courses/tag/Shogi?limit=101");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    #endregion
+
     #region POST /api/courses
 
     [Fact]

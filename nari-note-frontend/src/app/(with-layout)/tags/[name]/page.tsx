@@ -5,7 +5,7 @@ import { TagArticleListPage } from '@/features/tag/pages';
 
 interface TagPageProps {
   params: Promise<{ name: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; tab?: string }>;
 }
 
 export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
@@ -14,16 +14,18 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
 
   return buildPageMetadata({
     title: `#${decodedName}`,
-    description: `「${decodedName}」タグの将棋記事一覧`,
+    description: `「${decodedName}」タグの将棋記事・講座一覧`,
     path: `/tags/${name}`,
   });
 }
 
 export default async function TagPage({ params, searchParams }: TagPageProps) {
   const { name } = await params;
-  const { page } = await searchParams;
+  const { page, tab } = await searchParams;
   const parsedPage = Number(page);
   const currentPage = Number.isInteger(parsedPage) && parsedPage >= 1 ? parsedPage : 1;
 
-  return <TagArticleListPage tagName={name} page={currentPage} />;
+  const activeTab = tab === 'courses' ? 'courses' : 'articles';
+
+  return <TagArticleListPage tagName={name} activeTab={activeTab} page={currentPage} />;
 }

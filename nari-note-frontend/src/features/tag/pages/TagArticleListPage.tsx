@@ -1,39 +1,45 @@
 import { PageWithSidebar } from '@/features/global/organisms';
-import { TagArticleListTemplate } from '../templates/TagArticleListTemplate';
-import { getArticlesByTag } from '@/lib/api/server';
+import { TagArticleListTemplate, type TagTab } from '../templates/TagArticleListTemplate';
+import { getArticlesByTag, getCoursesByTag } from '@/lib/api/server';
 
 const PAGE_SIZE = 20;
 
 interface TagArticleListPageProps {
   tagName: string;
+  activeTab: TagTab;
   page: number;
 }
 
 /**
  * TagArticleListPage - Page Component
- * 
- * タグ別記事一覧ページのビジネスロジックを担当するページコンポーネント
- * サーバーサイドでデータフェッチを行い、Templateに渡す
+ *
+ * タグ別一覧ページ（記事・講座）のビジネスロジックを担当するページコンポーネント
+ * サーバーサイドで表示中のタブのデータだけをフェッチし、Templateに渡す
  */
-export async function TagArticleListPage({ tagName, page }: TagArticleListPageProps) {
+export async function TagArticleListPage({ tagName, activeTab, page }: TagArticleListPageProps) {
   // URLエンコードされたタグ名をデコード
   const decodedTagName = decodeURIComponent(tagName);
-  
-  // サーバーサイドでデータをフェッチ
-  const data = await getArticlesByTag({
+  const params = {
     tagName: decodedTagName,
     limit: PAGE_SIZE,
     offset: (page - 1) * PAGE_SIZE,
-  }).catch(() => ({ articles: [], totalCount: 0 }));
-  const articles = data?.articles ?? [];
-  const totalCount = data?.totalCount ?? 0;
+  };
+
+  const articleData = activeTab === 'articles'
+    ? await getArticlesByTag(params).catch(() => ({ articles: [], totalCount: 0 }))
+    : undefined;
+  const courseData = activeTab === 'courses'
+    ? await getCoursesByTag(params).catch(() => ({ courses: [], totalCount: 0 }))
+    : undefined;
 
   return (
     <PageWithSidebar>
       <TagArticleListTemplate
         tag={decodedTagName}
-        articles={articles}
-        totalCount={totalCount}
+        activeTab={activeTab}
+        articles={articleData?.articles ?? []}
+        courses={courseData?.courses ?? []}
+        totalCount={(activeTab === 'articles' ? articleData?.totalCount : courseData?.totalCount) ?? 0}
         currentPage={page}
         pageSize={PAGE_SIZE}
       />

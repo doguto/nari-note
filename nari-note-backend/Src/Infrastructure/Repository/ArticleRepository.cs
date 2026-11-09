@@ -85,8 +85,10 @@ public class ArticleRepository : IArticleRepository
                                   .ToListAsync();
         if (tagIds.Count == 0) return (new List<ArticleSummary>(), 0);
 
+        // 講座の記事はタグ別の講座一覧側で講座として表示するため除外する
         var query = context.Articles
                            .Where(a => a.ArticleTags.Any(at => tagIds.Contains(at.TagId)))
+                           .Where(IsStandalone())
                            .Where(visibilityFilter);
 
         var totalCount = await query.CountAsync();
@@ -108,7 +110,8 @@ public class ArticleRepository : IArticleRepository
         // 下書きに加え、公開日時を過ぎていない予約投稿も第三者には見せない
         // 講座に属する記事は講座一覧側で表示するため除外する
         var query = context.Articles
-                           .Where(a => a.AuthorId == authorId && !a.CourseId.HasValue)
+                           .Where(a => a.AuthorId == authorId)
+                           .Where(IsStandalone())
                            .Where(visibilityFilter);
 
         var totalCount = await query.CountAsync();
@@ -191,7 +194,7 @@ public class ArticleRepository : IArticleRepository
         // 講座の記事は取得しない
         var query = context.Articles
                            .Where(visibilityFilter)
-                           .Where(a => !a.CourseId.HasValue)
+                           .Where(IsStandalone())
                            .OrderByDescending(a => a.PublishedAt)
                            .ThenByDescending(a => a.Id)
                            .Skip(offset)
@@ -215,7 +218,9 @@ public class ArticleRepository : IArticleRepository
         var now = timeProvider.UtcNow();
         var searchFilter = IsPubliclyVisibleAndContainsKeyword(now, keyword);
 
-        var query = context.Articles.Where(searchFilter);
+        var query = context.Articles
+                           .Where(IsStandalone())
+                           .Where(searchFilter);
 
         var totalCount = await query.CountAsync();
         var articles = await query.OrderByDescending(a => a.CreatedAt)
@@ -235,7 +240,8 @@ public class ArticleRepository : IArticleRepository
 
         // 作者別の記事一覧と件数を揃えるため、講座に属する記事は数えない
         return await context.Articles
-                            .Where(a => a.AuthorId == authorId && !a.CourseId.HasValue)
+                            .Where(a => a.AuthorId == authorId)
+                            .Where(IsStandalone())
                             .Where(visibilityFilter)
                             .CountAsync();
     }
@@ -257,12 +263,19 @@ public class ArticleRepository : IArticleRepository
         return a => a.PublishedAt.HasValue && a.PublishedAt!.Value <= now;
     }
 
+    // 講座に属さない単発記事のフィルタ条件
+    // 新着・検索・作者別・タグ別のように講座側にも同種の一覧がある一覧では、講座の記事を除外するために使う
+    // いいね一覧のように講座側に対応する一覧が無いものでは使わない
+    static Expression<Func<Article, bool>> IsStandalone()
+    {
+        return a => !a.CourseId.HasValue;
+    }
+
     // 公開記事かつキーワードを含む記事のフィルタ条件を生成します。
-    // 講座に属する記事は講座検索側で講座としてヒットさせるため除外します。
+    // 講座に属する記事は講座検索側で講座としてヒットさせるため、呼び出し側で IsStandalone と組み合わせます。
     static Expression<Func<Article, bool>> IsPubliclyVisibleAndContainsKeyword(DateTime now, string keyword)
     {
         return a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now &&
-                    a.CourseId == null &&
                     (a.Title.Contains(keyword) || a.Body.Contains(keyword));
     }
 }

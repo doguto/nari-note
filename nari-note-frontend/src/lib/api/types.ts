@@ -214,6 +214,17 @@ export interface GetCoursesByAuthorResponse {
   totalCount: number;
 }
 
+export interface GetCoursesByTagRequest {
+  tagName?: string;
+  limit: number;
+  offset: number;
+}
+
+export interface GetCoursesByTagResponse {
+  courses: CourseDto[];
+  totalCount: number;
+}
+
 export interface GetCoursesRequest {
   limit: number;
   offset: number;
