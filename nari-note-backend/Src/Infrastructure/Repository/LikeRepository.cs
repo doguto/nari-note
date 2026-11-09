@@ -66,6 +66,7 @@ public class LikeRepository : ILikeRepository
     {
         var query = context.Likes.Where(l => l.UserId == userId);
 
+        // 講座の記事へのいいねも含める
         // いいねした日時の新しい順に並べる（Likes の (UserId, CreatedAt) インデックスを使う）
         var totalCount = await query.CountAsync();
         var articles = await query.OrderByDescending(l => l.CreatedAt)

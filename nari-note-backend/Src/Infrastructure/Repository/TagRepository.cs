@@ -60,6 +60,7 @@ public class TagRepository : ITagRepository
     public async Task<List<Tag>> GetPopularTagsAsync(DateTime sinceDate, int limit)
     {
         // 公開日時を過ぎていない予約投稿は集計に含めない
+        // タグページでは講座の記事も講座として表示するため、講座の記事も集計に含める
         var now = timeProvider.UtcNow();
 
         return await context.Tags

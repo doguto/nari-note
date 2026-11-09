@@ -49,6 +49,8 @@ import type {
   GetCourseContentResponse,
   GetCoursesByAuthorRequest,
   GetCoursesByAuthorResponse,
+  GetCoursesByTagRequest,
+  GetCoursesByTagResponse,
   GetCoursesRequest,
   GetCoursesResponse,
   GetDraftArticlesResponse,
@@ -181,6 +183,18 @@ export async function getCoursesByAuthor(params: GetCoursesByAuthorRequest): Pro
   });
 
   return serverFetch<GetCoursesByAuthorResponse>(url.toString());
+}
+
+export async function getCoursesByTag(params: GetCoursesByTagRequest): Promise<GetCoursesByTagResponse> {
+  const url = new URL(`/api/courses/tag/${params.tagName}`, getBaseUrl());
+  const query = { limit: params.limit, offset: params.offset };
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  });
+
+  return serverFetch<GetCoursesByTagResponse>(url.toString());
 }
 
 export async function getCourseContent(params: GetCourseContentRequest): Promise<GetCourseContentResponse> {

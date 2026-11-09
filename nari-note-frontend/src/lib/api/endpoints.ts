@@ -27,6 +27,8 @@ import type {
   GetCourseContentResponse,
   GetCoursesByAuthorRequest,
   GetCoursesByAuthorResponse,
+  GetCoursesByTagRequest,
+  GetCoursesByTagResponse,
   GetCoursesRequest,
   GetCoursesResponse,
   GetDraftArticlesResponse,
@@ -188,6 +190,10 @@ export const coursesApi = {
   },
   getCoursesByAuthor: async (data: GetCoursesByAuthorRequest): Promise<GetCoursesByAuthorResponse> => {
     const response = await apiClient.get<GetCoursesByAuthorResponse>(`/api/courses/author/${data.authorId}`, { params: { limit: data.limit, offset: data.offset } });
+    return response;
+  },
+  getCoursesByTag: async (data: GetCoursesByTagRequest): Promise<GetCoursesByTagResponse> => {
+    const response = await apiClient.get<GetCoursesByTagResponse>(`/api/courses/tag/${data.tagName}`, { params: { limit: data.limit, offset: data.offset } });
     return response;
   },
   createCourse: async (data: CreateCourseRequest): Promise<CreateCourseResponse> => {

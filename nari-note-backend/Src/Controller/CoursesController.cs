@@ -18,6 +18,7 @@ public class CoursesController : ApplicationController
     readonly GetCourseContentForEditService getCourseContentForEditService;
     readonly GetCoursesService getCoursesService;
     readonly GetCoursesByAuthorService getCoursesByAuthorService;
+    readonly GetCoursesByTagService getCoursesByTagService;
     readonly GetMyCoursesService getMyCoursesService;
     readonly SearchCoursesService searchCoursesService;
     readonly UpdateCourseService updateCourseService;
@@ -28,6 +29,7 @@ public class CoursesController : ApplicationController
         UpdateCourseService updateCourseService,
         GetCoursesService getCoursesService,
         GetCoursesByAuthorService getCoursesByAuthorService,
+        GetCoursesByTagService getCoursesByTagService,
         GetMyCoursesService getMyCoursesService,
         GetCourseContentService getCourseContentService,
         GetCourseContentForEditService getCourseContentForEditService,
@@ -41,6 +43,7 @@ public class CoursesController : ApplicationController
         this.getCourseContentForEditService = getCourseContentForEditService;
         this.getCoursesService = getCoursesService;
         this.getCoursesByAuthorService = getCoursesByAuthorService;
+        this.getCoursesByTagService = getCoursesByTagService;
         this.getMyCoursesService = getMyCoursesService;
         this.searchCoursesService = searchCoursesService;
     }
@@ -84,6 +87,20 @@ public class CoursesController : ApplicationController
     {
         var request = new GetCoursesByAuthorRequest { AuthorId = authorId, Limit = limit, Offset = offset };
         var response = await getCoursesByAuthorService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpGet("tag/{tagName}")]
+    [Auth(AuthLevel.Anonymous)]
+    [ValidateModelState]
+    public async Task<ActionResult<GetCoursesByTagResponse>> GetCoursesByTag(
+        string tagName,
+        [FromQuery, Range(1, 100, ErrorMessage = "取得件数は1から100の範囲で指定してください")] int limit = 20,
+        [FromQuery, Range(0, int.MaxValue, ErrorMessage = "オフセットは0以上の値を指定してください")] int offset = 0
+    )
+    {
+        var request = new GetCoursesByTagRequest { TagName = tagName, Limit = limit, Offset = offset };
+        var response = await getCoursesByTagService.ExecuteAsync(request);
         return Ok(response);
     }
 

@@ -169,27 +169,45 @@ public class CourseRepository : ICourseRepository
                            .Where(c => c.UserId == authorId && c.PublishedAt.HasValue && c.PublishedAt.Value <= now);
 
         var totalCount = await query.CountAsync();
-        // 予約投稿（公開日時が未来）の記事は含めない。記事は本文を読み込まず ID とタイトルだけを取得する
         var courses = await query.OrderByDescending(c => c.CreatedAt)
                                  .ThenByDescending(c => c.Id)
                                  .Skip(offset)
                                  .Take(limit)
-                                 .Select(c => new CourseSummary
-                                 {
-                                     Id = c.Id,
-                                     UserId = c.UserId,
-                                     UserName = c.User.Name,
-                                     UserProfileImage = c.User.ProfileImage,
-                                     Name = c.Name,
-                                     Articles = c.Articles
-                                                 .Where(a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now)
-                                                 .OrderBy(a => a.ArticleOrder)
-                                                 .ThenBy(a => a.Id)
-                                                 .Select(a => new CourseArticleSummary { Id = a.Id, Title = a.Title })
-                                                 .ToList(),
-                                     LikeCount = c.CourseLikes.Count(),
-                                     PublishedAt = c.PublishedAt
-                                 })
+                                 .Select(ToSummary(now))
+                                 .ToListAsync();
+
+        return (courses, totalCount);
+    }
+
+    public async Task<(List<CourseSummary> Courses, int TotalCount)> FindPublishedSummariesByTagAsync(string tagName, int limit, int offset)
+    {
+        var now = timeProvider.UtcNow();
+
+        // タグ別の記事一覧と同じく、タグ名は大文字小文字を区別せずに一致させる
+        var normalizedTagName = tagName.ToLowerInvariant();
+        var tagIds = await context.Tags
+                                  .Where(t => t.Name.ToLower() == normalizedTagName)
+                                  .Select(t => t.Id)
+                                  .ToListAsync();
+        if (tagIds.Count == 0) return (new List<CourseSummary>(), 0);
+
+        // 講座自体はタグを持たないため、公開中の講座内記事に付いたタグで講座を絞り込む
+        var query = context.Courses
+                           .Where(c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now)
+                           .Where(
+                               c => c.Articles.Any(
+                                   a => a.PublishedAt.HasValue
+                                        && a.PublishedAt.Value <= now
+                                        && a.ArticleTags.Any(at => tagIds.Contains(at.TagId))
+                               )
+                           );
+
+        var totalCount = await query.CountAsync();
+        var courses = await query.OrderByDescending(c => c.CreatedAt)
+                                 .ThenByDescending(c => c.Id)
+                                 .Skip(offset)
+                                 .Take(limit)
+                                 .Select(ToSummary(now))
                                  .ToListAsync();
 
         return (courses, totalCount);
@@ -210,5 +228,26 @@ public class CourseRepository : ICourseRepository
     {
         return c => c.PublishedAt.HasValue && c.PublishedAt.Value <= now &&
                     (c.Name.Contains(keyword) || matchedCourseIds.Contains(c.Id));
+    }
+
+    // 予約投稿（公開日時が未来）の記事は含めない。記事は本文を読み込まず ID とタイトルだけを取得する
+    static Expression<Func<Course, CourseSummary>> ToSummary(DateTime now)
+    {
+        return c => new CourseSummary
+        {
+            Id = c.Id,
+            UserId = c.UserId,
+            UserName = c.User.Name,
+            UserProfileImage = c.User.ProfileImage,
+            Name = c.Name,
+            Articles = c.Articles
+                        .Where(a => a.PublishedAt.HasValue && a.PublishedAt.Value <= now)
+                        .OrderBy(a => a.ArticleOrder)
+                        .ThenBy(a => a.Id)
+                        .Select(a => new CourseArticleSummary { Id = a.Id, Title = a.Title })
+                        .ToList(),
+            LikeCount = c.CourseLikes.Count(),
+            PublishedAt = c.PublishedAt
+        };
     }
 }

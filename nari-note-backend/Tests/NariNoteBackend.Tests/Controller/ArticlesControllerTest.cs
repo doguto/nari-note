@@ -825,6 +825,31 @@ public class ArticlesControllerTest : IntegrationTestBase
     }
 
     [Fact]
+    public async Task タグ別の記事一覧に講座の記事は含まれない()
+    {
+        var author = new UserBuilder().Build();
+        var course = new CourseBuilder(author).Build();
+        var tag = TestEntity.Tag("Shogi");
+        var single = new ArticleBuilder(author).WithTitle("単発記事").Build();
+        var inCourse = new ArticleBuilder(author).WithTitle("講座の記事").InCourse(course, 1).Build();
+        await SeedAsync(
+            author,
+            course,
+            tag,
+            single,
+            inCourse,
+            TestEntity.ArticleTag(single, tag),
+            TestEntity.ArticleTag(inCourse, tag)
+        );
+
+        var response = await CreateClient().GetAsync("/api/articles/tag/Shogi");
+
+        var body = await ReadAsync<GetArticlesByTagResponse>(response);
+        Assert.Equal(["単発記事"], body.Articles.Select(a => a.Title));
+        Assert.Equal(1, body.TotalCount);
+    }
+
+    [Fact]
     public async Task タグ別の記事一覧は公開日時の新しい順に指定した範囲を返す()
     {
         var author = new UserBuilder().Build();
