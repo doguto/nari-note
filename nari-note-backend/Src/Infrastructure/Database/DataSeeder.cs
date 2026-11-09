@@ -11,7 +11,7 @@ public static class DataSeeder
         if (await context.Users.AnyAsync()) return;
 
         // ユーザー作成
-        // ⚠️ 注意: 開発環境用のシードデータです。本番環境では使用しないでください。
+        // 注意: 開発環境用のシードデータです。本番環境では使用しないでください。
         // パスワード: password123 (セキュリティ上、本番環境ではより強力なパスワードを使用してください)
         var users = new List<User>
         {
@@ -774,6 +774,6 @@ public static class DataSeeder
         context.Notifications.AddRange(notifications);
         await context.SaveChangesAsync();
 
-        Console.WriteLine("✅ シードデータの投入が完了しました");
+        Console.WriteLine("シードデータの投入が完了しました");
     }
 }
