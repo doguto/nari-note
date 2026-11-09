@@ -3,7 +3,7 @@ include "root" {
 }
 
 terraform {
-  source = "${get_repo_root()}/infrastruture/terraform/prod/network/gateway"
+  source = "${get_repo_root()}/infrastruture/terraform/modules/network/gateway"
 }
 
 dependencies {

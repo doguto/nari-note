@@ -1,9 +1,7 @@
 namespace NariNoteBackend.Tests.Support;
 
-/// <summary>
-///     テストから現在時刻を自由に設定できる TimeProvider。
-///     FakeTimeProvider と異なり時刻を巻き戻せるため、結合テストでテストごとに初期値へ戻せる。
-/// </summary>
+// テストから現在時刻を自由に設定できる TimeProvider。
+// FakeTimeProvider と異なり時刻を巻き戻せるため、結合テストでテストごとに初期値へ戻せる。
 public class TestTimeProvider : TimeProvider
 {
     public static readonly DateTime DefaultUtcNow = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);

@@ -23,5 +23,5 @@ public class Kifu : EntityBase
     public required int SortOrder { get; set; }
 
     // Navigation Properties
-    public Article Article { get; set; }
+    public Article Article { get; set; } = null!;
 }

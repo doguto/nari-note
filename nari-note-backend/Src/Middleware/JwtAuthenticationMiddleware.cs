@@ -1,5 +1,6 @@
 using System.Net;
 using NariNoteBackend.Application.Dto.Response;
+using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Repository;
 using NariNoteBackend.Domain.Security;
 using NariNoteBackend.Extension;
@@ -105,9 +106,9 @@ public class JwtAuthenticationMiddleware
             return;
         }
 
-        // 退会済みユーザーのトークンは無効として扱う
+        // 退会済みユーザーのトークンと、無効化された（SecurityStamp が一致しない）トークンは無効として扱う
         var user = await userRepository.FindByIdAsync(userId.Value);
-        if (user == null)
+        if (user == null || !IsSecurityStampValid(user, jwtHelper.GetSecurityStampFromToken(token!)))
         {
             context.Response.Cookies.Delete("authToken", new CookieOptions
             {
@@ -127,7 +128,7 @@ public class JwtAuthenticationMiddleware
                     error = new
                     {
                         code = "UNAUTHORIZED",
-                        message = "ユーザーが存在しません",
+                        message = user == null ? "ユーザーが存在しません" : "無効なトークンです",
                         timestamp = timeProvider.UtcNow(),
                         path = context.Request.Path
                     }
@@ -154,5 +155,10 @@ public class JwtAuthenticationMiddleware
         context.Items["IsEmailVerified"] = user.IsEmailVerified;
 
         await next(context);
+    }
+
+    static bool IsSecurityStampValid(User user, string? tokenSecurityStamp)
+    {
+        return user.SecurityStamp == null || user.SecurityStamp == tokenSecurityStamp;
     }
 }

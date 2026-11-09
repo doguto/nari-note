@@ -3,7 +3,7 @@ include "root" {
 }
 
 terraform {
-  source = "${get_repo_root()}/infrastruture/terraform/prod/app/server"
+  source = "${get_repo_root()}/infrastruture/terraform/modules/app/server"
 }
 
 dependencies {
@@ -11,6 +11,7 @@ dependencies {
     "../../network/vpc",
     "../../network/gateway",
     "../../deploy/bucket",
+    "../../db/backup",
     "../secret",
     "../../db/secret",
     "../../image_delivery/storage"

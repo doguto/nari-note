@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using NariNoteBackend.Domain.Gateway;
-using NariNoteBackend.Infrastructure.Outbox;
+using NariNoteBackend.Infrastructure.Job;
 using NariNoteBackend.Tests.Support.Fake;
 using Npgsql;
 using Respawn;
@@ -14,10 +14,8 @@ using Testcontainers.PostgreSql;
 
 namespace NariNoteBackend.Tests.Support.Integration;
 
-/// <summary>
-///     実 PostgreSQL（Testcontainers）に接続した API を起動する。
-///     起動コストが高いため、結合テスト全体で 1 インスタンスを共有する。
-/// </summary>
+// 実 PostgreSQL（Testcontainers）に接続した API を起動する。
+// 起動コストが高いため、結合テスト全体で 1 インスタンスを共有する。
 public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     // docker-compose.yml の db と同じイメージを使用する
@@ -54,9 +52,7 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    ///     DB の全データ・時計・Fake の記録を初期状態に戻す。
-    /// </summary>
+    // DB の全データ・時計・Fake の記録を初期状態に戻す。
     public async Task ResetAsync()
     {
         await using var connection = new NpgsqlConnection(this.postgres.GetConnectionString());
@@ -97,6 +93,12 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
                 d.ServiceType == typeof(IHostedService) && d.ImplementationType == typeof(OutboxWorker)
             );
             services.Remove(outboxWorker);
+
+            // 未認証ユーザーの削除も同様に、必要なテストが UnverifiedUserDeletionProcessor を直接呼ぶ
+            var cleanupWorker = services.Single(d =>
+                d.ServiceType == typeof(IHostedService) && d.ImplementationType == typeof(UnverifiedUserDeletionWorker)
+            );
+            services.Remove(cleanupWorker);
         });
     }
 }

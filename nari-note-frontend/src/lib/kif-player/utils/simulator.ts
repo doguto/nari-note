@@ -1,4 +1,4 @@
-import type { BoardState, CapturedPieces, ParsedBoard, PieceType } from '../types';
+import type { BoardState, CapturedPieces, ParsedBoard, PieceOwner, PieceType } from '../types';
 import type { KifGame, KifMove } from '../types';
 import { INITIAL_BOARD } from '../constants';
 
@@ -36,8 +36,15 @@ function removeCaptured(captured: CapturedPieces, pieceType: PieceType, by: 'sen
   if (existing.count <= 0) list.splice(list.indexOf(existing), 1);
 }
 
-function applyMove(board: BoardState, captured: CapturedPieces, move: KifMove): void {
-  const owner: 'sente' | 'gote' = move.moveNumber % 2 === 1 ? 'sente' : 'gote';
+// 1手目を指す側から数えて、N手目を指す側を返す
+export function moverOf(moveNumber: number, firstTurn: PieceOwner): PieceOwner {
+  const isFirstSide = moveNumber % 2 === 1;
+  if (firstTurn === 'sente') return isFirstSide ? 'sente' : 'gote';
+  return isFirstSide ? 'gote' : 'sente';
+}
+
+function applyMove(board: BoardState, captured: CapturedPieces, move: KifMove, firstTurn: PieceOwner): void {
+  const owner = moverOf(move.moveNumber, firstTurn);
   const toCi = colIdx(move.toCol);
   const toRi = rowIdx(move.toRow);
 
@@ -62,12 +69,16 @@ function applyMove(board: BoardState, captured: CapturedPieces, move: KifMove): 
 
 // moveNumber=0: 初期配置, N: N手目指了後の盤面
 export function getBoardAtMove(game: KifGame, moveNumber: number): ParsedBoard {
-  const board = deepCopyBoard(INITIAL_BOARD);
-  const captured: CapturedPieces = { sente: [], gote: [] };
+  const initial = game.initialPosition;
+  const board = deepCopyBoard(initial?.board ?? INITIAL_BOARD);
+  const captured: CapturedPieces = {
+    sente: (initial?.captured.sente ?? []).map((p) => ({ ...p })),
+    gote: (initial?.captured.gote ?? []).map((p) => ({ ...p })),
+  };
 
   const limit = Math.min(moveNumber, game.moves.length);
   for (let i = 0; i < limit; i++) {
-    applyMove(board, captured, game.moves[i]);
+    applyMove(board, captured, game.moves[i], game.firstTurn);
   }
 
   return { board, captured, sentePlayer: game.sentePlayer, gotePlayer: game.gotePlayer };

@@ -20,6 +20,6 @@ public class ArticleTag : EntityBase
     public TagId TagId { get; set; }
 
     // Navigation Properties
-    public Article Article { get; set; }
-    public Tag Tag { get; set; }
+    public Article Article { get; set; } = null!;
+    public Tag Tag { get; set; } = null!;
 }

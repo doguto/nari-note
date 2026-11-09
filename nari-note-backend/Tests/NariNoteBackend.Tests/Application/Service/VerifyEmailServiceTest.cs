@@ -26,7 +26,7 @@ public class VerifyEmailServiceTest
 
     public VerifyEmailServiceTest()
     {
-        this.jwtHelper.GenerateToken(this.user.Id, this.user.Name).Returns("jwt-token");
+        this.jwtHelper.GenerateToken(this.user).Returns("jwt-token");
         this.cookieOptionsHelper
             .CreateAuthCookieOptions(Arg.Any<TimeSpan>())
             .Returns(new CookieOptions { HttpOnly = true, Path = "/" });
@@ -68,6 +68,77 @@ public class VerifyEmailServiceTest
         Assert.True(this.user.IsEmailVerified);
         await this.userRepository.Received(1).UpdateAsync(this.user);
         Assert.Contains("authToken=jwt-token", SetCookieHeader);
+    }
+
+    [Fact]
+    public async Task パスワードが置き換わる場合は以前に発行された認証トークンを無効にする()
+    {
+        var verification = SetupVerification(Now.AddHours(1));
+        verification.PasswordHash = "new-password-hash";
+        this.jwtHelper
+            .GenerateToken(this.user)
+            .Returns(_ => $"jwt-{this.user.SecurityStamp}");
+
+        await Execute();
+
+        // 認証前に別の人がサインインしていても、そのトークンは使えなくなる
+        Assert.NotNull(this.user.SecurityStamp);
+        // 新しく発行するトークンは更新後の SecurityStamp で作る
+        Assert.Contains($"authToken=jwt-{this.user.SecurityStamp}", SetCookieHeader);
+    }
+
+    [Fact]
+    public async Task パスワードが変わらない場合は発行済みの認証トークンを無効にしない()
+    {
+        // 別の端末で確認メールを開いても、サインイン済みの端末はそのまま使えるようにする
+        var verification = SetupVerification(Now.AddHours(1));
+        verification.PasswordHash = this.user.PasswordHash;
+
+        await Execute();
+
+        Assert.Null(this.user.SecurityStamp);
+    }
+
+    [Fact]
+    public async Task トークンに保存されたユーザー名とパスワードを反映する()
+    {
+        var verification = SetupVerification(Now.AddHours(1));
+        verification.Name = "new-name";
+        verification.PasswordHash = "new-password-hash";
+
+        await Execute();
+
+        Assert.Equal("new-name", this.user.Name);
+        Assert.Equal("new-password-hash", this.user.PasswordHash);
+    }
+
+    [Fact]
+    public async Task トークンのユーザー名が他のユーザーに使われていれば現在の名前のままにする()
+    {
+        var currentName = this.user.Name;
+        var verification = SetupVerification(Now.AddHours(1));
+        verification.Name = "taken-name";
+        verification.PasswordHash = "new-password-hash";
+        this.userRepository.ExistsByNameAsync("taken-name", this.user.Id).Returns(true);
+
+        await Execute();
+
+        Assert.Equal(currentName, this.user.Name);
+        Assert.Equal("new-password-hash", this.user.PasswordHash);
+    }
+
+    [Fact]
+    public async Task トークンにユーザー名とパスワードが無ければ現在の値のままにする()
+    {
+        // 確認メールの再送で発行したトークン
+        var currentName = this.user.Name;
+        var currentPasswordHash = this.user.PasswordHash;
+        SetupVerification(Now.AddHours(1));
+
+        await Execute();
+
+        Assert.Equal(currentName, this.user.Name);
+        Assert.Equal(currentPasswordHash, this.user.PasswordHash);
     }
 
     [Fact]

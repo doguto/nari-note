@@ -3,9 +3,7 @@ using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Tests.Support.Builder;
 
-/// <summary>
-///     既定値で「公開済みの講座」を組み立てる。
-/// </summary>
+// 既定値で「公開済みの講座」を組み立てる。
 public class CourseBuilder
 {
     readonly List<Article> articles = new();
@@ -45,7 +43,7 @@ public class CourseBuilder
         return this;
     }
 
-    /// <summary>単体テスト用に、読み込み済みの記事として設定する</summary>
+    // 単体テスト用に、読み込み済みの記事として設定する
     public CourseBuilder WithArticles(params Article[] values)
     {
         this.articles.AddRange(values);

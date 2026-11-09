@@ -60,6 +60,7 @@ nari-note-backend/Src/
 ├── Infrastructure/
 │   ├── NariNoteDbContext.cs  # EF Core DbContext
 │   ├── Repository/         # Repository実装
+│   ├── Job/                # バックグラウンドジョブ（Outbox 配送、未認証ユーザーの削除等）
 │   └── Binding/            # ValueObject のモデルバインド・JSON 変換
 ├── Middleware/             # グローバルミドルウェア
 └── Filter/                 # アクションフィルタ
@@ -123,6 +124,9 @@ nari-note-frontend/src/
 - private修飾子: クラスフィールドでは省略（デフォルトでprivate）
   - 良い例: `readonly NariNoteDbContext context;`
   - 悪い例: `private readonly NariNoteDbContext context;`
+
+**コメント:**
+- XML ドキュメントコメント（`/// <summary>` 等）は使わず、`//` のコメントで書く
 
 **ValueObject（ID型）:**
 - エンティティのIDにはVogenライブラリを使用した型安全なValueObjectを使用

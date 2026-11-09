@@ -1,6 +1,8 @@
 # Personal settings
 .idea/
 scripts/.env
+scripts/tsume/
+scripts/post-article/
 **/*.env
 
 # archived source

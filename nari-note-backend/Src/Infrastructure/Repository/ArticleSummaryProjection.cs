@@ -6,11 +6,9 @@ namespace NariNoteBackend.Infrastructure.Repository;
 
 static class ArticleSummaryProjection
 {
-    /// <summary>
-    ///     一覧のサムネイル表示に必要な列だけを射影します。
-    ///     タグを JOIN するため、いいね数のサブクエリは記事 × タグの行ごとに実行されます。
-    ///     AsSplitQuery でタグを分けると、ページングの絞り込みが 2 本目でも再実行され、深いページほど遅くなるため 1 本のクエリにしています。
-    /// </summary>
+    // 一覧のサムネイル表示に必要な列だけを射影します。
+    // タグを JOIN するため、いいね数のサブクエリは記事 × タグの行ごとに実行されます。
+    // AsSplitQuery でタグを分けると、ページングの絞り込みが 2 本目でも再実行され、深いページほど遅くなるため 1 本のクエリにしています。
     public static readonly Expression<Func<Article, ArticleSummary>> FromArticle = a => new ArticleSummary
     {
         Id = a.Id,

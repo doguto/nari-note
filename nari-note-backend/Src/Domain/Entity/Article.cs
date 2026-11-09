@@ -33,7 +33,7 @@ public class Article : EntityBase
     public DateTime? PublishedAt { get; set; }
 
     // Navigation Properties
-    public User Author { get; set; }
+    public User Author { get; set; } = null!;
     public Course? Course { get; set; }
     public List<ArticleTag> ArticleTags { get; set; } = new();
     public List<Like> Likes { get; set; } = new();

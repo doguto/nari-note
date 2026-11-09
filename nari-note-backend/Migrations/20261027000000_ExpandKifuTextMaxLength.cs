@@ -4,9 +4,7 @@
 
 namespace NariNoteBackend.Migrations
 {
-    /// <summary>
-    /// 棋譜テキストの上限を DTO のバリデーション（20000 文字）に合わせて 8192 から 20000 に広げる。
-    /// </summary>
+    // 棋譜テキストの上限を DTO のバリデーション（20000 文字）に合わせて 8192 から 20000 に広げる。
     public partial class ExpandKifuTextMaxLength : Migration
     {
         /// <inheritdoc />

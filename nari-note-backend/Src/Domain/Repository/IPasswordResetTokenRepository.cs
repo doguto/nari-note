@@ -6,4 +6,5 @@ namespace NariNoteBackend.Domain.Repository;
 public interface IPasswordResetTokenRepository : IRepository<PasswordResetToken, PasswordResetTokenId>
 {
     Task<PasswordResetToken?> FindByTokenAsync(string token);
+    Task<PasswordResetToken?> FindLatestByUserIdAsync(UserId userId);
 }
