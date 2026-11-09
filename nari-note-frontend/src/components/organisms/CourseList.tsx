@@ -3,14 +3,21 @@ import { EmptyState, LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { CourseDto } from '@/lib/api/types';
 
 interface CourseListProps {
-  courses: CourseDto[];
+  courses?: CourseDto[];
   isLoading: boolean;
   error: Error | null;
   onRetry: () => void;
+  emptyMessage?: string;
 }
 
 
-export function CourseList({ courses, isLoading, error, onRetry }: CourseListProps) {
+export function CourseList({
+  courses,
+  isLoading,
+  error,
+  onRetry,
+  emptyMessage = 'まだ講座がありません',
+}: CourseListProps) {
   if (isLoading) {
     return <LoadingSpinner text="講座を読み込み中..." />;
   }
@@ -24,8 +31,8 @@ export function CourseList({ courses, isLoading, error, onRetry }: CourseListPro
     );
   }
 
-  if (courses.length === 0) {
-    return <EmptyState title="まだ講座がありません" />;
+  if (!courses || courses.length === 0) {
+    return <EmptyState title={emptyMessage} />;
   }
 
   return (
