@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useGetUserProfile, useToggleFollow, useGetFollowers, useGetFollowings, useGetArticlesByAuthor, useGetLikedArticles } from '@/lib/api';
+import { useGetUserProfile, useToggleFollow, useGetFollowers, useGetFollowings, useGetArticlesByAuthor, useGetCoursesByAuthor, useGetLikedArticles } from '@/lib/api';
 import { LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useRequireVerifiedEmail } from '@/lib/hooks';
@@ -52,6 +52,12 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
   const { data: articlesData, isLoading: isArticlesLoading, error: articlesError, refetch: refetchArticles } = useGetArticlesByAuthor(
     { authorId: userId, ...paging },
     { enabled: activeTab === 'articles' }
+  );
+  
+  // ユーザーの講座取得（タブがcoursesの場合のみ）
+  const { data: coursesData, isLoading: isCoursesLoading, error: coursesError, refetch: refetchCourses } = useGetCoursesByAuthor(
+    { authorId: userId, ...paging },
+    { enabled: activeTab === 'courses' }
   );
   
   // いいねした記事取得（タブがlikesの場合のみ）
@@ -106,14 +112,17 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
         currentPage={currentPage}
         pageSize={PAGE_SIZE}
         articlesData={articlesData}
+        coursesData={coursesData}
         likedArticlesData={likedArticlesData}
         followersData={followersData}
         followingsData={followingsData}
         isArticlesLoading={isArticlesLoading}
+        isCoursesLoading={isCoursesLoading}
         isLikedArticlesLoading={isLikedArticlesLoading}
         isFollowersLoading={isFollowersLoading}
         isFollowingsLoading={isFollowingsLoading}
         articlesError={articlesError}
+        coursesError={coursesError}
         likedArticlesError={likedArticlesError}
         followersError={followersError}
         followingsError={followingsError}
@@ -122,6 +131,7 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
         onArticlesClick={handleArticlesClick}
         onFollowClick={handleFollowClick}
         onArticlesRetry={refetchArticles}
+        onCoursesRetry={refetchCourses}
         onLikedArticlesRetry={refetchLikedArticles}
         onFollowersRetry={refetchFollowers}
         onFollowingsRetry={refetchFollowings}

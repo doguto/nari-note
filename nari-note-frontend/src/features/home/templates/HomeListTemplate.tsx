@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArticleList, CourseList } from '../organisms';
+import { CourseList } from '@/components/organisms';
+import { ArticleList } from '../organisms';
 import { ArticleThumbnailDto, CourseDto } from '@/lib/api/types';
 
 interface HomeListTemplateProps {

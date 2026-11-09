@@ -28,8 +28,10 @@ public class UsersControllerTest : IntegrationTestBase
         var following2 = new UserBuilder().Build();
         var published = new ArticleBuilder(user).Build();
         var othersArticle = new ArticleBuilder(follower).Build();
+        var course = new CourseBuilder(user).Build();
         await SeedAsync(
             user,
+            course,
             follower,
             following1,
             following2,
@@ -37,6 +39,7 @@ public class UsersControllerTest : IntegrationTestBase
             othersArticle,
             new ArticleBuilder(user).Draft().Build(),
             new ArticleBuilder(user).PublishedAt(Now.AddDays(1)).Build(),
+            new ArticleBuilder(user).InCourse(course).Build(),
             TestEntity.Follow(follower, user),
             TestEntity.Follow(user, following1),
             TestEntity.Follow(user, following2),
@@ -53,7 +56,7 @@ public class UsersControllerTest : IntegrationTestBase
         Assert.Equal("https://images.test/taro", body.UserIconImageUrl);
         Assert.Equal(1, body.FollowerCount);
         Assert.Equal(2, body.FollowingCount);
-        // 下書きと公開日時を過ぎていない予約投稿は記事数に含めない
+        // 下書き・公開日時を過ぎていない予約投稿・講座の記事は記事数に含めない
         Assert.Equal(1, body.ArticleCount);
         Assert.Equal(1, body.LikedArticleCount);
         Assert.False(body.IsFollowing);

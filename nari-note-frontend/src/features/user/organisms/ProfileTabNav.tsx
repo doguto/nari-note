@@ -1,8 +1,8 @@
-import { ArticleList } from '@/components/organisms';
+import { ArticleList, CourseList } from '@/components/organisms';
 import { Pagination } from '@/components/molecules';
 import { Button } from '@/components/ui/button';
 import { UserFollowersList } from './UserFollowersList';
-import type { GetArticlesByAuthorResponse, GetLikedArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
+import type { GetArticlesByAuthorResponse, GetCoursesByAuthorResponse, GetLikedArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
 interface ProfileTabNavProps {
   activeTab: string;
@@ -11,19 +11,23 @@ interface ProfileTabNavProps {
   currentPage: number;
   pageSize: number;
   articlesData?: GetArticlesByAuthorResponse;
+  coursesData?: GetCoursesByAuthorResponse;
   likedArticlesData?: GetLikedArticlesResponse;
   followersData?: GetFollowersResponse;
   followingsData?: GetFollowingsResponse;
   isArticlesLoading: boolean;
+  isCoursesLoading: boolean;
   isLikedArticlesLoading: boolean;
   isFollowersLoading: boolean;
   isFollowingsLoading: boolean;
   articlesError: Error | null;
+  coursesError: Error | null;
   likedArticlesError: Error | null;
   followersError: Error | null;
   followingsError: Error | null;
   onTabChange: (tab: string) => void;
   onArticlesRetry: () => void;
+  onCoursesRetry: () => void;
   onLikedArticlesRetry: () => void;
   onFollowersRetry: () => void;
   onFollowingsRetry: () => void;
@@ -33,7 +37,7 @@ interface ProfileTabNavProps {
  * ProfileTabNav - Organism Component
  *
  * プロフィールページのタブナビゲーションとタブコンテンツ
- * コンテンツタブ（記事/いいね/フォロー中のタグ）とフォロータブ（フォロワー/フォロー中）を管理
+ * コンテンツタブ（記事/講座/いいね/フォロー中のタグ）とフォロータブ（フォロワー/フォロー中）を管理
  */
 export function ProfileTabNav({
   activeTab,
@@ -42,19 +46,23 @@ export function ProfileTabNav({
   currentPage,
   pageSize,
   articlesData,
+  coursesData,
   likedArticlesData,
   followersData,
   followingsData,
   isArticlesLoading,
+  isCoursesLoading,
   isLikedArticlesLoading,
   isFollowersLoading,
   isFollowingsLoading,
   articlesError,
+  coursesError,
   likedArticlesError,
   followersError,
   followingsError,
   onTabChange,
   onArticlesRetry,
+  onCoursesRetry,
   onLikedArticlesRetry,
   onFollowersRetry,
   onFollowingsRetry,
@@ -77,7 +85,7 @@ export function ProfileTabNav({
         <nav className="flex gap-6 sm:gap-8 px-4 sm:px-6 overflow-x-auto">
           {tabContext === 'content' ? (
             <>
-              {/* コンテンツタブ（記事/いいね/フォロー中のタグ） */}
+              {/* コンテンツタブ（記事/講座/いいね/フォロー中のタグ） */}
               <Button
                 variant="ghost"
                 onClick={() => onTabChange('articles')}
@@ -88,6 +96,17 @@ export function ProfileTabNav({
                 }`}
               >
                 記事
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => onTabChange('courses')}
+                className={`py-4 h-auto px-0 border-b-2 whitespace-nowrap flex-shrink-0 rounded-none hover:bg-transparent ${
+                  activeTab === 'courses'
+                    ? 'border-brand-primary text-brand-text font-medium'
+                    : 'border-transparent text-gray-600 hover:text-brand-text'
+                }`}
+              >
+                講座
               </Button>
               <Button
                 variant="ghost"
@@ -154,6 +173,16 @@ export function ProfileTabNav({
           />
         )}
         {activeTab === 'articles' && !isArticlesLoading && !articlesError && renderPagination(articlesData?.totalCount)}
+
+        {activeTab === 'courses' && (
+          <CourseList
+            courses={coursesData?.courses}
+            isLoading={isCoursesLoading}
+            error={coursesError}
+            onRetry={onCoursesRetry}
+          />
+        )}
+        {activeTab === 'courses' && !isCoursesLoading && !coursesError && renderPagination(coursesData?.totalCount)}
 
         {activeTab === 'likes' && (
           <ArticleList

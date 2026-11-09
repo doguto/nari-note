@@ -733,6 +733,25 @@ public class ArticlesControllerTest : IntegrationTestBase
     }
 
     [Fact]
+    public async Task 作者別の記事一覧に講座の記事は含まれない()
+    {
+        var author = new UserBuilder().Build();
+        var course = new CourseBuilder(author).Build();
+        await SeedAsync(
+            author,
+            course,
+            new ArticleBuilder(author).WithTitle("単発記事").Build(),
+            new ArticleBuilder(author).WithTitle("講座の記事").InCourse(course, 1).Build()
+        );
+
+        var response = await CreateClient().GetAsync($"/api/articles/author/{author.Id.Value}");
+
+        var body = await ReadAsync<GetArticlesByAuthorResponse>(response);
+        Assert.Equal(["単発記事"], body.Articles.Select(a => a.Title));
+        Assert.Equal(1, body.TotalCount);
+    }
+
+    [Fact]
     public async Task 作者別の記事一覧は指定した範囲と公開済みの総件数を返す()
     {
         var author = new UserBuilder().Build();
