@@ -138,6 +138,6 @@ public static class BulkDataSeeder
         // VACUUM はトランザクション内で実行できない。可視性マップを作成し Index Only Scan を選択可能にする
         await context.Database.ExecuteSqlRawAsync("VACUUM ANALYZE");
 
-        Console.WriteLine($"✅ 大量シードデータの投入が完了しました (ElapsedSec={stopwatch.Elapsed.TotalSeconds:F1})");
+        Console.WriteLine($"大量シードデータの投入が完了しました (ElapsedSec={stopwatch.Elapsed.TotalSeconds:F1})");
     }
 }

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BookOpen, FileText } from 'lucide-react';
 import { ArticleCard, CourseCard, Pagination } from '@/components/molecules';
 import { EmptyState } from '@/components/ui';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -59,7 +60,7 @@ export function TagArticleListTemplate({
       {activeTab === 'articles' && (
         totalCount === 0 ? (
           <EmptyState
-            icon="📝"
+            icon={<FileText />}
             title="記事がありません"
             description={`#${tag} に関連する記事はまだ投稿されていません。`}
           />
@@ -85,7 +86,7 @@ export function TagArticleListTemplate({
       {activeTab === 'courses' && (
         totalCount === 0 ? (
           <EmptyState
-            icon="📚"
+            icon={<BookOpen />}
             title="講座がありません"
             description={`#${tag} の記事を含む講座はまだ公開されていません。`}
           />
