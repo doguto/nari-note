@@ -1,5 +1,6 @@
 import type { PieceType } from '../types';
 import type { KifGame, KifMove } from '../types';
+import { parseBOD } from './parseBOD';
 
 const FULL_WIDTH_TO_NUM: Record<string, number> = {
   '１': 1, '２': 2, '３': 3, '４': 4, '５': 5,
@@ -28,13 +29,36 @@ const MOVE_RE =
 
 export function parseKif(kifText: string): KifGame {
   const lines = kifText.split('\n');
-  const game: KifGame = { moves: [] };
+  const game: KifGame = { firstTurn: 'sente', moves: [] };
   let lastToCol = 1;
   let lastToRow = 1;
+  // 「後手の持駒：」から「先手の持駒：」までを開始局面の BOD として集める
+  let bodLines: string[] | null = null;
 
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('*')) continue;
+
+    if (game.moves.length === 0 && !game.initialPosition) {
+      if (bodLines === null && trimmed.startsWith('後手の持駒：')) {
+        bodLines = [trimmed];
+        continue;
+      }
+      if (bodLines !== null) {
+        bodLines.push(trimmed);
+        if (trimmed.startsWith('先手の持駒：')) {
+          const { board, captured } = parseBOD(bodLines.join('\n'));
+          game.initialPosition = { board, captured };
+          bodLines = null;
+        }
+        continue;
+      }
+    }
+
+    if (trimmed === '後手番' || trimmed === '手番：後手') {
+      game.firstTurn = 'gote';
+      continue;
+    }
 
     if (trimmed.startsWith('先手：')) {
       game.sentePlayer = trimmed.slice(3).trim();

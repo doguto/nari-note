@@ -8,7 +8,7 @@ import { Board } from './Board';
 import { CapturedPieces } from './CapturedPieces';
 import { parseKif } from '../utils/parseKif';
 import { parseBOD } from '../utils/parseBOD';
-import { getBoardAtMove } from '../utils/simulator';
+import { getBoardAtMove, moverOf } from '../utils/simulator';
 import { ROW_LABELS } from '../constants';
 
 const FULL_WIDTH_DIGITS = ['０', '１', '２', '３', '４', '５', '６', '７', '８', '９'];
@@ -129,9 +129,9 @@ export function KifPlayer({
             size === 'sm' ? 'text-sm' : 'text-base',
           )}
         >
-          {currentMove === 0 ? '初期配置' : (() => {
+          {currentMove === 0 ? (game?.initialPosition ? '開始局面' : '初期配置') : (() => {
             const m = game!.moves[currentMove - 1];
-            const mark = currentMove % 2 === 1 ? '▲' : '△';
+            const mark = moverOf(currentMove, game!.firstTurn) === 'sente' ? '▲' : '△';
             const coord = m.isSameSquare ? '同' : `${FULL_WIDTH_DIGITS[m.toCol]}${ROW_LABELS[m.toRow - 1]}`;
             return <>{currentMove}手目　{mark}{coord}{m.piece}{m.isPromote ? '成' : ''}</>;
           })()}

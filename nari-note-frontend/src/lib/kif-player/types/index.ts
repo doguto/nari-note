@@ -45,5 +45,9 @@ export interface KifMove {
 export interface KifGame {
   sentePlayer?: string;
   gotePlayer?: string;
+  // KIF ヘッダーに BOD 形式の局面があるときの開始局面。無ければ平手
+  initialPosition?: Pick<ParsedBoard, 'board' | 'captured'>;
+  // 1手目を指す側。KIF ヘッダーの「後手番」で gote になる
+  firstTurn: PieceOwner;
   moves: KifMove[];
 }
