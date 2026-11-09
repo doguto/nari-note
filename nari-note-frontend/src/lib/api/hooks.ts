@@ -28,6 +28,8 @@ import type {
   GetCourseContentResponse,
   GetCoursesByAuthorRequest,
   GetCoursesByAuthorResponse,
+  GetCoursesByTagRequest,
+  GetCoursesByTagResponse,
   GetCoursesRequest,
   GetCoursesResponse,
   GetDraftArticlesResponse,
@@ -91,6 +93,7 @@ export const queryKeys = {
     searchCourses: ['courses', 'searchCourses'] as const,
     getMyCourses: ['courses', 'getMyCourses'] as const,
     getCoursesByAuthor: ['courses', 'getCoursesByAuthor'] as const,
+    getCoursesByTag: ['courses', 'getCoursesByTag'] as const,
     getCourseContent: ['courses', 'getCourseContent'] as const,
     getCourseContentForEdit: ['courses', 'getCourseContentForEdit'] as const,
   },
@@ -383,6 +386,14 @@ export function useGetCoursesByAuthor(params: GetCoursesByAuthorRequest, options
   return useQuery<GetCoursesByAuthorResponse>({
     queryKey: [...queryKeys.courses.getCoursesByAuthor, params],
     queryFn: () => coursesApi.getCoursesByAuthor(params),
+    ...options,
+  });
+}
+
+export function useGetCoursesByTag(params: GetCoursesByTagRequest, options?: Omit<UseQueryOptions<GetCoursesByTagResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetCoursesByTagResponse>({
+    queryKey: [...queryKeys.courses.getCoursesByTag, params],
+    queryFn: () => coursesApi.getCoursesByTag(params),
     ...options,
   });
 }
