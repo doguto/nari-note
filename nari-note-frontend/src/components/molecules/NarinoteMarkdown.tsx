@@ -27,7 +27,7 @@ export function NarinoteMarkdown({ content, className, kifuList = [] }: Narinote
   const boardSize = isMobile ? 'sm' : 'md';
 
   return (
-    <div className={cn('[&_a]:wrap-anywhere', className)}>
+    <div className={cn('wrap-break-word', className)}>
       <ReactMarkdown
         remarkPlugins={[remarkBreaks, remarkLinkCard]}
         components={{
