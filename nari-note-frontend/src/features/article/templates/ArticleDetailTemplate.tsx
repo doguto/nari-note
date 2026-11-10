@@ -90,7 +90,7 @@ export function ArticleDetailTemplate({
         </div>
       )}
 
-      <h1 className="mb-4 md:mb-6 break-words text-2xl md:text-4xl font-bold text-brand-text">
+      <h1 className="mb-4 md:mb-6 wrap-anywhere text-2xl md:text-4xl font-bold text-brand-text">
         {article.article.title}
       </h1>
 

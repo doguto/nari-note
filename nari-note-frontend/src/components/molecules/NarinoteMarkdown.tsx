@@ -8,6 +8,7 @@ import { XPostEmbed } from './XPostEmbed';
 import { remarkLinkCard, LINK_CARD_ATTRIBUTE, getXPostId } from '@/lib/link-preview';
 import { KifPlayer, parseKifuEmbed } from '@/lib/kif-player';
 import { useMediaQuery } from '@/lib/hooks';
+import { cn } from '@/lib/utils';
 
 interface NarinoteMarkdownProps {
   content: string;
@@ -26,7 +27,7 @@ export function NarinoteMarkdown({ content, className, kifuList = [] }: Narinote
   const boardSize = isMobile ? 'sm' : 'md';
 
   return (
-    <div className={className}>
+    <div className={cn('wrap-break-word', className)}>
       <ReactMarkdown
         remarkPlugins={[remarkBreaks, remarkLinkCard]}
         components={{
