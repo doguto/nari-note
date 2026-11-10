@@ -7,7 +7,7 @@ interface CommentItemProps {
 
 /**
  * CommentItem - Molecule Component
- * 
+ *
  * 個別のコメント表示コンポーネント
  */
 export function CommentItem({ comment }: CommentItemProps) {
@@ -23,16 +23,14 @@ export function CommentItem({ comment }: CommentItemProps) {
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4 mb-3">
-      <div className="flex items-start gap-3">
-        <UserAvatar username={comment.userName || 'Unknown'} userIconImageUrl={comment.userIconImageUrl} size="sm" />
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-medium text-brand-text">{comment.userName}</span>
-            <span className="text-xs text-gray-500">{formatDate(comment.createdAt)}</span>
-          </div>
-          <p className="text-gray-800 whitespace-pre-wrap">{comment.message}</p>
+    <div className="flex items-start gap-3 py-4 first:pt-0">
+      <UserAvatar username={comment.userName || 'Unknown'} userIconImageUrl={comment.userIconImageUrl} size="sm" />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-baseline gap-x-2">
+          <span className="font-medium text-brand-text">{comment.userName}</span>
+          <span className="text-xs text-gray-500">{formatDate(comment.createdAt)}</span>
         </div>
+        <p className="mt-1 text-gray-800 whitespace-pre-wrap break-words">{comment.message}</p>
       </div>
     </div>
   );

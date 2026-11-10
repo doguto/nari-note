@@ -60,7 +60,7 @@ export function ShareButtons({ title, path, tags = [] }: ShareButtonsProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <Button
         type="button"
         size="sm"

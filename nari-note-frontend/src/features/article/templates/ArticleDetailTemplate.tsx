@@ -4,7 +4,6 @@ import { NarinoteMarkdown, CourseBreadcrumb, ArticleAuthorInfo, ArticleTagList, 
 import { CommentForm } from '../organisms/CommentForm';
 import { CommentList } from '../organisms/CommentList';
 import { Comment } from '@/types/comment';
-import { Button } from '@/components/ui/button';
 import { Pencil, X } from 'lucide-react';
 import { GetArticleContentResponse } from '@/lib/api/types';
 
@@ -56,7 +55,7 @@ export function ArticleDetailTemplate({
   const articlePath = `/articles/${article.article.id}`;
 
   return (
-    <article className="bg-white rounded-lg shadow-lg p-8">
+    <article className="bg-white rounded-lg shadow-lg p-4 md:p-8">
       {showPublishedBanner && (
         <div className="relative mb-6 rounded-lg border border-green-200 bg-green-50 p-4 pr-10" role="status">
           <p className="mb-3 font-medium text-green-800">
@@ -74,28 +73,28 @@ export function ArticleDetailTemplate({
         </div>
       )}
 
-      {article.courseId && article.courseName && (
-        <CourseBreadcrumb courseId={article.courseId} courseName={article.courseName} />
+      {(isOwnArticle || (article.courseId && article.courseName)) && (
+        <div className="mb-2 flex items-center gap-2">
+          {article.courseId && article.courseName && (
+            <CourseBreadcrumb courseId={article.courseId} courseName={article.courseName} />
+          )}
+          {isOwnArticle && (
+            <Link
+              href={`/articles/${article.article.id}/edit`}
+              className="ml-auto inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-brand-primary-dark underline underline-offset-4 hover:text-brand-primary"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              編集
+            </Link>
+          )}
+        </div>
       )}
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-4xl font-bold text-brand-text">
-          {article.article.title}
-        </h1>
-        {isOwnArticle && (
-          <Link href={`/articles/${article.article.id}/edit`}>
-            <Button
-              variant="outline"
-              className="border-[var(--brand-primary)] text-[var(--brand-primary)] hover:bg-[var(--brand-bg-light)]"
-            >
-              <Pencil className="w-4 h-4 mr-2" />
-              編集
-            </Button>
-          </Link>
-        )}
-      </div>
+      <h1 className="mb-4 md:mb-6 break-words text-2xl md:text-4xl font-bold text-brand-text">
+        {article.article.title}
+      </h1>
 
-      <div className="flex items-center gap-6 mb-8 pb-6 border-b border-gray-200">
+      <div className="flex items-center gap-3 md:gap-6 mb-4 md:mb-8 pb-3 md:pb-6 border-b border-gray-200">
         <ArticleAuthorInfo
           authorId={article.article.authorId}
           authorName={article.article.authorName}
@@ -113,7 +112,7 @@ export function ArticleDetailTemplate({
         </div>
       </div>
 
-      <div className="prose prose-lg max-w-none mb-8 text-gray-800 leading-relaxed">
+      <div className="prose prose-base md:prose-lg max-w-none mb-8 text-gray-800 leading-relaxed">
         <NarinoteMarkdown content={article.article.body} kifuList={article.article.kifus} />
       </div>
 
@@ -125,15 +124,10 @@ export function ArticleDetailTemplate({
         <ShareButtons title={article.article.title} path={articlePath} tags={article.article.tags} />
       </div>
 
-      {/* コメント一覧 */}
-      <div className="mt-8">
+      <section className="mt-8 border-t border-gray-200 pt-6 space-y-6">
         <CommentList comments={comments} />
-      </div>
-
-      {/* コメント投稿フォーム */}
-      <div className="mt-8">
         <CommentForm articleId={article.article.id} onSuccess={onCommentSuccess} />
-      </div>
+      </section>
     </article>
   );
 }
