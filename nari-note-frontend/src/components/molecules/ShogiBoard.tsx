@@ -1,6 +1,7 @@
 'use client';
 
 import { ShogiBoard as NextShogiBoard } from '@/lib/kif-player';
+import type { BoardSize } from '@/lib/kif-player/types';
 
 interface ShogiBoardProps {
   /**
@@ -11,6 +12,7 @@ interface ShogiBoardProps {
    * 追加のクラス名
    */
   className?: string;
+  size?: BoardSize;
 }
 
 /**
@@ -19,6 +21,6 @@ interface ShogiBoardProps {
  * BOD形式の将棋盤面をレンダリングする汎用コンポーネント
  * next-shogi ライブラリを使用
  */
-export function ShogiBoard({ bodText, className = '' }: ShogiBoardProps) {
-  return <NextShogiBoard bodText={bodText} className={`my-4 ${className}`} />;
+export function ShogiBoard({ bodText, className = '', size }: ShogiBoardProps) {
+  return <NextShogiBoard bodText={bodText} size={size} className={`my-4 ${className}`} />;
 }

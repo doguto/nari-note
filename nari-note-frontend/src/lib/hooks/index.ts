@@ -2,3 +2,4 @@ export { useRequireAuth } from './useRequireAuth';
 export { useRequireVerifiedEmail } from './useRequireVerifiedEmail';
 export { useIsMounted } from './useIsMounted';
 export { useDebouncedValue } from './useDebouncedValue';
+export { useMediaQuery } from './useMediaQuery';

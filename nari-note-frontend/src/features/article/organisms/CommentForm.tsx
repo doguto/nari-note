@@ -6,6 +6,10 @@ import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { Button } from '@/components/ui/button';
 import { useCreateComment } from '@/lib/api';
 import { useRequireVerifiedEmail } from '@/lib/hooks';
+import { useAuth } from '@/lib/providers/AuthProvider';
+import { CharacterCounter, UserAvatar } from '@/components/ui';
+
+const MAX_LENGTH = 1000;
 
 interface CommentFormProps {
   articleId: string;
@@ -23,6 +27,7 @@ export function CommentForm({ articleId, onSuccess }: CommentFormProps) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState<string>('');
   const { ensureVerifiedEmail } = useRequireVerifiedEmail();
+  const { userName, userIconImageUrl } = useAuth();
 
   const createComment = useCreateComment({
     onSuccess: () => {
@@ -47,7 +52,7 @@ export function CommentForm({ articleId, onSuccess }: CommentFormProps) {
       return;
     }
 
-    if (message.length > 1000) {
+    if (message.length > MAX_LENGTH) {
       setError('コメントは1000文字以内で入力してください');
       return;
     }
@@ -57,36 +62,37 @@ export function CommentForm({ articleId, onSuccess }: CommentFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-xl font-bold text-brand-text mb-4">コメントを投稿</h2>
-      
-      {createComment.error && (
-        <ErrorAlert message="コメントの投稿に失敗しました" />
-      )}
+    <div className="flex items-start gap-3">
+      <UserAvatar username={userName || 'ゲスト'} userIconImageUrl={userIconImageUrl ?? undefined} size="sm" />
+      <div className="min-w-0 flex-1 space-y-2">
+        {createComment.error && (
+          <ErrorAlert message="コメントの投稿に失敗しました" />
+        )}
 
-      {createComment.isSuccess && (
-        <div className="bg-green-50 border border-green-200 rounded p-3 mb-4">
-          <p className="text-green-600 text-sm">コメントを投稿しました</p>
-        </div>
-      )}
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <CommentField 
-          value={message} 
-          onChange={setMessage}
-          error={error}
-        />
-        
-        <div className="flex justify-end">
-          <Button 
-            type="submit" 
-            disabled={createComment.isPending}
-            className="bg-brand-primary hover:bg-brand-primary-hover text-white"
-          >
-            {createComment.isPending ? '投稿中...' : 'コメントを投稿'}
-          </Button>
-        </div>
-      </form>
+        {createComment.isSuccess && (
+          <p className="text-sm text-green-600">コメントを投稿しました</p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-2">
+          <CommentField
+            value={message}
+            onChange={setMessage}
+            error={error}
+            maxLength={MAX_LENGTH}
+          />
+          <div className="flex items-center justify-between gap-2">
+            <CharacterCounter count={message.length} max={MAX_LENGTH} />
+            <Button
+              type="submit"
+              size="sm"
+              disabled={createComment.isPending}
+              className="bg-brand-primary hover:bg-brand-primary-hover text-white"
+            >
+              {createComment.isPending ? '投稿中...' : '投稿'}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
