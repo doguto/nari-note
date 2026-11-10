@@ -5,6 +5,9 @@ scripts/tsume/
 scripts/post-article/
 **/*.env
 
+.mcp.json
+
+
 # archived source
 archive/
 docs/memo/
@@ -19,3 +22,5 @@ bash.exe.stackdump
 SECURITY_AUDIT_TASKS.md
 
 *.dump
+
+google-analytics-mcp/
