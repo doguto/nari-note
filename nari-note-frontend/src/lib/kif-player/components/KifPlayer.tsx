@@ -121,11 +121,12 @@ export function KifPlayer({
           disabled={currentMove === 0}
           aria-label="前の手"
         >
-          ◀ 戻る
+          {size === 'sm' ? '◀' : '◀ 戻る'}
         </Button>
         <span
           className={cn(
-            'min-w-[9rem] text-center font-bold tabular-nums text-brand-text select-none',
+            size !== 'sm' && 'min-w-[9rem]',
+            'text-center font-bold tabular-nums text-brand-text select-none',
             size === 'sm' ? 'text-sm' : 'text-base',
           )}
         >
@@ -143,7 +144,7 @@ export function KifPlayer({
           disabled={currentMove === totalMoves}
           aria-label="次の手"
         >
-          進む ▶
+          {size === 'sm' ? '▶' : '進む ▶'}
         </Button>
       </div>
       )}

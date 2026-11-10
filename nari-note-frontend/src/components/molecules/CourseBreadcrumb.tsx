@@ -13,7 +13,7 @@ interface CourseBreadcrumbProps {
  */
 export function CourseBreadcrumb({ courseId, courseName }: CourseBreadcrumbProps) {
   return (
-    <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
+    <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-gray-600">
       <BookOpen className="w-4 h-4" />
       <Link
         href={`/courses/${courseId}`}

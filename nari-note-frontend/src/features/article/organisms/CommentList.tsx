@@ -1,6 +1,5 @@
 import { Comment } from '@/types/comment';
 import { CommentItem } from './CommentItem';
-import { EmptyState } from '@/components/ui';
 
 interface CommentListProps {
   comments: Comment[];
@@ -8,31 +7,25 @@ interface CommentListProps {
 
 /**
  * CommentList - Organism Component
- * 
+ *
  * コメント一覧を表示するコンポーネント
- * Atomic Designパターンにおける Organism として、
- * コメントリストの表示を管理
  */
 export function CommentList({ comments }: CommentListProps) {
-  if (comments.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-xl font-bold text-brand-text mb-4">コメント</h2>
-        <EmptyState title="まだコメントがありません" />
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-xl font-bold text-brand-text mb-4">
-        コメント ({comments.length})
+    <div>
+      <h2 className="text-lg font-bold text-brand-text mb-4">
+        コメント
+        {comments.length > 0 && <span className="ml-2 font-medium text-gray-500">{comments.length}</span>}
       </h2>
-      <div className="space-y-3">
-        {comments.map((comment) => (
-          <CommentItem key={comment.id} comment={comment} />
-        ))}
-      </div>
+      {comments.length === 0 ? (
+        <p className="text-sm text-gray-500">まだコメントがありません</p>
+      ) : (
+        <div className="divide-y divide-gray-100">
+          {comments.map((comment) => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

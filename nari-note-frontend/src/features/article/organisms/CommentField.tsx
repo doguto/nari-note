@@ -1,5 +1,5 @@
-import { TextareaField } from '@/components/ui/TextareaField';
-import { CharacterCounter } from '@/components/ui';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 interface CommentFieldProps {
   value: string;
@@ -10,31 +10,29 @@ interface CommentFieldProps {
 
 /**
  * CommentField - Molecule Component
- * 
- * コメント入力フィールド（TextareaFieldと文字数カウンターを組み合わせ）
+ *
+ * コメント入力フィールド
  */
-export function CommentField({ 
-  value, 
-  onChange, 
+export function CommentField({
+  value,
+  onChange,
   error,
   maxLength = 1000,
 }: CommentFieldProps) {
   return (
-    <div className="space-y-2">
-      <TextareaField
+    <div className="space-y-1">
+      <Textarea
         id="comment"
-        label="コメント"
+        aria-label="コメント"
         value={value}
-        onChange={onChange}
-        placeholder="コメントを入力してください"
-        error={error}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="コメントを書く"
         required
-        rows={4}
+        rows={2}
         maxLength={maxLength}
+        className={cn('min-h-16 resize-y focus:min-h-24', error && 'border-red-500')}
       />
-      <div className="flex justify-end">
-        <CharacterCounter count={value.length} max={maxLength} />
-      </div>
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );
 }

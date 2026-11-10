@@ -7,6 +7,7 @@ import { LinkCard } from './LinkCard';
 import { XPostEmbed } from './XPostEmbed';
 import { remarkLinkCard, LINK_CARD_ATTRIBUTE, getXPostId } from '@/lib/link-preview';
 import { KifPlayer, parseKifuEmbed } from '@/lib/kif-player';
+import { useMediaQuery } from '@/lib/hooks';
 
 interface NarinoteMarkdownProps {
   content: string;
@@ -21,6 +22,9 @@ interface NarinoteMarkdownProps {
  * コードブロック内の将棋盤面（language-bod）も自動的に表示
  */
 export function NarinoteMarkdown({ content, className, kifuList = [] }: NarinoteMarkdownProps) {
+  const isMobile = useMediaQuery('(max-width: 767px)');
+  const boardSize = isMobile ? 'sm' : 'md';
+
   return (
     <div className={className}>
       <ReactMarkdown
@@ -46,7 +50,7 @@ export function NarinoteMarkdown({ content, className, kifuList = [] }: Narinote
             if (className?.includes('language-bod')) {
               return (
                 <div className="flex justify-center">
-                  <ShogiBoard bodText={String(children)} />
+                  <ShogiBoard bodText={String(children)} size={boardSize} />
                 </div>
               );
             }
@@ -64,7 +68,7 @@ export function NarinoteMarkdown({ content, className, kifuList = [] }: Narinote
               }
               return (
                 <div className="flex justify-center my-4">
-                  <KifPlayer kifText={kifu.kifuText} defaultMoveNumber={defaultMoveNumber} />
+                  <KifPlayer kifText={kifu.kifuText} defaultMoveNumber={defaultMoveNumber} size={boardSize} />
                 </div>
               );
             }
