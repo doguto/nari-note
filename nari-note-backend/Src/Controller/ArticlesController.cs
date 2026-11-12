@@ -15,6 +15,7 @@ public class ArticlesController : ApplicationController
     readonly CreateArticleService createArticleService;
     readonly CreateCommentService createCommentService;
     readonly DeleteArticleService deleteArticleService;
+    readonly GetArticleCommentsService getArticleCommentsService;
     readonly GetArticleContentService getArticleContentService;
     readonly GetArticlesByAuthorService getArticlesByAuthorService;
     readonly GetArticlesByTagService getArticlesByTagService;
@@ -38,6 +39,7 @@ public class ArticlesController : ApplicationController
         GetDraftArticlesService getDraftArticlesService,
         SearchArticlesService searchArticlesService,
         CreateCommentService createCommentService,
+        GetArticleCommentsService getArticleCommentsService,
         GetMyArticlesService getMyArticlesService,
         UploadArticleImageService uploadArticleImageService
     )
@@ -53,6 +55,7 @@ public class ArticlesController : ApplicationController
         this.getDraftArticlesService = getDraftArticlesService;
         this.searchArticlesService = searchArticlesService;
         this.createCommentService = createCommentService;
+        this.getArticleCommentsService = getArticleCommentsService;
         this.getMyArticlesService = getMyArticlesService;
         this.uploadArticleImageService = uploadArticleImageService;
     }
@@ -178,6 +181,20 @@ public class ArticlesController : ApplicationController
     public async Task<ActionResult<SearchArticlesResponse>> SearchArticles([FromQuery] SearchArticlesRequest request)
     {
         var response = await searchArticlesService.ExecuteAsync(request);
+        return Ok(response);
+    }
+
+    [HttpGet("{id}/comments")]
+    [Auth(AuthLevel.Optional)]
+    [ValidateModelState]
+    public async Task<ActionResult<GetArticleCommentsResponse>> GetArticleComments(
+        ArticleId id,
+        [FromQuery, Range(1, 100, ErrorMessage = "取得件数は1から100の範囲で指定してください")] int limit = 20,
+        [FromQuery, Range(0, int.MaxValue, ErrorMessage = "オフセットは0以上の値を指定してください")] int offset = 0
+    )
+    {
+        var request = new GetArticleCommentsRequest { Id = id, Limit = limit, Offset = offset };
+        var response = await getArticleCommentsService.ExecuteAsync(request, UserId);
         return Ok(response);
     }
 

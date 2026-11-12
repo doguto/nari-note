@@ -2,8 +2,7 @@ import Link from 'next/link';
 import { LikeButton, LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { NarinoteMarkdown, CourseBreadcrumb, ArticleAuthorInfo, ArticleTagList, ShareButtons } from '@/components/molecules';
 import { CommentForm } from '../organisms/CommentForm';
-import { CommentList } from '../organisms/CommentList';
-import { Comment } from '@/types/comment';
+import { CommentList, CommentListProps } from '../organisms/CommentList';
 import { Pencil, X } from 'lucide-react';
 import { GetArticleContentResponse } from '@/lib/api/types';
 
@@ -11,14 +10,13 @@ interface ArticleDetailTemplateProps {
   isLoading: boolean;
   error: Error | null;
   article: GetArticleContentResponse | undefined;
-  comments: Comment[];
+  comments: CommentListProps;
   isOwnArticle: boolean;
   isLikePending: boolean;
   showPublishedBanner: boolean;
   onDismissPublishedBanner: () => void;
   onRetry: () => void;
   onLikeClick: () => void;
-  onCommentSuccess: () => void;
 }
 
 export function ArticleDetailTemplate({
@@ -32,7 +30,6 @@ export function ArticleDetailTemplate({
   onDismissPublishedBanner,
   onRetry,
   onLikeClick,
-  onCommentSuccess,
 }: ArticleDetailTemplateProps) {
   if (isLoading) {
     return (
@@ -125,8 +122,8 @@ export function ArticleDetailTemplate({
       </div>
 
       <section className="mt-8 border-t border-gray-200 pt-6 space-y-6">
-        <CommentList comments={comments} />
-        <CommentForm articleId={article.article.id} onSuccess={onCommentSuccess} />
+        <CommentList {...comments} />
+        <CommentForm articleId={article.article.id} />
       </section>
     </article>
   );

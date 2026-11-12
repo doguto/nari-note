@@ -15,6 +15,8 @@ import type {
   DeleteCourseRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
+  GetArticleCommentsRequest,
+  GetArticleCommentsResponse,
   GetArticleContentRequest,
   GetArticleContentResponse,
   GetArticlesByAuthorRequest,
@@ -84,6 +86,7 @@ export const queryKeys = {
     getMyArticles: ['articles', 'getMyArticles'] as const,
     getDraftArticles: ['articles', 'getDraftArticles'] as const,
     searchArticles: ['articles', 'searchArticles'] as const,
+    getArticleComments: ['articles', 'getArticleComments'] as const,
   },
   auth: {
     getCurrentUser: ['auth', 'getCurrentUser'] as const,
@@ -123,24 +126,24 @@ export function useGetArticles(params: GetArticlesRequest, options?: Omit<UseQue
 export function useCreateArticle(options?: UseMutationOptions<CreateArticleResponse, Error, CreateArticleRequest>) {
   const queryClient = useQueryClient();
   return useMutation<CreateArticleResponse, Error, CreateArticleRequest>({
+    ...options,
     mutationFn: (data) => articlesApi.createArticle(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useUploadArticleImage(options?: UseMutationOptions<UploadArticleImageResponse, Error, File>) {
   const queryClient = useQueryClient();
   return useMutation<UploadArticleImageResponse, Error, File>({
+    ...options,
     mutationFn: (file) => articlesApi.uploadArticleImage(file),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
@@ -155,12 +158,12 @@ export function useGetArticleContent(params: GetArticleContentRequest, options?:
 export function useUpdateArticle(options?: UseMutationOptions<UpdateArticleResponse, Error, UpdateArticleRequest>) {
   const queryClient = useQueryClient();
   return useMutation<UpdateArticleResponse, Error, UpdateArticleRequest>({
+    ...options,
     mutationFn: (data) => articlesApi.updateArticle(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
@@ -183,24 +186,24 @@ export function useGetArticlesByTag(params: GetArticlesByTagRequest, options?: O
 export function useDeleteArticle(options?: UseMutationOptions<void, Error, DeleteArticleRequest>) {
   const queryClient = useQueryClient();
   return useMutation<void, Error, DeleteArticleRequest>({
+    ...options,
     mutationFn: (data) => articlesApi.deleteArticle(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useToggleLike(options?: UseMutationOptions<ToggleLikeResponse, Error, ToggleLikeRequest>) {
   const queryClient = useQueryClient();
   return useMutation<ToggleLikeResponse, Error, ToggleLikeRequest>({
+    ...options,
     mutationFn: (data) => articlesApi.toggleLike(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
@@ -228,15 +231,23 @@ export function useSearchArticles(params: SearchArticlesRequest, options?: Omit<
   });
 }
 
+export function useGetArticleComments(params: GetArticleCommentsRequest, options?: Omit<UseQueryOptions<GetArticleCommentsResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticleCommentsResponse>({
+    queryKey: [...queryKeys.articles.getArticleComments, params],
+    queryFn: () => articlesApi.getArticleComments(params),
+    ...options,
+  });
+}
+
 export function useCreateComment(options?: UseMutationOptions<CreateCommentResponse, Error, CreateCommentRequest>) {
   const queryClient = useQueryClient();
   return useMutation<CreateCommentResponse, Error, CreateCommentRequest>({
+    ...options,
     mutationFn: (data) => articlesApi.createComment(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
@@ -244,24 +255,24 @@ export function useCreateComment(options?: UseMutationOptions<CreateCommentRespo
 export function useSignUp(options?: UseMutationOptions<SignUpResponse, Error, SignUpRequest>) {
   const queryClient = useQueryClient();
   return useMutation<SignUpResponse, Error, SignUpRequest>({
+    ...options,
     mutationFn: (data) => authApi.signUp(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useSignIn(options?: UseMutationOptions<AuthResponse, Error, SignInRequest>) {
   const queryClient = useQueryClient();
   return useMutation<AuthResponse, Error, SignInRequest>({
+    ...options,
     mutationFn: (data) => authApi.signIn(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
@@ -276,84 +287,84 @@ export function useGetCurrentUser(options?: Omit<UseQueryOptions<AuthResponse>, 
 export function useVerifyEmail(options?: UseMutationOptions<AuthResponse, Error, VerifyEmailRequest>) {
   const queryClient = useQueryClient();
   return useMutation<AuthResponse, Error, VerifyEmailRequest>({
+    ...options,
     mutationFn: (data) => authApi.verifyEmail(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useResendVerificationEmail(options?: UseMutationOptions<ResendVerificationEmailResponse, Error, void>) {
   const queryClient = useQueryClient();
   return useMutation<ResendVerificationEmailResponse, Error, void>({
+    ...options,
     mutationFn: () => authApi.resendVerificationEmail(),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useUpdatePassword(options?: UseMutationOptions<UpdatePasswordResponse, Error, UpdatePasswordRequest>) {
   const queryClient = useQueryClient();
   return useMutation<UpdatePasswordResponse, Error, UpdatePasswordRequest>({
+    ...options,
     mutationFn: (data) => authApi.updatePassword(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useForgotPassword(options?: UseMutationOptions<ForgotPasswordResponse, Error, ForgotPasswordRequest>) {
   const queryClient = useQueryClient();
   return useMutation<ForgotPasswordResponse, Error, ForgotPasswordRequest>({
+    ...options,
     mutationFn: (data) => authApi.forgotPassword(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useResetPassword(options?: UseMutationOptions<ResetPasswordResponse, Error, ResetPasswordRequest>) {
   const queryClient = useQueryClient();
   return useMutation<ResetPasswordResponse, Error, ResetPasswordRequest>({
+    ...options,
     mutationFn: (data) => authApi.resetPassword(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useLogout(options?: UseMutationOptions<void, Error, void>) {
   const queryClient = useQueryClient();
   return useMutation<void, Error, void>({
+    ...options,
     mutationFn: () => authApi.logout(),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useWithdraw(options?: UseMutationOptions<WithdrawResponse, Error, WithdrawRequest>) {
   const queryClient = useQueryClient();
   return useMutation<WithdrawResponse, Error, WithdrawRequest>({
+    ...options,
     mutationFn: (data) => authApi.withdraw(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
@@ -401,12 +412,12 @@ export function useGetCoursesByTag(params: GetCoursesByTagRequest, options?: Omi
 export function useCreateCourse(options?: UseMutationOptions<CreateCourseResponse, Error, CreateCourseRequest>) {
   const queryClient = useQueryClient();
   return useMutation<CreateCourseResponse, Error, CreateCourseRequest>({
+    ...options,
     mutationFn: (data) => coursesApi.createCourse(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
@@ -429,24 +440,24 @@ export function useGetCourseContentForEdit(params: { id: string }, options?: Omi
 export function useDeleteCourse(options?: UseMutationOptions<void, Error, DeleteCourseRequest>) {
   const queryClient = useQueryClient();
   return useMutation<void, Error, DeleteCourseRequest>({
+    ...options,
     mutationFn: (data) => coursesApi.deleteCourse(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useUpdateCourse(options?: UseMutationOptions<UpdateCourseResponse, Error, UpdateCourseRequest>) {
   const queryClient = useQueryClient();
   return useMutation<UpdateCourseResponse, Error, UpdateCourseRequest>({
+    ...options,
     mutationFn: (data) => coursesApi.updateCourse(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
@@ -480,36 +491,36 @@ export function useGetUserProfile(params: GetUserProfileRequest, options?: Omit<
 export function useUploadUserIcon(options?: UseMutationOptions<UploadUserIconResponse, Error, File>) {
   const queryClient = useQueryClient();
   return useMutation<UploadUserIconResponse, Error, File>({
+    ...options,
     mutationFn: (file) => usersApi.uploadUserIcon(file),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useUpdateUserProfile(options?: UseMutationOptions<UpdateUserProfileResponse, Error, UpdateUserProfileRequest>) {
   const queryClient = useQueryClient();
   return useMutation<UpdateUserProfileResponse, Error, UpdateUserProfileRequest>({
+    ...options,
     mutationFn: (data) => usersApi.updateUserProfile(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
 export function useToggleFollow(options?: UseMutationOptions<ToggleFollowResponse, Error, ToggleFollowRequest>) {
   const queryClient = useQueryClient();
   return useMutation<ToggleFollowResponse, Error, ToggleFollowRequest>({
+    ...options,
     mutationFn: (data) => usersApi.toggleFollow(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
