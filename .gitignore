@@ -3,6 +3,7 @@
 scripts/.env
 scripts/tsume/
 scripts/post-article/
+scripts/ebs-encryption/
 **/*.env
 
 .mcp.json
