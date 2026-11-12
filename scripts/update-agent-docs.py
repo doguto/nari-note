@@ -156,12 +156,11 @@ class AgentDocUpdater:
         # ドキュメントファイルの存在確認
         expected_docs = [
             "backend-implementation-guide.md",
-            "error-handling-strategy.md",
-            "architecture-overview.md",
             "architecture.md",
             "development-workflow.md",
             "authentication-strategy.md",
-            "er-diagram.md"
+            "er-diagram.md",
+            "testing-guide.md"
         ]
         
         missing_docs = [doc for doc in expected_docs if doc not in structure["documents"]]
@@ -206,9 +205,7 @@ class AgentDocUpdater:
         expected_docs = [
             "implementation-guide.md",
             "architecture.md",
-            "api-usage.md",
-            "architecture-diagram.md",
-            "quick-reference.md"
+            "api-usage.md"
         ]
         
         missing_docs = [doc for doc in expected_docs if doc not in structure["documents"]]
