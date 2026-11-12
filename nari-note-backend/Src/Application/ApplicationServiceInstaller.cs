@@ -22,6 +22,7 @@ public static class ApplicationServiceInstaller
         services.AddScoped<GetMyCoursesService>();
         services.AddScoped<GetArticlesByTagService>();
         services.AddScoped<GetArticleContentService>();
+        services.AddScoped<GetArticleCommentsService>();
         services.AddScoped<GetCourseContentService>();
         services.AddScoped<GetCourseContentForEditService>();
         services.AddScoped<GetUserProfileService>();

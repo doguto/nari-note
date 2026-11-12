@@ -10,19 +10,16 @@ namespace NariNoteBackend.Application.Service;
 public class GetArticleContentService
 {
     readonly IArticleRepository articleRepository;
-    readonly ICommentRepository commentRepository;
     readonly ILikeRepository likeRepository;
     readonly TimeProvider timeProvider;
 
     public GetArticleContentService(
         IArticleRepository articleRepository,
-        ICommentRepository commentRepository,
         ILikeRepository likeRepository,
         TimeProvider timeProvider
     )
     {
         this.articleRepository = articleRepository;
-        this.commentRepository = commentRepository;
         this.likeRepository = likeRepository;
         this.timeProvider = timeProvider;
     }
@@ -34,8 +31,6 @@ public class GetArticleContentService
         // 未公開（下書き・予約投稿）の記事は作者本人以外には存在自体を秘匿する
         var isAuthor = userId.HasValue && article.AuthorId == userId.Value;
         if (!article.IsPubliclyVisibleAt(timeProvider.UtcNow()) && !isAuthor) throw new KeyNotFoundException($"記事{request.Id}が存在しません");
-
-        var comments = await commentRepository.FindByArticleAsync(request.Id);
 
         var isLiked = false;
         if (userId.HasValue)
@@ -65,18 +60,7 @@ public class GetArticleContentService
             },
             IsLiked = isLiked,
             CourseId = article.CourseId,
-            CourseName = article.Course?.Name,
-            Comments = comments
-                       .Where(c => !string.IsNullOrEmpty(c.User?.Name))
-                       .Select(c => new CommentDto
-                       {
-                           Id = c.Id,
-                           UserId = c.UserId,
-                           UserName = c.User!.Name,
-                           UserIconImageUrl = c.User.ProfileImage,
-                           Message = c.Message,
-                           CreatedAt = c.CreatedAt
-                       }).OrderBy(c => c.CreatedAt).ToList()
+            CourseName = article.Course?.Name
         };
     }
 }

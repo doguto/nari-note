@@ -13,7 +13,6 @@ public class GetArticleContentServiceTest
 {
     readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
     readonly User author = new UserBuilder().Build();
-    readonly ICommentRepository commentRepository = Substitute.For<ICommentRepository>();
     readonly ILikeRepository likeRepository = Substitute.For<ILikeRepository>();
     readonly User otherUser = new UserBuilder().Build();
     readonly GetArticleContentService service;
@@ -21,14 +20,8 @@ public class GetArticleContentServiceTest
 
     public GetArticleContentServiceTest()
     {
-        // Vogen の ID 型は Arg.Any が使えないため、ForAnyArgs で任意の引数にマッチさせる
-        this.commentRepository
-            .FindByArticleAsync(ArticleId.From(Guid.CreateVersion7()))
-            .ReturnsForAnyArgs(new List<Comment>());
-
         this.service = new GetArticleContentService(
             this.articleRepository,
-            this.commentRepository,
             this.likeRepository,
             this.timeProvider
         );

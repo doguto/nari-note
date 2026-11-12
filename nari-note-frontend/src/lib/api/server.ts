@@ -36,6 +36,8 @@ async function serverFetch<T>(url: string): Promise<T> {
 
 import type {
   AuthResponse,
+  GetArticleCommentsRequest,
+  GetArticleCommentsResponse,
   GetArticleContentRequest,
   GetArticleContentResponse,
   GetArticlesByAuthorRequest,
@@ -135,6 +137,18 @@ export async function searchArticles(params: SearchArticlesRequest): Promise<Sea
   });
 
   return serverFetch<SearchArticlesResponse>(url.toString());
+}
+
+export async function getArticleComments(params: GetArticleCommentsRequest): Promise<GetArticleCommentsResponse> {
+  const url = new URL(`/api/articles/${params.id}/comments`, getBaseUrl());
+  const query = { limit: params.limit, offset: params.offset };
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  });
+
+  return serverFetch<GetArticleCommentsResponse>(url.toString());
 }
 
 // Auth Server Functions

@@ -14,6 +14,8 @@ import type {
   DeleteCourseRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
+  GetArticleCommentsRequest,
+  GetArticleCommentsResponse,
   GetArticleContentRequest,
   GetArticleContentResponse,
   GetArticlesByAuthorRequest,
@@ -122,6 +124,10 @@ export const articlesApi = {
   },
   searchArticles: async (data: SearchArticlesRequest): Promise<SearchArticlesResponse> => {
     const response = await apiClient.get<SearchArticlesResponse>('/api/articles/search', { params: data });
+    return response;
+  },
+  getArticleComments: async (data: GetArticleCommentsRequest): Promise<GetArticleCommentsResponse> => {
+    const response = await apiClient.get<GetArticleCommentsResponse>(`/api/articles/${data.id}/comments`, { params: { limit: data.limit, offset: data.offset } });
     return response;
   },
   createComment: async (data: CreateCommentRequest): Promise<CreateCommentResponse> => {

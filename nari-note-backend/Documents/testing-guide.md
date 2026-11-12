@@ -96,12 +96,12 @@ public class CreateArticleServiceTest
 
 ```csharp
 // NG: 例外になる
-this.commentRepository.FindByArticleAsync(Arg.Any<ArticleId>()).Returns(comments);
+this.likeRepository.CountByArticleAsync(Arg.Any<ArticleId>()).Returns(3);
 
 // OK: 任意の引数にマッチさせる（渡す値は何でもよい）
-this.commentRepository
-    .FindByArticleAsync(ArticleId.From(Guid.CreateVersion7()))
-    .ReturnsForAnyArgs(comments);
+this.likeRepository
+    .CountByArticleAsync(ArticleId.From(Guid.CreateVersion7()))
+    .ReturnsForAnyArgs(3);
 
 await this.kifuRepository.DidNotReceiveWithAnyArgs().ReplaceAllByArticleIdAsync(
     ArticleId.From(Guid.CreateVersion7()),

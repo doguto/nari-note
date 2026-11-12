@@ -15,6 +15,8 @@ import type {
   DeleteCourseRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
+  GetArticleCommentsRequest,
+  GetArticleCommentsResponse,
   GetArticleContentRequest,
   GetArticleContentResponse,
   GetArticlesByAuthorRequest,
@@ -84,6 +86,7 @@ export const queryKeys = {
     getMyArticles: ['articles', 'getMyArticles'] as const,
     getDraftArticles: ['articles', 'getDraftArticles'] as const,
     searchArticles: ['articles', 'searchArticles'] as const,
+    getArticleComments: ['articles', 'getArticleComments'] as const,
   },
   auth: {
     getCurrentUser: ['auth', 'getCurrentUser'] as const,
@@ -224,6 +227,14 @@ export function useSearchArticles(params: SearchArticlesRequest, options?: Omit<
   return useQuery<SearchArticlesResponse>({
     queryKey: [...queryKeys.articles.searchArticles, params],
     queryFn: () => articlesApi.searchArticles(params),
+    ...options,
+  });
+}
+
+export function useGetArticleComments(params: GetArticleCommentsRequest, options?: Omit<UseQueryOptions<GetArticleCommentsResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetArticleCommentsResponse>({
+    queryKey: [...queryKeys.articles.getArticleComments, params],
+    queryFn: () => articlesApi.getArticleComments(params),
     ...options,
   });
 }
