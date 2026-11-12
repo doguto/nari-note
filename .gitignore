@@ -3,7 +3,11 @@
 scripts/.env
 scripts/tsume/
 scripts/post-article/
+scripts/ebs-encryption/
 **/*.env
+
+.mcp.json
+
 
 # archived source
 archive/
@@ -19,3 +23,5 @@ bash.exe.stackdump
 SECURITY_AUDIT_TASKS.md
 
 *.dump
+
+google-analytics-mcp/
