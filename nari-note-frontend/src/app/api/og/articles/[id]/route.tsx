@@ -16,7 +16,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   // Worker が返したレスポンスは Cache-Control を付けても CDN にキャッシュされないため、Cache API に保存して再生成を避ける
   const cache = getEdgeCache();
-  const cached = await cache?.match(request.url);
+  const cacheKey = buildCacheKey(request);
+  const cached = await cache?.match(cacheKey);
   if (cached) return cached;
 
   let article;
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     },
   );
   if (cache) {
-    getCloudflareContext().ctx.waitUntil(cache.put(request.url, response.clone()));
+    getCloudflareContext().ctx.waitUntil(cache.put(cacheKey, response.clone()));
   }
   return response;
 }
@@ -56,6 +57,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 interface EdgeCache {
   match(key: string): Promise<Response | undefined>;
   put(key: string, response: Response): Promise<void>;
+}
+
+// 任意のクエリを付けて叩かれるたびに生成し直さないよう、画像の内容を決める v だけをキーに残す
+function buildCacheKey(request: NextRequest): string {
+  const url = new URL(request.nextUrl.pathname, request.nextUrl.origin);
+  const version = request.nextUrl.searchParams.get('v');
+  if (version !== null) url.searchParams.set('v', version);
+  return url.toString();
 }
 
 function getEdgeCache(): EdgeCache | undefined {
