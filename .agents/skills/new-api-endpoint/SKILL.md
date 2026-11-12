@@ -1,56 +1,81 @@
 ---
 name: new-api-endpoint
-description: nari-noteバックエンドに新しいAPIエンドポイントを追加するスキル。クリーンアーキテクチャパターン（Controller → Service → DTO → DI登録 → api-generator実行）に沿って実装する。ユーザーが「APIを作りたい」「エンドポイントを追加して」「〜APIを実装して」と言ったとき、または新しいバックエンドAPIの実装を求められたときは必ずこのスキルを使用する。
+description: nari-noteバックエンドに新しいAPIエンドポイントを追加するスキル。レイヤードアーキテクチャ（DTO → Service → Controller → DI登録 → テスト → api-generator実行）に沿って実装する。ユーザーが「APIを作りたい」「エンドポイントを追加して」「〜APIを実装して」と言ったとき、または新しいバックエンドAPIの実装を求められたときは必ずこのスキルを使用する。
 ---
 
 ## 概要
 
-このプロジェクト（nari-note）のバックエンドAPIを新規実装するスキルです。
-以下のステップに沿って進めてください。
+nari-note のバックエンド API を新規実装する手順。規約（`this.` の使用、`private` 省略、XML ドキュメントコメント禁止、`TimeProvider`、例外の使い分け）はルートの `AGENTS.md`、詳しい実装パターンは `nari-note-backend/Documents/backend-implementation-guide.md` を正とする。
+
+パスはすべて `nari-note-backend/` からの相対パス。
 
 ---
 
 ## ステップ1: 要件を明確にする
 
-実装前に以下を確認する（不明な場合はユーザーに確認）：
+不明な点はユーザーに確認する。
 
-- **目的**: このAPIは何をするのか
-- **HTTPメソッド**: GET / POST / PUT / DELETE
-- **エンドポイントパス**: どのControllerに追加するか
-  - `AuthController` → 認証関連（`/api/auth/...`）
-  - `UsersController` → ユーザー関連（`/api/users/...`）
-  - `ArticlesController` → 記事関連（`/api/articles/...`）
-  - など
-- **認証要件**:
+- **目的**: この API は何をするのか
+- **HTTP メソッドとパス**: どの Controller（`Src/Controller/`）に追加するか。ルートは `api/[controller]`（例: `ArticlesController` → `/api/articles/...`）
+- **認証要件**（`Src/Filter/AuthLevel.cs`）:
   - `[Auth(AuthLevel.VerifiedEmail)]` → ログイン必須 + メール認証済み
   - `[Auth(AuthLevel.Authenticated)]` → ログイン必須
-  - `[Auth(AuthLevel.Optional)]` → 任意（`UserId` が nullable）
+  - `[Auth(AuthLevel.Optional)]` → 任意（`UserId` が null になりうる）
   - `[Auth(AuthLevel.Anonymous)]` → 誰でもアクセス可
-- **リクエスト内容**: ボディ・パスパラメータ・クエリパラメータ
-- **レスポンス内容**: 返すデータ（なければ空レスポンス）
+- **リクエスト**: ボディ・パスパラメータ・クエリパラメータ
+- **レスポンス**: 返すデータ（無ければ空の Response）
+- **DB 変更の有無**: Entity / カラムの追加が必要か
 
 ---
 
-## ステップ2: 既存パターンを参照する
+## ステップ2: 既存パターンを読む
 
-類似のServiceやControllerを読んで、コードパターンを把握する。
+類似の Service / Controller / Repository を読み、パターンを揃える。
 
-```
-nari-note-backend/src/Application/Service/   ← 類似Serviceを参照
-nari-note-backend/src/Controller/            ← 追加先のControllerを読む
-```
+- `Src/Application/Service/` - 類似 Service
+- `Src/Controller/` - 追加先の Controller
+- `Src/Domain/Repository/`（インターフェース）、`Src/Infrastructure/Repository/`（実装）
 
-特に以下のパターンを確認しておく：
-- ユーザー取得: `userRepository.FindForceByIdAsync(userId)`
-- BCrypt: `BCrypt.Net.BCrypt.HashPassword()` / `BCrypt.Net.BCrypt.Verify()`
-- 更新時: `user.UpdatedAt = timeProvider.UtcNow();`（`TimeProvider` をコンストラクタで受け取る）
-- エラー: `throw new ArgumentException("メッセージ")`
+よく使うパターン:
+
+- 取得: `this.userRepository.FindForceByIdAsync(userId)`（見つからなければ `KeyNotFoundException` → 404）。null を扱いたい場合は `FindByIdAsync`
+- 現在時刻: `this.timeProvider.UtcNow()`（`TimeProvider` をコンストラクタで受け取る。`NariNoteBackend.Extension` の拡張メソッド）
+- 入力不正: `throw new ArgumentException("メッセージ")` → 400
+- 権限不足 / 競合: `ForbiddenException` / `ConflictException`（`Src/Application/Exception/`）
 
 ---
 
-## ステップ3: Request DTOを作成する
+## ステップ3: DB 変更がある場合
 
-`nari-note-backend/src/Application/Dto/Request/{ActionName}Request.cs`
+1. `Src/Domain/Entity/` に Entity を追加・変更する
+2. マイグレーションを追加する
+
+```bash
+cd nari-note-backend
+dotnet ef migrations add <マイグレーション名>
+```
+
+マイグレーションはアプリ起動時に自動適用される。手順の詳細は `Documents/development-workflow.md`。
+
+---
+
+## ステップ4: Repository を追加・拡張する（必要な場合）
+
+- インターフェース: `Src/Domain/Repository/I{Name}Repository.cs`
+- 実装: `Src/Infrastructure/Repository/{Name}Repository.cs`
+- 新しい Repository は `Src/Infrastructure/InfrastructureServiceInstaller.cs` に登録する
+
+```csharp
+services.AddScoped<I{Name}Repository, {Name}Repository>();
+```
+
+N+1 にならないよう、必要な関連は `Include` 等でまとめて取得する。
+
+---
+
+## ステップ5: Request DTO を作成する
+
+`Src/Application/Dto/Request/{ActionName}Request.cs`
 
 ```csharp
 using System.ComponentModel.DataAnnotations;
@@ -65,29 +90,29 @@ public class {ActionName}Request
 }
 ```
 
-> GETやDELETEでリクエストボディが不要な場合はスキップ可能。
+ボディもパラメータも無い場合は省略してよい。
 
 ---
 
-## ステップ4: Response DTOを作成する
+## ステップ6: Response DTO を作成する
 
-`nari-note-backend/src/Application/Dto/Response/{ActionName}Response.cs`
+`Src/Application/Dto/Response/{ActionName}Response.cs`
 
 ```csharp
 namespace NariNoteBackend.Application.Dto.Response;
 
 public class {ActionName}Response
 {
-    // 返すフィールドを定義する
-    // データを返さない場合は空クラスでOK
 }
 ```
 
+返すデータが無い場合も空クラスを作る。名前を `{Controller のアクション名}Response` にしておくと、api-generator がレスポンス型を推測できる。
+
 ---
 
-## ステップ5: Serviceを作成する
+## ステップ7: Service を作成する
 
-`nari-note-backend/src/Application/Service/{ActionName}Service.cs`
+`Src/Application/Service/{ActionName}Service.cs`（API 一個につき Service 一個）
 
 ```csharp
 using NariNoteBackend.Application.Dto.Request;
@@ -108,51 +133,45 @@ public class {ActionName}Service
 
     public async Task<{ActionName}Response> ExecuteAsync(UserId userId, {ActionName}Request request)
     {
-        // ビジネスロジックを実装する
         return new {ActionName}Response();
     }
 }
 ```
 
-> ユーザー認証不要のAPIは `UserId` パラメータを省略する。
+- 認証不要の API では `UserId` 引数を省略する
+- try-catch はしない（`GlobalExceptionHandlerMiddleware` が変換する）
+- トランザクションは `TransactionMiddleware` が管理するので Service では張らない
 
 ---
 
-## ステップ6: Controllerにエンドポイントを追加する
+## ステップ8: Controller にアクションを追加する
 
-対象のControllerファイルに3箇所追加する：
+対象 Controller（`ApplicationController` を継承）に、フィールド・コンストラクタ引数・アクションを追加する。
 
-### 6-1. フィールド宣言
 ```csharp
 readonly {ActionName}Service {actionName}Service;
-```
 
-### 6-2. コンストラクタ引数と代入
-```csharp
-// 引数に追加
-{ActionName}Service {actionName}Service,
-
-// 代入に追加
+// コンストラクタ
 this.{actionName}Service = {actionName}Service;
-```
 
-### 6-3. アクションメソッド
-```csharp
 [HttpPost("path")]
-[Auth(AuthLevel.Authenticated)]  // 認証要件に応じて変更
-[ValidateModelState]    // リクエストボディがある場合
+[Auth(AuthLevel.Authenticated)]
+[ValidateModelState]
 public async Task<ActionResult<{ActionName}Response>> {ActionName}([FromBody] {ActionName}Request request)
 {
-    var response = await {actionName}Service.ExecuteAsync(UserId!.Value, request);
+    var response = await this.{actionName}Service.ExecuteAsync(UserId!.Value, request);
     return Ok(response);
 }
 ```
 
+- `[ValidateModelState]` はリクエストボディがある場合に付ける
+- ファイルアップロード等でトランザクションを張りたくない場合は `[NoTransaction]`
+
 ---
 
-## ステップ7: DIに登録する
+## ステップ9: DI に登録する
 
-`nari-note-backend/src/Application/ApplicationServiceInstaller.cs`
+`Src/Application/ApplicationServiceInstaller.cs`
 
 ```csharp
 services.AddScoped<{ActionName}Service>();
@@ -160,22 +179,26 @@ services.AddScoped<{ActionName}Service>();
 
 ---
 
-## ステップ8: ビルドを確認する
+## ステップ10: テストを追加し、ビルド・テストする
+
+テストの方針と配置は `Documents/testing-guide.md` に従う（`Tests/NariNoteBackend.Tests/` 配下）。
 
 ```bash
-cd /c/htogi/Scripts/nari-note/nari-note-backend && dotnet build 2>&1 | tail -10
+cd nari-note-backend
+dotnet build nari-note-backend.sln
+dotnet test nari-note-backend.sln
 ```
 
-エラー0件を確認する。
+結合テストは Testcontainers で PostgreSQL を起動するため Docker が必要。
 
 ---
 
-## ステップ9: api-generatorを実行する
+## ステップ11: フロントエンドの API コードを生成する
 
-フロントエンドのTypeScript型・エンドポイント・hooksを自動生成する：
+リポジトリルートで実行する。
 
 ```bash
-cd /c/htogi/Scripts/nari-note && PYTHONIOENCODING=utf-8 python scripts/api-generator.py
+PYTHONIOENCODING=utf-8 python scripts/api-generator.py --verbose
 ```
 
-新しいRequest/Response型とエンドポイントが `nari-note-frontend/src/lib/api/` に反映される。
+`nari-note-frontend/src/lib/api/` の `types.ts` / `endpoints.ts` / `hooks.ts` / `server.ts` が再生成される。`Skipped methods` に今回のアクションが出た場合は、戻り値を `ActionResult<{ActionName}Response>` にする。詳細は `.agents/skills/api-generator/SKILL.md`。

@@ -1,10 +1,10 @@
 ---
 name: Agent-Doc-Updater-Skill
 description: |-
-    各エージェントのドキュメント(.agent.md)を最新のプロジェクト状態に基づいて更新します
+    各エージェントのドキュメント(.agent.md)を最新のプロジェクト状態に照らして検証し、必要に応じて手で更新します
     以下の場合に使用する
     - プロジェクト構造が大きく変更された後
-    - 新しい重要なドキュメントが追加された後
+    - ドキュメントの追加・削除・移動の後
     - エージェントの理解を最新の状態に保ちたい場合
 ---
 
@@ -12,64 +12,30 @@ description: |-
 
 ## 概要
 
-各エージェント（backend-engineer, frontend-engineer, spec）の`.agent.md`ファイルを、
-最新のプロジェクト構造とドキュメント情報に基づいて更新するスキルです。
+`.github/agents/` 配下の各エージェント定義（`backend-engineer.agent.md`, `frontend-engineer.agent.md`, `spec.agent.md`）が、現在のリポジトリと食い違っていないかを確認し、食い違いがあれば手で直すスキル。
+
+`scripts/update-agent-docs.py` は**検証のみ**を行い、ファイルは書き換えない。`--dry-run` を付けても付けなくても動作は同じ（表示メッセージが変わるだけ）。
+
+スクリプトが検証する内容:
+
+- 各 `.agent.md` 内の Markdown リンクのリンク切れ（`/` 始まりはリポジトリルートからのパスとして解決）
+- backend / frontend エージェントについて、スクリプト内にハードコードされた「想定ドキュメント一覧」が `nari-note-backend/Documents/` / `nari-note-frontend/docs/` に存在するか
 
 ## 実行手順
 
-1. Pythonスクリプトの実行
-
-リポジトリ直下の `scripts` ディレクトリに存在するPythonスクリプトを実行することで
-各エージェントのドキュメントが自動で更新される
+1. リポジトリルートで検証スクリプトを実行する
 
 ```bash
 python scripts/update-agent-docs.py --verbose
 ```
 
-### オプション
+- `--agent backend-engineer|frontend-engineer|spec`: 対象を 1 つに絞る
+- `--verbose`: 分析の詳細ログを表示する
 
-- `--agent`: 特定のエージェントのみ更新（backend-engineer, frontend-engineer, spec）
-- `--dry-run`: 実際には更新せず、変更内容のプレビューのみ表示
-- `--verbose`: 詳細な実行ログを表示
+2. 出力された警告を確認する
+   - リンク切れ: 該当 `.agent.md` のリンクを実在するパスに直す
+   - 想定ドキュメントの欠落: ドキュメントの統合・削除が原因で、`.agent.md` 側が正しい場合は警告を無視してよい（想定一覧はスクリプトの `expected_docs`）
 
-### 使用例
-
-```bash
-# 全エージェントのドキュメントを更新
-python scripts/update-agent-docs.py --verbose
-
-# バックエンドエージェントのみ更新
-python scripts/update-agent-docs.py --agent backend-engineer --verbose
-
-# ドライランで変更内容を確認
-python scripts/update-agent-docs.py --dry-run --verbose
-```
-
-2. 更新されたドキュメントの確認
-
-スクリプト実行後、以下のファイルが更新されているか確認する
-
-- `.github/agents/backend-engineer.agent.md`
-- `.github/agents/frontend-engineer.agent.md`
-- `.github/agents/spec.agent.md`
-
-## 更新内容
-
-このスキルは以下の情報を各エージェントのドキュメントに反映します：
-
-### Backend-Engineer-Agent
-
-- バックエンドディレクトリ配下の構造
-- 主要なドキュメントファイルの存在確認とリンク
-- 技術スタックの最新情報
-
-### Frontend-Engineer-Agent
-
-- フロントエンドディレクトリ配下の構造
-- 主要なドキュメントファイルの存在確認とリンク
-- 技術スタックの最新情報
-
-### Spec-Agent
-
-- 仕様書ディレクトリ（spec/）の構造
-- 利用可能な仕様書ファイルのリスト
+3. 警告以外の内容も目視で確認し、`.agent.md` を手で更新する
+   - 技術スタックや規約は `.agent.md` に重複して書かず、ルートの `AGENTS.md` を参照させる
+   - 参照ドキュメントの一覧が、AGENTS.md の「ドキュメント地図」と一致しているか

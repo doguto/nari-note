@@ -1,65 +1,64 @@
-Feature "タグタイムライン機能" do
+Feature "タグページ" do
   Scenario "タグページの基本表示" do
     Given None do
       When "タグページにアクセスすると、" do
         Then "タグ名が表示される"
-          .And "タグの説明が表示される"
-          .And "タグが使われている記事の総数が表示される"
-          .And "タグをフォローしているユーザー数が表示される"
-          .And "そのタグを含む記事の一覧が表示される"
+          .And "「記事」と「講座」のタブが表示される"
+          .And "表示中のタブの件数が表示される"
       end
     end
   end
 
-  Scenario "記事一覧の表示" do
-    Given "タグページにアクセスしているとき" do
+  Scenario "記事タブ" do
+    Given "記事タブを表示しているとき" do
       When None do
-        Then "各記事のタイトルが表示される"
-          .And "各記事の著者名とアイコンが表示される"
-          .And "各記事の投稿日時が表示される"
-          .And "各記事のいいね数が表示される"
-          .And "各記事のコメント数が表示される"
+        Then "そのタグが付いた公開済みの単体記事が公開日時の新しい順に表示される"
+          .And "各記事のタイトル、著者、タグ、いいね数、投稿日が表示される"
       end
     end
   end
 
-  Scenario "記事のソート順" do
-    Given "タグページにアクセスしているとき" do
+  Scenario "講座タブ" do
+    Given "講座タブを表示しているとき" do
       When None do
-        Then "新着順に記事が表示される"
+        Then "そのタグが付いた記事を含む公開済みの講座が表示される"
       end
     end
   end
 
-  Scenario "記事のクリック" do
+  Scenario "一覧からの遷移" do
     Given None do
-      When "記事のタイトルをクリックすると、" do
-        Then "その記事の詳細ページに遷移する"
+      When "記事をクリックすると、" do
+        Then "その記事のページに遷移する"
       end
 
-      When "記事の著者名またはアイコンをクリックすると、" do
+      When "講座をクリックすると、" do
+        Then "その講座のページに遷移する"
+      end
+
+      When "著者をクリックすると、" do
         Then "その著者のプロフィールページに遷移する"
       end
     end
   end
 
   Scenario "ページネーション" do
-    Given "タグを含む記事が20件以上存在するとき" do
-      When "タグページにアクセスすると、" do
-        Then "記事は20件ずつ表示される"
-          .And "ページネーションが表示される"
+    Given "表示中のタブの件数が1ページの表示件数を超えるとき" do
+      When None do
+        Then "ページネーションが表示される"
       end
 
       When "次のページをクリックすると、" do
-        Then "次の20件の記事が表示される"
+        Then "次の一覧が表示される"
+          .And "ページ番号とタブが URL に反映される"
       end
     end
   end
 
-  Scenario "タグの記事が存在しない場合" do
-    Given "タグを含む記事が存在しないとき" do
+  Scenario "該当がない場合" do
+    Given "タグに該当する記事・講座が存在しないとき" do
       When "タグページにアクセスすると、" do
-        Then "記事がない旨のメッセージが表示される"
+        Then "記事（講座）がない旨のメッセージが表示される"
       end
     end
   end

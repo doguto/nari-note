@@ -1,170 +1,129 @@
-# DB設計
+# ER 図
 
-## ER図
+主要カラムのみを示す。スキーマの正は `Migrations/NariNoteDbContextModelSnapshot.cs`（Entity は `Src/Domain/Entity/`、リレーション設定は `Src/Infrastructure/Database/NariNoteDbContext.cs`）。
 
 ```mermaid
 erDiagram
+    Users ||--o{ Articles : "書く"
+    Users ||--o{ Courses : "作る"
+    Courses |o--o{ Articles : "含む"
+    Articles ||--o{ ArticleTags : ""
+    Tags ||--o{ ArticleTags : ""
+    Articles ||--o{ Kifus : "埋め込む"
+    Users ||--o{ Likes : ""
+    Articles ||--o{ Likes : ""
+    Users ||--o{ CourseLikes : ""
+    Courses ||--o{ CourseLikes : ""
+    Users ||--o{ Comments : ""
+    Articles ||--o{ Comments : ""
+    Users ||--o{ Follows : "フォローする (FollowerId)"
+    Users ||--o{ Follows : "フォローされる (FollowingId)"
+    Users ||--o{ Notifications : ""
+    Articles ||--o{ Notifications : ""
+    Users ||--o{ EmailVerifications : ""
+    Users ||--o{ PasswordResetTokens : ""
 
-User ||--o{ Article: "has many"
-Article ||--o{ ArticleTag: "has many"
-Article ||--o{ Kifu: "has_many"
-Tag ||--o{ ArticleTag: "1:n"
-
-User ||--o{ Course: "has many"
-Course ||--o{ Article: "has many"
-
-User ||--o{ Follow: "following"
-User ||--o{ Follow: "followed"
-
-User ||--o{ Like: "has many"
-Article ||--o{ Like: "has many"
-
-User ||--o{ CourseLike: "has many"
-Course ||--o{ CourseLike: "has many"
-
-User ||--o{ Comment: "has many"
-Article ||--o{ Comment: "has many"
-
-User ||--o{ Notification: "has many"
-
-User {
-    id uuid PK
-    name varchar(50)
-    profile_image varchar(255)
-    bio varchar(500)
-    email varchar(255)
-    password_hash varchar(255)
-    created_at datetime
-    updated_at datetime
-}
-
-Article {
-    id uuid PK
-    author_id uuid FK
-    course_id uuid FK "nullable"
-    article_order integer "nullable"
-    title varchar(50)
-    body varchar(10000)
-    is_published boolean
-    created_at datetime
-    updated_at datetime
-}
-
-Tag {
-    id uuid PK
-    name varchar(50)
-    created_at datetime
-    updated_at datetime
-}
-
-ArticleTag {
-    id integer PK
-    article_id uuid FK
-    tag_id integer FK
-    created_at datetime
-    updated_at datetime
-}
-
-Course {
-    id uuid PK
-    user_id uuid FK
-    name varchar(100)
-    created_at datetime
-    updated_at datetime
-}
-
-CourseLike {
-    id integer PK
-    user_id uuid FK
-    course_id uuid FK
-    created_at datetime
-    updated_at datetime
-}
-
-Kifu {
-    id integer PK
-    article_id uuid FK
-    kifu_text text
-}
-
-Like {
-    id integer PK
-    user_id uuid FK
-    article_id uuid FK
-    created_at datetime
-    updated_at datetime
-}
-
-Comment {
-    id integer PK
-    user_id uuid FK
-    article_id uuid FK
-    message text
-    created_at datetime
-    updated_at datetime
-}
-
-Follow {
-    id integer PK
-    follower_id uuid FK
-    following_id uuid FK
-    created_at datetime
-    updated_at datetime
-}
-
-Notification {
-    id integer PK
-    user_id uuid FK
-    article_id uuid FK
-    is_read boolean
-    created_at datetime
-    updated_at datetime
-}
+    Users {
+        uuid Id PK
+        string Name "max 50"
+        string Email UK "正規化して保存"
+        string PasswordHash "BCrypt"
+        string ProfileImage "nullable"
+        string Bio "nullable"
+        bool IsEmailVerified
+        string SecurityStamp "nullable"
+        datetime AlreadyRegisteredNotifiedAt "nullable"
+    }
+    Articles {
+        uuid Id PK
+        uuid AuthorId FK
+        uuid CourseId FK "nullable"
+        int ArticleOrder "講座内の順番, nullable"
+        string Title "max 50"
+        string Body "max 10000"
+        datetime PublishedAt "null は下書き, 未来は予約投稿"
+    }
+    Courses {
+        uuid Id PK
+        uuid UserId FK
+        string Name "max 100"
+        datetime PublishedAt "nullable"
+    }
+    Tags {
+        uuid Id PK
+        string Name UK
+    }
+    ArticleTags {
+        int Id PK
+        uuid ArticleId FK
+        uuid TagId FK
+    }
+    Kifus {
+        int Id PK
+        uuid ArticleId FK
+        string Name
+        string KifuText "max 20000"
+        int SortOrder
+    }
+    Likes {
+        int Id PK
+        uuid UserId FK
+        uuid ArticleId FK
+    }
+    CourseLikes {
+        int Id PK
+        uuid UserId FK
+        uuid CourseId FK
+    }
+    Comments {
+        int Id PK
+        uuid UserId FK
+        uuid ArticleId FK
+        string Message "max 1000"
+    }
+    Follows {
+        int Id PK
+        uuid FollowerId FK
+        uuid FollowingId FK
+    }
+    Notifications {
+        int Id PK
+        uuid UserId FK
+        uuid ArticleId FK
+        bool IsRead
+    }
+    EmailVerifications {
+        int Id PK
+        uuid UserId FK
+        string Token UK
+        datetime ExpiresAt
+        bool IsUsed
+        string Name "サインアップ入力, nullable"
+        string PasswordHash "サインアップ入力, nullable"
+    }
+    PasswordResetTokens {
+        int Id PK
+        uuid UserId FK
+        string Token UK
+        datetime ExpiresAt
+        bool IsUsed
+    }
+    OutboxMessages {
+        uuid Id PK
+        string Type "Email / DiscordEmbed"
+        string Payload "JSON"
+        datetime NextAttemptAt
+        int Attempts
+        datetime ProcessedAt "nullable"
+        datetime FailedAt "nullable"
+        string LastError "nullable"
+    }
 ```
 
-## インデックス・制約
+## 補足
 
-### User
-- UNIQUE INDEX: `email`
-
-### Tag
-- UNIQUE INDEX: `name`
-
-### Article
-- INDEX: `author_id` (外部キー制約により自動生成)
-- INDEX: `course_id` (外部キー制約により自動生成)
-- INDEX: `created_at` (時系列ソート用)
-- INDEX: `(is_published, published_at, created_at)` (公開記事の検索最適化用)
-
-### ArticleTag
-- UNIQUE INDEX: `(article_id, tag_id)`
-- INDEX: `tag_id` (外部キー制約により自動生成)
-
-### Course
-- INDEX: `user_id` (外部キー制約により自動生成)
-- INDEX: `created_at` (時系列ソート用)
-
-### CourseLike
-- UNIQUE INDEX: `(user_id, course_id)`
-- INDEX: `course_id` (外部キー制約により自動生成)
-- INDEX: `(user_id, created_at)` (ユーザーの講座いいね一覧取得用)
-
-### Like
-- UNIQUE INDEX: `(user_id, article_id)`
-- INDEX: `article_id` (外部キー制約により自動生成)
-- INDEX: `(user_id, created_at)` (ユーザーのいいね記事一覧取得用)
-
-### Comment
-- INDEX: `article_id` (外部キー制約により自動生成)
-- INDEX: `user_id` (外部キー制約により自動生成)
-- INDEX: `(article_id, created_at)` (記事別コメント一覧取得最適化用)
-
-### Follow
-- UNIQUE INDEX: `(follower_id, following_id)`
-- INDEX: `follower_id` (フォロー中ユーザー検索用)
-- INDEX: `following_id` (フォロワー検索用)
-
-### Notification
-- INDEX: `user_id` (外部キー制約により自動生成)
-- INDEX: `article_id` (外部キー制約により自動生成)
-- INDEX: `(user_id, is_read, created_at)` (未読通知取得最適化用)
+- 全テーブルに `CreatedAt` / `UpdatedAt` がある（`EntityBase`。未設定なら保存時に `NariNoteDbContext` が設定する）
+- ID は Vogen の ValueObject（`UserId` 等）。Users / Articles / Courses / Tags は UUID v7 をアプリ側で採番し、それ以外は int の IDENTITY 列
+- 外部キーはすべて `ON DELETE CASCADE`。ユーザー削除（退会・未認証ユーザー削除）で記事・講座・いいね・コメント・フォロー・通知・各種トークンがまとめて消え、講座を削除すると所属する記事も消える
+- 一意制約: `Users.Email`（`lower(Email)`）、`Users.Name`、`Tags.Name`、`EmailVerifications.Token`、`PasswordResetTokens.Token`、`(ArticleId, TagId)`、`(UserId, ArticleId)` の Likes、`(UserId, CourseId)` の CourseLikes、`(FollowerId, FollowingId)` の Follows
+- `OutboxMessages` は他テーブルと関連を持たない配送キュー（[architecture.md](./architecture.md#バックグラウンドジョブ)）
