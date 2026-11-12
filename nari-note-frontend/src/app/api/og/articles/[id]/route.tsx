@@ -1,9 +1,9 @@
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { ImageResponse } from 'next/og';
 import type { NextRequest } from 'next/server';
 import { getArticleContent } from '@/lib/api/server';
-import { KOMA_LABEL_MAP } from '@/lib/kif-player/constants';
 import { findArticleBoard } from '@/lib/og/findArticleBoard';
-import { ArticleOgImage, KOMA_FONT_FAMILY, OG_IMAGE_SIZE, formatCaptured } from '@/lib/og/ArticleOgImage';
+import { ArticleOgImage, OG_IMAGE_SIZE, formatCaptured } from '@/lib/og/ArticleOgImage';
 import { loadGoogleFont } from '@/lib/og/assets';
 
 // /api/[...path] のバックエンドプロキシより優先され、ここだけは Next.js 側で処理する。
@@ -13,6 +13,11 @@ const FONT_FAMILY = 'Noto Sans JP';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  // Worker が返したレスポンスは Cache-Control を付けても CDN にキャッシュされないため、Cache API に保存して再生成を避ける
+  const cache = getEdgeCache();
+  const cached = await cache?.match(request.url);
+  if (cached) return cached;
 
   let article;
   try {
@@ -31,23 +36,29 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     formatCaptured(board.captured.sente),
     formatCaptured(board.captured.gote),
   ].join('');
-  const komaText = [...new Set(board.board.flat().map((piece) => (piece ? KOMA_LABEL_MAP[piece.type] : '')))].join('');
 
-  const [font, komaFont] = await Promise.all([
-    loadGoogleFont(FONT_FAMILY, 700, text),
-    komaText ? loadGoogleFont(KOMA_FONT_FAMILY, 700, komaText) : null,
-  ]);
-  const fonts = [
-    font && { name: FONT_FAMILY, data: font, weight: 700 as const, style: 'normal' as const },
-    komaFont && { name: KOMA_FONT_FAMILY, data: komaFont, weight: 700 as const, style: 'normal' as const },
-  ].filter((f) => !!f);
+  const font = await loadGoogleFont(FONT_FAMILY, 700, text);
 
-  return new ImageResponse(
+  const response = new ImageResponse(
     <ArticleOgImage title={article.title} authorName={article.authorName} board={board} />,
     {
       ...OG_IMAGE_SIZE,
-      fonts: fonts.length > 0 ? fonts : undefined,
+      fonts: font ? [{ name: FONT_FAMILY, data: font, weight: 700, style: 'normal' }] : undefined,
       headers: { 'Cache-Control': CACHE_CONTROL },
     },
   );
+  if (cache) {
+    getCloudflareContext().ctx.waitUntil(cache.put(request.url, response.clone()));
+  }
+  return response;
+}
+
+interface EdgeCache {
+  match(key: string): Promise<Response | undefined>;
+  put(key: string, response: Response): Promise<void>;
+}
+
+function getEdgeCache(): EdgeCache | undefined {
+  // next dev（Node.js）には Cloudflare の Cache API が無い
+  return (globalThis.caches as unknown as { default?: EdgeCache } | undefined)?.default;
 }

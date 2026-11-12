@@ -1,12 +1,15 @@
 import { KOMA_LABEL_MAP, KOMA_SHAPE_POINTS, PROMOTED_PIECES } from '@/lib/kif-player/constants';
-import type { CapturedPiece, ParsedBoard, Piece } from '@/lib/kif-player/types';
+import type { CapturedPiece, ParsedBoard } from '@/lib/kif-player/types';
+import { KOMA_GLYPH_PATHS } from '@/lib/og/komaGlyphs';
 
 export const OG_IMAGE_SIZE = { width: 1200, height: 630 };
-export const KOMA_FONT_FAMILY = 'Shippori Mincho';
 
 const CELL_SIZE = 50;
 const PIECE_SIZE = 44;
 const STAR_SIZE = 8;
+const FRAME_WIDTH = 3;
+const BOARD_SIZE = CELL_SIZE * 9;
+const PIECE_OFFSET = (CELL_SIZE - PIECE_SIZE) / 2;
 // globals.css の --color-shogi-* と揃える
 const COLORS = {
   background: '#f5f3e8',
@@ -47,43 +50,7 @@ export function ArticleOgImage({ title, authorName, board }: ArticleOgImageProps
     >
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         <CapturedRow mark="△" pieces={board.captured.gote} />
-        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', border: `3px solid ${COLORS.boardLine}` }}>
-          {board.board.map((row, ri) => (
-            <div key={ri} style={{ display: 'flex' }}>
-              {row.map((piece, ci) => (
-                <div
-                  key={ci}
-                  style={{
-                    width: CELL_SIZE,
-                    height: CELL_SIZE,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: COLORS.board,
-                    borderRight: ci < 8 ? `1px solid ${COLORS.boardLine}` : 'none',
-                    borderBottom: ri < 8 ? `1px solid ${COLORS.boardLine}` : 'none',
-                  }}
-                >
-                  {piece && <OgKoma piece={piece} />}
-                </div>
-              ))}
-            </div>
-          ))}
-          {[3, 6].flatMap((r) => [3, 6].map((c) => (
-            <div
-              key={`${r}-${c}`}
-              style={{
-                position: 'absolute',
-                left: CELL_SIZE * c - STAR_SIZE / 2,
-                top: CELL_SIZE * r - STAR_SIZE / 2,
-                width: STAR_SIZE,
-                height: STAR_SIZE,
-                borderRadius: STAR_SIZE / 2,
-                backgroundColor: COLORS.boardLine,
-              }}
-            />
-          )))}
-        </div>
+        <OgBoard board={board} />
         <CapturedRow mark="▲" pieces={board.captured.sente} />
       </div>
 
@@ -120,47 +87,54 @@ export function ArticleOgImage({ title, authorName, board }: ArticleOgImageProps
   );
 }
 
-/** satori は svg 内の text を描画できないため、五角形の上に文字を重ねる */
-function OgKoma({ piece }: { piece: Piece }) {
+// satori は要素・文字・svg ごとに描画コストがかかり Workers の CPU 上限を超えるため、
+// 盤・罫線・星・駒を 1 枚の svg にまとめ、駒の文字も事前に書き出したパスで描く
+function OgBoard({ board }: { board: ParsedBoard }) {
+  const pieces = board.board.flatMap((row, ri) =>
+    row.flatMap((piece, ci) => (piece ? [{ piece, x: ci * CELL_SIZE + PIECE_OFFSET, y: ri * CELL_SIZE + PIECE_OFFSET }] : [])),
+  );
+  const lines = Array.from({ length: 8 }, (_, i) => (i + 1) * CELL_SIZE);
+  const komaScale = PIECE_SIZE / 60;
+  const outerSize = BOARD_SIZE + FRAME_WIDTH * 2;
+
   return (
-    <div
-      style={{
-        position: 'relative',
-        display: 'flex',
-        width: PIECE_SIZE,
-        height: PIECE_SIZE,
-        // satori は transform: undefined を不正な値として例外にするため、後手のときだけ指定する
-        ...(piece.owner === 'gote' && { transform: 'rotate(180deg)' }),
-      }}
-    >
-      <svg width={PIECE_SIZE} height={PIECE_SIZE} viewBox="0 0 60 60" style={{ position: 'absolute', left: 0, top: 0 }}>
-        <polygon
-          points={KOMA_SHAPE_POINTS}
-          fill={COLORS.koma}
-          stroke={COLORS.komaEdge}
-          strokeWidth={2.5}
-          strokeLinejoin="round"
-        />
-      </svg>
-      <div
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: 3,
-          width: PIECE_SIZE,
-          height: PIECE_SIZE,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: KOMA_FONT_FAMILY,
-          fontSize: 22,
-          fontWeight: 700,
-          color: PROMOTED_PIECES.has(piece.type) ? COLORS.komaPromoted : COLORS.komaInk,
-        }}
-      >
-        {KOMA_LABEL_MAP[piece.type]}
-      </div>
-    </div>
+    <svg width={outerSize} height={outerSize} viewBox={`${-FRAME_WIDTH} ${-FRAME_WIDTH} ${outerSize} ${outerSize}`}>
+      <rect
+        x={-FRAME_WIDTH / 2}
+        y={-FRAME_WIDTH / 2}
+        width={BOARD_SIZE + FRAME_WIDTH}
+        height={BOARD_SIZE + FRAME_WIDTH}
+        fill={COLORS.board}
+        stroke={COLORS.boardLine}
+        strokeWidth={FRAME_WIDTH}
+      />
+      <path
+        d={lines.map((p) => `M${p} 0V${BOARD_SIZE}M0 ${p}H${BOARD_SIZE}`).join('')}
+        stroke={COLORS.boardLine}
+        strokeWidth={1}
+      />
+      {[3, 6].flatMap((r) => [3, 6].map((c) => (
+        <circle key={`${r}-${c}`} cx={CELL_SIZE * c} cy={CELL_SIZE * r} r={STAR_SIZE / 2} fill={COLORS.boardLine} />
+      )))}
+      {pieces.map(({ piece, x, y }) => (
+        <g
+          key={`${x}-${y}`}
+          transform={`translate(${x} ${y}) scale(${komaScale})${piece.owner === 'gote' ? ' rotate(180 30 30)' : ''}`}
+        >
+          <polygon
+            points={KOMA_SHAPE_POINTS}
+            fill={COLORS.koma}
+            stroke={COLORS.komaEdge}
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+          />
+          <path
+            d={KOMA_GLYPH_PATHS[KOMA_LABEL_MAP[piece.type]]}
+            fill={PROMOTED_PIECES.has(piece.type) ? COLORS.komaPromoted : COLORS.komaInk}
+          />
+        </g>
+      ))}
+    </svg>
   );
 }
 
