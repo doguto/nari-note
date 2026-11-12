@@ -44,27 +44,51 @@ nari-note は将棋記事の投稿・共有プラットフォームの Web ア�
 
 ```mermaid
 flowchart LR
-    Browser["ブラウザ"]
-    subgraph CF["Cloudflare Workers"]
-        Next["Next.js<br/>(SSR / BFF プロキシ app/api/[...path])"]
-    end
-    subgraph AWS["AWS EC2"]
-        Nginx["nginx<br/>(Blue/Green)"]
-        Api["ASP.NET Core API"]
-        Db[("PostgreSQL")]
-    end
-    S3[("S3<br/>画像")]
-    Mail["Resend<br/>メール"]
+    user["ユーザー<br/>(ブラウザ)"]
 
-    Browser -->|"HttpOnly Cookie (JWT)"| Next
-    Next -->|"/api/* を転送"| Nginx --> Api --> Db
-    Api --> S3
-    Api -->|"Outbox 経由で非同期送信"| Mail
+    subgraph cf["Cloudflare"]
+        next["Next.js<br/>Workers (OpenNext)<br/>SSR / BFF"]
+        proxy["Cloudflare Proxy<br/>API ドメイン / DNS"]
+    end
+
+    subgraph aws["AWS"]
+        subgraph ec2["EC2"]
+            nginx["nginx<br/>TLS 終端 / Blue-Green"]
+            api["ASP.NET Core<br/>Web API"]
+            db[("PostgreSQL 17")]
+        end
+        cfront["CloudFront<br/>画像 CDN"]
+        s3img[("S3<br/>画像")]
+    end
+
+    subgraph ext["外部サービス"]
+        resend["Resend<br/>メール"]
+        discord["Discord<br/>Webhook 通知"]
+        sentry["Sentry<br/>エラー監視"]
+    end
+
+    user -->|HTTPS| next
+    next -->|"/api/*"| proxy
+    proxy -->|"HTTPS + 内部 API キー"| nginx
+    nginx --> api
+    api -->|SQL| db
+    api -->|アップロード| s3img
+    user -->|画像| cfront
+    cfront -->|OAC| s3img
+    api -->|Outbox| resend
+    api -->|Outbox| discord
+    api --> sentry
 ```
 
-- ブラウザからの API 呼び出しは同一オリジンの `/api/*` に送られ、Next.js の BFF プロキシ（`src/app/api/[...path]`）がバックエンドへ転送する。Server Component からのデータ取得は生成済みの `lib/api/server.ts` がバックエンドを直接呼ぶ。
-- 認証は HttpOnly Cookie に入れた JWT。
-- 詳細なシステム構成とデプロイフローは `infrastruture/docs/infra-design.md` を参照。
+| 経路 | 内容 |
+| --- | --- |
+| ページ | ブラウザ → Next.js（Cloudflare Workers）。メタデータは SSR、本文は CSR |
+| API | ブラウザは同一オリジンの `/api/*` を呼び、Next.js の BFF（`src/app/api/[...path]`）が Cloudflare Proxy 経由で EC2 の nginx → API へ転送する。Server Component からは `lib/api/server.ts` が同じ経路でバックエンドを呼ぶ |
+| 認証 | HttpOnly Cookie の JWT |
+| 画像 | API が S3 に保存し、ブラウザは CloudFront から取得する |
+| メール・通知 | API が Outbox に積み、バックグラウンドジョブが Resend / Discord に配送する |
+
+EC2 の運用系（SSM Parameter Store、CloudWatch / SNS、デプロイ成果物の S3、DB 用 EBS）とデプロイフローは [infrastruture/docs/infra-design.md](infrastruture/docs/infra-design.md) を参照。
 
 ## バックエンドの設計原則（要約）
 
