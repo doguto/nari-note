@@ -1,280 +1,224 @@
 # AGENTS.md
 
+エージェントが最初に読む、このリポジトリの正本。ここには全体像と規約だけを置き、詳細は末尾の「ドキュメント地図」から各文書を参照する。
+
 ## プロジェクト概要
 
-nari-note は将棋記事の投稿・共有プラットフォーム の Web アプリケーション.
+nari-note は将棋記事の投稿・共有プラットフォームの Web アプリケーション。記事（棋譜・盤面の埋め込みあり）、講座（記事をまとめた連載）、タグ、いいね、フォロー等の機能を持つ。
 
-### 技術スタック
+トップレベル構成:
+
+| パス | 内容 |
+| --- | --- |
+| `nari-note-backend/` | ASP.NET Core Web API（`Src/` 本体、`Tests/`、`Migrations/`、`Documents/`） |
+| `nari-note-frontend/` | Next.js アプリ（`src/` 本体、`docs/`） |
+| `infrastruture/` | AWS インフラ（Terraform + Terragrunt）。ディレクトリ名の綴りはこのまま |
+| `spec/` | 画面・機能の仕様（`*.spec`） |
+| `scripts/` | API クライアント生成、デプロイ等のスクリプト |
+| `.agents/` | エージェント用スキルの実体（`.github/skills`, `.claude/skills` はここへの symlink） |
+
+## 技術スタック
+
+メジャーバージョンのみ記載する。正確なバージョンの正は `nari-note-frontend/package.json`、`nari-note-backend/nari-note-backend.csproj`、`global.json`、`docker-compose.yml`。
 
 **バックエンド**
-- ASP.NET Core 9.0 (.NET 9.0)
-- PostgreSQL 17 + Entity Framework Core 9.0
-- JWT認証（System.IdentityModel.Tokens.Jwt）
-- BCrypt.Net-Next（パスワードハッシュ化）
-- Vogen（型安全なValueObject）
+- .NET 9 / ASP.NET Core 9（Web API）
+- PostgreSQL 17 + Entity Framework Core 9（Npgsql）
+- JWT（System.IdentityModel.Tokens.Jwt）、BCrypt.Net-Next（パスワードハッシュ）
+- Vogen（ID の ValueObject）
+- Serilog（ログ）、Sentry（エラー監視）、Resend（メール送信）、AWS SDK（S3 への画像保存、SSM Parameter Store からの設定読み込み）
+- テスト: xUnit v3、NSubstitute、Testcontainers（PostgreSQL）（`nari-note-backend/Tests/`）
 
 **フロントエンド**
-- Next.js 15 (App Router)
-- React 19
-- TypeScript 5.9
-- TanStack Query（React Query）v5.90
-- Axios
-- Tailwind CSS 4
-- shadcn/ui（Radix UI）
-- Tiptap（リッチテキストエディタ）
+- Next.js 16（App Router）/ React 19 / TypeScript 5
+- TanStack Query 5 + Axios
+- Tailwind CSS 4、shadcn/ui（Radix UI）、lucide-react
+- react-markdown（remark-gfm 等）で本文表示。エディタは自作の MarkdownEditor（Tiptap 等の外部エディタは使っていない）
+- Cloudflare Workers へ OpenNext（`@opennextjs/cloudflare`）でデプロイ
 
-## アーキテクチャ
+**インフラ**
+- AWS（Terraform + Terragrunt）。バックエンドと PostgreSQL は EC2 上、nginx で Blue/Green 切り替え
+- フロントエンドは Cloudflare Workers
 
-### バックエンド：レイヤードアーキテクチャ + Repository パターン
+## 全体構成
 
-```
-Controller（プレゼンテーション層）
-    ↓ 依存
-Application（Service層）
-    ↓ 依存
-Domain（Repository Interface + Entity）
-    ↑ 実装
-Infrastructure（Repository実装 + DbContext）
-```
+```mermaid
+flowchart LR
+    Browser["ブラウザ"]
+    subgraph CF["Cloudflare Workers"]
+        Next["Next.js<br/>(SSR / BFF プロキシ app/api/[...path])"]
+    end
+    subgraph AWS["AWS EC2"]
+        Nginx["nginx<br/>(Blue/Green)"]
+        Api["ASP.NET Core API"]
+        Db[("PostgreSQL")]
+    end
+    S3[("S3<br/>画像")]
+    Mail["Resend<br/>メール"]
 
-**重要な設計原則:**
-- **API一個につきService一個**の粒度で実装
-- Serviceはビジネスロジックに専念（キャッシュ等のインフラ関心事は書かない）
-- インフラ関心事はRepository層で吸収
-- グローバル例外ハンドラーミドルウェアで統一的にエラー処理（Controllerでtry-catchは不要）
-
-**ディレクトリ構造:**
-```
-nari-note-backend/Src/
-├── Controller/              # APIエンドポイント
-├── Application/
-│   ├── Service/            # ビジネスロジック（API一個につきService一個）
-│   ├── Dto/
-│   │   ├── Request/        # リクエストDTO
-│   │   └── Response/       # レスポンスDTO
-│   └── Exception/          # カスタム例外（NotFoundException, ValidationException等）
-├── Domain/
-│   ├── Entity/             # エンティティ（EF Core + ドメインロジック）
-│   ├── Repository/         # Repository Interface（新規実装はここに配置）
-│   └── Security/           # JWT等のセキュリティ関連
-├── Infrastructure/
-│   ├── NariNoteDbContext.cs  # EF Core DbContext
-│   ├── Repository/         # Repository実装
-│   ├── Job/                # バックグラウンドジョブ（Outbox 配送、未認証ユーザーの削除等）
-│   └── Binding/            # ValueObject のモデルバインド・JSON 変換
-├── Middleware/             # グローバルミドルウェア
-└── Filter/                 # アクションフィルタ
+    Browser -->|"HttpOnly Cookie (JWT)"| Next
+    Next -->|"/api/* を転送"| Nginx --> Api --> Db
+    Api --> S3
+    Api -->|"Outbox 経由で非同期送信"| Mail
 ```
 
-### フロントエンド：Atomic Designパターン
+- ブラウザからの API 呼び出しは同一オリジンの `/api/*` に送られ、Next.js の BFF プロキシ（`src/app/api/[...path]`）がバックエンドへ転送する。Server Component からのデータ取得は生成済みの `lib/api/server.ts` がバックエンドを直接呼ぶ。
+- 認証は HttpOnly Cookie に入れた JWT。localStorage にトークンは置かず、リフレッシュトークンも無い。
+- 詳細なシステム構成とデプロイフローは `infrastruture/docs/infra-design.md` を参照。
 
-```
-Atoms（最小単位のコンポーネント）
-    ↓ 組み合わせ
-Molecules（機能コンポーネント）
-    ↓ 組み合わせ
-Organisms（完全な機能ブロック）
-```
+## バックエンドの設計原則（要約）
 
-**重要な設計原則:**
-- コンポーネントは小さな単位（Atoms → Molecules → Organisms）で階層的に構成
-- 共通コンポーネント（Atoms/Molecules）は `components/common/` に配置
-- 機能固有のOrganismsは `features/{feature}/organisms/` に配置
-- データフェッチングが複雑な場合はContainer/Presentationalパターンを併用
+レイヤードアーキテクチャ + Repository パターン。依存の向きは Controller → Application(Service) → Domain ← Infrastructure。
 
-**ディレクトリ構造:**
-```
-nari-note-frontend/src/
-├── app/                    # Next.js App Router
-│   ├── (auth)/            # 認証関連ページグループ
-│   ├── articles/          # 記事関連ページ
-│   └── users/             # ユーザー関連ページ
-├── components/
-│   ├── common/
-│   │   ├── atoms/         # 最小単位（FormField, ErrorAlert, TagChip等）
-│   │   ├── molecules/     # 機能単位（EmailField, PasswordField, TagInput等）
-│   │   ├── Loading.tsx
-│   │   ├── ErrorMessage.tsx
-│   │   └── EmptyState.tsx
-│   ├── ui/                # 基本UIコンポーネント（shadcn/ui）
-│   └── layout/            # レイアウトコンポーネント
-├── features/              # 機能ごとのモジュール
-│   ├── article/
-│   │   └── organisms/     # ArticleFormPage, ArticleDetailPage等
-│   ├── auth/
-│   │   └── organisms/     # LoginPage, SignUpPage等
-│   └── user/
-│       └── organisms/     # UserProfilePage等
-└── lib/
-    ├── api/               # APIクライアント（TanStack Query + Axios）
-    ├── providers/         # Reactプロバイダー
-    ├── utils/             # ユーティリティ関数
-    └── hooks/             # 共通カスタムフック
-```
+- **API 一個につき Service 一個**（`XxxService.ExecuteAsync`）。Service はビジネスロジックに専念し、キャッシュ等のインフラ関心事は Repository / Infrastructure 層で吸収する
+- Repository のインターフェースは `Src/Domain/Repository/`、実装は `Src/Infrastructure/Repository/`。DbContext は `Src/Infrastructure/Database/`
+- 例外は `GlobalExceptionHandlerMiddleware` が HTTP ステータスに変換する。Controller / Service で try-catch はしない
+- 書き込みリクエストのトランザクションは `TransactionMiddleware` が管理する（`[NoTransaction]` で除外）
+- 認可は Controller アクションの `[Auth(AuthLevel.xxx)]`（Anonymous / Optional / Authenticated / VerifiedEmail）
+- メール等の非同期配送は Outbox、未認証ユーザーの削除はバックグラウンドジョブ（`Src/Infrastructure/Job/`）
+- DI 登録は `ApplicationServiceInstaller`（Service）と `InfrastructureServiceInstaller`（Repository、Gateway、ジョブ等）
+- マイグレーションは全環境で起動時に自動適用、シードデータ投入は Development のみ
+
+詳細: `nari-note-backend/Documents/architecture.md`、`backend-implementation-guide.md`
+
+## フロントエンドの設計原則（要約）
+
+5 層の Atomic Design（Page → Template → Organism → Molecule → Atom）。
+
+| 層 | 配置 | 責務 |
+| --- | --- | --- |
+| Atom | `src/components/ui/` | 最小単位の汎用 UI（shadcn/ui もここ） |
+| Molecule | `src/components/molecules/` | Atom を組み合わせた汎用部品 |
+| Organism | `src/features/{feature}/organisms/`（機能横断のものは `src/components/organisms/`） | 特定の画面に属する UI のまとまり |
+| Template | `src/features/{feature}/templates/` | 画面のレイアウトとレスポンシブ対応 |
+| Page | `src/features/{feature}/pages/` | データ取得・状態管理等の非 UI ロジック |
+
+- `src/app/` のルートファイルは薄く保ち、`features/` の Page を呼ぶ
+- API の型・関数・フック（`src/lib/api/` の `types.ts` / `endpoints.ts` / `hooks.ts` / `server.ts`）は `scripts/api-generator.py` で生成する。手で編集しない
+- 基本は Server Component。必要な場合のみ `'use client'`
+
+詳細: `nari-note-frontend/docs/architecture.md`、`implementation-guide.md`、`api-usage.md`
 
 ## コーディング規約
 
 ### バックエンド（C#）
 
-**命名規則:**
-- private変数: アンダースコア（`_`）無し、キャメルケース、`readonly`推奨
-  - 例: `readonly IArticleRepository articleRepository;`
-- private変数へのアクセス: `this.`を使用
-  - 例: `this.articleRepository.FindByIdAsync(id);`
-- private修飾子: クラスフィールドでは省略（デフォルトでprivate）
-  - 良い例: `readonly NariNoteDbContext context;`
-  - 悪い例: `private readonly NariNoteDbContext context;`
+**命名・修飾子**
+- private フィールドはアンダースコア無しのキャメルケース、`readonly` 推奨。`private` 修飾子は省略する
+  - 良い例: `readonly IArticleRepository articleRepository;`
+  - 悪い例: `private readonly IArticleRepository _articleRepository;`
+- private フィールドへのアクセスは `this.` を付ける（例: `this.articleRepository.FindByIdAsync(id);`）
 
-**コメント:**
-- XML ドキュメントコメント（`/// <summary>` 等）は使わず、`//` のコメントで書く
+**コメント**
+- XML ドキュメントコメント（`/// <summary>` 等）は使わず、`//` で書く
+- コードを読めば分かること（What / How）は書かない。必要なときに Why だけを書く
 
-**ValueObject（ID型）:**
-- エンティティのIDにはVogenライブラリを使用した型安全なValueObjectを使用
-  - 例: `ArticleId`, `UserId`, `TagId`
-  - `NariNoteBackend.Domain.ValueObject` 名前空間に定義
+**ValueObject（ID 型）**
+- エンティティの ID は Vogen の ValueObject（`ArticleId`, `UserId`, `TagId` 等）。`NariNoteBackend.Domain.ValueObject` 名前空間に定義
 
-**日付時刻:**
-- 現在時刻は DI した `TimeProvider` から取得（`timeProvider.UtcNow()`）
+**日付時刻**
+- 現在時刻は DI した `TimeProvider` から取得する（`timeProvider.UtcNow()`）
 - `DateTime.UtcNow` / `DateTime.Now` の直接使用は禁止（テストで時刻を固定できなくなるため）
 
-**エラーハンドリング:**
-- Controllerでtry-catchは不要（グローバル例外ハンドラーが処理）
-- カスタム例外を使用: `NotFoundException`, `ValidationException`, `ConflictException`
+**例外**
+- 標準例外を使い分ける。ミドルウェアでのステータス変換は以下
+  - 400: `ArgumentException` 系、`System.ComponentModel.DataAnnotations.ValidationException`、`InvalidOperationException`
+  - 401: `UnauthorizedAccessException`
+  - 404: `KeyNotFoundException`（Repository の `FindForceByIdAsync` が投げる）
+- カスタム例外（`Src/Application/Exception/`）は `ConflictException`(409) / `ForbiddenException`(403) / `TooManyRequestsException`(429) / `NariNoteException`(500) のみ
+- 詳細な対応表は `nari-note-backend/Documents/architecture.md`
+
+**パフォーマンス**
+- N+1 クエリ等、明らかに性能を落とす書き方をしない
 
 ### フロントエンド（TypeScript）
 
-**Atomic Design実装順序:**
-1. Atomsの確認・作成（`components/common/atoms/`）
-2. Moleculesの確認・作成（`components/common/molecules/`）
-3. Organismsの実装（`features/{feature}/organisms/`）
+- すべての props に明示的な型を付ける
+- API 型は生成された `lib/api/types.ts` を使う。データ取得は生成された TanStack Query フック（例: `useGetArticle`）または `server.ts` の関数を使う
+- 新しい UI は Atom → Molecule → Organism → Template → Page の順に、既存部品で足りるか確認してから作る
+- レスポンシブ調整は原則 Template で行う
 
-**型定義:**
-- すべてのpropsに明示的な型定義を追加
-- API型は `lib/api/types.ts` に定義
+### 共通
 
-**コンポーネント:**
-- 共通コンポーネント（Loading, ErrorMessage, EmptyState）を活用
-- データフェッチングはTanStack Queryのフックを使用
-  - 例: `useGetArticle`, `useCreateArticle`
+- プロダクト（UI 文言・コード・ログ）に絵文字を使わない
+- ログメッセージ等はシステム的な文言にする
+
+## 新機能実装の手順（概要）
+
+**バックエンド**（詳細は `.agents/skills/new-api-endpoint/SKILL.md` と `backend-implementation-guide.md`）
+1. 必要なら Entity（`Src/Domain/Entity/`）を定義し、マイグレーションを追加（`dotnet ef migrations add <名前>`）
+2. Repository のインターフェース / 実装を追加・拡張
+3. Request / Response DTO（`Src/Application/Dto/`）
+4. Service（`Src/Application/Service/`、API 一個につき一個）
+5. Controller にアクションを追加
+6. `ApplicationServiceInstaller` / `InfrastructureServiceInstaller` に DI 登録
+7. テストを追加（`nari-note-backend/Documents/testing-guide.md`）
+8. `scripts/api-generator.py` でフロントの API コードを再生成
+
+**フロントエンド**（詳細は `nari-note-frontend/docs/implementation-guide.md`）
+1. API コードを生成（バックエンド側の手順 8）
+2. 必要な Atom / Molecule を確認・作成
+3. `features/{feature}/` に Organism → Template → Page を実装
+4. `src/app/` にルートを追加
 
 ## ユーティリティスクリプト
 
-### API Generator Skill
+いずれもリポジトリルートで実行する。
 
-バックエンドで実装したAPIに基づき、フロントエンドのAPI関連コードを自動生成します。
+| コマンド | 内容 |
+| --- | --- |
+| `python scripts/api-generator.py` | バックエンドの Controller / DTO を解析し、`nari-note-frontend/src/lib/api/` の `types.ts` / `endpoints.ts` / `hooks.ts` / `server.ts` を上書き生成する。詳細: `.agents/skills/api-generator/SKILL.md` |
+| `python scripts/update-agent-docs.py --verbose` | `.github/agents/*.agent.md` のリンク切れ等を検証する（ファイルは書き換えない）。詳細: `.agents/skills/agent-doc-updater/SKILL.md` |
+| `scripts/deploy.sh` / `scripts/rollback.sh` | バックエンドの本番デプロイ / ロールバック（SSM Run Command）。詳細: `infrastruture/docs/infra-design.md` |
 
-```bash
-# 全APIコードを生成
-python scripts/api-generator.py --force --verbose
-```
+## ブランチ・コミット・PR
 
-詳細: [.github/skills/api-generator/SKILL.md](.github/skills/api-generator/SKILL.md)
-
-### Agent Doc Updater Skill
-
-各エージェントの`.agent.md`ファイルを最新のプロジェクト情報に基づいて検証・更新します。
-
-```bash
-# 全エージェントのドキュメントを検証
-python scripts/update-agent-docs.py --verbose
-
-# 特定のエージェントのみ検証
-python scripts/update-agent-docs.py --agent backend-engineer --verbose
-
-# Dry-run（変更せず検証のみ）
-python scripts/update-agent-docs.py --dry-run --verbose
-```
-
-詳細: [.github/skills/agent-doc-updater/SKILL.md](.github/skills/agent-doc-updater/SKILL.md)
-
-## 新機能実装の手順
-
-### バックエンド
-
-1. **Domain Entity の定義** (`Src/Domain/Entity/`)
-   - EF Coreエンティティ + ドメインロジック
-2. **マイグレーション作成**
-   ```bash
-   dotnet ef migrations add <マイグレーション名>
-   dotnet ef database update
-   ```
-3. **Repository Interface** (`Src/Domain/Repository/`)
-4. **Repository 実装** (`Src/Infrastructure/Repository/`)
-5. **Request/Response DTO** (`Src/Application/Dto/`)
-6. **Service実装** (`Src/Application/Service/`)
-   - API一個につきService一個
-7. **Controller実装** (`Src/Controller/`)
-8. **DI登録** (`Program.cs`)
-
-### フロントエンド
-
-1. **API型定義** (`lib/api/types.ts`)
-2. **APIエンドポイント関数** (`lib/api/endpoints.ts`)
-3. **TanStack Queryフック** (`lib/api/hooks.ts`)
-4. **Atoms作成** (`components/common/atoms/`)
-   - 必要な基本要素の確認・作成
-5. **Molecules作成** (`components/common/molecules/`)
-   - Atomsを組み合わせた機能コンポーネント
-6. **Organisms実装** (`features/{feature}/organisms/`)
-   - 完全な機能ブロック
-7. **ページ実装** (`app/`)
-   - Next.js App Routerのページコンポーネント
-
-## データベース
-
-- **DBMS**: PostgreSQL 17
-- **ORM**: Entity Framework Core 9.0
-- **マイグレーション**: EF Core Migrations（`Migrations/` ディレクトリ）
-- **開発環境**: Docker Composeで自動マイグレーション + シードデータ投入
-
-## 認証
-
-- **方式**: JWT（JSON Web Token）
-- **パスワードハッシュ**: BCrypt.Net-Next
-- **ミドルウェア**: `JwtAuthenticationMiddleware` で認証処理
-- **エンドポイント**:
-  - `POST /api/auth/signup`: ユーザー登録
-  - `POST /api/auth/signin`: ログイン
-
-## 重要なドキュメント
-
-プロジェクトの詳細な実装ガイドは以下を参照してください：
-
-**バックエンド:**
-- `nari-note-backend/Documents/backend-implementation-guide.md` - コーディング規約と実装パターン（最重要）
-- `nari-note-backend/Documents/architecture.md` - アーキテクチャ設計
-- `nari-note-backend/Documents/error-handling-strategy.md` - エラーハンドリング戦略
-- `nari-note-backend/Documents/development-workflow.md` - 開発ワークフロー
-- `nari-note-backend/Documents/testing-guide.md` - テストの方針と書き方（単体 / 結合）
-
-**フロントエンド:**
-- `nari-note-frontend/docs/implementation-guide.md` - Atomic Design実装ガイド（最重要）
-- `nari-note-frontend/docs/architecture.md` - アーキテクチャ設計
-- `nari-note-frontend/docs/api-usage.md` - API使用方法
-
-**共通:**
-- `.github/copilot-instructions.md` - GitHub Copilot向けの指示（コミットメッセージ規約等）
-
-## コミットメッセージ規約
-
-形式: `Prefix: {簡潔な変更内容（日本語で）}`
-
-**Prefix:**
-- `Feat`: 新機能の追加
-- `Fix`: バグ修正
-- `Refactor`: リファクタリング（機能変更を伴わない）
-- `Chore`: ビルドプロセスやツールの変更、雑務
-- `Docs`: ドキュメントのみの変更
-
-**例:**
-```
-Feat: 記事作成機能を追加
-Fix: ログイン時のエラーハンドリングを修正
-Refactor: Repository層のクエリロジックを整理
-```
-
-## その他の注意事項
-
+- GitHub の Default Branch は `develop`。PR は基本的に `develop` をターゲットにする
+- `main` へのマージでフロントエンドが Cloudflare にデプロイされる（`.github/workflows/cloudflare-deploy.yml`）
+- コミットメッセージ: `Prefix: {簡潔な変更内容（日本語で）}`
+  - `Feat`: 新機能の追加
+  - `Fix`: バグ修正
+  - `Refactor`: リファクタリング（機能変更を伴わない）
+  - `Chore`: ビルドプロセスやツールの変更、雑務
+  - `Docs`: ドキュメントのみの変更
+  - 例: `Feat: 記事作成機能を追加`、`Fix: ログイン時のエラーハンドリングを修正`
 - レビューやコードの説明は**すべて日本語**で行う
-- Docker Compose の使用
-- GitHub の Default Branch は `develop`. PR は基本的に `develop` をターゲットにする
+
+## ドキュメント地図
+
+**ルート / 横断**
+- [README.md](README.md) - 人間向けの入口（概要・ローカル起動）
+- [.github/copilot-instructions.md](.github/copilot-instructions.md) - GitHub Copilot 向けの追加指示
+- [.github/agents/](.github/agents/) - Copilot カスタムエージェント（backend-engineer / frontend-engineer / spec）
+- [.agents/README.md](.agents/README.md) - スキルの管理方法
+- [.claude/commands/pr-review.md](.claude/commands/pr-review.md) - PR レビューコマンド（CI の Claude Code Review でも使用）
+
+**バックエンド**
+- [nari-note-backend/README.md](nari-note-backend/README.md) - セットアップと主要コマンド
+- [Documents/architecture.md](nari-note-backend/Documents/architecture.md) - レイヤー構成、設計思想、エラーハンドリング
+- [Documents/backend-implementation-guide.md](nari-note-backend/Documents/backend-implementation-guide.md) - 実装パターンと規約（最重要）
+- [Documents/authentication-strategy.md](nari-note-backend/Documents/authentication-strategy.md) - 認証・認可
+- [Documents/er-diagram.md](nari-note-backend/Documents/er-diagram.md) - データモデル
+- [Documents/testing-guide.md](nari-note-backend/Documents/testing-guide.md) - テスト方針（単体 / 結合）
+- [Documents/development-workflow.md](nari-note-backend/Documents/development-workflow.md) - ローカル開発、マイグレーション、設定キー
+
+**フロントエンド**
+- [nari-note-frontend/README.md](nari-note-frontend/README.md) - セットアップ、コマンド、環境変数
+- [docs/architecture.md](nari-note-frontend/docs/architecture.md) - 構成、BFF、認証、データ取得
+- [docs/implementation-guide.md](nari-note-frontend/docs/implementation-guide.md) - Atomic Design の実装ガイド（最重要）
+- [docs/api-usage.md](nari-note-frontend/docs/api-usage.md) - 生成 API コードの使い方
+
+**インフラ**
+- [infrastruture/AGENTS.md](infrastruture/AGENTS.md) - Terraform / Terragrunt の構成と規約
+- [infrastruture/docs/infra-design.md](infrastruture/docs/infra-design.md) - システム構成、デプロイ / リリースフロー
+- [infrastruture/docs/setup.md](infrastruture/docs/setup.md) - インフラ作業環境のセットアップ
+- [infrastruture/docs/db-backup-recovery.md](infrastruture/docs/db-backup-recovery.md) / [db-restore-runbook.md](infrastruture/docs/db-restore-runbook.md) - DB バックアップと復旧
+
+**仕様**
+- [spec/README.md](spec/README.md) - 仕様書の位置づけと書式
+
+**正（Single Source of Truth）の所在**
+- API 一覧: `nari-note-backend/Src/Controller/`
+- DB スキーマ: `nari-note-backend/Migrations/` のモデルスナップショット
+- 依存バージョン: `package.json` / `*.csproj` / `global.json`
+- フロントの API 型: `nari-note-frontend/src/lib/api/`（生成物）

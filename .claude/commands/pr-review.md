@@ -21,7 +21,8 @@ $ARGUMENTS で指定された Pull Request をレビューする。
 2. **差分の把握**
    `gh pr diff <PR>` で差分を取得する。必要に応じて `Read` / `Grep` / `Glob` で差分周辺のファイルを読み、文脈を補う（変更されていない既存コードとの整合性確認のため）。
    ルートの CLAUDE.md（`@AGENTS.md` 経由で AGENTS.md を含む）はセッション開始時に自動で読み込まれているので、追加で読む必要はない。
-   差分が `nari-note-backend/` に及ぶ場合は `nari-note-backend/Documents/backend-implementation-guide.md`、`nari-note-frontend/` に及ぶ場合は `nari-note-frontend/docs/implementation-guide.md` も規約として参照してよい。
+   差分が `nari-note-backend/` に及ぶ場合は `nari-note-backend/Documents/backend-implementation-guide.md`、`nari-note-frontend/` に及ぶ場合は `nari-note-frontend/docs/implementation-guide.md`、`infrastruture/` に及ぶ場合は `infrastruture/AGENTS.md` も規約として参照してよい。
+   `nari-note-frontend/src/lib/api/` の `types.ts` / `endpoints.ts` / `hooks.ts` / `server.ts` は `scripts/api-generator.py` の生成物なので、手編集の痕跡が無い限りレビュー対象から外してよい。
 
 3. **レビュー観点**
    以下の **HIGH SIGNAL** な問題だけを拾う。誤検知はレビューの信頼を損なうので、確信が持てないものは指摘しない。

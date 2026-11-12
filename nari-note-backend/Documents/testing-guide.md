@@ -1,43 +1,35 @@
 # テストガイド
 
-バックエンドのテストの方針と書き方をまとめます。
+バックエンドのテストの方針と書き方をまとめる。
 
 ## 実行方法
 
 ```bash
 cd nari-note-backend
 
-# 全テスト（結合テストは Docker が必要）
+# 全テスト（結合テスト・マイグレーションテストは Docker が必要）
 dotnet test
 
 # 単体テストのみ（Docker 不要）
 dotnet test --filter "FullyQualifiedName~NariNoteBackend.Tests.Application"
 
-# 結合テストのみ
+# Controller の結合テストのみ
 dotnet test --filter "FullyQualifiedName~NariNoteBackend.Tests.Controller"
 ```
 
+結合テストは Testcontainers が PostgreSQL コンテナを自動で起動するため、Docker が動いていればよい（`docker compose` の DB は使わない）。
+
 ## 構成
+
+テストプロジェクトは `Tests/NariNoteBackend.Tests/`。使用ライブラリは xUnit v3 / NSubstitute / Microsoft.AspNetCore.Mvc.Testing / Testcontainers / Respawn。
 
 | 種別 | 対象 | 依存の扱い | 配置 |
 |---|---|---|---|
-| 単体テスト | Service | Repository / Gateway の interface を NSubstitute で差し替え | `Tests/NariNoteBackend.Tests/Application/Service/` |
-| 結合テスト | Controller（HTTP 経由） | 実 Service・実 Repository・実 PostgreSQL（Testcontainers） | `Tests/NariNoteBackend.Tests/Controller/` |
-| マイグレーションテスト | 既存データがある DB へのマイグレーション適用 | テストごとに専用の PostgreSQL（Testcontainers） | `Tests/NariNoteBackend.Tests/Migrations/` |
+| 単体テスト | Service | Repository / Gateway の interface を NSubstitute で差し替え | `Application/Service/` |
+| 結合テスト | Controller（HTTP 経由）、バックグラウンドジョブの Processor | 実 Service・実 Repository・実 PostgreSQL（Testcontainers） | `Controller/`, `Infrastructure/` |
+| マイグレーションテスト | 既存データがある DB へのマイグレーション適用 | テストごとに専用の PostgreSQL（Testcontainers） | `Migrations/` |
 
-```
-Tests/NariNoteBackend.Tests/
-├── Application/Service/     # Service の単体テスト
-├── Controller/              # Controller の結合テスト
-├── Migrations/              # データ移行を伴うマイグレーションのテスト
-└── Support/
-    ├── Builder/             # テストデータの Builder
-    ├── Fake/                # 外部サービス（メール・Discord・画像ストレージ）の Fake
-    ├── Integration/         # NariNoteApiFactory / IntegrationTestBase
-    └── TestTimeProvider.cs  # 時刻を固定・変更できる TimeProvider
-```
-
-使用ライブラリ: xUnit v3 / NSubstitute / Microsoft.AspNetCore.Mvc.Testing / Testcontainers / Respawn
+`Support/` にテスト用の部品を置く: `Builder/`（テストデータの Builder と `TestEntity`）、`Fake/`（メール・Discord・画像ストレージの Fake）、`Integration/`（`NariNoteApiFactory` / `IntegrationTestBase`）、`TestTimeProvider`。
 
 ## 共通ルール
 
@@ -74,7 +66,7 @@ public async Task 棋譜を減らして更新すると余分な棋譜は削除�
 
 ## 単体テスト（Service）
 
-Service はコンストラクタで受け取る interface を `Substitute.For<T>()` で差し替えて直接生成します。
+Service はコンストラクタで受け取る interface を `Substitute.For<T>()` で差し替えて直接生成する。
 
 ```csharp
 public class CreateArticleServiceTest
@@ -100,13 +92,13 @@ public class CreateArticleServiceTest
 
 ### 注意: Vogen の ID 型に `Arg.Any` は使えない
 
-`Arg.Any<ArticleId>()` は内部で `default(ArticleId)` を返しますが、Vogen の未初期化値は等価比較が成立しないため、NSubstitute が引数を特定できず例外になります。「任意の ID」を指定したい場合は `ForAnyArgs` / `WithAnyArgs` を使います。
+`Arg.Any<ArticleId>()` は内部で `default(ArticleId)` を返しますが、Vogen の未初期化値は等価比較が成立しないため、NSubstitute が引数を特定できず例外になる。「任意の ID」を指定したい場合は `ForAnyArgs` / `WithAnyArgs` を使う。
 
 ```csharp
-// ❌ 例外になる
+// NG: 例外になる
 this.commentRepository.FindByArticleAsync(Arg.Any<ArticleId>()).Returns(comments);
 
-// ✅ 任意の引数にマッチさせる（渡す値は何でもよい）
+// OK: 任意の引数にマッチさせる（渡す値は何でもよい）
 this.commentRepository
     .FindByArticleAsync(ArticleId.From(Guid.CreateVersion7()))
     .ReturnsForAnyArgs(comments);
@@ -117,7 +109,7 @@ await this.kifuRepository.DidNotReceiveWithAnyArgs().ReplaceAllByArticleIdAsync(
 );
 ```
 
-特定の ID を指定する場合（`FindForceByIdAsync(article.Id)` 等）や、`Arg.Is<Article>(...)` のような Entity への使用は問題ありません。
+特定の ID を指定する場合（`FindForceByIdAsync(article.Id)` 等）や、`Arg.Is<Article>(...)` のような Entity への使用は問題ない。
 
 ### HttpResponse を受け取る Service
 
@@ -137,11 +129,10 @@ Assert.Contains("authToken=jwt-token", this.httpResponse.Headers.SetCookie.ToStr
 var article = new ArticleBuilder(author).WithTags("振り飛車").LikedBy(liker).Build();
 var course = new CourseBuilder(owner).WithArticles(article).LikedBy(liker).Build();
 ```
-| `Factory.EmailHelper` 等 | 外部サービスの Fake（送信内容の検証） |
 
 ## 結合テスト（Controller）
 
-`IntegrationTestBase` を継承します。API は `NariNoteApiFactory` が 1 回だけ起動し、結合テスト全体で共有します。
+`IntegrationTestBase` を継承する。API は `NariNoteApiFactory` が 1 回だけ起動し、結合テスト全体で共有する。
 
 - **テストごとに DB は空になる**（Respawn）。必要なデータは各テストの Arrange で `SeedAsync` する
 - 時計と Fake の記録もテストごとに初期化される
@@ -179,11 +170,12 @@ public class ArticlesControllerTest : IntegrationTestBase
 | `GetAuthToken(response)` | レスポンスの `Set-Cookie` から認証トークンを取り出す |
 | `ProcessOutboxAsync()` | Outbox に溜まったメッセージを配送する（メール送信等の検証用） |
 | `TimeProvider` | 時刻の変更（`SetUtcNow` / `Advance`） |
+| `Factory.EmailHelper` 等 | 外部サービスの Fake（送信内容の検証） |
 
 ### 本番との違い
 
 - 環境名は `Testing`（SSM・シードデータは読み込まない）
 - メール・Discord・画像ストレージは Fake に差し替え
-- `OutboxWorker`（バックグラウンド処理）は起動しない。Outbox の配送まで検証する場合は `ProcessOutboxAsync()` を呼ぶ
+- `OutboxWorker` / `UnverifiedUserDeletionWorker`（バックグラウンド処理）は起動しない。Outbox の配送まで検証する場合は `ProcessOutboxAsync()` を、未認証ユーザー削除は `UnverifiedUserDeletionProcessor` を直接呼ぶ
 - 認証 Cookie は `Secure` 属性付きで発行されるため、`HttpClient` が自動では送り返さない。サインイン後の状態を検証する場合は `GetAuthToken` と `CreateClientWithToken` を使う
 - リクエストボディは API の契約を検証するため、DTO ではなく匿名オブジェクトで組み立てる

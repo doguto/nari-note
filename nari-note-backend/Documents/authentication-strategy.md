@@ -1,964 +1,145 @@
-# ユーザー認証戦略
+# 認証
 
-このドキュメントは、nari-note-backendのユーザー認証戦略について説明します。
+認証まわり（JWT、メール認証、パスワード再設定、トークン失効）の設計をまとめる。エンドポイントの正は `Src/Controller/AuthController.cs`。
 
-## 目次
+## 方針
 
-1. [検討した認証方式](#検討した認証方式)
-2. [選定結果と理由](#選定結果と理由)
-3. [従来のCookieベース認証との違い](#従来のcookieベース認証との違い)
-4. [XSS（クロスサイトスクリプティング）対策](#xssクロスサイトスクリプティング対策)
-5. [アーキテクチャ](#アーキテクチャ)
-6. [実装詳細](#実装詳細)
-7. [セキュリティ対策](#セキュリティ対策)
-8. [APIエンドポイント](#apiエンドポイント)
+- **JWT を HttpOnly Cookie（`authToken`）に保存する**。JavaScript からトークンを読めないため XSS で盗まれにくい。localStorage は使わない
+- サーバー側にセッションストアを持たない。リフレッシュトークンも無く、有効期限（`Jwt:ExpirationInHours`）が切れたら再サインインする
+- 即時失効が必要な場面は、ユーザーごとの **SecurityStamp** で発行済みトークンを一括無効化する
+- フロントエンドは BFF プロキシ（Next.js の `app/api/[...path]`）経由で API を呼ぶため、Cookie はフロントと同一オリジンで扱われる
 
----
+### Cookie の属性
 
-## 検討した認証方式
+| 属性 | 値 |
+|---|---|
+| HttpOnly | 常に有効 |
+| Secure | Development 以外で有効 |
+| SameSite | Development は `Lax`、それ以外は `Strict`（CSRF 対策） |
+| MaxAge | JWT の有効期限と同じ |
+| Path | `/` |
 
-### 1. セッションベース認証（Cookie）
+### JWT の内容
 
-**概要**
-- サーバー側でセッション情報を管理
-- クライアントにはセッションIDのみをCookieで保持
-- 伝統的なWebアプリケーションで広く使用される方式
+HS256 署名。`sub`（UserId）、`name`（ユーザー名）、`jti`、`security_stamp`（ユーザーに SecurityStamp がある場合のみ）を含む。Issuer / Audience / 有効期限を検証し、時計のずれ（ClockSkew）は許容しない。有効期限の判定には DI した `TimeProvider` を使う。
 
-**メリット**
-- ✅ セッション無効化が即座に可能
-- ✅ サーバー側で完全な制御が可能
-- ✅ 実装が比較的シンプル
-- ✅ ASP.NET Core標準機能で実装可能
+## 認証レベル
 
-**デメリット**
-- ❌ サーバー側でセッション状態を保持する必要がある
-- ❌ 水平スケーリング時にRedis等の外部ストアが必要
-- ❌ モバイルアプリとの統合が複雑
-- ❌ CORS設定が複雑になる可能性
-- ❌ マイクロサービスアーキテクチャに不向き
+各エンドポイントに `[Auth(AuthLevel.X)]` を付ける。付けない場合は `Authenticated` として扱われる。
 
-**採用判断**: ❌ **不採用**
+| レベル | トークン無し・無効 | 有効なトークン |
+|---|---|---|
+| `Anonymous` | 通過 | 通過（ユーザー情報を設定） |
+| `Optional` | 通過（`UserId` は null） | 通過（ユーザー情報を設定） |
+| `Authenticated` | 401 | 通過 |
+| `VerifiedEmail` | 401 | メール未認証なら 403（`code: EMAIL_NOT_VERIFIED`）、認証済みなら通過 |
 
-### 2. JWT（JSON Web Token）ベース認証
+Controller は `ApplicationController` の `UserId` / `UserName` / `IsEmailVerified` で認証済みユーザーを参照する。記事・講座の作成/更新/削除、画像アップロード、いいね、コメント、フォローなどの書き込み系は `VerifiedEmail`、メール未認証でも使えるべきもの（自分の記事・下書きの取得、確認メール再送、パスワード変更、退会など）は `Authenticated` にしている。
 
-**概要**
-- トークンに認証情報を含める自己完結型の認証方式
-- サーバー側でセッション状態を保持しないステートレス認証
-- 署名により改ざん検知が可能
+### ミドルウェアでの検証
 
-**メリット**
-- ✅ ステートレスでスケーラビリティが高い
-- ✅ マイクロサービスアーキテクチャに適している
-- ✅ SPA/モバイルアプリとの統合が容易
-- ✅ CORS問題が発生しにくい
-- ✅ サーバー側でセッションストアが不要
-
-**デメリット**
-- ❌ トークンの即座の無効化が困難（有効期限まで有効）
-- ❌ トークンサイズが大きい
-- ❌ リフレッシュトークンの実装が必要
-- ⚠️ **XSS攻撃のリスク**（localStorageに保存する場合）
-
-**採用判断**: ✅ **採用**（ハイブリッド方式とHttpOnly Cookieで欠点を補完）
-
-### 3. OAuth 2.0 / OpenID Connect
-
-**概要**
-- 外部認証プロバイダー（Google, GitHub等）を利用
-- 認証を外部サービスに委譲
-
-**メリット**
-- ✅ ユーザーがパスワードを管理する必要がない
-- ✅ 実装コストの削減
-- ✅ セキュリティレベルの向上
-- ✅ ソーシャルログインによるUX向上
-
-**デメリット**
-- ❌ 外部サービスへの依存
-- ❌ ネットワーク遅延の影響
-- ❌ プロバイダーのメンテナンス影響
-- ❌ 初回ログインのみでメール/パスワードログインが使えない
-
-**採用判断**: 🔄 **将来実装予定**（補助的な認証手段として）
-
-### 4. API Key認証
-
-**概要**
-- APIキーをリクエストヘッダーに含める方式
-- 主にサーバー間通信で使用
-
-**メリット**
-- ✅ 実装がシンプル
-- ✅ 機械間通信に適している
-
-**デメリット**
-- ❌ ユーザー認証には不向き
-- ❌ キーの漏洩リスク
-- ❌ ローテーションが困難
-- ❌ ユーザー体験が悪い
-
-**採用判断**: ❌ **不採用**（ユーザー認証には不適切）
-
-### 5. Basic認証
-
-**概要**
-- HTTPヘッダーにBase64エンコードしたユーザー名とパスワードを含める
-- HTTP標準の認証方式
-
-**メリット**
-- ✅ 実装が極めてシンプル
-- ✅ 標準化されている
-
-**デメリット**
-- ❌ 毎回パスワードを送信する必要がある
-- ❌ セキュリティレベルが低い
-- ❌ ログアウト機能が実装困難
-- ❌ 現代的なWebアプリケーションには不適切
-
-**採用判断**: ❌ **不採用**（セキュリティ要件を満たさない）
-
----
-
-## 選定結果と理由
-
-### 採用方式: **JWTベース認証 + セッション管理のハイブリッド方式 + HttpOnly Cookie**
-
-nari-noteでは、**JWT（JSON Web Token）**を主要な認証方式として採用し、セッション管理を組み合わせ、さらに**XSS対策としてHttpOnly Cookieを使用**したハイブリッド方式を実装します。
-
-#### 選定理由
-
-1. **スケーラビリティの確保**
-   - ステートレス認証により、サーバーの水平スケーリングが容易
-   - セッションストアへの依存を最小化
-
-2. **マイクロサービス対応**
-   - 将来的に複数のサービスに分割する際も、トークンベースで認証情報を共有可能
-   - サービス間通信にも同じトークンを利用可能
-
-3. **モバイル/SPA対応**
-   - Next.jsなどのSPAやモバイルアプリとの統合が容易
-   - CORS問題が発生しにくい
-
-4. **JWTの欠点を補完**
-   - データベースにセッションレコードを保持することで、トークンの即座の無効化を実現
-   - ログアウト機能やセキュリティインシデント時の全セッション削除が可能
-
-5. **XSS攻撃への対策**
-   - **HttpOnly Cookie**を使用してJWTトークンを保存
-   - JavaScriptからトークンへのアクセスを防止
-   - CSRF対策も併用
-
-6. **将来の拡張性**
-   - OAuth 2.0（Google認証等）との統合が容易
-   - リフレッシュトークンの実装も可能
-
----
-
-## 従来のCookieベース認証との違い
-
-### ❓ 「HttpOnly CookieでJWTを保存する」vs「従来のCookieベースセッション認証」の違いは？
-
-どちらもCookieを使用しますが、**認証の仕組みと保存される内容が根本的に異なります**：
-
-| 項目 | 従来のCookieベースセッション認証 | JWT + HttpOnly Cookie（採用方式） |
-|------|--------------------------------|----------------------------------|
-| **Cookieに保存される内容** | セッションID（ランダムな文字列） | JWTトークン（署名付き認証情報） |
-| **認証情報の保存場所** | サーバー側（メモリ、Redis等） | トークン内に自己完結（+ DB） |
-| **認証プロセス** | 1. CookieのセッションIDを取得<br>2. サーバーでセッションストアを検索<br>3. セッション情報から認証確認 | 1. CookieのJWTトークンを取得<br>2. JWTの署名を検証<br>3. トークン内のClaimsから認証確認 |
-| **サーバー側の状態** | ステートフル（セッション保持必須） | ステートレス（トークンで自己完結） |
-| **スケーラビリティ** | ❌ 低い<br>- セッションストア必須<br>- サーバー間でセッション共有が必要 | ✅ 高い<br>- トークンで認証完結<br>- サーバー間でセッション共有不要 |
-| **マイクロサービス対応** | ❌ 困難<br>- 全サービスがセッションストア参照必要 | ✅ 容易<br>- トークンを各サービスで検証可能 |
-| **モバイルアプリ対応** | ⚠️ 複雑<br>- Cookie管理が困難 | ✅ 容易<br>- トークンをヘッダーで送信可能 |
-| **トークン無効化** | ✅ 即座に可能<br>- セッションを削除するだけ | ⚠️ ハイブリッド方式で対応<br>- DBのセッションレコードで管理 |
-| **ネットワーク負荷** | 小さい（セッションIDのみ） | やや大きい（JWTトークン全体） |
-
-### 具体例で理解する違い
-
-#### 従来のCookieベースセッション認証
-
-```
-1. ログイン成功
-   → サーバー: セッションストア（Redis等）に保存
-      {"session_abc123": {"userId": 1, "email": "user@example.com", ...}}
-   → クライアント: Cookieに保存
-      Cookie: session_id=abc123
-
-2. API リクエスト
-   → クライアント: Cookieを送信
-      Cookie: session_id=abc123
-   → サーバー: セッションストアを検索
-      session_abc123 を探す → ユーザー情報取得
-   → レスポンス返却
-
-問題点:
-- 全てのAPIサーバーがセッションストアにアクセス必要
-- セッションストアがSPOF（単一障害点）になる
-- 水平スケーリング時にセッション共有が必要
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant M as JwtAuthenticationMiddleware
+    participant DB as Users
+    participant A as Controller
+    C->>M: リクエスト（Cookie: authToken）
+    alt トークン無し / 署名・期限が無効
+        M-->>C: Optional 以下なら未認証で通過、それ以外は 401
+    else トークン有効
+        M->>DB: UserId でユーザーを取得
+        alt ユーザーが存在しない / SecurityStamp 不一致
+            M-->>C: Cookie を削除し、Optional 以下なら未認証で通過、それ以外は 401
+        else VerifiedEmail かつメール未認証
+            M-->>C: 403 EMAIL_NOT_VERIFIED
+        else
+            M->>A: UserId / UserName / IsEmailVerified を HttpContext.Items に設定して通過
+        end
+    end
 ```
 
-#### JWT + HttpOnly Cookie（採用方式）
+## SecurityStamp によるトークン失効
 
-```
-1. ログイン成功
-   → サーバー: JWTトークンを生成
-      JWT = {
-        "header": {"alg": "HS256"},
-        "payload": {"userId": 1, "email": "user@example.com", "exp": ...},
-        "signature": "..."
-      }
-   → サーバー: DBにセッションレコード保存（無効化管理用）
-      {"sessionId": 1, "userId": 1, "sessionKey": "xyz789", ...}
-   → クライアント: HttpOnly Cookieに保存
-      Cookie: authToken=eyJhbGciOi... (JWT全体)
+`User.SecurityStamp` と同じ値を JWT の `security_stamp` に埋め込み、ミドルウェアで照合する。`User.RotateSecurityStamp()` で値を変えると、それ以前に発行したトークンはすべて無効になる。
 
-2. API リクエスト
-   → クライアント: Cookieを送信
-      Cookie: authToken=eyJhbGciOi...
-   → サーバー: JWTの署名を検証（セッションストア不要！）
-      署名検証 → payload取得 → ユーザー情報取得
-   → (オプション) DBで無効化チェック
-      sessionKey が有効かチェック
-   → レスポンス返却
+- `SecurityStamp` が null のユーザーは照合しない（導入前に発行したトークンを無効にしないため）
+- 現在ローテーションするのは、メール認証時にサインアップ入力のパスワードへ置き換わった場合（下記）
 
-利点:
-- サーバー間でセッションストアの共有不要
-- 各APIサーバーが独立して認証可能
-- 水平スケーリングが容易
-- マイクロサービスでトークン共有可能
-```
+## サインアップとメール認証
 
-### なぜハイブリッド方式なのか？
+ユーザー列挙を防ぐため、サインアップはメールアドレスの登録有無によらず同じレスポンスを返す。名前・パスワードは「確認メールを受け取った本人」が認証した時点で確定させる。
 
-純粋なJWT認証の問題点：
-- ❌ トークンを即座に無効化できない（有効期限まで有効）
-- ❌ ログアウトしてもトークンが漏洩していれば使用可能
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as SignUpService
+    participant DB as DB
+    participant O as Outbox
+    C->>S: POST /api/auth/signup（名前・メール・パスワード）
+    alt 未登録のメール
+        S->>DB: 名前重複なら 409。User を作成（未認証）
+        S->>DB: EmailVerification（24 時間有効、入力した名前・パスワードハッシュを保持）
+        S->>O: 確認メール + Discord 通知
+    else 認証済みユーザーのメール
+        S->>O: 「登録済み」の案内メール（クールダウン中は送らない）
+    else 未認証ユーザーのメール
+        S->>DB: 名前重複なら 409。EmailVerification を追加（今回の入力を保持）
+        S->>O: 確認メール（クールダウン中は送らない）
+    end
+    S-->>C: 200（内容は常に同じ）
 
-解決策：
-- ✅ DBにセッションレコードを保存
-- ✅ ログアウト時にセッションレコードを削除
-- ✅ API リクエスト時にセッションが有効かチェック
-- ✅ セキュリティインシデント時に全セッションを削除可能
-
-これにより：
-- JWTのメリット（ステートレス、スケーラブル）を享受
-- セッション管理のメリット（即座の無効化）も実現
-- **両方の良いところを組み合わせたハイブリッド方式**
-
----
-
-## XSS（クロスサイトスクリプティング）対策
-
-### 問題: JWTトークンのXSS脆弱性
-
-JWTトークンをブラウザで扱う際、以下のような保存方法にはXSS攻撃のリスクがあります：
-
-#### ❌ **脆弱な保存方法**
-
-1. **localStorage / sessionStorage**
-   ```javascript
-   // 危険な例
-   localStorage.setItem('token', jwtToken);
-   ```
-   - JavaScriptから自由にアクセス可能
-   - XSS攻撃によりトークンが盗まれる
-   - 攻撃者がトークンを取得してなりすまし可能
-
-2. **通常のCookie（HttpOnly なし）**
-   ```javascript
-   // 危険な例
-   document.cookie = `token=${jwtToken}`;
-   ```
-   - JavaScriptから読み取り可能
-   - XSS攻撃でトークンが漏洩
-
-### 解決策: HttpOnly Cookie + 追加のセキュリティ対策
-
-#### ✅ **推奨する実装方式**
-
-1. **HttpOnly Cookie の使用**
-   
-   サーバー側でJWTトークンをHttpOnly Cookieに設定：
-   
-   ```csharp
-   // C# (ASP.NET Core) での実装例
-   Response.Cookies.Append("authToken", jwtToken, new CookieOptions
-   {
-       HttpOnly = true,        // JavaScriptからアクセス不可
-       Secure = true,          // HTTPS のみ
-       SameSite = SameSiteMode.Strict,  // CSRF対策
-       MaxAge = TimeSpan.FromHours(24)
-   });
-   ```
-   
-   **メリット:**
-   - ✅ JavaScriptからトークンにアクセスできない
-   - ✅ XSS攻撃でトークンが盗まれない
-   - ✅ ブラウザが自動的にCookieを送信
-
-2. **SameSite属性によるCSRF対策**
-   
-   ```csharp
-   SameSite = SameSiteMode.Strict  // または Lax
-   ```
-   
-   - `Strict`: 同一サイトからのリクエストのみCookieを送信
-   - `Lax`: GET リクエストなど一部のクロスサイトリクエストを許可
-   - CSRF攻撃を防止
-
-3. **Secure属性の設定**
-   
-   ```csharp
-   Secure = true
-   ```
-   
-   - HTTPS通信のみでCookieを送信
-   - 中間者攻撃（MITM）を防止
-
-4. **短い有効期限 + リフレッシュトークン**
-   
-   - アクセストークン: 15分〜1時間程度の短い有効期限
-   - リフレッシュトークン: より長い有効期限（7日〜30日）
-   - トークンが漏洩した場合の影響を最小化
-
-### トークン保存方式の比較
-
-| 保存方式 | XSS脆弱性 | CSRF脆弱性 | モバイル対応 | 推奨度 |
-|---------|----------|-----------|------------|--------|
-| localStorage | ❌ 高リスク | ✅ 安全 | ✅ 容易 | ❌ 非推奨 |
-| sessionStorage | ❌ 高リスク | ✅ 安全 | ✅ 容易 | ❌ 非推奨 |
-| 通常のCookie | ❌ 高リスク | ❌ 高リスク | ⚠️ 複雑 | ❌ 非推奨 |
-| **HttpOnly Cookie** | ✅ **安全** | ⚠️ 要対策 | ⚠️ 複雑 | ✅ **推奨** |
-| HttpOnly + SameSite | ✅ **安全** | ✅ **安全** | ⚠️ 複雑 | ✅ **最推奨** |
-
-### その他のXSS対策
-
-1. **Content Security Policy (CSP)**
-   
-   HTTPヘッダーでスクリプトの実行を制限：
-   
-   ```csharp
-   app.Use(async (context, next) =>
-   {
-       context.Response.Headers.Add("Content-Security-Policy", 
-           "default-src 'self'; script-src 'self'");
-       await next();
-   });
-   ```
-
-2. **入力のサニタイゼーション**
-   
-   - ユーザー入力を常にエスケープ
-   - HTMLタグの無効化
-   - ASP.NET Core の Razor Pages は自動エスケープ機能あり
-
-3. **出力のエンコーディング**
-   
-   - HTML、JavaScript、URL等のコンテキストに応じた適切なエンコーディング
-   - `HtmlEncoder.Default.Encode()` などを使用
-
-4. **定期的なセキュリティ監査**
-   
-   - 依存ライブラリの脆弱性チェック
-   - OWASP Top 10 に基づくセキュリティレビュー
-
-### モバイルアプリケーションの場合
-
-モバイルアプリ（iOS, Android）では、ブラウザのCookieが使用できないため、以下の方式を採用：
-
-1. **Secure Storage の使用**
-   - iOS: Keychain
-   - Android: EncryptedSharedPreferences
-   - トークンを暗号化して保存
-
-2. **Certificate Pinning**
-   - HTTPS通信のセキュリティ強化
-   - 中間者攻撃を防止
-
-### 実装時の注意点
-
-1. **Webアプリケーション（ブラウザ）**
-   - ✅ HttpOnly Cookie + SameSite属性を使用
-   - ✅ HTTPS必須
-   - ✅ CSP ヘッダー設定
-
-2. **モバイルアプリケーション**
-   - ✅ Secure Storage に保存
-   - ✅ Certificate Pinning 実装
-   - ⚠️ HttpOnly Cookie は使用不可（代替手段を使用）
-
-3. **API間通信（サーバー間）**
-   - ✅ Authorization ヘッダーでトークン送信
-   - ✅ 相互TLS認証の検討
-
-### パスワードハッシュ化アルゴリズムの検討
-
-#### 1. BCrypt ✅ **採用**
-
-**特徴**
-- 適応型ハッシュ関数（計算コストを調整可能）
-- ソルト自動生成
-- レインボーテーブル攻撃に強い
-
-**メリット**
-- ✅ 広く使用されている実績あり
-- ✅ .NET用のライブラリ（BCrypt.Net-Next）が充実
-- ✅ 計算コストを調整できる（将来的に強度を上げられる）
-- ✅ ソルト管理が自動化されている
-
-**デメリット**
-- ⚠️ Argon2より若干セキュリティレベルが低い
-
-**採用理由**: 実績と安定性、ライブラリの充実度から採用
-
-#### 2. Argon2
-
-**特徴**
-- Password Hashing Competition 優勝アルゴリズム
-- メモリ使用量とCPU使用量の両方を調整可能
-- 最新の暗号学的ハッシュ関数
-
-**メリット**
-- ✅ 最も安全とされる現代的アルゴリズム
-- ✅ GPUベースの攻撃に強い
-- ✅ メモリとCPUの両方を使用
-
-**デメリット**
-- ❌ .NETの標準ライブラリに含まれていない
-- ❌ サードパーティライブラリの選択肢が少ない
-- ❌ BCryptと比較して採用実績が少ない
-
-**採用判断**: ❌ 不採用（将来的に検討）
-
-#### 3. PBKDF2
-
-**特徴**
-- NIST推奨のアルゴリズム
-- ASP.NET Core Identityのデフォルト
-
-**メリット**
-- ✅ .NET標準ライブラリで実装可能
-- ✅ FIPS準拠が必要な場合に適している
-
-**デメリット**
-- ❌ BCryptやArgon2より攻撃に弱い
-- ❌ GPUベースの攻撃に脆弱
-
-**採用判断**: ❌ 不採用（セキュリティレベルが相対的に低い）
-
-#### 4. SHA-256/SHA-512（ソルト付き）
-
-**特徴**
-- 高速なハッシュ関数
-- 暗号学的ハッシュ関数
-
-**メリット**
-- ✅ 実装がシンプル
-- ✅ 高速
-
-**デメリット**
-- ❌ パスワードハッシュ用には設計されていない
-- ❌ 高速すぎてブルートフォース攻撃に弱い
-- ❌ 適応型でない
-
-**採用判断**: ❌ 不採用（パスワードハッシュには不適切）
-
----
-
-### パスワードハッシュ化
-
-パスワードは**BCrypt**アルゴリズムを使用してハッシュ化されます。
-
-- **BCrypt.Net-Next** ライブラリを使用
-- ソルト付きハッシュで安全性を確保
-- レインボーテーブル攻撃に対する耐性
-
----
-
-## アーキテクチャ
-
-```
-┌─────────────┐
-│   Client    │
-│ (Browser/   │
-│   Mobile)   │
-└──────┬──────┘
-       │ 1. POST /api/auth/signup or /api/auth/signin
-       │    (email, password)
-       ↓
-┌─────────────────────────────────────┐
-│        AuthController               │
-│  - SignUp / SignIn エンドポイント   │
-└──────────────┬──────────────────────┘
-               │ 2. Request validation
-               ↓
-┌─────────────────────────────────────┐
-│     SignUpService / SignInService   │
-│  - ビジネスロジック実行             │
-│  - パスワード検証・ハッシュ化       │
-└──────┬────────────┬─────────────────┘
-       │            │
-       │ 3. User    │ 4. Session
-       │    CRUD    │    CRUD
-       ↓            ↓
-┌─────────────┐ ┌─────────────┐
-│    User     │ │   Session   │
-│ Repository  │ │ Repository  │
-└──────┬──────┘ └──────┬──────┘
-       │                │
-       └────────┬───────┘
-                │ 5. Database operations
-                ↓
-         ┌─────────────┐
-         │ PostgreSQL  │
-         │   Database  │
-         └─────────────┘
-                │
-                │ 6. JWT Token + Session created
-                ↓
-         ┌─────────────┐
-         │   Client    │
-         │ (Token保存) │
-         └─────────────┘
+    C->>S: POST /api/auth/verify-email（token）
+    Note over S: 無効・使用済み・期限切れは 400
+    S->>DB: トークンを使用済みにし、保持していた名前・パスワードを反映、IsEmailVerified = true
+    Note over S: パスワードが置き換わった場合は SecurityStamp をローテーション
+    S-->>C: 認証 Cookie を発行
 ```
 
----
+- 未認証のままでもサインインはできる（`VerifiedEmail` のエンドポイントは 403 になる）。メール認証が済むとフロントは書き込み系を使えるようになる
+- 認証時のパスワード置き換えで SecurityStamp を回すのは、メールアドレスの持ち主ではない人が先に登録・サインインしていた場合にそのセッションを切るため
+- 名前は、サインアップ後に他人が同じ名前を使い始めていたら反映しない
+- 確認メールの再送（`POST /api/auth/resend-verification`、`Authenticated`）は既存トークンを失効させずに新しいトークンを発行する。認証済みなら 409、クールダウン中は 429
+- 7 日経っても未認証のユーザーはバックグラウンドジョブで削除される（[architecture.md](./architecture.md#未認証ユーザーの削除)）
 
-## 実装詳細
+## サインイン・サインアウト・退会
 
-### 1. ユーザー登録（SignUp）
+- サインイン（`POST /api/auth/signin`）: ユーザー名またはメールアドレスとパスワードで照合（BCrypt）。失敗時はどちらが誤りか区別しない 400
+- 現在のユーザー（`GET /api/auth/me`、`Optional`）: ミドルウェアが設定した情報を返す
+- サインアウト（`POST /api/auth/logout`）: Cookie を削除するだけで、SecurityStamp は回さない
+- 退会（`POST /api/auth/withdraw`）: パスワードを再確認してユーザーを削除する。関連データは DB の Cascade で削除し、アイコン画像は DB 削除の後に外部ストレージから消す（`[NoTransaction]`）
 
-#### フロー
+## パスワード
 
-1. クライアントが `POST /api/auth/signup` にリクエスト
-2. `SignUpService` がメールアドレスの重複をチェック
-3. パスワードを `BCrypt` でハッシュ化
-4. ユーザーを `Users` テーブルに保存
-5. JWT トークンを生成
-6. セッションを `Sessions` テーブルに保存
-7. トークンとユーザー情報をクライアントに返却
+- ハッシュは BCrypt.Net-Next
+- 変更（`PUT /api/auth/password`、`Authenticated`）: 現在のパスワードを確認して更新
+- 再設定:
 
-#### コード例
-
-```csharp
-// POST /api/auth/signup
-{
-  "name": "山田太郎",
-  "email": "yamada@example.com",
-  "password": "securePassword123"
-}
-
-// Response
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "userId": 1,
-  "email": "yamada@example.com",
-  "name": "山田太郎",
-  "expiresAt": "2025-12-29T10:00:00Z"
-}
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Service
+    participant O as Outbox
+    C->>S: POST /api/auth/forgot-password（メール）
+    alt 登録済み かつ クールダウン外
+        S->>S: PasswordResetToken を発行（1 時間有効）
+        S->>O: 再設定メール
+    end
+    S-->>C: 200（登録有無によらず同じ）
+    C->>S: POST /api/auth/reset-password（token, 新パスワード）
+    Note over S: 無効・使用済み・期限切れは 400
+    S-->>C: トークンを使用済みにしてパスワードを更新
 ```
 
-### 2. ログイン（SignIn）
+## 認証メールの送信クールダウン
 
-#### フロー
+他人のメールアドレスを指定した API 連打で大量のメールが届くのを防ぐため、同じユーザーへの認証系メール（確認メール・登録済みの案内・パスワード再設定）は直前の送信から 60 秒間送らない（`AuthEmailCooldown`）。
 
-1. クライアントが `POST /api/auth/signin` にリクエスト
-2. `SignInService` がメールアドレスでユーザーを検索
-3. パスワードを `BCrypt.Verify` で検証
-4. JWT トークンを生成
-5. セッションを `Sessions` テーブルに保存
-6. トークンとユーザー情報をクライアントに返却
+| 操作 | クールダウンの基準 | クールダウン中の挙動 |
+|---|---|---|
+| サインアップ（未認証ユーザー） | 最新の EmailVerification の作成日時 | 送信だけ止めて 200（登録有無を漏らさない） |
+| サインアップ（認証済みユーザー） | `User.AlreadyRegisteredNotifiedAt` | 同上 |
+| パスワード再設定の申請 | 最新の PasswordResetToken の作成日時 | 同上 |
+| 確認メールの再送 | 最新の EmailVerification の作成日時 | 429（本人の操作なので明示する） |
 
-#### コード例
-
-```csharp
-// POST /api/auth/signin
-{
-  "email": "yamada@example.com",
-  "password": "securePassword123"
-}
-
-// Response
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "userId": 1,
-  "email": "yamada@example.com",
-  "name": "山田太郎",
-  "expiresAt": "2025-12-29T10:00:00Z"
-}
-```
-
-### 3. JWT トークンの構造
-
-JWTトークンには以下の情報（Claims）が含まれます：
-
-| Claim | 説明 |
-|-------|------|
-| `sub` | ユーザーID（Subject） |
-| `email` | ユーザーのメールアドレス |
-| `name` | ユーザー名 |
-| `jti` | トークンの一意識別子（JWT ID） |
-| `security_stamp` | `User.SecurityStamp`（設定済みの場合のみ）。DB の値と一致しないトークンは無効として扱う |
-| `iss` | 発行者（Issuer） |
-| `aud` | 対象者（Audience） |
-| `exp` | 有効期限（Expiration） |
-
-### 4. セッション管理
-
-JWTトークンに加えて、データベースに `Session` レコードを保存します。
-
-#### Sessionテーブルの役割
-
-- **セッション無効化**: ログアウト時にセッションを削除することで、トークンを無効化
-- **デバイス管理**: ユーザーがどのデバイスでログインしているかを追跡
-- **セキュリティ**: 不審なアクティビティがあった場合、全セッションを削除可能
-
-#### Session エンティティ
-
-```csharp
-public class Session
-{
-    public int Id { get; set; }
-    public int UserId { get; set; }
-    public string SessionKey { get; set; }  // ランダム生成された一意のキー
-    public DateTime ExpiresAt { get; set; } // 有効期限
-    public DateTime CreatedAt { get; set; }
-    public User User { get; set; }
-}
-```
-
-### 5. メール認証
-
-サインアップ時に確認メールを送信し、メール内のリンク（`POST /api/auth/verify-email`）で `User.IsEmailVerified` を `true` にします。
-
-#### 仕様
-
-メール認証は**サインインの条件にはせず、他のユーザーに影響する書き込みとコンテンツの作成・更新を制限**します。
-
-| 操作 | メール未認証のユーザー |
-|------|----------------------|
-| サインイン・閲覧 | ✅ 可能 |
-| プロフィール（ユーザー名・自己紹介）の更新 | ✅ 可能 |
-| 記事の作成・更新・削除（下書き保存を含む） | ❌ 403 |
-| 講座の作成・更新・削除 | ❌ 403 |
-| いいね・コメント・フォロー | ❌ 403 |
-| アイコン画像のアップロード | ❌ 403 |
-
-- 制限するエンドポイントには `[Auth(AuthLevel.VerifiedEmail)]` を付与し、`JwtAuthenticationMiddleware` で判定する
-- 拒否時は `403 Forbidden` と `code: "EMAIL_NOT_VERIFIED"` を返す。フロントエンドはこのコードを見て確認メールの再送導線を表示する
-- 認証状態はリクエストごとに DB を参照するため、認証完了後は発行済みの Cookie のまま制限が解除される（認証でパスワードが置き換わる場合を除く。後述）
-
-```json
-{
-  "statusCode": 403,
-  "message": "メールアドレスの認証が完了していません。確認メールのリンクから認証を完了してください。",
-  "timeStamp": "2026-10-11T13:00:00Z",
-  "code": "EMAIL_NOT_VERIFIED"
-}
-```
-
-#### 確認メールの再送
-
-`POST /api/auth/resend-verification`（要サインイン）で、サインイン中のユーザー自身のメールアドレスへ確認メールを再送します。
-
-- 宛先は常に本人の登録メールアドレス（リクエストでは指定できない）
-- 直近の送信から 60 秒間は再送を拒否する（`429 Too Many Requests`）
-- 認証済みのユーザーは `409 Conflict`
-- 再送しても発行済みのトークンは失効させない。有効期限（24 時間）内であれば、どの確認メールのリンクからでも認証できる
-
-#### 未認証のメールアドレスで再度サインアップされた場合
-
-他人のメールアドレスで先に登録しておき、本人が認証した後にそのアカウントを乗っ取る攻撃を防ぐため、次のように扱います（#682）。
-
-- サインアップ時に入力されたユーザー名・パスワードは確認トークン（`EmailVerification.Name` / `PasswordHash`）に保存し、ユーザーにはすぐ反映しない
-- 確認メールのリンクで認証したときに、そのトークンのユーザー名・パスワードをユーザーへ反映する。メールアドレスの持ち主が入力した値で認証されるため、先に登録した人のパスワードは残らない
-  - ユーザー名がその間に他のユーザーに使われていた場合は、現在の名前のままにする
-  - 確認メールの再送で発行したトークンには保存しない（ユーザーの現在の値のまま）
-- 認証でパスワードが置き換わる場合は `User.SecurityStamp` を更新し、それ以前に発行された JWT を無効にする（先に登録した人がサインインしていても、そのセッションは使えなくなる）
-- ユーザー名の重複は、そのユーザー自身を除いて確認する（新規登録時と同じく `409 Conflict`）
-
-#### 送信間隔の制限
-
-他人のメールアドレスを指定した API の連打で、そのアドレスへ大量のメールが届くのを防ぐため、同じアドレスへの送信は直近の送信から 60 秒間止めます。
-
-| API | 対象 | 直近の送信日時 |
-|-----|------|----------------|
-| `POST /api/auth/signup` | 未認証アドレスへの確認メール | 最新の `EmailVerification.CreatedAt` |
-| `POST /api/auth/signup` | 認証済みアドレスへの登録済みの案内 | `User.AlreadyRegisteredNotifiedAt` |
-| `POST /api/auth/forgot-password` | パスワード再設定メール | 最新の `PasswordResetToken.CreatedAt` |
-
-- メールアドレスの登録有無が漏れないよう、エラーにはせず通常と同じレスポンスを返して送信だけを止める（再送 API の `429` とは異なる）
-
-#### 放置された未認証ユーザーの削除
-
-`UnverifiedUserDeletionWorker` が 1 日ごと（およびアプリ起動時）に、次の条件をすべて満たすユーザーを削除します（関連データは Cascade で削除）。
-
-- メールアドレスが未認証
-- 作成から 7 日以上経過
-- 有効期限内の未使用の確認トークンを持たない（再度サインアップした直後のユーザーは残す）
-
-#### 既存ユーザーの扱い
-
-制限の導入前に登録された未認証ユーザーも、一律で未認証として扱います（データ移行は行わない）。
-公開済みの記事・講座はそのまま残りますが、作成・更新には確認メールの再送による認証が必要です。
-
----
-
-## セキュリティ対策
-
-### 1. パスワードセキュリティ
-
-- ✅ **BCryptハッシュ化**: ソルト付きハッシュで保存
-- ✅ **最小文字数制限**: 8文字以上（`SignUpRequest` でバリデーション）
-- ✅ **平文パスワード非保存**: データベースにはハッシュのみ保存
-
-### 2. JWT セキュリティ
-
-- ✅ **HMAC SHA256署名**: トークンの改ざんを防止
-- ✅ **有効期限設定**: デフォルト24時間で自動失効
-- ✅ **Secret鍵の環境変数管理**: `appsettings.json` で設定（本番環境では環境変数推奨）
-- ✅ **HttpOnly Cookie**: XSS攻撃からトークンを保護（詳細は[XSS対策](#xssクロスサイトスクリプティング対策)を参照）
-
-### 3. XSS（クロスサイトスクリプティング）対策
-
-- ✅ **HttpOnly Cookie**: JavaScriptからトークンへのアクセスを防止
-- ✅ **Secure属性**: HTTPS通信のみでCookieを送信
-- ✅ **SameSite属性**: CSRF攻撃を防止（Strict または Lax）
-- ✅ **Content Security Policy (CSP)**: スクリプト実行を制限
-- ✅ **入力のサニタイゼーション**: ユーザー入力を常にエスケープ
-- ✅ **出力のエンコーディング**: コンテキストに応じた適切なエンコーディング
-
-詳細は[XSS対策](#xssクロスサイトスクリプティング対策)セクションを参照してください。
-
-### 4. CSRF（クロスサイトリクエストフォージェリ）対策
-
-- ✅ **SameSite Cookie属性**: クロスサイトからのCookie送信を制限
-- ✅ **CSRF トークン**: 重要な操作には追加のトークン検証（将来実装予定）
-- ✅ **Origin/Referer ヘッダー検証**: リクエスト元の検証
-
-### 5. セッションセキュリティ
-
-- ✅ **セッションキーのランダム生成**: 32バイトのランダムバイト列をBase64エンコード
-- ✅ **有効期限管理**: 期限切れセッションは自動削除可能（`DeleteExpiredSessionsAsync`）
-- ✅ **ユーザー単位での全セッション削除**: セキュリティインシデント時に対応可能
-
-### 6. API セキュリティ
-
-- ✅ **入力バリデーション**: Data Annotationsによる厳格なバリデーション
-- ✅ **エラーメッセージの汎用化**: 認証エラー時は「メールアドレスまたはパスワードが正しくありません」と表示（アカウント列挙攻撃対策）
-- ✅ **HTTPS強制**: `UseHttpsRedirection()` で暗号化通信を強制
-- ✅ **Rate Limiting**: ブルートフォース攻撃対策（将来実装予定）
-
-### 7. データベースセキュリティ
-
-- ✅ **Unique制約**: メールアドレスとセッションキーに一意性制約
-- ✅ **外部キー制約**: データ整合性の保証
-- ✅ **カスケード削除**: ユーザー削除時に関連セッションも自動削除
-
----
-
-## APIエンドポイント
-
-### POST /api/auth/signup
-
-ユーザー登録
-
-**Request Body**
-```json
-{
-  "name": "山田太郎",
-  "email": "yamada@example.com",
-  "password": "securePassword123"
-}
-```
-
-**バリデーション**:
-- `name`: 必須、最大50文字
-- `email`: 必須、有効なメールアドレス形式、最大255文字
-- `password`: 必須、最小8文字、最大255文字
-
-**Response (200 OK)**
-```json
-{
-  "userId": 1
-}
-```
-
-**エラーレスポンス**
-- `400 Bad Request`: バリデーションエラー
-  ```json
-  {
-    "errors": {
-      "Email": ["有効なメールアドレスを入力してください"],
-      "Password": ["パスワードは8文字以上で入力してください"]
-    }
-  }
-  ```
-- `409 Conflict`: メールアドレス重複
-  ```json
-  {
-    "error": {
-      "code": "CONFLICT",
-      "message": "このメールアドレスは既に使用されています",
-      "timestamp": "2025-12-29T13:00:00Z",
-      "path": "/api/auth/signup"
-    }
-  }
-  ```
-
-### POST /api/auth/signin
-
-ログイン
-
-**Request Body**
-```json
-{
-  "usernameOrEmail": "yamada@example.com",
-  "password": "securePassword123"
-}
-```
-
-**バリデーション**:
-- `usernameOrEmail`: 必須、ユーザー名またはメールアドレス
-- `password`: 必須
-
-**Response (200 OK)**
-```json
-{
-  "userId": 1
-}
-```
-
-**エラーレスポンス**
-- `400 Bad Request`: バリデーションエラー
-  ```json
-  {
-    "errors": {
-      "UsernameOrEmail": ["ユーザー名またはメールアドレスは必須です"]
-    }
-  }
-  ```
-- `401 Unauthorized`: 認証失敗
-  ```json
-  {
-    "error": {
-      "code": "UNAUTHORIZED",
-      "message": "ユーザー名またはパスワードが正しくありません",
-      "timestamp": "2025-12-29T13:00:00Z",
-      "path": "/api/auth/signin"
-    }
-  }
-  ```
-
-### 認証が必要なAPIの使用方法
-
-SignUp/SignInで取得したトークンは、Cookieに`authToken`として自動的に保存されます。
-ブラウザは自動的にこのCookieを後続のリクエストに含めるため、クライアント側で特別な処理は不要です。
-
-**Cookieの設定**:
-- HttpOnly: true（JavaScriptからアクセス不可）
-- Secure: true（HTTPS通信のみ）
-- SameSite: Strict（CSRF対策）
-- MaxAge: 24時間（設定可能）
-
-**認証エラーレスポンス（401 Unauthorized）**:
-```json
-{
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "認証が必要です",
-    "timestamp": "2025-12-29T13:00:00Z",
-    "path": "/api/articles/1"
-  }
-}
-```
-
-### テスト用コマンド例（curl）
-
-#### SignUp
-```bash
-curl -X POST http://localhost:5243/api/auth/signup \
-  -H "Content-Type: application/json" \
-  -c cookies.txt \
-  -d '{
-    "name": "山田太郎",
-    "email": "yamada@example.com",
-    "password": "securePassword123"
-  }'
-```
-
-#### SignIn
-```bash
-curl -X POST http://localhost:5243/api/auth/signin \
-  -H "Content-Type: application/json" \
-  -c cookies.txt \
-  -d '{
-    "usernameOrEmail": "yamada@example.com",
-    "password": "securePassword123"
-  }'
-```
-
-#### 認証が必要なAPIへのアクセス
-```bash
-curl -X GET http://localhost:5243/api/articles/1 \
-  -b cookies.txt
-```
-
----
-
-## 設定
-
-### appsettings.json
-
-```json
-{
-  "Jwt": {
-    "Secret": "your-secret-key-here-minimum-32-characters-required",
-    "Issuer": "nari-note-api",
-    "Audience": "nari-note-client",
-    "ExpirationInHours": 24
-  }
-}
-```
-
-### 本番環境での推奨設定
-
-1. **JWT Secret**: 環境変数で管理（最低32文字以上のランダム文字列）
-2. **HTTPS**: 必須
-3. **CORS**: フロントエンドのドメインのみ許可
-4. **Rate Limiting**: ブルートフォース攻撃対策
-
----
-
-## 今後の拡張予定
-
-### 1. OAuth認証（Google）
-
-仕様書（`signin.spec`、`signup.spec`）に記載されている Google 認証の実装
-
-- Google OAuth 2.0 を使用
-- ソーシャルログイン対応
-
-### 2. リフレッシュトークン
-
-長期間のセッション維持のためのリフレッシュトークン実装
-
-### 3. パスワードリセット
-
-パスワード忘れ機能の実装（メール送信を含む）
-
-### 4. 二要素認証（2FA）
-
-セキュリティ強化のための2FA対応
-
----
-
-## まとめ
-
-nari-noteの認証戦略は以下の特徴を持ちます：
-
-✅ **JWT ベースのステートレス認証**  
-✅ **BCrypt によるパスワードハッシュ化**  
-✅ **セッション管理によるセキュリティ強化**  
-✅ **拡張可能な設計（OAuth対応予定）**  
-
-この設計により、セキュアでスケーラブルな認証システムを実現しています。
+メールはすべて Outbox 経由で非同期に送られる（[architecture.md](./architecture.md#outbox-によるメールdiscord-通知の配送)）。

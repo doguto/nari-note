@@ -5,6 +5,8 @@
 > [!WARNING]
 > `restore` / `extract` は本番で初めて使うことがないよう、事前に dev 環境で訓練しておくこと ([訓練](#訓練))。
 
+コマンドは prod を前提に書いている。dev では `prod/` を `dev/` に、名前の `nari-note` を `nari-note-dev` に読み替える。
+
 ## 0. 共通の準備
 
 ### EC2 へ接続する
@@ -15,7 +17,7 @@ SSH (22) は閉じているため、SSM Session Manager で接続する。手元
 aws-vault exec narinote -- aws ssm start-session --target <instance-id> --region ap-northeast-1
 ```
 
-インスタンス ID は `terragrunt output` (`prod/app/server`) で確認できる。セッションは `ssm-user` で開始されるため、以降のコマンドは `sudo` を付けて実行する。
+インスタンス ID は `prod/app/server` の `terragrunt output instance_id`、またはコンソールで Name タグ `nari-note-app-server` を探して確認する。セッションは `ssm-user` で開始されるため、以降のコマンドは `sudo` を付けて実行する。
 
 ### 現状を確認する
 
@@ -27,6 +29,8 @@ mountpoint /data/postgresql                    # データ用 EBS がマウン�
 ```
 
 ### コマンド一覧
+
+仕組みは [db-backup-recovery.md](db-backup-recovery.md#restore-の仕組み-手順-b--d--e) を参照。
 
 | コマンド | 内容 |
 | --- | --- |
@@ -169,7 +173,7 @@ sudo nari-note-db-backup finalize
 
 EBS は AZ を跨げないため、別の AZ に作り直して S3 から復元する。
 
-1. `prod/app/server` の `public_subnet_ids[0]` を `[1]` に変更する (`main.tf` の `subnet_id` と `remote-resources.tf` の `data.aws_subnet.app_server` の 2 箇所)
+1. `terraform/modules/app/server` の `public_subnet_ids[0]` を `[1]` に変更する (`main.tf` の `subnet_id` と `remote-resources.tf` の `data.aws_subnet.app_server` の 2 箇所。モジュールは dev と共有のため、作業後に戻すかを判断する)
 2. [D](#d-データ用-ebs-の喪失) の手順を行う (EBS も新しい AZ に作成される)
 3. 障害の復旧後、元の AZ へ戻すかを判断する (戻す場合は同じ手順を逆に行う)
 

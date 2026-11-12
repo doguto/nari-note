@@ -1,51 +1,52 @@
-# Nari-Note フロントエンド
+# nari-note-frontend
 
-技術記事の投稿・共有プラットフォーム「なりノート」のフロントエンド実装です。
+なりノート（将棋記事の投稿・共有プラットフォーム）のフロントエンド。Next.js（App Router）で実装し、Cloudflare Workers に OpenNext でデプロイする。
 
-## 技術スタック
+技術スタックはルートの [AGENTS.md](../AGENTS.md) を、依存バージョンは `package.json` を正とする。
 
-- **フレームワーク**: Next.js 15
-- **言語**: TypeScript
-- **スタイリング**: TailwindCSS
-- **データフェッチング**: TanStack Query (React Query)
-- **HTTPクライアント**: Axios
-- **アーキテクチャ**: Container/Presentationalパターン
+## セットアップ
 
-## API通信
+Node.js のバージョンは `.node-version` を正とする。
 
-このプロジェクトでは、TanStack QueryとAxiosを使用してバックエンドAPIと通信します。
-
-### 主な機能
-
-- **型安全**: TypeScriptによる完全な型定義
-- **自動キャッシング**: スマートなデータキャッシング戦略
-- **認証管理**: 自動的なトークン管理
-- **エラーハンドリング**: 統一されたエラー処理
-
-詳細な使い方は[API使用ガイド](./docs/api-usage.md)を参照してください。
-
-## ディレクトリ構造
-
+```bash
+cd nari-note-frontend
+cp .env.local.example .env.local   # 必要に応じて値を編集
+npm install
+npm run dev                         # http://localhost:3000
 ```
-src/
-├── app/                    # Next.js App Router
-│   ├── page.tsx           # トップページ
-│   ├── debug/             # デバッグページ（従来のfetch API）
-│   └── debug-new/         # デバッグページ（TanStack Query版）
-└── lib/
-    ├── api/               # API関連
-    │   ├── client.ts      # Axiosクライアント設定
-    │   ├── types.ts       # 型定義
-    │   ├── endpoints.ts   # API関数
-    │   ├── hooks.ts       # TanStack Queryフック
-    │   └── index.ts       # エクスポート
-    └── providers/         # Providerコンポーネント
-        └── QueryProvider.tsx
-```
+
+バックエンド（既定 `http://localhost:5243`）が起動している必要がある。ルートで `docker compose up` するとバックエンド・DB と一緒にフロントエンドも起動する（その場合 `API_URL` は compose 側で `http://api:5243` に設定される）。
+
+## npm scripts
+
+| コマンド | 用途 |
+|---|---|
+| `npm run dev` | 開発サーバー |
+| `npm run build` | Next.js の本番ビルド（型チェック込み） |
+| `npm run lint` | ESLint |
+| `npm run pages:build` | Next.js ビルド + OpenNext で Cloudflare Workers 向けに変換（`.open-next/` に出力） |
+| `npm run preview` | `pages:build` 後に `wrangler dev` で Workers ランタイム上で動作確認 |
+| `npm run deploy` | `pages:build` 後に `wrangler deploy`（通常は CI から。手動では使わない） |
+
+## 環境変数
+
+ローカルは `.env.local`（雛形は `.env.local.example`）、本番は `wrangler.toml` の `[vars]` と Cloudflare 側のシークレットで設定する。サーバー側の値は `utils/env.ts` の `getEnv()` 経由で読む（Workers の env を優先し、無ければ `process.env`）。
+
+| キー | 用途 |
+|---|---|
+| `API_URL` | バックエンドの URL。BFF プロキシ（`app/api/[...path]`）とサーバー側 fetch（`lib/api/server.ts`）の転送先 |
+| `INTERNAL_API_KEY` | バックエンド前段の nginx が検証する共有シークレット。`X-Narinote-Kf` ヘッダーで送る。ローカルでは空でよい |
+| `NEXT_PUBLIC_IMAGE_HOSTNAME` | 画像 CDN のホスト名（`next/image` の許可リスト） |
+| `NEXT_PUBLIC_SITE_URL` | サイトの絶対 URL（metadata・sitemap・robots の基準。未設定時は本番 URL） |
+
+`wrangler.toml` の `WORKER_SELF_REFERENCE` はリンクプレビューで自サイトのページを取得するためのサービスバインディング。
+
+## デプロイ
+
+`main` へのマージで Cloudflare の Deploy Hook が起動しビルド・デプロイされる。詳細は [infrastruture/docs/infra-design.md](../infrastruture/docs/infra-design.md) を参照。
 
 ## ドキュメント
 
-- [API使用ガイド](./docs/api-usage.md) - API関数の詳細な使い方
-- [フロントエンド実装ガイド](./docs/implementation-guide.md) - Atomic Designとコンポーネント生成パターン
-- [フロントエンドアーキテクチャ](./docs/architecture.md) - アーキテクチャの詳細ガイド
-- [クイックリファレンス](./docs/quick-reference.md) - よく使うパターン集
+- [docs/architecture.md](./docs/architecture.md) - レイヤー構成、レンダリング方針、API 通信、認証状態、キャッシュ方針
+- [docs/implementation-guide.md](./docs/implementation-guide.md) - ページ・機能の追加手順とコンポーネント規約
+- [docs/api-usage.md](./docs/api-usage.md) - API コード生成（api-generator）と使い方
