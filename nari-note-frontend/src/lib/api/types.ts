@@ -144,6 +144,17 @@ export interface ForgotPasswordRequest {
 export interface ForgotPasswordResponse {
 }
 
+export interface GetArticleCommentsRequest {
+  id?: string;
+  limit: number;
+  offset: number;
+}
+
+export interface GetArticleCommentsResponse {
+  comments: CommentDto[];
+  totalCount: number;
+}
+
 export interface GetArticleContentRequest {
   id?: string;
 }
@@ -151,7 +162,6 @@ export interface GetArticleContentRequest {
 export interface GetArticleContentResponse {
   article: ArticleDto;
   isLiked: boolean;
-  comments: CommentDto[];
   courseId?: string;
   courseName?: string;
 }

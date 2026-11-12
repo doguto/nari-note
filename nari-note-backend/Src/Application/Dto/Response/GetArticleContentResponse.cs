@@ -6,7 +6,6 @@ public class GetArticleContentResponse
 {
     public required ArticleDto Article { get; set; }
     public bool IsLiked { get; set; }
-    public List<CommentDto> Comments { get; set; } = new();
     public CourseId? CourseId { get; set; }
     public string? CourseName { get; set; }
 }

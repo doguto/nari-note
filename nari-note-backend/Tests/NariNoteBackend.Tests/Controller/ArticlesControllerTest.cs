@@ -289,7 +289,7 @@ public class ArticlesControllerTest : IntegrationTestBase
     #region GET /api/articles/{id}
 
     [Fact]
-    public async Task 記事の内容をタグ_棋譜_コメント_いいねと合わせて取得できる()
+    public async Task 記事の内容をタグ_棋譜_いいねと合わせて取得できる()
     {
         var author = new UserBuilder().WithName("author").Build();
         var reader = new UserBuilder().WithName("reader").Build();
@@ -304,9 +304,7 @@ public class ArticlesControllerTest : IntegrationTestBase
             tag,
             TestEntity.ArticleTag(article, tag),
             TestEntity.Kifu(article, "第1局"),
-            TestEntity.Like(reader, article),
-            TestEntity.Comment(reader, article, "2件目", Now.AddHours(-1)),
-            TestEntity.Comment(author, article, "1件目", Now.AddHours(-2))
+            TestEntity.Like(reader, article)
         );
         var url = $"/api/articles/{article.Id.Value}";
 
@@ -321,8 +319,6 @@ public class ArticlesControllerTest : IntegrationTestBase
         Assert.True(body.IsLiked);
         Assert.Equal(course.Id, body.CourseId);
         Assert.Equal("四間飛車講座", body.CourseName);
-        Assert.Equal(["1件目", "2件目"], body.Comments.Select(c => c.Message));
-        Assert.Equal(["author", "reader"], body.Comments.Select(c => c.UserName));
 
         // 未ログインの場合はいいね済みにならない
         var anonymous = await ReadAsync<GetArticleContentResponse>(await CreateClient().GetAsync(url));
@@ -1131,6 +1127,63 @@ public class ArticlesControllerTest : IntegrationTestBase
         var response = await CreateClient().GetAsync(url);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    #endregion
+
+    #region GET /api/articles/{id}/comments
+
+    [Fact]
+    public async Task 記事のコメントを古い順に指定した範囲だけ取得できる()
+    {
+        var author = new UserBuilder().WithName("author").Build();
+        var reader = new UserBuilder().WithName("reader").Build();
+        var article = new ArticleBuilder(author).Build();
+        var otherArticle = new ArticleBuilder(author).Build();
+        await SeedAsync(
+            author,
+            reader,
+            article,
+            otherArticle,
+            TestEntity.Comment(reader, article, "3件目", Now.AddHours(-1)),
+            TestEntity.Comment(author, article, "1件目", Now.AddHours(-3)),
+            TestEntity.Comment(reader, article, "2件目", Now.AddHours(-2)),
+            TestEntity.Comment(reader, otherArticle, "別記事", Now)
+        );
+        var url = $"/api/articles/{article.Id.Value}/comments";
+
+        var firstPage = await ReadAsync<GetArticleCommentsResponse>(await CreateClient().GetAsync($"{url}?limit=2"));
+        Assert.Equal(["1件目", "2件目"], firstPage.Comments.Select(c => c.Message));
+        Assert.Equal(["author", "reader"], firstPage.Comments.Select(c => c.UserName));
+        Assert.Equal(3, firstPage.TotalCount);
+
+        var secondPage = await ReadAsync<GetArticleCommentsResponse>(await CreateClient().GetAsync($"{url}?limit=2&offset=2"));
+        Assert.Equal(["3件目"], secondPage.Comments.Select(c => c.Message));
+        Assert.Equal(3, secondPage.TotalCount);
+    }
+
+    [Fact]
+    public async Task 下書きのコメントは作者本人だけが取得できる()
+    {
+        var author = new UserBuilder().Build();
+        var otherUser = new UserBuilder().Build();
+        var draft = new ArticleBuilder(author).Draft().Build();
+        await SeedAsync(author, otherUser, draft);
+        var url = $"/api/articles/{draft.Id.Value}/comments";
+
+        Assert.Equal(HttpStatusCode.NotFound, (await CreateClient().GetAsync(url)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await CreateClientAs(otherUser).GetAsync(url)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await CreateClientAs(author).GetAsync(url)).StatusCode);
+    }
+
+    [Fact]
+    public async Task コメント一覧で範囲外の件数やオフセットを指定すると400を返す()
+    {
+        var url = $"/api/articles/{Guid.CreateVersion7()}/comments";
+
+        Assert.Equal(HttpStatusCode.BadRequest, (await CreateClient().GetAsync($"{url}?limit=0")).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await CreateClient().GetAsync($"{url}?limit=101")).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await CreateClient().GetAsync($"{url}?offset=-1")).StatusCode);
     }
 
     #endregion

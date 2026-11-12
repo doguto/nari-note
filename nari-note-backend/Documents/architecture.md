@@ -1,350 +1,139 @@
 # アーキテクチャ
 
-## 基本アーキテクチャの選定
+バックエンド（ASP.NET Core Web API）の構成・リクエスト処理・エラーハンドリング・バックグラウンドジョブの設計をまとめる。技術スタックはルートの [AGENTS.md](../../AGENTS.md) を参照。
 
-### 前提条件の整理
+## 設計方針
 
-アーキテクチャは不安定要素の変更に耐える設計になっているべきである。
+個人開発・小規模・モノリシックという前提に対し、インフラ構成（キャッシュ、DB 配置など）は変わりうる。完全なクリーンアーキテクチャは過剰なため、**階層型アーキテクチャにデータアクセス部分のみ依存性逆転を適用**している。
 
-よってバックエンドアーキテクチャを選定するにあたり、プロジェクトの安定要素と不安定要素を整理する。
+- Service はビジネスロジックに専念し、キャッシュ等のインフラ関心事は Repository 実装で吸収する
+- **API 一個につき Service 一個**。責務が明確になり、Service 単位で単体テストできる
+- トランザクションと例外→HTTP ステータス変換はミドルウェアで一元化し、Controller / Service に try-catch やトランザクション管理を書かない
 
-**安定要素**
-* 基本的技術スタック
-  * Front: Next.js
-  * Back: ASP.NET Core Web API
-  * DB: PostgreSQL
-* 開発メンバー
-  * 基本的に個人開発
-  * 実装スタイル等がぶれる心配は基本的に無し
-* アプリ規模
-  * 小規模
-* モノリシック構成
-  * マイクロサービスにはしない
+## レイヤー構成
 
-**不安定要素**
-* インフラ構成
-  * アプリケーションサーバー
-  * DBサーバー
-  * キャッシュサーバー
-* デプロイ方式
-  * そもそもインフラ（デプロイ先）が未定
-  * 方式も未定
-* ユーザー数・データ量
-  * そんなに多くは無いと思うが、不確定
+```mermaid
+flowchart TD
+    Controller["Controller<br/>(Src/Controller)"]
+    Service["Application / Service<br/>(Src/Application)"]
+    Domain["Domain<br/>Entity / Repository IF / Gateway IF<br/>(Src/Domain)"]
+    Infra["Infrastructure<br/>Repository 実装 / DbContext / Gateway 実装 / Job<br/>(Src/Infrastructure)"]
+    DB[(PostgreSQL)]
+    Ext["外部サービス<br/>Resend / Discord / S3"]
 
-### アーキテクチャの候補
-
-**シンプルな階層型アーキテクチャ**
-
-以下の階層にレイヤー分けした運用
-* プレゼンテーション層（Controller）
-* ビジネスロジック層（Service）
-* データアクセス層（Model/Repository）
-
-**クリーンアーキテクチャ**
-
-インフラ構成の未確定をInfrastructure層で吸収できるようにする
-以下のレイヤーに分割して運用
-* Presentation
-  * Controller
-* Application
-  * UseCase
-* Domain
-  * Entity
-  * ValueObject
-  * Repository(Interface)
-* Infrastructure
-  * Repository(実装)
-  * External
-
-### 結論
-シンプルな階層型アーキテクチャではインフラ構成の不確定を吸収しきれないが、完全なクリーンアーキテクチャは個人開発には過剰である。
-よって、**シンプルな階層型アーキテクチャにData層のみ依存性逆転を適用**する。
-
-**設計方針:**
-- Service層はビジネスロジックに専念（キャッシュ等のインフラ関心事は書かない）
-- インフラ関心事（キャッシュ、レプリカ振り分け等）はRepository層で吸収
-- **API一個につきService一個の粒度**で実装
-
-## アーキテクチャ詳細
-
-### レイヤー構成
-
-```
-Controllers
-    ↓ 依存
-Application (Services, IRepository定義)
-    ↓ 依存
-Domain (Entities)
-    ↑ 実装
-Data (DbContext, Repository実装)
+    Controller --> Service
+    Service --> Domain
+    Infra -. 実装 .-> Domain
+    Infra --> DB
+    Infra --> Ext
 ```
 
-### プロジェクト構成
+| 層 | 担うこと | 担わないこと |
+|---|---|---|
+| Controller | ルーティング、`[Auth]` による認証レベル指定、`[ValidateModelState]` による入力検証、Service 呼び出し | ビジネスロジック、try-catch |
+| Application | Service（ユースケース）、Request/Response DTO、カスタム例外、Helper | DB・外部 API の直接操作 |
+| Domain | Entity とドメインロジック、Repository / Gateway の interface、ID の ValueObject、ReadModel（一覧用の射影） | 永続化の実装 |
+| Infrastructure | EF Core DbContext（`Infrastructure/Database`）、Repository 実装、外部サービスの Gateway、バックグラウンドジョブ、ValueObject のバインド・JSON 変換 | ビジネス判断 |
 
-```
-nari-note-backend/
-├── Controller/               # Presentation層
-│   ├── ArticlesController.cs
-│   ├── UsersController.cs
-│   └── TagsController.cs
-├── Application/              # Business Logic層
-│   ├── Service/
-│   │   ├── GetArticleContentService.cs
-│   │   ├── CreateArticleService.cs
-│   │   ├── UpdateArticleService.cs
-│   │   ├── DeleteArticleService.cs
-│   │   ├── ToggleLikeService.cs
-│   │   └── GetUserProfileService.cs
-│   └── Repository/           # Repository抽象化
-│       ├── IArticleRepository.cs
-│       └── IUserRepository.cs
-├── Domain/                   # Domain Entity
-│   ├── Article.cs
-│   ├── User.cs
-│   ├── Tag.cs
-│   └── Like.cs
-└── Infrastructure/           # Data Access層
-    ├── ApplicationDbContext.cs
-    ├── ArticleRepository.cs
-    └── UserRepository.cs
+DI 登録は `Src/Application/ApplicationServiceInstaller.cs`（Service）と `Src/Infrastructure/InfrastructureServiceInstaller.cs`（DbContext・Repository・Gateway・Job）に集約し、`Program.cs` から呼び出す。
+
+## リクエストパイプライン
+
+`Program.cs` で登録しているミドルウェアの順序:
+
+```mermaid
+flowchart LR
+    R[Request] --> Routing[UseRouting]
+    Routing --> Cors[UseCors]
+    Cors --> Log[Serilog<br/>RequestLogging]
+    Log --> Ex[GlobalException<br/>Handler]
+    Ex --> Jwt[JwtAuthentication]
+    Jwt --> Tx[Transaction]
+    Tx --> Https[HttpsRedirection]
+    Https --> C[Controller]
 ```
 
-### Entity Framework Core との統合
+| ミドルウェア | 役割 |
+|---|---|
+| `UseRouting` | 先頭に置き、後続がエンドポイントのメタデータ（`[Auth]` / `[NoTransaction]`）を参照できるようにする |
+| `GlobalExceptionHandlerMiddleware` | 後続で発生した例外を捕捉し、ログ・Sentry 送信のうえ `ErrorResponse` に変換する |
+| `JwtAuthenticationMiddleware` | Cookie の JWT を検証し、`[Auth]` のレベルに応じて通過・拒否する。詳細は [authentication-strategy.md](./authentication-strategy.md) |
+| `TransactionMiddleware` | GET / HEAD 以外のリクエスト全体を 1 つの DB トランザクションで包み、例外時はロールバックする。1 秒以上かかったトランザクションは Warning ログを出す |
 
-#### 1. Domain (Entities)
-EF Coreのエンティティクラスとして機能。ドメインロジックも含む。
+- トランザクションを張りたくないエンドポイント（外部ストレージへのアップロード・削除を伴うもの等）には `[NoTransaction]` を付ける
+- リクエスト単位でトランザクションを張るため、EF Core の `EnableRetryOnFailure` は使用しない
+- ヘルスチェック `/health` は認証不要（`AuthLevel.Anonymous`）
 
-```csharp
-// Domain/Article.cs
-public class Article
-{
-    public int Id { get; set; }
-    public string Title { get; set; }
-    public string Content { get; set; }
-    public int AuthorId { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    
-    // Navigation Properties (EF Core用)
-    public User Author { get; set; }
-    public List<Tag> Tags { get; set; } = new();
-    public List<Like> Likes { get; set; } = new();
-    
-    // ドメインロジック
-    public bool IsLikedBy(int userId) => Likes.Any(l => l.UserId == userId);
-    public int LikeCount => Likes.Count;
-}
+## エラーハンドリング
+
+Service や Repository は適切な例外を throw するだけでよい。`GlobalExceptionHandlerMiddleware` が以下のように HTTP ステータスへ変換する（正は同ミドルウェアの実装）。
+
+| 例外 | ステータス | 主な用途 |
+|---|---|---|
+| `ArgumentException`（`ArgumentNullException` / `ArgumentOutOfRangeException` を含む）、`System.ComponentModel.DataAnnotations.ValidationException`、`InvalidOperationException` | 400 | 入力不正、ビジネスルール違反、無効・期限切れトークン |
+| `UnauthorizedAccessException` | 401 | 認証エラー |
+| `ForbiddenException` | 403 | 認証済みだが操作権限が無い（他人の記事の編集等） |
+| `KeyNotFoundException` | 404 | リソースが存在しない（`FindForce*Async` が throw） |
+| `ConflictException` | 409 | 一意制約に当たる重複（ユーザー名等）、状態の競合 |
+| `TooManyRequestsException` | 429 | 送信間隔の制限 |
+| `TimeoutException` | 408 | タイムアウト |
+| `NariNoteException`、その他すべて | 500 | 想定外のエラー |
+
+カスタム例外は `Src/Application/Exception/` の `ConflictException` / `ForbiddenException` / `TooManyRequestsException` / `NariNoteException` のみ。404 は専用の例外を作らず `KeyNotFoundException` を使う。
+
+### エラーレスポンス形式
+
+例外ハンドラーが返す形式（`ErrorResponse`、camelCase で出力）:
+
+```json
+{ "statusCode": 404, "message": "...", "timeStamp": "2026-01-01T00:00:00Z", "code": null }
 ```
 
-#### 2. Data/ApplicationDbContext
-EF Coreのコンテキスト。テーブル定義と設定。
+- 500 のときは `message` を固定文言にし、例外メッセージ（内部情報）を返さない。それ以外は例外メッセージをそのまま返すため、**ユーザーに見せてよい日本語で書く**
+- `code` はクライアントがエラー種別で分岐する必要がある場合のみ設定する（`ErrorCode` 定数。例: `EMAIL_NOT_VERIFIED`）
 
-```csharp
-// Data/ApplicationDbContext.cs
-public class ApplicationDbContext : DbContext
-{
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options) { }
-    
-    public DbSet<Article> Articles { get; set; }
-    public DbSet<User> Users { get; set; }
-    public DbSet<Tag> Tags { get; set; }
-    public DbSet<Like> Likes { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        // Article設定
-        modelBuilder.Entity<Article>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.Content).IsRequired();
-            
-            // リレーション設定
-            entity.HasOne(e => e.Author)
-                .WithMany(u => u.Articles)
-                .HasForeignKey(e => e.AuthorId);
-            
-            entity.HasMany(e => e.Tags)
-                .WithMany(t => t.Articles);
-        });
-        
-        // その他のエンティティ設定...
-    }
-}
+例外ハンドラーを通らないエラー応答もある:
+
+- `[ValidateModelState]` による入力検証エラー: 400 で `{ "errors": { "<項目名>": ["メッセージ", ...] } }`
+- `JwtAuthenticationMiddleware` の 401: `{ "error": { "code": "UNAUTHORIZED", "message", "timestamp", "path" } }`
+- 同ミドルウェアのメール未認証による 403: `ErrorResponse` 形式で `code` = `EMAIL_NOT_VERIFIED`
+
+## バックグラウンドジョブ
+
+`Src/Infrastructure/Job/` に `BackgroundService` として実装し、Worker（定期実行）と Processor（1 回分の処理。テストから直接呼べる）に分けている。
+
+### Outbox によるメール・Discord 通知の配送
+
+メール送信や Discord 通知はリクエスト処理中に直接行わず、Service が `OutboxMessage` を DB に追加するだけにする。リクエストのトランザクションと同時にコミットされるため、「DB 更新はロールバックされたのにメールだけ送られた」「外部 API 障害でリクエスト自体が失敗した」を防げる。
+
+```mermaid
+sequenceDiagram
+    participant S as Service
+    participant DB as OutboxMessages
+    participant W as OutboxWorker
+    participant X as Resend / Discord
+    S->>DB: OutboxMessage を追加（リクエストと同一トランザクション）
+    loop 5 秒ごと（溜まっていれば連続処理）
+        W->>DB: 未処理を最大 20 件取得し Attempts+1、リース 2 分を設定（FOR UPDATE SKIP LOCKED）
+        W->>X: 種別（Email / DiscordEmbed）に応じて送信
+        alt 成功
+            W->>DB: ProcessedAt を記録
+        else 失敗
+            W->>DB: LastError を記録し NextAttemptAt を後ろ倒し
+        end
+    end
 ```
 
-#### 3. Application/Repositories (Repository抽象化)
-インフラ（DB）からビジネスロジックを分離。
+- 取得時に `NextAttemptAt` をリース期限まで進めるため、処理中にプロセスが落ちてもリース切れ後に再取得される。`SKIP LOCKED` により複数インスタンスでも二重取得しない
+- 再試行間隔は `OutboxRetryPolicy`（固定 1 分）。`MaxAttempts`（5 回）に達すると `FailedAt` を記録して以後は再試行しない
+- ポーリングの SQL ログは Serilog フィルタで Warning 未満を出力しない
 
-```csharp
-// Application/Repositories/IArticleRepository.cs
-public interface IArticleRepository
-{
-    Task<Article?> FindByIdAsync(int id);
-    Task<List<Article>> FindByTagAsync(string tagName);
-    Task<List<Article>> FindByAuthorAsync(int authorId);
-    Task<Article> CreateAsync(Article article);
-    Task UpdateAsync(Article article);
-    Task DeleteAsync(int id);
-}
-```
+### 未認証ユーザーの削除
 
-#### 4. Data/Repositories (Repository実装)
-EF Coreを使ってRepositoryインターフェースを実装。キャッシュ等のインフラ関心事もここで処理。
+`UnverifiedUserDeletionWorker` が 1 日ごとに、作成から 7 日経ってもメール認証が完了していないユーザーを削除する（他人のメールアドレスで登録されたアカウントが名前・アドレスを占有し続けないようにするため）。有効期限内の確認トークンが残っているユーザーは対象外。判定と削除は 1 つの DELETE で行い、関連データは Cascade で消える。
 
-```csharp
-// Data/Repositories/ArticleRepository.cs
-public class ArticleRepository : IArticleRepository
-{
-    private readonly ApplicationDbContext _context;
-    private readonly IDistributedCache _cache; // キャッシュもここで扱う
-    
-    public ArticleRepository(ApplicationDbContext context, IDistributedCache cache)
-    {
-        _context = context;
-        _cache = cache;
-    }
-    
-    public async Task<Article?> FindByIdAsync(int id)
-    {
-        // キャッシュチェック
-        var cacheKey = $"article:{id}";
-        var cached = await _cache.GetStringAsync(cacheKey);
-        if (cached != null)
-            return JsonSerializer.Deserialize<Article>(cached);
-        
-        // DB取得
-        var article = await _context.Articles
-            .Include(a => a.Author)
-            .Include(a => a.Tags)
-            .Include(a => a.Likes)
-            .FirstOrDefaultAsync(a => a.Id == id);
-        
-        // キャッシュ保存
-        if (article != null)
-            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(article));
-        
-        return article;
-    }
-    
-    public async Task<Article> CreateAsync(Article article)
-    {
-        _context.Articles.Add(article);
-        await _context.SaveChangesAsync();
-        return article;
-    }
-    
-    public async Task UpdateAsync(Article article)
-    {
-        _context.Articles.Update(article);
-        await _context.SaveChangesAsync();
-        
-        // キャッシュ削除
-        await _cache.RemoveAsync($"article:{article.Id}");
-    }
-}
-```
+## 起動時の処理
 
-#### 5. Application/Services (ビジネスロジック)
-**API一個につきService一個**の粒度でビジネスロジックを実装。
-
-```csharp
-// Application/Services/GetArticleContentService.cs
-public class GetArticleContentService
-{
-    readonly IArticleRepository articleRepository;
-    
-    public GetArticleContentService(IArticleRepository articleRepository)
-    {
-        this.articleRepository = articleRepository;
-    }
-    
-    public async Task<Article?> ExecuteAsync(int id)
-    {
-        return await articleRepository.FindByIdAsync(id);
-    }
-}
-```
-
-#### 6. Controllers
-Serviceを呼び出してHTTPリクエストを処理。
-
-```csharp
-// Controllers/ArticlesController.cs
-[ApiController]
-[Route("api/[controller]")]
-public class ArticlesController : ControllerBase
-{
-    readonly GetArticleContentService getArticleContentService;
-    readonly CreateArticleService createArticleService;
-    readonly ToggleLikeService toggleLikeService;
-    
-    public ArticlesController(
-        GetArticleContentService getArticleContentService,
-        CreateArticleService createArticleService,
-        ToggleLikeService toggleLikeService)
-    {
-        this.getArticleContentService = getArticleContentService;
-        this.createArticleService = createArticleService;
-        this.toggleLikeService = toggleLikeService;
-    }
-    
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetArticle(int id)
-    {
-        var article = await getArticleContentService.ExecuteAsync(id);
-        return Ok(article);
-    }
-}
-```
-
-### DI設定 (Program.cs)
-
-```csharp
-// Program.cs
-var builder = WebApplication.CreateBuilder(args);
-
-// DbContext登録
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// キャッシュ登録
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-});
-
-// Repository登録
-builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-// Service登録（API一個につき一個）
-builder.Services.AddScoped<GetArticleContentService>();
-
-builder.Services.AddControllers();
-
-var app = builder.Build();
-app.MapControllers();
-app.Run();
-```
-
-### このアーキテクチャのメリット
-
-1. **関心の分離**
-   - Service層: ビジネスロジックのみ
-   - Repository層: データ取得とインフラ最適化（キャッシュ等）
-
-2. **Service粒度の明確化**
-   - API一個につきService一個で責務が明確
-   - 各Serviceが単一責任を持つ
-
-3. **テスタビリティ**
-   - IRepositoryをモック化してServiceを単体テスト可能
-   - キャッシュやDBの実装を気にせずビジネスロジックをテスト
-
-4. **インフラ変更耐性**
-   - キャッシュ追加/削除がRepository実装のみで完結
-   - DB変更時もRepository実装のみ修正
-
+- 全環境でマイグレーションを起動時に適用する（`statement_timeout` を無効化して実行）
+- Development 環境のみシードデータ（`DataSeeder` / `BulkDataSeeder`）を投入する
+- 設定の読み込み元は [development-workflow.md](./development-workflow.md#設定キー) を参照

@@ -55,13 +55,20 @@ public class CommentRepository : ICommentRepository
         await context.SaveChangesAsync();
     }
 
-    public async Task<List<Comment>> FindByArticleAsync(ArticleId articleId)
+    public async Task<(List<Comment> Comments, int TotalCount)> FindPageByArticleAsync(ArticleId articleId, int limit, int offset)
     {
-        return await context.Comments
-            .Include(c => c.User)
-            .Where(c => c.ArticleId == articleId)
-            .OrderBy(c => c.CreatedAt)
-            .ToListAsync();
+        var query = context.Comments.Where(c => c.ArticleId == articleId);
+
+        var totalCount = await query.CountAsync();
+        // 投稿日時が同じコメントがあってもページ間で重複・欠落しないよう、Id で順序を確定させる
+        var comments = await query.Include(c => c.User)
+                                  .OrderBy(c => c.CreatedAt)
+                                  .ThenBy(c => c.Id)
+                                  .Skip(offset)
+                                  .Take(limit)
+                                  .ToListAsync();
+
+        return (comments, totalCount);
     }
 
     public async Task<List<Comment>> FindByUserAsync(UserId userId)

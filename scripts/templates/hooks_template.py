@@ -152,12 +152,12 @@ import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type Us
             f"export function {hook_name}(options?: UseMutationOptions<{response_type}, Error, {request_type}>) {{",
             "  const queryClient = useQueryClient();",
             f"  return useMutation<{response_type}, Error, {request_type}>({{",
+            "    ...options,",
             f"    mutationFn: {mutation_fn_prefix}{mutation_fn_call},",
             "    onSuccess: (...args) => {",
             f"      queryClient.invalidateQueries({{ queryKey: ['{controller}'] }});",
             "      options?.onSuccess?.(...args);",
             "    },",
-            "    ...options,",
             "  });",
             "}",
         ]

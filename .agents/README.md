@@ -1,51 +1,34 @@
-# .agent ディレクトリ
+# .agents ディレクトリ
 
-このディレクトリはAIエージェント関連のリソースを一元管理するための親ディレクトリです。
+AI エージェント（GitHub Copilot、Claude Code 等）が使うスキルの実体を一元管理するディレクトリ。
 
-## ディレクトリ構造
+## 構成
 
 ```
-.agent/
+.agents/
 └── skills/
-    ├── agent-doc-updater/
-    │   └── SKILL.md
-    └── api-generator/
+    └── <skill-name>/
         └── SKILL.md
 ```
 
-## Skills
+各エージェント用のディレクトリからは、`skills` ディレクトリ全体をシンボリックリンクで参照している。
 
-`skills/` ディレクトリには、各種AIエージェントが使用するスキル定義ファイルが格納されています。
+| リンク | 参照先 |
+| --- | --- |
+| `.github/skills` | `../.agents/skills` |
+| `.claude/skills` | `../.agents/skills` |
 
-### 管理方針
+そのため `.agents/skills/` 配下にスキルを追加・編集するだけで、すべてのエージェントに反映される。個別のリンクを作る必要はない。
 
-- 実際のSKILL.mdファイルは `.agent/skills/` 配下に配置
-- 他のAIエージェントディレクトリ（`.github/skills/`, `.claude/skills/`）からはシンボリックリンクで参照
-- skillの内容を更新する場合は、`.agent/skills/` 配下のファイルを編集することで、すべてのAIエージェントに変更が反映される
+Windows で clone する場合、シンボリックリンクを有効にするには `git config core.symlinks true`（と、開発者モードまたは管理者権限）が必要。
 
-### 既存のシンボリックリンク
+## 管理しているスキル
 
-#### .github/skills/
-- `agent-doc-updater` → `../../.agent/skills/agent-doc-updater`
-- `api-generator` → `../../.agent/skills/api-generator`
+スキルの一覧は `.agents/skills/` 配下のディレクトリを参照する。各スキルの用途は `SKILL.md` の front matter（`name` / `description`）に書く。
 
-#### .claude/skills/
-- `agent-doc-updater` → `../../.agent/skills/agent-doc-updater`
-
-## 新しいスキルの追加方法
-
-1. `.agent/skills/` 配下に新しいディレクトリを作成
-2. SKILL.mdファイルを作成
-3. 必要に応じて `.github/skills/` や `.claude/skills/` からシンボリックリンクを作成
+## スキルの追加方法
 
 ```bash
-# 例: 新しいスキル "new-skill" を追加する場合
-mkdir -p .agent/skills/new-skill
-touch .agent/skills/new-skill/SKILL.md
-
-# .github/skills/ からリンク
-ln -s ../../.agent/skills/new-skill .github/skills/new-skill
-
-# .claude/skills/ からリンク
-ln -s ../../.agent/skills/new-skill .claude/skills/new-skill
+mkdir .agents/skills/<skill-name>
+# .agents/skills/<skill-name>/SKILL.md を作成し、front matter に name と description を書く
 ```

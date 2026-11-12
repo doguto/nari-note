@@ -33,6 +33,7 @@ resource "aws_ebs_volume" "postgres_data" {
   availability_zone = local.app_server_availability_zone
   size              = var.postgres_data_volume_size
   type              = "gp3"
+  encrypted         = true
 
   tags = {
     Name = "${var.app_name}-postgres-data"
@@ -58,6 +59,7 @@ resource "aws_instance" "app_server" {
   root_block_device {
     volume_size = 8
     volume_type = "gp3"
+    encrypted   = true
   }
 
   user_data = templatefile("${path.module}/userdata.sh", {

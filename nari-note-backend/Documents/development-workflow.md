@@ -1,439 +1,80 @@
 # 開発ワークフロー
 
-このドキュメントは、nari-note-backendの開発における一般的なタスクの手順を説明します。
+ローカル開発環境、マイグレーション、設定キーをまとめる。本番環境の構成とデプロイ手順は [infrastruture/docs/infra-design.md](../../infrastruture/docs/infra-design.md) を参照。
 
-## 目次
+## ローカル起動
 
-1. [環境セットアップ](#環境セットアップ)
-2. [新規APIエンドポイントの追加](#新規apiエンドポイントの追加)
-3. [データベーススキーマの変更](#データベーススキーマの変更)
-4. [便利なコマンド](#便利なコマンド)
-
----
-
-## 環境セットアップ
-
-### 初回セットアップ
-
-#### Docker Compose使用（推奨）
+リポジトリルートの `docker-compose.yml` で DB・API・フロントエンドをまとめて起動する。
 
 ```bash
-# プロジェクトルートから
-docker-compose up
-
-# バックグラウンドで起動
-docker-compose up -d
-
-# ログ確認
-docker-compose logs -f backend
+# リポジトリルートで
+docker compose up -d
+docker compose logs -f api
 ```
 
-#### ローカル環境
+| サービス | 内容 | ポート |
+|---|---|---|
+| `db` | PostgreSQL 17（`pg_stat_statements` 有効） | 5432 |
+| `api` | `dotnet watch run` によるホットリロード（Development 環境） | 5243 |
+| `web` | Next.js の開発サーバー | 3000 |
 
-```bash
-# .NET SDKインストール確認
-dotnet --version  # 9.0以上
+- API は起動時にマイグレーションを適用し、Development では開発用のシードデータを投入する。シードユーザーのアカウントは `Src/Infrastructure/Database/DataSeeder.cs` を参照
+- Development では画像ストレージがダミー（`LocalImageStorageGateway`。アップロードせずダミー URL を返す）になる
+- DB に直接入る: `docker compose exec db psql -U myuser -d mydatabase`
+- DB を作り直す: `docker compose down -v`（ボリュームごと削除）してから起動し直す
 
-# PostgreSQLインストールと起動
-# macOS
-brew install postgresql@16
-brew services start postgresql@16
+ホストで直接 API を動かす場合は、DB だけコンテナで起動して `nari-note-backend` で `dotnet run` する（`appsettings.Development.json` の接続文字列は `localhost:5432` を向いている）。
 
-# Ubuntu/Debian
-sudo apt install postgresql-16
-sudo systemctl start postgresql
-
-# データベース作成
-createdb nari_note
-
-# プロジェクトディレクトリに移動
-cd nari-note-backend
-
-# 依存関係の復元
-dotnet restore
-
-# マイグレーション実行
-dotnet ef database update
-
-# アプリケーション起動
-dotnet run
-```
-
-### 開発サーバーの起動
-
-```bash
-# 通常起動
-dotnet run
-
-# ホットリロード有効
-dotnet watch run
-```
-
-アクセス: `http://localhost:5243`
-
----
-
-## 新規APIエンドポイントの追加
-
-### 例: 記事更新API（PUT /api/articles/{id}）の追加
-
-#### ステップ1: Request/Response DTOの作成
-
-```csharp
-using System.ComponentModel.DataAnnotations;
-
-namespace NariNoteBackend.Application.Dto.Request;
-
-public class UpdateArticleRequest
-{
-    [Required(ErrorMessage = "タイトルは必須です")]
-    [MaxLength(200, ErrorMessage = "タイトルは200文字以内で入力してください")]
-    public string Title { get; set; } = string.Empty;
-    
-    [Required(ErrorMessage = "本文は必須です")]
-    public string Body { get; set; } = string.Empty;
-    
-    public bool IsPublished { get; set; }
-}
-```
-
-```csharp
-namespace NariNoteBackend.Application.Dto.Response;
-
-public class UpdateArticleResponse
-{
-    public int Id { get; set; }
-    public DateTime UpdatedAt { get; set; }
-}
-```
-
-#### ステップ2: Repository Interfaceにメソッド追加
-
-```csharp
-public interface IArticleRepository
-{
-    // 既存のメソッド...
-    
-    // 記事を更新する
-    Task<Article> UpdateAsync(Article article);
-}
-```
-
-#### ステップ3: Repository実装
-
-```csharp
-public async Task<Article> UpdateAsync(Article article)
-{
-    article.UpdatedAt = DateTime.UtcNow;
-    context.Articles.Update(article);
-    await context.SaveChangesAsync();
-    return article;
-}
-```
-
-#### ステップ4: Serviceの実装
-
-```csharp
-using NariNoteBackend.Application.Repository;
-using NariNoteBackend.Application.Dto.Request;
-using NariNoteBackend.Application.Dto.Response;
-using NariNoteBackend.Application.Exception;
-using NariNoteBackend.Domain;
-
-namespace NariNoteBackend.Application.Service;
-
-public class UpdateArticleService
-{
-    readonly IArticleRepository articleRepository;
-    
-    public UpdateArticleService(IArticleRepository articleRepository)
-    {
-        this.articleRepository = articleRepository;
-    }
-    
-    public async Task<UpdateArticleResponse> ExecuteAsync(
-        int id,
-        UpdateArticleRequest request,
-        int userId)
-    {
-        // 記事の存在確認
-        var article = await this.articleRepository.GetByIdAsync(id);
-        
-        // 権限確認
-        if (article.AuthorId != userId)
-        {
-            throw new ForbiddenException(
-                "You don't have permission to update this article");
-        }
-        
-        // 更新
-        article.Title = request.Title;
-        article.Body = request.Body;
-        article.IsPublished = request.IsPublished;
-        
-        var updated = await this.articleRepository.UpdateAsync(article);
-        
-        return new UpdateArticleResponse
-        {
-            Id = updated.Id,
-            UpdatedAt = updated.UpdatedAt
-        };
-    }
-}
-```
-
-#### ステップ5: Controllerにエンドポイント追加
-
-```csharp
-[ApiController]
-[Route("api/[controller]")]
-public class ArticlesController : ControllerBase
-{
-    readonly UpdateArticleService updateArticleService;
-    
-    public ArticlesController(
-        // 既存のサービス...
-        UpdateArticleService updateArticleService)
-    {
-        // 既存のコンストラクタ処理...
-        this.updateArticleService = updateArticleService;
-    }
-    
-    // 既存のエンドポイント...
-    
-    [HttpPut("{id}")]
-    public async Task<ActionResult<UpdateArticleResponse>> UpdateArticle(
-        int id,
-        [FromBody] UpdateArticleRequest request,
-        [FromQuery] int userId)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-        
-        var response = await this.updateArticleService.ExecuteAsync(
-            id, request, userId);
-        return Ok(response);
-    }
-}
-```
-
-#### ステップ6: DI登録
-
-```csharp
-// Register services
-builder.Services.AddScoped<UpdateArticleService>();
-```
-
-#### ステップ7: 動作確認
-
-```bash
-# アプリケーション再起動（ホットリロード使用時は不要）
-dotnet run
-
-# curlでテスト
-curl -X PUT http://localhost:5243/api/articles/1?userId=1 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Updated Title",
-    "body": "Updated content",
-    "isPublished": true
-  }'
-```
-
----
-
-## データベーススキーマの変更
-
-### 新しいエンティティの追加
-
-#### ステップ1: Domainエンティティの作成
-
-```csharp
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace NariNoteBackend.Domain;
-
-public class Comment
-{
-    [Key]
-    public int Id { get; set; }
-
-    [Required]
-    [ForeignKey("Article")]
-    public int ArticleId { get; set; }
-
-    [Required]
-    [ForeignKey("Author")]
-    public int AuthorId { get; set; }
-
-    [Required]
-    [MaxLength(1000)]
-    public required string Body { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-
-    public Comment()
-    {
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    // Navigation Properties
-    public required Article Article { get; set; }
-    public required User Author { get; set; }
-}
-```
-
-#### ステップ2: DbContextに追加
-
-```csharp
-public class NariNoteDbContext : DbContext
-{
-    // 既存のDbSet...
-    public DbSet<Comment> Comments { get; set; } = null!;
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        // 既存の設定...
-        
-        // Commentの設定
-        modelBuilder.Entity<Comment>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Body).IsRequired().HasMaxLength(1000);
-            
-            entity.HasOne(e => e.Article)
-                .WithMany()
-                .HasForeignKey(e => e.ArticleId)
-                .OnDelete(DeleteBehavior.Cascade);
-                
-            entity.HasOne(e => e.Author)
-                .WithMany()
-                .HasForeignKey(e => e.AuthorId);
-        });
-    }
-}
-```
-
-#### ステップ3: マイグレーション作成
+## ビルドとテスト
 
 ```bash
 cd nari-note-backend
-
-# マイグレーション作成
-dotnet ef migrations add AddCommentEntity
-
-# マイグレーションの確認
-cat Migrations/*_AddCommentEntity.cs
-
-# マイグレーション適用
-dotnet ef database update
-```
-
-#### ステップ4: マイグレーションのロールバック（必要な場合）
-
-```bash
-# 一つ前のマイグレーションに戻る
-dotnet ef database update <前のマイグレーション名>
-
-# マイグレーションファイルの削除
-dotnet ef migrations remove
-```
-
-### 既存エンティティの変更
-
-#### 例: Articleにview_countカラムを追加
-
-```csharp
-public class Article
-{
-    // 既存のプロパティ...
-    
-    public int ViewCount { get; set; } = 0;  // 追加
-}
-```
-
-```bash
-# マイグレーション作成
-dotnet ef migrations add AddViewCountToArticle
-
-# 適用
-dotnet ef database update
-```
-
----
-
-## 便利なコマンド
-
-### プロジェクト管理
-
-```bash
-# パッケージ追加
-dotnet add package <パッケージ名>
-
-# パッケージ一覧
-dotnet list package
-
-# プロジェクトのクリーン
-dotnet clean
-
-# ビルド
 dotnet build
-
-# リリースビルド
-dotnet build -c Release
+dotnet test
 ```
 
-### Entity Framework Core
+テストの詳細は [testing-guide.md](./testing-guide.md)。
+
+## マイグレーション
+
+EF Core のツールはローカルツールとして `nari-note-backend/.config/dotnet-tools.json` に定義している。
 
 ```bash
-# マイグレーション作成
-dotnet ef migrations add <名前>
+cd nari-note-backend
+dotnet tool restore                        # 初回のみ
 
-# マイグレーション適用
-dotnet ef database update
-
-# マイグレーション削除（最新のみ）
-dotnet ef migrations remove
-
-# データベース削除
-dotnet ef database drop
-
-# スクリプト生成（SQLファイル）
-dotnet ef migrations script -o migrations.sql
+dotnet ef migrations add <マイグレーション名>  # Entity / DbContext の変更から作成
+dotnet ef migrations remove                # 直前のマイグレーションを取り消す（未適用の場合）
 ```
 
-### Docker
+- マイグレーションは全環境で API の起動時に自動適用される。手動で `dotnet ef database update` する必要は基本的に無い
+- 生成されたマイグレーションと `Migrations/NariNoteDbContextModelSnapshot.cs` は必ずレビューしてコミットする（スナップショットがスキーマの正）
+- 既存データの変換を伴うマイグレーションは、`Tests/NariNoteBackend.Tests/Migrations/` にテストを追加する
+- 本番では起動時に適用されるため、大きなテーブルのロックや長時間かかる変更は避けるか、デプロイ手順を別途検討する
 
-```bash
-# コンテナ起動
-docker-compose up -d
+## 設定キー
 
-# コンテナ停止
-docker-compose down
+設定は以下の順で読み込まれる（後のものが優先）。
 
-# ログ確認
-docker-compose logs -f backend
+1. `appsettings.json` → `appsettings.{環境名}.json`
+2. 環境変数（例: `ConnectionStrings__DefaultConnection`）
+3. Development のみ: `secret.json`（git 管理外。外部サービスのトークン等の開発用シークレットを置く）
+4. Development / Testing 以外: AWS SSM Parameter Store の `/{APP_NAME}/app` と `/{APP_NAME}/db`（`APP_NAME` 環境変数、未指定時は `nari-note`）。本番の値はここで上書きされる
 
-# コンテナに入る
-docker-compose exec backend bash
+`secret.json` と SSM は `Program.cs` で後から追加するため、環境変数より優先される。
 
-# PostgreSQLコンテナに接続
-docker-compose exec postgres psql -U postgres -d nari_note
-```
+値はここには書かない。キー名と用途のみ示す。
 
----
-
-## まとめ
-
-このワークフローに従うことで：
-- ✅ 一貫した開発プロセス
-- ✅ エラーの早期発見
-- ✅ スムーズなデバッグ
-- ✅ 効率的な開発
-
-新規機能を追加する際は、このドキュメントと[実装ガイド](./backend-implementation-guide.md)を参照してください。
+| キー | 用途 |
+|---|---|
+| `ConnectionStrings:DefaultConnection` | DB 接続文字列。未設定の場合は下の個別キーから組み立てる |
+| `host` / `port` / `name` / `username` / `password` | DB 接続情報（SSM の `/db` から読む） |
+| `Jwt:Secret` / `Jwt:Issuer` / `Jwt:Audience` | JWT の署名鍵・発行者・対象 |
+| `Jwt:ExpirationInHours` | JWT と認証 Cookie の有効期間（時間） |
+| `Frontend:BaseUrl` | メール本文に載せるフロントエンドの URL（必須） |
+| `Cors:AllowedOrigins` | CORS で許可するオリジン |
+| `resend_api_token` | メール送信（Resend）の API トークン |
+| `discord_general_webhook_url` | Discord 通知の Webhook URL |
+| `image_delivery_bucket_name` / `image_delivery_domain` | 画像を保存する S3 バケットと配信ドメイン（Development 以外） |
+| `sentry_dsn` | Sentry の DSN |
+| `Serilog` | ログ出力の設定（本番はファイルにも出力） |

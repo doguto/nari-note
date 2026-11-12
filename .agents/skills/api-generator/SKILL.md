@@ -11,22 +11,39 @@ description: |-
 
 ## 概要
 
-作成・更新したAPI情報をフロントエンドのコードに反映させるスクリプトを実行する
+`scripts/api-generator.py` はバックエンドの C# コードを正規表現で解析し、フロントエンドの API コードを生成する。
+
+入力:
+
+- `nari-note-backend/Src/Controller/*Controller.cs`（`[HttpGet]` 等のアクション）
+- `nari-note-backend/Src/Application/Dto/`（`Request/`, `Response/` と直下の DTO）
+- `nari-note-backend/Src/Domain/ValueObject/EntityKeyObject.cs`（ID 型）
+
+出力（`nari-note-frontend/src/lib/api/`、毎回上書き）:
+
+| ファイル | 内容 |
+| --- | --- |
+| `types.ts` | Request / Response / DTO の型 |
+| `endpoints.ts` | Axios クライアントを使う API 関数（ブラウザから BFF 経由で呼ぶ） |
+| `hooks.ts` | TanStack Query のフック（`useXxx`） |
+| `server.ts` | Server Component 用の fetch 関数（GET エンドポイントのみ） |
+
+`client.ts` と `index.ts` は生成対象外（手書き）。
 
 ## 実行手順
 
-1. Pythonスクリプトの実行
-
-リポジトリ直下の `scripts` ディレクトリに存在するPythonスクリプトを実行することでフロントエンドのコードが自動で更新される
+1. リポジトリルートで実行する（パスはルートからの相対で解決される）
 
 ```bash
-python scripts/api-generator.py --force --verbose
+PYTHONIOENCODING=utf-8 python scripts/api-generator.py --verbose
 ```
 
-2. 生成されたコードの確認
+- `--verbose`: レスポンス型を特定できずスキップしたアクションの件数も表示する
+- `--force`: 互換のために残っているオプション。指定しなくても常に全ファイルを上書きする
+- Windows のコンソールでは出力の文字化け・エンコードエラーを避けるため `PYTHONIOENCODING=utf-8` を付ける
 
-スクリプトの実行のみで生成が完了するので、念のため以下のファイル内容を確認し変更内容を把握する
+2. 出力の末尾に `Skipped methods` が出ていないか確認する。レスポンス型は次のいずれかで決まるので、スキップされた場合はどちらかに合わせる
+   - アクションの戻り値を `ActionResult<XxxResponse>` にする
+   - アクション名 `Xxx` に対して `XxxResponse` という Response DTO を用意する（どちらも無い DELETE と Logout は戻り値なしとして扱われる）
 
-- nari-note-frontend/src/lib/api/endpoint.ts
-- nari-note-frontend/src/lib/api/hooks.ts
-- nari-note-frontend/src/lib/api/types.ts
+3. `git diff nari-note-frontend/src/lib/api/` で生成結果を確認する。生成物は手で編集しない（次回の生成で上書きされる）
