@@ -98,7 +98,7 @@ sequenceDiagram
 
 - `app/` の `page.tsx` は原則 Server Component とし、`params` / `searchParams` を解決して `features/*/pages` の Page に渡すだけにする。公開ページは `generateMetadata` で `lib/api/server.ts` を使い、`lib/metadata.ts` の `buildPageMetadata` で metadata を組み立てる。取得に失敗しても `{}` を返してページ自体は表示する。
 - ログイン必須のページは metadata に `robots: { index: false }` を設定し、`AuthGuard`（必要なら `VerifiedEmailGuard`）で Page を包む。
-- Page 以下は Client Component で、データは TanStack Query で取得する。サーバーで取得したデータをクライアントに引き継ぐ（hydration）ことはしていない。
+- Page 以下は Client Component で、データは TanStack Query で取得する。
 - `server.ts` の fetch は `cache: 'no-store'` で、ページ単位のキャッシュは行わない。
 - `sitemap.ts` / `robots.ts`、OG 画像（`app/api/og`）も `server.ts` を使ってサーバー側で生成する。
 
@@ -133,7 +133,7 @@ sequenceDiagram
 
 ## 認証状態
 
-認証は HttpOnly Cookie に入った JWT で行う。フロントエンドはトークンを読まず、保存もしない（localStorage 不使用、リフレッシュトークン無し）。
+認証は HttpOnly Cookie に入った JWT で行う。フロントエンドはトークンを扱わない。
 
 ```mermaid
 flowchart TD

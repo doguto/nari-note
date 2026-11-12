@@ -125,7 +125,7 @@ sequenceDiagram
 ```
 
 - 取得時に `NextAttemptAt` をリース期限まで進めるため、処理中にプロセスが落ちてもリース切れ後に再取得される。`SKIP LOCKED` により複数インスタンスでも二重取得しない
-- 再試行間隔は `OutboxRetryPolicy`（現状は暫定の固定 1 分）。`MaxAttempts`（5 回）に達すると `FailedAt` を記録して以後は再試行しない
+- 再試行間隔は `OutboxRetryPolicy`（固定 1 分）。`MaxAttempts`（5 回）に達すると `FailedAt` を記録して以後は再試行しない
 - ポーリングの SQL ログは Serilog フィルタで Warning 未満を出力しない
 
 ### 未認証ユーザーの削除

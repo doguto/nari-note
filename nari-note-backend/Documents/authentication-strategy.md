@@ -4,8 +4,8 @@
 
 ## 方針
 
-- **JWT を HttpOnly Cookie（`authToken`）に保存する**。JavaScript からトークンを読めないため XSS で盗まれにくい。localStorage は使わない
-- サーバー側にセッションストアを持たない。リフレッシュトークンも無く、有効期限（`Jwt:ExpirationInHours`）が切れたら再サインインする
+- **JWT を HttpOnly Cookie（`authToken`）に保存する**。JavaScript からトークンを読めないため XSS で盗まれにくい
+- サーバー側にセッションストアを持たない。有効期限（`Jwt:ExpirationInHours`）が切れたら再サインインする
 - 即時失効が必要な場面は、ユーザーごとの **SecurityStamp** で発行済みトークンを一括無効化する
 - フロントエンドは BFF プロキシ（Next.js の `app/api/[...path]`）経由で API を呼ぶため、Cookie はフロントと同一オリジンで扱われる
 

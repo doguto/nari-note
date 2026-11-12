@@ -22,7 +22,6 @@ public class GetArticleContentService
 }
 ```
 
-既存コードには `this.` の無いアクセスも残っているが、新規・修正箇所では規約に従う。
 
 ### コメント
 

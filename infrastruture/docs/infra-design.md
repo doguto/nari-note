@@ -39,7 +39,7 @@
 | 対象 | トリガー | 仕組み |
 | --- | --- | --- |
 | フロント | `main` への PR マージ | `.github/workflows/cloudflare-deploy.yml` が Cloudflare の Deploy Hook を叩き、Cloudflare 側でビルド・デプロイする |
-| バックエンド | 手動 | 手元からリリース対象のコミットで `scripts/deploy.sh` を実行する (CI からは自動デプロイしない) |
+| バックエンド | 手動 | 手元からリリース対象のコミットで `scripts/deploy.sh` を実行する |
 | インフラ | 手動 | 対象ユニットで `terragrunt plan` / `apply` |
 
 GitHub Actions は PR 時のチェック (Backend Build / Test, Frontend Check) とフロントのデプロイのみを行う。

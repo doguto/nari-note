@@ -26,7 +26,7 @@ npm run dev                         # http://localhost:3000
 | `npm run lint` | ESLint |
 | `npm run pages:build` | Next.js ビルド + OpenNext で Cloudflare Workers 向けに変換（`.open-next/` に出力） |
 | `npm run preview` | `pages:build` 後に `wrangler dev` で Workers ランタイム上で動作確認 |
-| `npm run deploy` | `pages:build` 後に `wrangler deploy`（通常は CI から。手動では使わない） |
+| `npm run deploy` | `pages:build` 後に `wrangler deploy` |
 
 ## 環境変数
 

@@ -33,7 +33,7 @@ nari-note は将棋記事の投稿・共有プラットフォームの Web ア�
 - Next.js 16（App Router）/ React 19 / TypeScript 5
 - TanStack Query 5 + Axios
 - Tailwind CSS 4、shadcn/ui（Radix UI）、lucide-react
-- react-markdown（remark-gfm 等）で本文表示。エディタは自作の MarkdownEditor（Tiptap 等の外部エディタは使っていない）
+- react-markdown で本文表示。エディタは自作の MarkdownEditor
 - Cloudflare Workers へ OpenNext（`@opennextjs/cloudflare`）でデプロイ
 
 **インフラ**
@@ -63,7 +63,7 @@ flowchart LR
 ```
 
 - ブラウザからの API 呼び出しは同一オリジンの `/api/*` に送られ、Next.js の BFF プロキシ（`src/app/api/[...path]`）がバックエンドへ転送する。Server Component からのデータ取得は生成済みの `lib/api/server.ts` がバックエンドを直接呼ぶ。
-- 認証は HttpOnly Cookie に入れた JWT。localStorage にトークンは置かず、リフレッシュトークンも無い。
+- 認証は HttpOnly Cookie に入れた JWT。
 - 詳細なシステム構成とデプロイフローは `infrastruture/docs/infra-design.md` を参照。
 
 ## バックエンドの設計原則（要約）
