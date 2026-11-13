@@ -1,5 +1,4 @@
-import { ProfileCard } from '../organisms/ProfileCard';
-import { ProfileTabNav } from '../organisms/ProfileTabNav';
+import { ProfileCard, ProfileTabs, ProfileTabContent } from '../organisms';
 import type { GetUserProfileResponse, GetArticlesByAuthorResponse, GetCoursesByAuthorResponse, GetLikedArticlesResponse, GetFollowersResponse, GetFollowingsResponse } from '@/lib/api/types';
 
 interface UserProfileTemplateProps {
@@ -32,7 +31,6 @@ interface UserProfileTemplateProps {
   isFollowPending: boolean;
 
   onTabChange: (tab: string) => void;
-  onArticlesClick: () => void;
   onFollowClick: () => void;
   onArticlesRetry: () => void;
   onCoursesRetry: () => void;
@@ -47,71 +45,28 @@ export function UserProfileTemplate({
   isOwnProfile,
   activeTab,
   tabContext,
-  currentPage,
-  pageSize,
-  articlesData,
-  coursesData,
-  likedArticlesData,
-  followersData,
-  followingsData,
-  isArticlesLoading,
-  isCoursesLoading,
-  isLikedArticlesLoading,
-  isFollowersLoading,
-  isFollowingsLoading,
-  articlesError,
-  coursesError,
-  likedArticlesError,
-  followersError,
-  followingsError,
   isFollowPending,
   onTabChange,
-  onArticlesClick,
   onFollowClick,
-  onArticlesRetry,
-  onCoursesRetry,
-  onLikedArticlesRetry,
-  onFollowersRetry,
-  onFollowingsRetry,
+  ...contentProps
 }: UserProfileTemplateProps) {
   return (
     <div className="space-y-6">
-      <ProfileCard
-        user={user}
-        isOwnProfile={isOwnProfile}
-        isFollowPending={isFollowPending}
-        onArticlesClick={onArticlesClick}
-        onTabChange={onTabChange}
-        onFollowClick={onFollowClick}
-      />
+      <section className="overflow-hidden rounded-xl bg-white shadow-sm">
+        <ProfileCard
+          user={user}
+          isOwnProfile={isOwnProfile}
+          isFollowPending={isFollowPending}
+          onTabChange={onTabChange}
+          onFollowClick={onFollowClick}
+        />
+        <ProfileTabs activeTab={activeTab} tabContext={tabContext} onTabChange={onTabChange} />
+      </section>
 
-      <ProfileTabNav
+      <ProfileTabContent
         activeTab={activeTab}
-        tabContext={tabContext}
         basePath={`/users/${user.id}`}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        articlesData={articlesData}
-        coursesData={coursesData}
-        likedArticlesData={likedArticlesData}
-        followersData={followersData}
-        followingsData={followingsData}
-        isArticlesLoading={isArticlesLoading}
-        isCoursesLoading={isCoursesLoading}
-        isLikedArticlesLoading={isLikedArticlesLoading}
-        isFollowersLoading={isFollowersLoading}
-        isFollowingsLoading={isFollowingsLoading}
-        articlesError={articlesError}
-        coursesError={coursesError}
-        likedArticlesError={likedArticlesError}
-        followersError={followersError}
-        followingsError={followingsError}
-        onTabChange={onTabChange}
-        onArticlesRetry={onArticlesRetry}
-        onCoursesRetry={onCoursesRetry}
-        onLikedArticlesRetry={onLikedArticlesRetry}
-        onFollowersRetry={onFollowersRetry}
-        onFollowingsRetry={onFollowingsRetry}
+        {...contentProps}
       />
     </div>
   );

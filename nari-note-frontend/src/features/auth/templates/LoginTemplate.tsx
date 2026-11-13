@@ -48,7 +48,7 @@ export function LoginTemplate({
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-brand-primary hover:bg-brand-primary-hover"
+          className="w-full"
         >
           {isLoading ? 'ログイン中...' : 'ログイン'}
         </Button>

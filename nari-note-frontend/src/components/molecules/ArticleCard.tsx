@@ -11,6 +11,7 @@ interface ArticleCardProps {
   tags: string[];
   likeCount: number;
   date: string;
+  showAuthor?: boolean;
 }
 
 
@@ -23,6 +24,7 @@ export function ArticleCard({
   tags,
   likeCount,
   date,
+  showAuthor = true,
 }: ArticleCardProps) {
   return (
     <div className="relative bg-white rounded-lg p-5 border border-gray-200 hover:shadow-lg hover:border-brand-primary/30 transition-all duration-200">
@@ -33,7 +35,9 @@ export function ArticleCard({
       />
       <div className="flex flex-col gap-3">
         <h3 className="text-lg font-bold text-gray-800">{title}</h3>
-        <UserAvatarLink userId={authorId} username={author} userIconImageUrl={userIconImageUrl} size="sm" />
+        {showAuthor && (
+          <UserAvatarLink userId={authorId} username={author} userIconImageUrl={userIconImageUrl} size="sm" />
+        )}
         <div className='flex gap-2 flex-wrap'>
           {
             tags.map((tag) => (

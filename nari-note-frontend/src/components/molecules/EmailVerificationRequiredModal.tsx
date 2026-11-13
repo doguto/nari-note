@@ -59,7 +59,7 @@ export function EmailVerificationRequiredModal({
           <Button
             onClick={onResend}
             disabled={isResending || isResent}
-            className="bg-brand-primary hover:bg-brand-primary-hover"
+           
           >
             {isResending ? '送信中...' : '確認メールを再送する'}
           </Button>

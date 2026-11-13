@@ -14,4 +14,5 @@ public interface ICourseRepository : IRepository<Course, CourseId>
     Task<(List<CourseSummary> Courses, int TotalCount)> FindPublishedSummariesByAuthorAsync(UserId authorId, int limit, int offset);
     Task<(List<CourseSummary> Courses, int TotalCount)> FindPublishedSummariesByTagAsync(string tagName, int limit, int offset);
     Task<List<Course>> FindAllByAuthorAsync(UserId authorId);
+    Task<int> CountPublishedByAuthorAsync(UserId authorId);
 }

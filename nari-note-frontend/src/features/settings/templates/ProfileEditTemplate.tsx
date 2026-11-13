@@ -89,7 +89,7 @@ export function ProfileEditTemplate({
           <Button
             type="submit"
             disabled={isSubmitting || !hasChanges}
-            className="flex-1 bg-brand-primary hover:bg-brand-primary-hover"
+            className="flex-1"
           >
             {isSubmitting ? '保存中...' : '保存'}
           </Button>

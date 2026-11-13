@@ -10,17 +10,20 @@ public class GetUserProfileService
     readonly IUserRepository userRepository;
     readonly IFollowRepository followRepository;
     readonly IArticleRepository articleRepository;
+    readonly ICourseRepository courseRepository;
     readonly ILikeRepository likeRepository;
     
     public GetUserProfileService(
         IUserRepository userRepository, 
         IFollowRepository followRepository,
         IArticleRepository articleRepository,
+        ICourseRepository courseRepository,
         ILikeRepository likeRepository)
     {
         this.userRepository = userRepository;
         this.followRepository = followRepository;
         this.articleRepository = articleRepository;
+        this.courseRepository = courseRepository;
         this.likeRepository = likeRepository;
     }
     
@@ -41,6 +44,8 @@ public class GetUserProfileService
         // 記事数を取得
         var articleCount = await articleRepository.CountByAuthorAsync(request.Id);
 
+        var courseCount = await this.courseRepository.CountPublishedByAuthorAsync(request.Id);
+
         // いいねした記事数を取得
         var likedArticleCount = await likeRepository.CountLikedArticlesByUserAsync(request.Id);
 
@@ -54,6 +59,7 @@ public class GetUserProfileService
             FollowingCount = followingCount,
             IsFollowing = isFollowing,
             ArticleCount = articleCount,
+            CourseCount = courseCount,
             LikedArticleCount = likedArticleCount,
             UserIconImageUrl = user.ProfileImage,
             XAccountName = user.XAccountName

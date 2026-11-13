@@ -1,5 +1,6 @@
+import { ReactNode } from 'react';
 import { ArticleCard } from '@/components/molecules';
-import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { EmptyState, LoadingSpinner, ErrorMessage } from '@/components/ui';
 import type { ArticleThumbnailDto } from '@/lib/api';
 
 interface ArticleListProps {
@@ -8,6 +9,9 @@ interface ArticleListProps {
   error: Error | null;
   onRetry: () => void;
   emptyMessage?: string;
+  emptyIcon?: ReactNode;
+  emptyVariant?: 'default' | 'panel';
+  showAuthor?: boolean;
 }
 
 /**
@@ -22,6 +26,9 @@ export function ArticleList({
   error,
   onRetry,
   emptyMessage = '記事がありません',
+  emptyIcon,
+  emptyVariant = 'default',
+  showAuthor = true,
 }: ArticleListProps) {
   if (isLoading) {
     return <LoadingSpinner text="記事を読み込み中..." />;
@@ -37,6 +44,9 @@ export function ArticleList({
   }
 
   if (!articles || articles.length === 0) {
+    if (emptyVariant === 'panel') {
+      return <EmptyState variant="panel" title={emptyMessage} icon={emptyIcon} />;
+    }
     return <p className="text-gray-500 text-center py-8">{emptyMessage}</p>;
   }
 
@@ -60,6 +70,7 @@ export function ArticleList({
           tags={article.tags ?? []}
           likeCount={article.likeCount ?? 0}
           date={article.updatedAt ? new Date(article.updatedAt).toLocaleDateString('ja-JP') : ''}
+          showAuthor={showAuthor}
         />
       ))}
     </div>

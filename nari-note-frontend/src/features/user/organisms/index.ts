@@ -1,4 +1,4 @@
 export { ProfileCard } from './ProfileCard';
-export { ProfileTabNav } from './ProfileTabNav';
+export { ProfileTabs } from './ProfileTabs';
+export { ProfileTabContent } from './ProfileTabContent';
 export { UserFollowersList } from './UserFollowersList';
-

@@ -40,6 +40,9 @@ public class UsersControllerTest : IntegrationTestBase
             new ArticleBuilder(user).Draft().Build(),
             new ArticleBuilder(user).PublishedAt(Now.AddDays(1)).Build(),
             new ArticleBuilder(user).InCourse(course).Build(),
+            new CourseBuilder(user).Draft().Build(),
+            new CourseBuilder(user).PublishedAt(Now.AddDays(1)).Build(),
+            new CourseBuilder(follower).Build(),
             TestEntity.Follow(follower, user),
             TestEntity.Follow(user, following1),
             TestEntity.Follow(user, following2),
@@ -58,6 +61,8 @@ public class UsersControllerTest : IntegrationTestBase
         Assert.Equal(2, body.FollowingCount);
         // 下書き・公開日時を過ぎていない予約投稿・講座の記事は記事数に含めない
         Assert.Equal(1, body.ArticleCount);
+        // 下書き・公開日時を過ぎていない講座は講座数に含めない
+        Assert.Equal(1, body.CourseCount);
         Assert.Equal(1, body.LikedArticleCount);
         Assert.False(body.IsFollowing);
     }
