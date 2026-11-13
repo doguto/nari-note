@@ -1,3 +1,4 @@
+import { BookOpen, FileText, Heart } from 'lucide-react';
 import { ArticleList, CourseList } from '@/components/organisms';
 import { Pagination } from '@/components/molecules';
 import { UserFollowersList } from './UserFollowersList';
@@ -83,6 +84,7 @@ export function ProfileTabContent({
             error={articlesError}
             onRetry={onArticlesRetry}
             emptyMessage="まだ記事がありません"
+            emptyIcon={<FileText />}
             layout="grid"
             showAuthor={false}
           />
@@ -97,6 +99,7 @@ export function ProfileTabContent({
             isLoading={isCoursesLoading}
             error={coursesError}
             onRetry={onCoursesRetry}
+            emptyIcon={<BookOpen />}
             layout="grid"
             showAuthor={false}
           />
@@ -112,6 +115,7 @@ export function ProfileTabContent({
             error={likedArticlesError}
             onRetry={onLikedArticlesRetry}
             emptyMessage="いいねした記事がありません"
+            emptyIcon={<Heart />}
             layout="grid"
           />
           {!isLikedArticlesLoading && !likedArticlesError && renderPagination(likedArticlesData?.totalCount)}
@@ -119,7 +123,7 @@ export function ProfileTabContent({
       )}
 
       {(activeTab === 'followers' || activeTab === 'followings') && (
-        <div className="rounded-xl border border-gray-200 bg-white p-2 sm:p-4">
+        <>
           {activeTab === 'followers' ? (
             <UserFollowersList
               users={followersData?.followers}
@@ -141,7 +145,7 @@ export function ProfileTabContent({
               emptyMessage="フォロー中のユーザーがいません"
             />
           )}
-        </div>
+        </>
       )}
       {activeTab === 'followers' && !isFollowersLoading && !followersError && renderPagination(followersData?.totalCount)}
       {activeTab === 'followings' && !isFollowingsLoading && !followingsError && renderPagination(followingsData?.totalCount)}

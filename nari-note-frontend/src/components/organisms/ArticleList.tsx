@@ -1,5 +1,6 @@
+import { ReactNode } from 'react';
 import { ArticleCard } from '@/components/molecules';
-import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { EmptyState, LoadingSpinner, ErrorMessage } from '@/components/ui';
 import type { ArticleThumbnailDto } from '@/lib/api';
 
 interface ArticleListProps {
@@ -8,9 +9,13 @@ interface ArticleListProps {
   error: Error | null;
   onRetry: () => void;
   emptyMessage?: string;
+  emptyIcon?: ReactNode;
   layout?: 'list' | 'grid';
   showAuthor?: boolean;
 }
+
+// 1件だけのときに右半分が空かないよう横幅いっぱいに広げる
+const GRID_CLASS = 'grid gap-4 md:grid-cols-2 md:[&>:only-child]:col-span-2';
 
 /**
  * ArticleList - Organism Component
@@ -24,6 +29,7 @@ export function ArticleList({
   error,
   onRetry,
   emptyMessage = '記事がありません',
+  emptyIcon,
   layout = 'list',
   showAuthor = true,
 }: ArticleListProps) {
@@ -41,6 +47,9 @@ export function ArticleList({
   }
 
   if (!articles || articles.length === 0) {
+    if (layout === 'grid') {
+      return <EmptyState variant="panel" title={emptyMessage} icon={emptyIcon} />;
+    }
     return <p className="text-gray-500 text-center py-8">{emptyMessage}</p>;
   }
 
@@ -52,7 +61,7 @@ export function ArticleList({
   }
 
   return (
-    <div className={layout === 'grid' ? 'grid gap-4 md:grid-cols-2' : 'space-y-4'}>
+    <div className={layout === 'grid' ? GRID_CLASS : 'space-y-4'}>
       {articlesWithId.map((article) => (
         <ArticleCard
           key={article.id}
