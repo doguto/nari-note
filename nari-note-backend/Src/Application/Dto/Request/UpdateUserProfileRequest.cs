@@ -10,4 +10,9 @@ public class UpdateUserProfileRequest
 
     [MaxLength(500, ErrorMessage = "自己紹介は500文字以内で入力してください")]
     public string? Bio { get; set; }
+
+    // 空文字列は紐付け解除として扱う
+    [MaxLength(15, ErrorMessage = "Xのユーザー名は15文字以内で入力してください")]
+    [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Xのユーザー名は半角英数字・アンダーバーのみ使用可能です")]
+    public string? XAccountName { get; set; }
 }

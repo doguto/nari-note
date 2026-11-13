@@ -326,6 +326,7 @@ export interface GetUserProfileResponse {
   articleCount: number;
   likedArticleCount: number;
   userIconImageUrl?: string;
+  xAccountName?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -455,6 +456,7 @@ export interface UpdatePasswordResponse {
 export interface UpdateUserProfileRequest {
   name?: string;
   bio?: string;
+  xAccountName?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

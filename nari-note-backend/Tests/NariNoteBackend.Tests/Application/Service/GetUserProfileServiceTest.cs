@@ -14,7 +14,7 @@ public class GetUserProfileServiceTest
     readonly IFollowRepository followRepository = Substitute.For<IFollowRepository>();
     readonly ILikeRepository likeRepository = Substitute.For<ILikeRepository>();
     readonly GetUserProfileService service;
-    readonly User user = new UserBuilder().WithName("taro").WithBio("居飛車党です").WithProfileImage("https://images.test/taro").Build();
+    readonly User user = new UserBuilder().WithName("taro").WithBio("居飛車党です").WithProfileImage("https://images.test/taro").WithXAccountName("taro_shogi").Build();
     readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     readonly User viewer = new UserBuilder().Build();
 
@@ -43,6 +43,7 @@ public class GetUserProfileServiceTest
         Assert.Equal("taro", response.Username);
         Assert.Equal("居飛車党です", response.Bio);
         Assert.Equal("https://images.test/taro", response.UserIconImageUrl);
+        Assert.Equal("taro_shogi", response.XAccountName);
         Assert.Equal(this.user.CreatedAt, response.CreatedAt);
         Assert.Equal(3, response.FollowerCount);
         Assert.Equal(5, response.FollowingCount);

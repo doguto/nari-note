@@ -12,7 +12,7 @@ namespace NariNoteBackend.Tests.Application.Service;
 public class UpdateUserProfileServiceTest
 {
     readonly UpdateUserProfileService service;
-    readonly User user = new UserBuilder().WithName("taro").WithBio("旧自己紹介").Build();
+    readonly User user = new UserBuilder().WithName("taro").WithBio("旧自己紹介").WithXAccountName("taro_old").Build();
     readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
 
     public UpdateUserProfileServiceTest()
@@ -39,6 +39,7 @@ public class UpdateUserProfileServiceTest
 
         Assert.Equal("taro", this.user.Name);
         Assert.Equal("", this.user.Bio);
+        Assert.Equal("taro_old", this.user.XAccountName);
         // 名前を変更しない場合は重複確認を行わない
         await this.userRepository.DidNotReceiveWithAnyArgs().ExistsByNameAsync("");
     }
@@ -53,5 +54,15 @@ public class UpdateUserProfileServiceTest
 
         Assert.Equal("taro", this.user.Name);
         await this.userRepository.DidNotReceive().UpdateAsync(Arg.Any<User>());
+    }
+
+    [Fact]
+    public async Task Xのユーザー名を更新し_空文字で紐付けを解除できる()
+    {
+        await this.service.ExecuteAsync(this.user.Id, new UpdateUserProfileRequest { XAccountName = "taro_new" });
+        Assert.Equal("taro_new", this.user.XAccountName);
+
+        await this.service.ExecuteAsync(this.user.Id, new UpdateUserProfileRequest { XAccountName = "" });
+        Assert.Null(this.user.XAccountName);
     }
 }

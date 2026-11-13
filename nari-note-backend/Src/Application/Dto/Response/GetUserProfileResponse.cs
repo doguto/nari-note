@@ -14,5 +14,6 @@ public class GetUserProfileResponse
     public int ArticleCount { get; set; }
     public int LikedArticleCount { get; set; }
     public string? UserIconImageUrl { get; set; }
+    public string? XAccountName { get; set; }
     // 注意: PasswordHash と Email は含めない
 }

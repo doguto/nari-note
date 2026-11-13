@@ -39,6 +39,11 @@ public class UpdateUserProfileService
             user.Bio = request.Bio;
         }
 
+        if (request.XAccountName != null)
+        {
+            user.XAccountName = request.XAccountName == "" ? null : request.XAccountName;
+        }
+
         user.UpdatedAt = timeProvider.UtcNow();
 
         await userRepository.UpdateAsync(user);
