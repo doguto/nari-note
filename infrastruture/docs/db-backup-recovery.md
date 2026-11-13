@@ -51,10 +51,12 @@ sequenceDiagram
     end
 
     loop 5 分毎
+        TM->>CW: DbUp (pg_isready の成否)
+        TM->>CW: DiskUsedPercent{MountPath} (/ と /data/postgresql)
         TM->>CW: DbWalArchivePendingFiles (.ready の数)
     end
 
-    opt 26 時間ベースバックアップ無し or 未送信 WAL がしきい値超過
+    opt 26 時間ベースバックアップ無し / 未送信 WAL・ディスク使用率がしきい値超過 / PostgreSQL 応答無し
         CW->>SNS: アラーム (メール通知)
     end
 ```
@@ -84,9 +86,14 @@ sequenceDiagram
 | --- | --- |
 | ベースバックアップ欠落 | `DbBackupSuccess{Type=base}` が 26 時間記録されない (欠損は異常扱い) |
 | WAL アーカイブ滞留 | `DbWalArchivePendingFiles` がしきい値 (`wal_archive_pending_threshold`) を 2 回連続で超える |
+| PostgreSQL 停止 | `DbUp` が 2 回連続で 0 (欠損は異常扱い) |
+| ディスク使用率 | `DiskUsedPercent{MountPath}` が `/`・`/data/postgresql` それぞれでしきい値 (`disk_used_percent_threshold`、既定 80%) を 2 回連続で超える (欠損は異常扱い) |
 | PostgreSQL エラーログ | `/<app_name>/postgresql` の ERROR / FATAL / PANIC 件数がしきい値を超える |
 
-- S3 障害時も DB は止まらないが、未送信の WAL が `pg_wal` に溜まりディスクを圧迫するため滞留を監視する
+- S3 障害時も DB は止まらないが、未送信の WAL が `pg_wal` に溜まりディスクを圧迫するため滞留とディスク使用率を監視する
+- ルートボリューム (8GiB) は swap・dnf キャッシュ・`extract` の一時 DB 展開先を兼ねるため、データ用 EBS と別に監視する
+- いずれも `nari-note-db-backup check` (5 分毎) が送る。check が止まるとすべてデータ欠損になり、各アラームが発報する
+- `restore` は PostgreSQL を停止するため、実行中は PostgreSQL 停止のアラームが発報する
 - 最終アーカイブからの経過時間ではなく未送信数を見る (アクセスが無いと WAL が切り替わらず、経過時間は正常時でも伸びるため)
 - メトリクスは `CWAgent` 名前空間に `AppName` ディメンションで送る (インスタンス再作成でアラームが外れないよう InstanceId は使わない)
 
