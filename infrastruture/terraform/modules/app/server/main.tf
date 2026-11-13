@@ -10,6 +10,8 @@ locals {
   deploy_script_key = "scripts/nari-note-deploy.sh"
   # DB バックアップ (WAL-G) の導入・リストア用スクリプト。配布方法はデプロイスクリプトと同じ
   db_backup_script_key = "scripts/nari-note-db-backup.sh"
+  # userdata に渡すと変更時に EC2 が再作成されるため、スクリプトに埋め込んで配布する
+  db_backup_script = replace(file("${path.module}/nari-note-db-backup.sh"), "@ENABLE_HEALTH_CHECK@", tostring(var.enable_db_health_check))
 
   # userdata が配置する設定ファイル。userdata の上限 (16KB) を超えないよう、埋め込まずに S3 経由で配布する
   server_config_files = {
@@ -100,10 +102,10 @@ resource "aws_s3_object" "deploy_script" {
 
 # 初回起動時に userdata が取得する DB バックアップスクリプト
 resource "aws_s3_object" "db_backup_script" {
-  bucket = local.deploy_bucket_name
-  key    = local.db_backup_script_key
-  source = "${path.module}/nari-note-db-backup.sh"
-  etag   = filemd5("${path.module}/nari-note-db-backup.sh")
+  bucket  = local.deploy_bucket_name
+  key     = local.db_backup_script_key
+  content = local.db_backup_script
+  etag    = md5(local.db_backup_script)
 }
 
 resource "aws_volume_attachment" "postgres_data" {

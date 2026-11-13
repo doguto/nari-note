@@ -259,6 +259,30 @@ sudo find /data/postgresql/pg_wal/archive_status -name '*.ready' | wc -l  # 未�
 
 S3 や IAM の問題が解消すれば、PostgreSQL が自動で再送する。未送信の WAL は `pg_wal` に溜まり続けるため、`df -h /data/postgresql` で空き容量も確認する。
 
+### PostgreSQL 停止のアラームが鳴った
+
+```bash
+sudo systemctl status postgresql --no-pager
+sudo journalctl -u postgresql -n 100 --no-pager
+sudo -u postgres pg_isready -h /run/postgresql -p 5432
+sudo systemctl status nari-note-db-backup-check.timer nari-note-db-backup-check.service --no-pager  # check 自体が止まっていないか
+```
+
+ディスクが埋まって停止した場合は、次節の手順で空き容量を確保してから `sudo systemctl start postgresql` で起動する。`restore` の実行中は意図した停止のため対応不要。
+
+### ディスク使用率のアラームが鳴った
+
+```bash
+df -h / /data/postgresql
+sudo du -xh --max-depth=2 /data/postgresql | sort -h | tail -n 20
+sudo du -xh --max-depth=2 / | sort -h | tail -n 20
+```
+
+- `/data/postgresql/pg_wal` が大きい場合は WAL アーカイブの滞留を疑い、「WAL アーカイブ滞留のアラームが鳴った」の手順で確認する。`pg_wal` 内のファイルは手で消さない
+- `/data/postgresql/.pre-restore-*` が残っている場合は、finalize されていない restore の退避データ
+- ルートは `sudo dnf clean all` で dnf キャッシュを、`/var/tmp/nari-note-pg-extract` が残っていれば `sudo nari-note-db-backup extract-stop` で一時 DB を削除できる
+- 恒常的に足りない場合はデータ用 EBS (`postgres_data_volume_size`) を拡張する
+
 ### ベースバックアップ欠落のアラームが鳴った
 
 ```bash
