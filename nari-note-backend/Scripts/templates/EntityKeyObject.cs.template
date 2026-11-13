@@ -1,5 +1,0 @@
-using Vogen;
-
-namespace NariNoteBackend.Domain.ValueObject;
-
-{value_objects}
