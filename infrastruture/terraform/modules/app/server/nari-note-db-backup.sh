@@ -48,6 +48,8 @@ EXTRACT_PORT=5433
 PG_CTL="/usr/bin/pg_ctl"
 # 使用率を監視するファイルシステム。ルートは swap・dnf キャッシュ・extract の一時 DB 展開先を兼ねる
 DISK_MOUNT_PATHS=("/" "${PGDATA}")
+# Terraform が配布時に置換する (enable_db_health_check)。アラームの無い環境ではメトリクス送信を止める
+ENABLE_HEALTH_CHECK="@ENABLE_HEALTH_CHECK@"
 
 APP_UNIT="nari-note-backend"
 NGINX_UPSTREAM_FILE="/etc/nginx/nari-note-backend/active-upstream.conf"
@@ -250,6 +252,15 @@ Persistent=true
 
 [Install]
 WantedBy=timers.target"
+
+  if [[ "${ENABLE_HEALTH_CHECK}" != "true" ]]; then
+    systemctl disable --now nari-note-db-backup-check.timer 2>/dev/null || true
+    rm -f /etc/systemd/system/nari-note-db-backup-check.service /etc/systemd/system/nari-note-db-backup-check.timer
+    systemctl daemon-reload
+    systemctl enable --now nari-note-db-backup-base.timer
+    log "install 完了 (bucket: ${bucket}, check 無効)"
+    return
+  fi
 
   write_unit nari-note-db-backup-check.service "[Unit]
 Description=Report nari-note PostgreSQL health metrics

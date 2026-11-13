@@ -93,6 +93,7 @@ sequenceDiagram
 - S3 障害時も DB は止まらないが、未送信の WAL が `pg_wal` に溜まりディスクを圧迫するため滞留とディスク使用率を監視する
 - ルートボリューム (8GiB) は swap・dnf キャッシュ・`extract` の一時 DB 展開先を兼ねるため、データ用 EBS と別に監視する
 - いずれも `nari-note-db-backup check` (5 分毎) が送る。check が止まるとすべてデータ欠損になり、各アラームが発報する
+- アラームの無い dev では `app/server` の `enable_db_health_check = false` で check を無効にしている (スクリプトの S3 配布時に埋め込まれ、`install` が check の timer を配置しない)
 - `restore` は PostgreSQL を停止するため、実行中は PostgreSQL 停止のアラームが発報する
 - 最終アーカイブからの経過時間ではなく未送信数を見る (アクセスが無いと WAL が切り替わらず、経過時間は正常時でも伸びるため)
 - メトリクスは `CWAgent` 名前空間に `AppName` ディメンションで送る (インスタンス再作成でアラームが外れないよう InstanceId は使わない)
