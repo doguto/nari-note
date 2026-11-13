@@ -1,8 +1,0 @@
-using NariNoteBackend.Domain.Entity;
-using NariNoteBackend.Domain.ValueObject;
-
-namespace NariNoteBackend.Domain.Repository;
-
-public interface I{{ENTITY_NAME}}Repository : IRepository<{{ENTITY_NAME}}, {{ENTITY_NAME}}Id>
-{
-}
