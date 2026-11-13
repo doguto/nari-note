@@ -84,7 +84,7 @@ export function ResetPasswordTemplate({
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-brand-primary hover:bg-brand-primary-hover"
+          className="w-full"
         >
           {isLoading ? '更新中...' : 'パスワードを更新'}
         </Button>

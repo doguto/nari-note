@@ -8,6 +8,8 @@ interface CourseListProps {
   error: Error | null;
   onRetry: () => void;
   emptyMessage?: string;
+  layout?: 'list' | 'grid';
+  showAuthor?: boolean;
 }
 
 
@@ -17,6 +19,8 @@ export function CourseList({
   error,
   onRetry,
   emptyMessage = 'まだ講座がありません',
+  layout = 'list',
+  showAuthor = true,
 }: CourseListProps) {
   if (isLoading) {
     return <LoadingSpinner text="講座を読み込み中..." />;
@@ -36,7 +40,7 @@ export function CourseList({
   }
 
   return (
-    <div className="space-y-4">
+    <div className={layout === 'grid' ? 'grid gap-4 md:grid-cols-2' : 'space-y-4'}>
       {courses.map((course) => (
         <CourseCard
           key={course.id}
@@ -47,6 +51,7 @@ export function CourseList({
           userIconImageUrl={course.userIconImageUrl}
           articleCount={course.articleIds?.length ?? 0}
           likeCount={course.likeCount ?? 0}
+          showAuthor={showAuthor}
         />
       ))}
     </div>

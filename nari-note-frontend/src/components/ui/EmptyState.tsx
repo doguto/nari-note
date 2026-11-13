@@ -39,7 +39,7 @@ export function EmptyState({ title, description, icon, action }: EmptyStateProps
       {action && (
         <Button
           onClick={action.onClick}
-          className="px-6 py-2 bg-brand-primary text-white hover:bg-brand-primary-hover font-medium"
+          className="px-6 py-2 font-medium"
         >
           {action.label}
         </Button>

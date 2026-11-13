@@ -1,24 +1,24 @@
-interface FollowStatsProps {
+interface ProfileStatProps {
   label: string;
   count: number;
-  onClick?: () => void;
+  onClick: () => void;
 }
 
 /**
- * FollowStats - Atom Component
- * 
- * フォロー統計（フォロワー数/フォロー中数）表示
- * クリック可能なスタイルでモーダルを開くトリガーとなる
+ * ProfileStat - Atom Component
+ *
+ * プロフィールの件数（記事数・フォロワー数など）を表示し、押すと対応する一覧へ切り替える
+ * スマホでは数値とラベルを縦に積んだマス、PC では横並びのテキストとして表示する
  */
-export function FollowStats({ label, count, onClick }: FollowStatsProps) {
-  const classes = onClick 
-    ? 'cursor-pointer hover:text-brand-primary transition-colors'
-    : '';
-
+export function ProfileStat({ label, count, onClick }: ProfileStatProps) {
   return (
-    <div className={classes} onClick={onClick}>
-      <span className="font-bold text-brand-text">{count}</span>
-      <span className="ml-1">{label}</span>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex flex-col items-center py-2.5 text-gray-600 transition-colors hover:text-brand-text sm:flex-row sm:items-baseline sm:gap-1 sm:py-0"
+    >
+      <span className="text-[17px] font-bold text-brand-text sm:text-xl">{count.toLocaleString()}</span>
+      <span className="text-[11px] sm:text-sm">{label}</span>
+    </button>
   );
 }

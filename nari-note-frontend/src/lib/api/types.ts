@@ -324,6 +324,7 @@ export interface GetUserProfileResponse {
   followingCount: number;
   isFollowing: boolean;
   articleCount: number;
+  courseCount: number;
   likedArticleCount: number;
   userIconImageUrl?: string;
   xAccountName?: string;

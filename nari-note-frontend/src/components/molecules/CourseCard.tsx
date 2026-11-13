@@ -10,6 +10,7 @@ interface CourseCardProps {
   userIconImageUrl?: string;
   articleCount: number;
   likeCount: number;
+  showAuthor?: boolean;
 }
 
 
@@ -21,6 +22,7 @@ export function CourseCard({
   userIconImageUrl,
   articleCount,
   likeCount,
+  showAuthor = true,
 }: CourseCardProps) {
   return (
     <div className="relative bg-white rounded-lg p-5 border border-gray-200 hover:shadow-lg hover:border-brand-primary/30 transition-all duration-200">
@@ -36,7 +38,9 @@ export function CourseCard({
           </span>
           <h3 className="text-lg font-bold text-gray-800">{name}</h3>
         </div>
-        <UserAvatarLink userId={userId} username={userName} userIconImageUrl={userIconImageUrl} size="sm" />
+        {showAuthor && (
+          <UserAvatarLink userId={userId} username={userName} userIconImageUrl={userIconImageUrl} size="sm" />
+        )}
         <div className="flex gap-4 text-sm text-gray-500 items-center">
           <span className="flex items-center gap-1">
             <BookOpen className="w-4 h-4" />

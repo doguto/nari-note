@@ -51,7 +51,7 @@ export function ForgotPasswordTemplate({
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-brand-primary hover:bg-brand-primary-hover"
+          className="w-full"
         >
           {isLoading ? '送信中...' : 'メールを送信'}
         </Button>

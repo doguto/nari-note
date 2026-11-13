@@ -86,7 +86,7 @@ export function CommentForm({ articleId, onSuccess }: CommentFormProps) {
               type="submit"
               size="sm"
               disabled={createComment.isPending}
-              className="bg-brand-primary hover:bg-brand-primary-hover text-white"
+             
             >
               {createComment.isPending ? '投稿中...' : '投稿'}
             </Button>

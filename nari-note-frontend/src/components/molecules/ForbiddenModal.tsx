@@ -37,7 +37,7 @@ export function ForbiddenModal({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button onClick={onClose} className="bg-brand-primary hover:bg-brand-primary-hover">
+          <Button onClick={onClose}>
             閉じる
           </Button>
         </DialogFooter>

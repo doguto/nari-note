@@ -8,6 +8,8 @@ interface ArticleListProps {
   error: Error | null;
   onRetry: () => void;
   emptyMessage?: string;
+  layout?: 'list' | 'grid';
+  showAuthor?: boolean;
 }
 
 /**
@@ -22,6 +24,8 @@ export function ArticleList({
   error,
   onRetry,
   emptyMessage = '記事がありません',
+  layout = 'list',
+  showAuthor = true,
 }: ArticleListProps) {
   if (isLoading) {
     return <LoadingSpinner text="記事を読み込み中..." />;
@@ -48,7 +52,7 @@ export function ArticleList({
   }
 
   return (
-    <div className="space-y-4">
+    <div className={layout === 'grid' ? 'grid gap-4 md:grid-cols-2' : 'space-y-4'}>
       {articlesWithId.map((article) => (
         <ArticleCard
           key={article.id}
@@ -60,6 +64,7 @@ export function ArticleList({
           tags={article.tags ?? []}
           likeCount={article.likeCount ?? 0}
           date={article.updatedAt ? new Date(article.updatedAt).toLocaleDateString('ja-JP') : ''}
+          showAuthor={showAuthor}
         />
       ))}
     </div>

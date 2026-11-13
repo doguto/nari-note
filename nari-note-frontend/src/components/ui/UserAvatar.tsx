@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { UserRoundIcon } from 'lucide-react';
 
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -22,9 +21,9 @@ const sizeClasses: Record<AvatarSize, { container: string }> = {
 
 /**
  * UserAvatar - Atom Component
- * 
+ *
  * ユーザーアバターを表示するコンポーネント
- * プロフィール画像がある場合は画像を表示、ない場合はユーザー名の最初の文字を表示
+ * プロフィール画像がある場合は画像を表示、ない場合はデフォルトのシルエットを表示
  */
 export function UserAvatar({
   username,
@@ -34,10 +33,10 @@ export function UserAvatar({
 }: UserAvatarProps) {
   const [imageError, setImageError] = useState(false);
   const sizeConfig = sizeClasses[size];
-  
+
   // 画像がある場合かつエラーが発生していない場合は画像を表示
   const shouldShowImage = userIconImageUrl && !imageError;
-  
+
   if (shouldShowImage) {
     return (
       <div className={`${sizeConfig.container} relative rounded-full overflow-hidden bg-gray-200 flex-shrink-0 ${className}`}>
@@ -52,14 +51,17 @@ export function UserAvatar({
       </div>
     );
   }
-  
-  // 画像がない場合はデフォルトアイコンを表示
+
   return (
-    <div 
-      className={`${sizeConfig.container} bg-brand-primary rounded-full flex items-center justify-center flex-shrink-0 ${className}`}
+    <div
+      role="img"
+      className={`${sizeConfig.container} bg-brand-primary-light rounded-full overflow-hidden flex items-end justify-center flex-shrink-0 ${className}`}
       aria-label={`${username}のアバター`}
     >
-      <UserRoundIcon />
+      <svg viewBox="0 0 24 24" className="w-[84%] h-[84%] fill-brand-primary-muted" aria-hidden="true">
+        <circle cx="12" cy="9" r="4.5" />
+        <path d="M3 24c0-5 4-8.5 9-8.5s9 3.5 9 8.5Z" />
+      </svg>
     </div>
   );
 }

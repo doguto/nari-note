@@ -80,11 +80,6 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
     router.push(`/users/${userId}?tab=${tab}`);
   };
   
-  // 記事数クリックハンドラ（contentタブに切り替え）
-  const handleArticlesClick = () => {
-    router.push(`/users/${userId}?tab=articles`);
-  };
-
   if (isLoading) {
     return <LoadingSpinner text="ユーザー情報を読み込み中..." />;
   }
@@ -128,7 +123,6 @@ export function UserProfilePage({ userId }: UserProfilePageProps) {
         followingsError={followingsError}
         isFollowPending={isFollowPending}
         onTabChange={handleTabChange}
-        onArticlesClick={handleArticlesClick}
         onFollowClick={handleFollowClick}
         onArticlesRetry={refetchArticles}
         onCoursesRetry={refetchCourses}
