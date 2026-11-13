@@ -17,3 +17,8 @@ dependencies {
     "../../image_delivery/storage"
   ]
 }
+
+inputs = {
+  # dev にはアラーム (app/observer) が無いため送らない
+  enable_db_health_check = false
+}

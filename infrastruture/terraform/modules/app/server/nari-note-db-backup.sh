@@ -11,7 +11,7 @@
 #   nari-note-db-backup base
 #       ベースバックアップを取得する (systemd timer から日次で呼ばれる)
 #   nari-note-db-backup check
-#       未アーカイブの WAL 数を CloudWatch へ送る (systemd timer から 5 分毎に呼ばれる)
+#       PostgreSQL の死活・ディスク使用率・未アーカイブの WAL 数を CloudWatch へ送る (systemd timer から 5 分毎に呼ばれる)
 #   nari-note-db-backup list
 #       S3 上のベースバックアップ一覧を表示する
 #   nari-note-db-backup restore <latest|時刻> [-y]
@@ -46,6 +46,10 @@ STASH_PREFIX=".pre-restore-"
 EXTRACT_DIR="/var/tmp/nari-note-pg-extract"
 EXTRACT_PORT=5433
 PG_CTL="/usr/bin/pg_ctl"
+# 使用率を監視するファイルシステム。ルートは swap・dnf キャッシュ・extract の一時 DB 展開先を兼ねる
+DISK_MOUNT_PATHS=("/" "${PGDATA}")
+# Terraform が配布時に置換する (enable_db_health_check)。アラームの無い環境ではメトリクス送信を止める
+ENABLE_HEALTH_CHECK="@ENABLE_HEALTH_CHECK@"
 
 APP_UNIT="nari-note-backend"
 NGINX_UPSTREAM_FILE="/etc/nginx/nari-note-backend/active-upstream.conf"
@@ -249,8 +253,17 @@ Persistent=true
 [Install]
 WantedBy=timers.target"
 
+  if [[ "${ENABLE_HEALTH_CHECK}" != "true" ]]; then
+    systemctl disable --now nari-note-db-backup-check.timer 2>/dev/null || true
+    rm -f /etc/systemd/system/nari-note-db-backup-check.service /etc/systemd/system/nari-note-db-backup-check.timer
+    systemctl daemon-reload
+    systemctl enable --now nari-note-db-backup-base.timer
+    log "install 完了 (bucket: ${bucket}, check 無効)"
+    return
+  fi
+
   write_unit nari-note-db-backup-check.service "[Unit]
-Description=Report nari-note PostgreSQL WAL archive backlog
+Description=Report nari-note PostgreSQL health metrics
 After=postgresql.service
 
 [Service]
@@ -258,7 +271,7 @@ Type=oneshot
 ExecStart=${SELF} check"
 
   write_unit nari-note-db-backup-check.timer "[Unit]
-Description=Report nari-note PostgreSQL WAL archive backlog every 5 minutes
+Description=Report nari-note PostgreSQL health metrics every 5 minutes
 
 [Timer]
 OnCalendar=*:0/5
@@ -290,9 +303,39 @@ cmd_base() {
 # 最終アーカイブ時刻からの経過時間は正常時でも伸び続けるため
 cmd_check() {
   load_env
+  # 1 つの失敗で残りのメトリクスまで欠損すると原因を切り分けにくいため、失敗しても続行し、最後に終了コードで失敗を残す
+  local failed=0
+
+  local db_up=0
+  if sudo -u postgres pg_isready -q -h /run/postgresql -p 5432 -t 10; then
+    db_up=1
+  fi
+  put_metric DbUp "${db_up}" Count || { log "DbUp の送信に失敗しました"; failed=1; }
+
+  local mount_path used_percent
+  for mount_path in "${DISK_MOUNT_PATHS[@]}"; do
+    # 未マウントだとルートの使用率を拾ってしまうため送らない (アラームはデータ欠損として発報する)
+    if ! mountpoint -q "${mount_path}"; then
+      log "${mount_path} がマウントされていないため、ディスク使用率の送信をスキップします"
+      failed=1
+      continue
+    fi
+    used_percent="$(df --output=pcent "${mount_path}" | tail -n 1 | tr -dc '0-9' || true)"
+    if [[ -z "${used_percent}" ]]; then
+      log "${mount_path} のディスク使用率を取得できませんでした"
+      failed=1
+      continue
+    fi
+    put_metric DiskUsedPercent "${used_percent}" Percent "MountPath=${mount_path}" \
+      || { log "DiskUsedPercent (${mount_path}) の送信に失敗しました"; failed=1; }
+  done
+
   local pending
   pending="$(find "${PGDATA}/pg_wal/archive_status" -name '*.ready' 2>/dev/null | wc -l)"
-  put_metric DbWalArchivePendingFiles "${pending}" Count
+  put_metric DbWalArchivePendingFiles "${pending}" Count \
+    || { log "DbWalArchivePendingFiles の送信に失敗しました"; failed=1; }
+
+  return "${failed}"
 }
 
 cmd_list() {

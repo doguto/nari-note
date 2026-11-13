@@ -527,6 +527,10 @@ namespace NariNoteBackend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("XAccountName")
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")

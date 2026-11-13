@@ -20,6 +20,10 @@ public class User : EntityBase
     [MaxLength(500)]
     public string? Bio { get; set; }
 
+    // X（旧 Twitter）のユーザー名。先頭の @ は含めない
+    [MaxLength(15)]
+    public string? XAccountName { get; set; }
+
     [Required]
     [MaxLength(255)]
     public required string Email { get; set; }

@@ -3,15 +3,19 @@ import { FormTitle, ErrorAlert } from '@/components/ui';
 import {
   UsernameField,
   BioField,
+  XAccountField,
   ProfileImageUpload,
 } from '../organisms';
 
 interface ProfileEditTemplateProps {
   username: string;
   bio: string;
+  xAccountName: string;
+  currentImage?: string;
   errors: {
     username?: string;
     bio?: string;
+    xAccountName?: string;
     profileImage?: string;
   };
   generalError?: string;
@@ -20,6 +24,7 @@ interface ProfileEditTemplateProps {
   showCancelConfirm: boolean;
   onUsernameChange: (value: string) => void;
   onBioChange: (value: string) => void;
+  onXAccountNameChange: (value: string) => void;
   onImageSelect: (file: File) => void;
   onImageRemove: () => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -31,6 +36,8 @@ interface ProfileEditTemplateProps {
 export function ProfileEditTemplate({
   username,
   bio,
+  xAccountName,
+  currentImage,
   errors,
   generalError,
   hasChanges,
@@ -38,6 +45,7 @@ export function ProfileEditTemplate({
   showCancelConfirm,
   onUsernameChange,
   onBioChange,
+  onXAccountNameChange,
   onImageSelect,
   onImageRemove,
   onSubmit,
@@ -53,6 +61,7 @@ export function ProfileEditTemplate({
 
       <form onSubmit={onSubmit} className="space-y-6">
         <ProfileImageUpload
+          currentImage={currentImage}
           onImageSelect={onImageSelect}
           onImageRemove={onImageRemove}
           error={errors.profileImage}
@@ -62,6 +71,12 @@ export function ProfileEditTemplate({
           value={username}
           onChange={onUsernameChange}
           error={errors.username}
+        />
+
+        <XAccountField
+          value={xAccountName}
+          onChange={onXAccountNameChange}
+          error={errors.xAccountName}
         />
 
         <BioField

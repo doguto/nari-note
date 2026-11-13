@@ -1,5 +1,11 @@
 locals {
   instance_id = data.terraform_remote_state.server.outputs.instance_id
+
+  # ディスク使用率を監視するファイルシステム (nari-note-db-backup の DISK_MOUNT_PATHS と揃える)
+  disk_mount_paths = {
+    root            = "/"
+    postgresql_data = "/data/postgresql"
+  }
 }
 
 resource "aws_sns_topic" "alerts" {
@@ -113,6 +119,60 @@ resource "aws_cloudwatch_metric_alarm" "db_wal_archive_backlog" {
 
   tags = {
     Name = "${var.app_name}-db-wal-archive-backlog-alarm"
+  }
+}
+
+# PostgreSQL が接続を受け付けない (pg_isready の失敗)。チェック自体が止まった場合 (データ無し) も異常とみなす
+# check は 5 分毎で送信時刻が評価期間の境界をまたぐと 1 期間データが欠けることがあるため、2 回連続で発報する
+resource "aws_cloudwatch_metric_alarm" "db_down" {
+  alarm_name          = "${var.app_name}-db-down"
+  alarm_description   = "PostgreSQL is not accepting connections"
+  namespace           = "CWAgent"
+  metric_name         = "DbUp"
+  statistic           = "Minimum"
+  period              = 300
+  evaluation_periods  = 2
+  threshold           = 1
+  comparison_operator = "LessThanThreshold"
+  treat_missing_data  = "breaching"
+
+  dimensions = {
+    AppName = var.app_name
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+
+  tags = {
+    Name = "${var.app_name}-db-down-alarm"
+  }
+}
+
+# ディスク使用率がしきい値を超えた。データ用 EBS が埋まると PostgreSQL が停止する
+resource "aws_cloudwatch_metric_alarm" "disk_used" {
+  for_each = local.disk_mount_paths
+
+  alarm_name          = "${var.app_name}-disk-used-${replace(each.key, "_", "-")}"
+  alarm_description   = "Disk usage of ${each.value} exceeded threshold"
+  namespace           = "CWAgent"
+  metric_name         = "DiskUsedPercent"
+  statistic           = "Maximum"
+  period              = 300
+  evaluation_periods  = 2
+  threshold           = var.disk_used_percent_threshold
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "breaching"
+
+  dimensions = {
+    AppName   = var.app_name
+    MountPath = each.value
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+
+  tags = {
+    Name = "${var.app_name}-disk-used-${replace(each.key, "_", "-")}-alarm"
   }
 }
 
