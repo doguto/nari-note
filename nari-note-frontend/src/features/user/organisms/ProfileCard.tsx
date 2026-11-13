@@ -50,16 +50,6 @@ export function ProfileCard({
             </div>
           </div>
 
-          <p className="text-gray-600 text-sm mb-3 sm:mb-4">
-            @{user.username || 'unknown'}
-          </p>
-
-          {user.bio && (
-            <p className="text-gray-700 text-sm sm:text-base mb-3 sm:mb-4">
-              {user.bio}
-            </p>
-          )}
-
           {user.xAccountName && (
             <a
               href={`https://x.com/${encodeURIComponent(user.xAccountName)}`}
@@ -70,6 +60,12 @@ export function ProfileCard({
               <XLogo className="size-4" />
               <span>@{user.xAccountName}</span>
             </a>
+          )}
+
+          {user.bio && (
+            <p className="text-gray-700 text-sm sm:text-base mb-3 sm:mb-4">
+              {user.bio}
+            </p>
           )}
 
           <div className="flex flex-wrap gap-4 sm:gap-6 text-sm text-gray-600">
