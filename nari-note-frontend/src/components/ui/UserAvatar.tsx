@@ -58,7 +58,8 @@ export function UserAvatar({
       className={`${sizeConfig.container} bg-brand-primary-light rounded-full overflow-hidden flex items-end justify-center flex-shrink-0 ${className}`}
       aria-label={`${username}のアバター`}
     >
-      <svg viewBox="0 0 24 24" className="w-[84%] h-[84%] fill-brand-primary-muted" aria-hidden="true">
+      {/* Button 内に置かれると [&_svg]:size-4 で縮められるため、インラインで大きさを固定する */}
+      <svg viewBox="0 0 24 24" style={{ width: '84%', height: '84%' }} className="shrink-0 fill-brand-primary-muted" aria-hidden="true">
         <circle cx="12" cy="9" r="4.5" />
         <path d="M3 24c0-5 4-8.5 9-8.5s9 3.5 9 8.5Z" />
       </svg>
