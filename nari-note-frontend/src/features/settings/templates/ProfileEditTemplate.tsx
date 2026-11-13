@@ -9,6 +9,7 @@ import {
 interface ProfileEditTemplateProps {
   username: string;
   bio: string;
+  currentImage?: string;
   errors: {
     username?: string;
     bio?: string;
@@ -31,6 +32,7 @@ interface ProfileEditTemplateProps {
 export function ProfileEditTemplate({
   username,
   bio,
+  currentImage,
   errors,
   generalError,
   hasChanges,
@@ -53,6 +55,7 @@ export function ProfileEditTemplate({
 
       <form onSubmit={onSubmit} className="space-y-6">
         <ProfileImageUpload
+          currentImage={currentImage}
           onImageSelect={onImageSelect}
           onImageRemove={onImageRemove}
           error={errors.profileImage}

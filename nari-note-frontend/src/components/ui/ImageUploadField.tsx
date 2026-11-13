@@ -31,7 +31,9 @@ export function ImageUploadField({
   maxSizeMB = 5,
   required = false,
 }: ImageUploadFieldProps) {
-  const [preview, setPreview] = useState<string | undefined>(currentImage);
+  // 選択した画像のプレビュー。未選択の間は現在の画像を表示する
+  const [selectedPreview, setSelectedPreview] = useState<string>();
+  const preview = selectedPreview ?? currentImage;
   const [validationError, setValidationError] = useState<string>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,7 +59,7 @@ export function ImageUploadField({
     // プレビュー表示
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPreview(reader.result as string);
+      setSelectedPreview(reader.result as string);
     };
     reader.readAsDataURL(file);
 
@@ -65,7 +67,7 @@ export function ImageUploadField({
   };
 
   const handleRemoveClick = () => {
-    setPreview(undefined);
+    setSelectedPreview(undefined);
     setValidationError(undefined);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -118,13 +120,13 @@ export function ImageUploadField({
               {preview ? '画像を変更' : '画像を選択'}
             </Button>
             
-            {preview && onImageRemove && (
+            {selectedPreview && onImageRemove && (
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleRemoveClick}
               >
-                削除
+                選択を取り消す
               </Button>
             )}
           </div>

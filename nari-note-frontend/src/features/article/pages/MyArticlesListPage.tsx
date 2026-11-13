@@ -17,6 +17,7 @@ export function MyArticlesListPage() {
   const [activeTab, setActiveTab] = useState<'published' | 'drafts'>('published');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null);
+  const [deleteError, setDeleteError] = useState<string>();
 
   const { data, isLoading, error, refetch } = useGetMyArticles({ enabled: !!userId });
   
@@ -27,7 +28,7 @@ export function MyArticlesListPage() {
     },
     onError: (error) => {
       console.error('記事の削除に失敗しました:', error);
-      alert('記事の削除に失敗しました。もう一度お試しください。');
+      setDeleteError('記事の削除に失敗しました。もう一度お試しください。');
       setDeletingId(null);
     },
   });
@@ -39,6 +40,7 @@ export function MyArticlesListPage() {
 
   const handleConfirmDelete = () => {
     if (!pendingDelete) return;
+    setDeleteError(undefined);
     setDeletingId(pendingDelete.id);
     setPendingDelete(null);
     deleteArticle.mutate({ id: pendingDelete.id });
@@ -76,6 +78,7 @@ export function MyArticlesListPage() {
         publishedArticles={publishedArticles}
         draftArticles={draftArticles}
         deletingId={deletingId}
+        deleteError={deleteError}
         onTabChange={setActiveTab}
         onNewArticle={handleNewArticle}
         onDelete={handleDeleteRequest}

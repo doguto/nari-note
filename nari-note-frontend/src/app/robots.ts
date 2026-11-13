@@ -10,7 +10,6 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         disallow: [
-          '/articles/drafts',
           '/articles/my-articles',
           '/articles/new',
           '/articles/*/edit',
