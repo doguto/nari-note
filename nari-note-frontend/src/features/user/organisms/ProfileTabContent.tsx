@@ -85,7 +85,7 @@ export function ProfileTabContent({
             onRetry={onArticlesRetry}
             emptyMessage="まだ記事がありません"
             emptyIcon={<FileText />}
-            layout="grid"
+            emptyVariant="panel"
             showAuthor={false}
           />
           {!isArticlesLoading && !articlesError && renderPagination(articlesData?.totalCount)}
@@ -100,7 +100,7 @@ export function ProfileTabContent({
             error={coursesError}
             onRetry={onCoursesRetry}
             emptyIcon={<BookOpen />}
-            layout="grid"
+            emptyVariant="panel"
             showAuthor={false}
           />
           {!isCoursesLoading && !coursesError && renderPagination(coursesData?.totalCount)}
@@ -116,7 +116,7 @@ export function ProfileTabContent({
             onRetry={onLikedArticlesRetry}
             emptyMessage="いいねした記事がありません"
             emptyIcon={<Heart />}
-            layout="grid"
+            emptyVariant="panel"
           />
           {!isLikedArticlesLoading && !likedArticlesError && renderPagination(likedArticlesData?.totalCount)}
         </>

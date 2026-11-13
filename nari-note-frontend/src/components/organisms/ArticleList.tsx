@@ -10,12 +10,9 @@ interface ArticleListProps {
   onRetry: () => void;
   emptyMessage?: string;
   emptyIcon?: ReactNode;
-  layout?: 'list' | 'grid';
+  emptyVariant?: 'default' | 'panel';
   showAuthor?: boolean;
 }
-
-// 1件だけのときに右半分が空かないよう横幅いっぱいに広げる
-const GRID_CLASS = 'grid gap-4 md:grid-cols-2 md:[&>:only-child]:col-span-2';
 
 /**
  * ArticleList - Organism Component
@@ -30,7 +27,7 @@ export function ArticleList({
   onRetry,
   emptyMessage = '記事がありません',
   emptyIcon,
-  layout = 'list',
+  emptyVariant = 'default',
   showAuthor = true,
 }: ArticleListProps) {
   if (isLoading) {
@@ -47,7 +44,7 @@ export function ArticleList({
   }
 
   if (!articles || articles.length === 0) {
-    if (layout === 'grid') {
+    if (emptyVariant === 'panel') {
       return <EmptyState variant="panel" title={emptyMessage} icon={emptyIcon} />;
     }
     return <p className="text-gray-500 text-center py-8">{emptyMessage}</p>;
@@ -61,7 +58,7 @@ export function ArticleList({
   }
 
   return (
-    <div className={layout === 'grid' ? GRID_CLASS : 'space-y-4'}>
+    <div className="space-y-4">
       {articlesWithId.map((article) => (
         <ArticleCard
           key={article.id}
