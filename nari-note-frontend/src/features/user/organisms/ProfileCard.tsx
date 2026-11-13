@@ -20,7 +20,7 @@ export function ProfileCard({
   onFollowClick,
 }: ProfileCardProps) {
   const username = user.username || 'Unknown User';
-  const joinedAt = new Date(user.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' });
+  const joinedAt = new Date(user.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', timeZone: 'Asia/Tokyo' });
 
   return (
     <div className="px-4 pt-6 pb-5 sm:px-8 sm:pt-8 sm:pb-7">

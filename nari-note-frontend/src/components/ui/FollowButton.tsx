@@ -1,4 +1,4 @@
-import { UserCheck, UserMinus, UserPlus } from 'lucide-react';
+import { Loader2, UserCheck, UserMinus, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface FollowButtonProps {
@@ -17,8 +17,18 @@ export function FollowButton({ isFollowing, onClick, disabled = false }: FollowB
   if (!isFollowing) {
     return (
       <Button onClick={onClick} disabled={disabled}>
-        <UserPlus />
+        {disabled ? <Loader2 className="animate-spin" /> : <UserPlus />}
         フォロー
+      </Button>
+    );
+  }
+
+  // disabled 中は pointer-events-none でホバーが外れ表示が揺れるため、ホバーによる切り替えをしない
+  if (disabled) {
+    return (
+      <Button disabled className="bg-brand-primary-light text-brand-primary-dark font-bold">
+        <Loader2 className="animate-spin" />
+        フォロー中
       </Button>
     );
   }
@@ -26,7 +36,6 @@ export function FollowButton({ isFollowing, onClick, disabled = false }: FollowB
   return (
     <Button
       onClick={onClick}
-      disabled={disabled}
       aria-label="フォロー中（押すとフォロー解除）"
       className="group bg-brand-primary-light text-brand-primary-dark font-bold hover:bg-red-50 hover:text-red-700"
     >
