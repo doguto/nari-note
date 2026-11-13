@@ -73,16 +73,16 @@ export function ProfileEditTemplate({
           error={errors.username}
         />
 
-        <BioField
-          value={bio}
-          onChange={onBioChange}
-          error={errors.bio}
-        />
-
         <XAccountField
           value={xAccountName}
           onChange={onXAccountNameChange}
           error={errors.xAccountName}
+        />
+
+        <BioField
+          value={bio}
+          onChange={onBioChange}
+          error={errors.bio}
         />
 
         <div className="flex gap-4 pt-4">
