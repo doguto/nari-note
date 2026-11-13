@@ -17,6 +17,7 @@ export function MyCoursesListPage() {
   const [activeTab, setActiveTab] = useState<'published' | 'drafts'>('published');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+  const [deleteError, setDeleteError] = useState<string>();
 
   const { data, isLoading, error, refetch } = useGetMyCourses(
     { enabled: !!userId }
@@ -29,7 +30,7 @@ export function MyCoursesListPage() {
     },
     onError: (error) => {
       console.error('講座の削除に失敗しました:', error);
-      alert('講座の削除に失敗しました。もう一度お試しください。');
+      setDeleteError('講座の削除に失敗しました。もう一度お試しください。');
       setDeletingId(null);
     },
   });
@@ -41,6 +42,7 @@ export function MyCoursesListPage() {
 
   const handleConfirmDelete = () => {
     if (!pendingDelete) return;
+    setDeleteError(undefined);
     setDeletingId(pendingDelete.id);
     setPendingDelete(null);
     deleteCourse.mutate({ id: pendingDelete.id });
@@ -82,6 +84,7 @@ export function MyCoursesListPage() {
         publishedCourses={publishedCourses}
         draftCourses={draftCourses}
         deletingId={deletingId}
+        deleteError={deleteError}
         onTabChange={setActiveTab}
         onDelete={handleDeleteRequest}
         onEdit={handleEdit}

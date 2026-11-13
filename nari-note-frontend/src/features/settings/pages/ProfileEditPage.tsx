@@ -152,6 +152,7 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     <ProfileEditTemplate
       username={username}
       bio={bio}
+      currentImage={user?.userIconImageUrl}
       errors={errors}
       generalError={generalError}
       hasChanges={hasChanges}

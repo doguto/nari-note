@@ -1,6 +1,6 @@
 import { DraftArticleCard } from '@/components/molecules/DraftArticleCard';
 import { PublishedArticleCard } from '@/components/molecules/PublishedArticleCard';
-import { LoadingSpinner } from '@/components/ui';
+import { LoadingSpinner, ErrorAlert } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { ArticleThumbnailDto } from '@/lib/api/types';
@@ -10,6 +10,7 @@ interface MyArticlesListTemplateProps {
   publishedArticles: ArticleThumbnailDto[];
   draftArticles: ArticleThumbnailDto[];
   deletingId: string | null;
+  deleteError?: string;
   onTabChange: (tab: 'published' | 'drafts') => void;
   onNewArticle: () => void;
   onDelete: (id: string, title: string) => void;
@@ -21,6 +22,7 @@ export function MyArticlesListTemplate({
   publishedArticles,
   draftArticles,
   deletingId,
+  deleteError,
   onTabChange,
   onNewArticle,
   onDelete,
@@ -42,6 +44,8 @@ export function MyArticlesListTemplate({
           新規記事作成
         </Button>
       </div>
+
+      {deleteError && <ErrorAlert message={deleteError} />}
 
       <div className="bg-white rounded-lg shadow">
         <div className="border-b border-gray-200">

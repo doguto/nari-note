@@ -1,4 +1,4 @@
-import { LoadingSpinner } from '@/components/ui';
+import { LoadingSpinner, ErrorAlert } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Plus, BookOpen, Trash2, Edit } from 'lucide-react';
 import { CourseDto } from '@/lib/api/types';
@@ -9,6 +9,7 @@ interface MyCoursesListTemplateProps {
   publishedCourses: CourseDto[];
   draftCourses: CourseDto[];
   deletingId: string | null;
+  deleteError?: string;
   onTabChange: (tab: 'published' | 'drafts') => void;
   onNewCourse: () => void;
   onDelete: (id: string, name: string) => void;
@@ -20,6 +21,7 @@ export function MyCoursesListTemplate({
   publishedCourses,
   draftCourses,
   deletingId,
+  deleteError,
   onTabChange,
   onNewCourse,
   onDelete,
@@ -42,6 +44,8 @@ export function MyCoursesListTemplate({
           新規講座作成
         </Button>
       </div>
+
+      {deleteError && <ErrorAlert message={deleteError} />}
 
       <div className="bg-white rounded-lg shadow">
         <div className="border-b border-gray-200">

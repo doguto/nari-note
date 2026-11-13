@@ -16,6 +16,8 @@ export function CourseFormPage(props: CourseFormPageProps) {
   const [name, setName] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [nameError, setNameError] = useState<string>();
+  const [submitError, setSubmitError] = useState<string>();
   
   const router = useRouter();
   const isEditMode = props.mode === 'edit';
@@ -39,7 +41,7 @@ export function CourseFormPage(props: CourseFormPageProps) {
     },
     onError: (error) => {
       console.error('講座の作成に失敗しました:', error);
-      alert('講座の作成に失敗しました。もう一度お試しください。');
+      setSubmitError('講座の作成に失敗しました。もう一度お試しください。');
     },
   });
 
@@ -49,7 +51,7 @@ export function CourseFormPage(props: CourseFormPageProps) {
     },
     onError: (error) => {
       console.error('講座の更新に失敗しました:', error);
-      alert('講座の更新に失敗しました。もう一度お試しください。');
+      setSubmitError('講座の更新に失敗しました。もう一度お試しください。');
     },
   });
 
@@ -99,15 +101,16 @@ export function CourseFormPage(props: CourseFormPageProps) {
 
   const validateForm = (): boolean => {
     if (!name.trim()) {
-      alert('講座名を入力してください');
+      setNameError('講座名を入力してください');
       return false;
     }
 
     if (name.length > 100) {
-      alert('講座名は100文字以内で入力してください');
+      setNameError('講座名は100文字以内で入力してください');
       return false;
     }
 
+    setNameError(undefined);
     return true;
   };
 
@@ -118,6 +121,7 @@ export function CourseFormPage(props: CourseFormPageProps) {
       return;
     }
 
+    setSubmitError(undefined);
     updateCourse.mutate({
       id: courseId,
       name: name.trim(),
@@ -133,6 +137,7 @@ export function CourseFormPage(props: CourseFormPageProps) {
       return;
     }
 
+    setSubmitError(undefined);
     if (isEditMode) {
       updateCourse.mutate({
         id: courseId,
@@ -168,6 +173,8 @@ export function CourseFormPage(props: CourseFormPageProps) {
     <PageWithoutSidebar title={pageTitle}>
       <CourseFormTemplate
         name={name}
+        nameError={nameError}
+        submitError={submitError}
         showPublishDialog={showPublishDialog}
         isLoading={isLoading}
         isFormDisabled={isFormDisabled}

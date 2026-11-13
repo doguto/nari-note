@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 interface CourseTitleInputProps {
   value: string;
   onChange: (value: string) => void;
+  error?: string;
 }
 
 /**
@@ -11,7 +12,7 @@ interface CourseTitleInputProps {
  * 
  * 講座名入力フィールド
  */
-export function CourseTitleInput({ value, onChange }: CourseTitleInputProps) {
+export function CourseTitleInput({ value, onChange, error }: CourseTitleInputProps) {
   return (
     <div className="space-y-2">
       <Label htmlFor="course-title">
@@ -25,7 +26,9 @@ export function CourseTitleInput({ value, onChange }: CourseTitleInputProps) {
         placeholder="講座名を入力してください"
         required
         maxLength={100}
+        aria-invalid={!!error}
       />
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );
 }

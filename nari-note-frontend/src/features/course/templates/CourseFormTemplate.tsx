@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/ui';
 import { PublishSettingsDialog } from '@/features/article/organisms/PublishSettingsDialog';
 import { CourseArticleDto } from '@/lib/api/types';
 import {
@@ -8,6 +9,8 @@ import {
 
 interface CourseFormTemplateProps {
   name: string;
+  nameError?: string;
+  submitError?: string;
   showPublishDialog: boolean;
   isLoading: boolean;
   isFormDisabled: boolean;
@@ -24,6 +27,8 @@ interface CourseFormTemplateProps {
 
 export function CourseFormTemplate({
   name,
+  nameError,
+  submitError,
   showPublishDialog,
   isLoading,
   isFormDisabled,
@@ -50,7 +55,9 @@ export function CourseFormTemplate({
         isEditMode={isEditMode}
       />
 
-      <CourseTitleInput value={name} onChange={onNameChange} />
+      {submitError && <ErrorAlert message={submitError} />}
+
+      <CourseTitleInput value={name} onChange={onNameChange} error={nameError} />
 
       {isEditMode && (
         <PublishSettingsDialog
