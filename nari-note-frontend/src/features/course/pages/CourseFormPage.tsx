@@ -181,7 +181,7 @@ export function CourseFormPage(props: CourseFormPageProps) {
         isEditMode={!!isEditMode}
         courseId={isEditMode ? courseId : undefined}
         articles={isEditMode ? course?.articles : undefined}
-        onNameChange={setName}
+        onNameChange={(value) => { setName(value); setNameError(undefined); }}
         onSave={handleSave}
         onOpenPublishSettings={handleOpenPublishSettings}
         onPublish={handlePublish}
