@@ -14,3 +14,4 @@ export { SearchInput } from './SearchInput';
 export { UserAvatar } from './UserAvatar';
 export { SuccessAlert } from './SuccessAlert';
 export { CharacterCounter } from './CharacterCounter';
+export { XLogo } from './XLogo';

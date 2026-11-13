@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { FollowButton, FollowStats, UserAvatar } from '@/components/ui';
+import { FollowButton, FollowStats, UserAvatar, XLogo } from '@/components/ui';
 import type { GetUserProfileResponse } from '@/lib/api/types';
 
 interface ProfileCardProps {
@@ -58,6 +58,18 @@ export function ProfileCard({
             <p className="text-gray-700 text-sm sm:text-base mb-3 sm:mb-4">
               {user.bio}
             </p>
+          )}
+
+          {user.xAccountName && (
+            <a
+              href={`https://x.com/${encodeURIComponent(user.xAccountName)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-brand-text hover:underline mb-3 sm:mb-4"
+            >
+              <XLogo className="size-4" />
+              <span>@{user.xAccountName}</span>
+            </a>
           )}
 
           <div className="flex flex-wrap gap-4 sm:gap-6 text-sm text-gray-600">

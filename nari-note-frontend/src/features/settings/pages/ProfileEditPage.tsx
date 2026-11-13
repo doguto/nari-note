@@ -9,6 +9,13 @@ import { useRequireVerifiedEmail } from '@/lib/hooks';
 import type { GetUserProfileResponse } from '@/lib/api/types';
 import { ProfileEditTemplate } from '../templates/ProfileEditTemplate';
 
+const X_ACCOUNT_NAME_PATTERN = /^[a-zA-Z0-9_]{1,15}$/;
+
+// 入力欄では @ 付きで入力されることがあるため、先頭の @ と前後の空白を取り除く
+function normalizeXAccountName(value: string): string {
+  return value.trim().replace(/^@/, '');
+}
+
 interface ProfileEditPageProps {
   initialUserData?: GetUserProfileResponse;
 }
@@ -28,11 +35,13 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
 
   const [username, setUsername] = useState(user?.username || '');
   const [bio, setBio] = useState(user?.bio || '');
+  const [xAccountName, setXAccountName] = useState(user?.xAccountName || '');
   const [syncedUser, setSyncedUser] = useState(user);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [errors, setErrors] = useState<{
     username?: string;
     bio?: string;
+    xAccountName?: string;
     profileImage?: string;
   }>({});
   const [generalError, setGeneralError] = useState<string>();
@@ -44,6 +53,7 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     if (user) {
       setUsername(user.username || '');
       setBio(user.bio || '');
+      setXAccountName(user.xAccountName || '');
     }
   }
 
@@ -51,6 +61,7 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     !!user &&
     (username !== (user.username || '') ||
       bio !== (user.bio || '') ||
+      normalizeXAccountName(xAccountName) !== (user.xAccountName || '') ||
       profileImage !== null);
 
   const uploadIcon = useUploadUserIcon();
@@ -83,6 +94,11 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
       newErrors.bio = '自己紹介文は250文字以内である必要があります';
     }
 
+    const normalizedXAccountName = normalizeXAccountName(xAccountName);
+    if (normalizedXAccountName && !X_ACCOUNT_NAME_PATTERN.test(normalizedXAccountName)) {
+      newErrors.xAccountName = 'Xのユーザー名は半角英数字・アンダーバーの15文字以内で入力してください';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -105,6 +121,8 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
       updateProfile.mutate({
         name: username,
         bio: bio || undefined,
+        // 空文字列を送ると紐付け解除になる
+        xAccountName: normalizeXAccountName(xAccountName),
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -152,6 +170,7 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
     <ProfileEditTemplate
       username={username}
       bio={bio}
+      xAccountName={xAccountName}
       currentImage={user?.userIconImageUrl}
       errors={errors}
       generalError={generalError}
@@ -160,6 +179,7 @@ export function ProfileEditPage({ initialUserData }: ProfileEditPageProps = {}) 
       showCancelConfirm={showCancelConfirm}
       onUsernameChange={setUsername}
       onBioChange={setBio}
+      onXAccountNameChange={setXAccountName}
       onImageSelect={handleImageSelect}
       onImageRemove={handleImageRemove}
       onSubmit={handleSubmit}

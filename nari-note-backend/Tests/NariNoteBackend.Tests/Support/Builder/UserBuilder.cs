@@ -17,6 +17,7 @@ public class UserBuilder
     string name;
     string passwordHash = "test-password-hash";
     string? profileImage;
+    string? xAccountName;
 
     public UserBuilder()
     {
@@ -56,6 +57,12 @@ public class UserBuilder
         return this;
     }
 
+    public UserBuilder WithXAccountName(string value)
+    {
+        this.xAccountName = value;
+        return this;
+    }
+
     public UserBuilder EmailUnverified()
     {
         this.isEmailVerified = false;
@@ -78,6 +85,7 @@ public class UserBuilder
             PasswordHash = this.passwordHash,
             Bio = this.bio,
             ProfileImage = this.profileImage,
+            XAccountName = this.xAccountName,
             IsEmailVerified = this.isEmailVerified,
             CreatedAt = this.createdAt,
             UpdatedAt = this.createdAt

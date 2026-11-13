@@ -30,6 +30,7 @@ erDiagram
         string PasswordHash "BCrypt"
         string ProfileImage "nullable"
         string Bio "nullable"
+        string XAccountName "nullable"
         bool IsEmailVerified
         string SecurityStamp "nullable"
         datetime AlreadyRegisteredNotifiedAt "nullable"
