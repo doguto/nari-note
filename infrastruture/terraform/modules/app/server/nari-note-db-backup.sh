@@ -292,27 +292,39 @@ cmd_base() {
 # 最終アーカイブ時刻からの経過時間は正常時でも伸び続けるため
 cmd_check() {
   load_env
+  # 1 つの失敗で残りのメトリクスまで欠損すると原因を切り分けにくいため、失敗しても続行し、最後に終了コードで失敗を残す
+  local failed=0
 
   local db_up=0
   if sudo -u postgres pg_isready -q -h /run/postgresql -p 5432 -t 10; then
     db_up=1
   fi
-  put_metric DbUp "${db_up}" Count
+  put_metric DbUp "${db_up}" Count || { log "DbUp の送信に失敗しました"; failed=1; }
 
   local mount_path used_percent
   for mount_path in "${DISK_MOUNT_PATHS[@]}"; do
     # 未マウントだとルートの使用率を拾ってしまうため送らない (アラームはデータ欠損として発報する)
     if ! mountpoint -q "${mount_path}"; then
       log "${mount_path} がマウントされていないため、ディスク使用率の送信をスキップします"
+      failed=1
       continue
     fi
-    used_percent="$(df --output=pcent "${mount_path}" | tail -n 1 | tr -dc '0-9')"
-    put_metric DiskUsedPercent "${used_percent}" Percent "MountPath=${mount_path}"
+    used_percent="$(df --output=pcent "${mount_path}" | tail -n 1 | tr -dc '0-9' || true)"
+    if [[ -z "${used_percent}" ]]; then
+      log "${mount_path} のディスク使用率を取得できませんでした"
+      failed=1
+      continue
+    fi
+    put_metric DiskUsedPercent "${used_percent}" Percent "MountPath=${mount_path}" \
+      || { log "DiskUsedPercent (${mount_path}) の送信に失敗しました"; failed=1; }
   done
 
   local pending
   pending="$(find "${PGDATA}/pg_wal/archive_status" -name '*.ready' 2>/dev/null | wc -l)"
-  put_metric DbWalArchivePendingFiles "${pending}" Count
+  put_metric DbWalArchivePendingFiles "${pending}" Count \
+    || { log "DbWalArchivePendingFiles の送信に失敗しました"; failed=1; }
+
+  return "${failed}"
 }
 
 cmd_list() {
