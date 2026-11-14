@@ -32,11 +32,13 @@ def handler(event, context):
         print(f"Exported {log_group_name} {day} to s3://{BUCKET_NAME}/{prefix}")
 
 
+# 取り込まれたログがエクスポート可能になるまで最大 12 時間かかるため、前日ではなく 2 日前を対象にする
+# (完了済みの日は再エクスポートしないので、取りこぼすとそのまま確定してしまう)
 # 手動で再実行するときは {"date": "YYYY-MM-DD"} で対象日 (UTC) を指定する。CloudWatch Logs の保持期間内に限る
 def target_day(event):
     if isinstance(event, dict) and event.get("date"):
         return date.fromisoformat(event["date"])
-    return datetime.now(timezone.utc).date() - timedelta(days=1)
+    return datetime.now(timezone.utc).date() - timedelta(days=2)
 
 
 # 非同期呼び出しの自動リトライで同じ日を重複して出力しないよう、前回の試行で作ったタスクがあれば

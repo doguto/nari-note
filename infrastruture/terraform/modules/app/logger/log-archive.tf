@@ -1,4 +1,4 @@
-# CloudWatch Logs の保持期間を過ぎたログを残すため、前日分 (UTC) を毎日 S3 にエクスポートする
+# CloudWatch Logs の保持期間を過ぎたログを残すため、2 日前の 1 日分 (UTC) を毎日 S3 にエクスポートする
 
 locals {
   log_archive_bucket_name = "${var.app_name}-logs"
