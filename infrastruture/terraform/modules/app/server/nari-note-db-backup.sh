@@ -435,6 +435,8 @@ cmd_restore() {
   systemctl start postgresql || true
   if ! wait_promoted 5432 "systemctl is-active --quiet postgresql"; then
     journalctl -u postgresql -n 50 --no-pager >&2 || true
+    # Restart=on-failure により失敗した recovery が繰り返されるのを止める
+    systemctl stop postgresql || true
     die "復元に失敗しました。退避データ: ${stash} (アプリは停止したままです)"
   fi
   rm -f "${PGDATA}/conf.d/zz-recovery.conf"

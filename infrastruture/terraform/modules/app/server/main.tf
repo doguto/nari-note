@@ -20,6 +20,7 @@ locals {
     "amazon-cloudwatch-agent.json" = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
     "postgresql.conf"              = file("${path.module}/postgresql.conf")
     "pg_hba.conf"                  = file("${path.module}/pg_hba.conf")
+    "postgresql.service.conf"      = file("${path.module}/postgresql.service.conf")
     "dnf-automatic.conf"           = file("${path.module}/dnf-automatic.conf")
     "dnf-automatic.timer.conf"     = file("${path.module}/dnf-automatic.timer.conf")
     "dnf-automatic.service.conf"   = file("${path.module}/dnf-automatic.service.conf")

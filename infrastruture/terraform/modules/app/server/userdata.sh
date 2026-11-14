@@ -137,12 +137,8 @@ mountpoint -q "$${PGDATA}" || mount "$${PGDATA}"
 chown postgres:postgres "$${PGDATA}"
 chmod 700 "$${PGDATA}"
 
-# データディレクトリを EBS ボリューム上のパスに向ける
 mkdir -p /etc/systemd/system/postgresql.service.d
-cat > /etc/systemd/system/postgresql.service.d/override.conf <<EOF
-[Service]
-Environment=PGDATA=$${PGDATA}
-EOF
+install -m 644 "$${CONFIG_DIR}/postgresql.service.conf" /etc/systemd/system/postgresql.service.d/override.conf
 systemctl daemon-reload
 
 # ストレージ上のページ破損を読み込み時に検知できるよう data checksums を有効にする
