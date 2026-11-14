@@ -6,20 +6,27 @@ locals {
   db_backup_bucket_name        = data.terraform_remote_state.db_backup.outputs.bucket_name
   db_backup_bucket_arn         = data.terraform_remote_state.db_backup.outputs.bucket_arn
 
+  # PostgreSQL のデータディレクトリ (データ用 EBS のマウントポイント)。userdata・systemd・バックアップスクリプトで同じ値を使う
+  pgdata = "/data/postgresql"
+
   # Blue/Green デプロイスクリプトの S3 キー。userdata の上限 (16KB) を超えないよう、埋め込まずに S3 経由で配布する
   deploy_script_key = "scripts/nari-note-deploy.sh"
   # DB バックアップ (WAL-G) の導入・リストア用スクリプト。配布方法はデプロイスクリプトと同じ
   db_backup_script_key = "scripts/nari-note-db-backup.sh"
   # userdata に渡すと変更時に EC2 が再作成されるため、スクリプトに埋め込んで配布する
-  db_backup_script = replace(file("${path.module}/nari-note-db-backup.sh"), "@ENABLE_HEALTH_CHECK@", tostring(var.enable_db_health_check))
+  db_backup_script = replace(
+    replace(file("${path.module}/nari-note-db-backup.sh"), "@ENABLE_HEALTH_CHECK@", tostring(var.enable_db_health_check)),
+    "@PGDATA@", local.pgdata
+  )
 
   # userdata が配置する設定ファイル。userdata の上限 (16KB) を超えないよう、埋め込まずに S3 経由で配布する
   server_config_files = {
     "nari-note-backend.nginx.conf" = file("${path.module}/nari-note-backend.nginx.conf")
     "nari-note-backend@.service"   = templatefile("${path.module}/nari-note-backend@.service", { app_name = var.app_name })
-    "amazon-cloudwatch-agent.json" = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name })
+    "amazon-cloudwatch-agent.json" = templatefile("${path.module}/amazon-cloudwatch-agent.json", { app_name = var.app_name, pgdata = local.pgdata })
     "postgresql.conf"              = file("${path.module}/postgresql.conf")
     "pg_hba.conf"                  = file("${path.module}/pg_hba.conf")
+    "postgresql.service.conf"      = templatefile("${path.module}/postgresql.service.conf", { pgdata = local.pgdata })
     "dnf-automatic.conf"           = file("${path.module}/dnf-automatic.conf")
     "dnf-automatic.timer.conf"     = file("${path.module}/dnf-automatic.timer.conf")
     "dnf-automatic.service.conf"   = file("${path.module}/dnf-automatic.service.conf")
@@ -72,6 +79,7 @@ resource "aws_instance" "app_server" {
     deploy_script_key     = aws_s3_object.deploy_script.key
     db_backup_script_key  = aws_s3_object.db_backup_script.key
     db_backup_bucket_name = local.db_backup_bucket_name
+    pgdata                = local.pgdata
   })
   user_data_replace_on_change = true
 

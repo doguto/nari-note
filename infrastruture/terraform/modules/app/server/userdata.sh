@@ -107,7 +107,7 @@ install -m 644 "$${CONFIG_DIR}/amazon-cloudwatch-agent.json" /opt/aws/amazon-clo
 # contrib は shared_preload_libraries で読み込む pg_stat_statements に必要。無いと PostgreSQL が起動しない
 dnf install -y postgresql17 postgresql17-server postgresql17-contrib
 
-PGDATA="/data/postgresql"
+PGDATA="${pgdata}"
 
 # PostgreSQL データ用の EBS ボリュームを特定し、未フォーマットなら初期化してマウントする
 # (インスタンスの user_data 変更による再作成時にもデータを失わないよう、ルートボリュームとは独立させている)
@@ -137,12 +137,8 @@ mountpoint -q "$${PGDATA}" || mount "$${PGDATA}"
 chown postgres:postgres "$${PGDATA}"
 chmod 700 "$${PGDATA}"
 
-# データディレクトリを EBS ボリューム上のパスに向ける
 mkdir -p /etc/systemd/system/postgresql.service.d
-cat > /etc/systemd/system/postgresql.service.d/override.conf <<EOF
-[Service]
-Environment=PGDATA=$${PGDATA}
-EOF
+install -m 644 "$${CONFIG_DIR}/postgresql.service.conf" /etc/systemd/system/postgresql.service.d/override.conf
 systemctl daemon-reload
 
 # ストレージ上のページ破損を読み込み時に検知できるよう data checksums を有効にする

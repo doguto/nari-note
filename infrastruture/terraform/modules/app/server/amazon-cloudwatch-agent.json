@@ -37,7 +37,7 @@
             "timezone": "UTC"
           },
           {
-            "file_path": "/data/postgresql/log/postgresql-*.log",
+            "file_path": "${pgdata}/log/postgresql-*.log",
             "log_group_name": "/${app_name}/postgresql",
             "log_stream_name": "{instance_id}",
             "timezone": "UTC",

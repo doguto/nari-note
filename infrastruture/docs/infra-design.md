@@ -13,6 +13,7 @@
 - フロントは Cloudflare Workers で動き、クライアントからの API 呼び出しは Next.js の BFF (`app/api/[...path]`) を経由してバックエンド (`API_URL`、`wrangler.toml`) へ送る
 - `api.nari-note.com` は Cloudflare のプロキシ経由で EC2 の EIP に届く。nginx は Cloudflare Origin 証明書 (SSM から取得) で TLS を終端する
 - バックエンド・PostgreSQL・nginx は 1 台の EC2 (Amazon Linux 2023 / arm64) に同居する。DB データは専用の EBS に置き、EC2 を作り直してもデータは残る
+- PostgreSQL は異常終了すると systemd が自動で再起動する (`modules/app/server/postgresql.service.conf`、10 分間に 5 回まで)。メモリ枯渇時は postmaster を OOM Killer の対象から外し、アプリ (`nari-note-backend@`) を優先して対象にする
 - SSH は開けない。運用操作は SSM (Session Manager / Run Command) で行う
 - 秘匿値 (JWT・DB 接続・外部 API キー等) は SSM Parameter Store の `/<app_name>/...` に置き、Terraform で投入する
 - 画像は S3 (`<app_name>-images`) に保存し、CloudFront (OAC) で配信する
