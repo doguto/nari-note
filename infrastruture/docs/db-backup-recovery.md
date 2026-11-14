@@ -71,6 +71,7 @@ sequenceDiagram
 
 - `modules/app/server/postgresql.conf` を userdata が `/data/postgresql/conf.d/nari-note.conf` に配置する。`archive_mode = on`、`archive_command` で WAL-G の `wal-push` を呼び、`archive_timeout = 60s` で低トラフィック時も最長 60 秒で WAL を切り替えて RPO を抑える
 - WAL-G 本体・`/etc/wal-g/config.json`・systemd timer は `nari-note-db-backup install` が配置する (userdata から PostgreSQL 起動前に実行)。WAL-G はバージョンと SHA256 を固定して取得し、圧縮は zstd、`WALG_VERIFY_PAGE_CHECKSUMS` でベースバックアップ時にページ破損を検査する
+- WAL-G はページ破損を検知しても `backup-push` を成功として終え、破損ブロックを S3 の `wal-g/basebackups_005/<backup_name>/files_metadata.json` (`Files.<path>.CorruptBlocks`) に記録するだけである。そのため `base` は取得後にこのファイルを確認し、破損があれば失敗として扱う (成功を記録しないため「ベースバックアップ欠落」アラームで気付ける)。破損を含むベースバックアップ自体は S3 に残る
 
 ### data checksums
 
@@ -79,20 +80,25 @@ sequenceDiagram
 - 新規 initdb では userdata が `--data-checksums` を付ける。既存クラスタが無効なら、userdata が起動前に `pg_checksums --enable` を試みる (異常終了したクラスタでは失敗するため、その場合は手動で有効化する)
 - 有効化前のベースバックアップから戻すと無効に戻るため、**有効化後は `sudo nari-note-db-backup base` でベースバックアップを取り直す**
 - 状態は `SHOW data_checksums;`、検知件数は `SELECT datname, checksum_failures FROM pg_stat_database;` で確認する
+- 読み込み時の検知件数は `check` が `DbChecksumFailures` として送り、1 件以上でアラームが出る。累計値のため、原因を調べて復旧した後に該当 DB で `SELECT pg_stat_reset();` を実行するまで発報し続ける
 
 ### 監視 (`app/observer`)
 
 | アラーム | 条件 |
 | --- | --- |
-| ベースバックアップ欠落 | `DbBackupSuccess{Type=base}` が 26 時間記録されない (欠損は異常扱い) |
+| ベースバックアップ欠落 | `DbBackupSuccess{Type=base}` が 26 時間記録されない (欠損は異常扱い)。取得したベースバックアップにページ破損がある場合も成功を記録しない |
 | WAL アーカイブ滞留 | `DbWalArchivePendingFiles` がしきい値 (`wal_archive_pending_threshold`) を 2 回連続で超える |
 | PostgreSQL 停止 | `DbUp` が 2 回連続で 0 (欠損は異常扱い) |
+| データページ破損 | `DbChecksumFailures` (`pg_stat_database.checksum_failures` の合計) が 1 以上 |
 | ディスク使用率 | `DiskUsedPercent{MountPath}` が `/`・`/data/postgresql` それぞれでしきい値 (`disk_used_percent_threshold`、既定 80%) を 2 回連続で超える (欠損は異常扱い) |
 | PostgreSQL エラーログ | `/<app_name>/postgresql` の ERROR / FATAL / PANIC 件数がしきい値を超える |
 
 - S3 障害時も DB は止まらないが、未送信の WAL が `pg_wal` に溜まりディスクを圧迫するため滞留とディスク使用率を監視する
 - ルートボリューム (8GiB) は swap・dnf キャッシュ・`extract` の一時 DB 展開先を兼ねるため、データ用 EBS と別に監視する
 - いずれも `nari-note-db-backup check` (5 分毎) が送る。check が止まるとすべてデータ欠損になり、各アラームが発報する
+- データページ破損は PostgreSQL が停止していると送られないため、欠損を異常扱いしない (停止・check の停止は PostgreSQL 停止のアラームで検知する)
+- CloudWatch の無料枠 (アラーム 10 個・カスタムメトリクス 10 個) に収めるため、接続数・トランザクション ID の周回 (`age(datfrozenxid)`) 等、現状の規模と設定 (`max_connections` / `statement_timeout` / `idle_in_transaction_session_timeout`) で起こりにくいものは監視していない。必要時は `pg_stat_activity` / `pg_database` を直接確認する
+- autovacuum (1 秒以上) と一時ファイルの書き出しは `postgresql.conf` の `log_autovacuum_min_duration` / `log_temp_files` で PostgreSQL のログに出る
 - アラームの無い dev では `app/server` の `enable_db_health_check = false` で check を無効にしている (スクリプトの S3 配布時に埋め込まれ、`install` が check の timer を配置しない)
 - `restore` は PostgreSQL を停止するため、実行中は PostgreSQL 停止のアラームが発報する
 - 最終アーカイブからの経過時間ではなく未送信数を見る (アクセスが無いと WAL が切り替わらず、経過時間は正常時でも伸びるため)

@@ -70,6 +70,33 @@ resource "aws_cloudwatch_metric_alarm" "app_server_status_check" {
   }
 }
 
+# PostgreSQL・.NET アプリ・nginx が 1GiB に同居しており、Blue/Green 切替中はアプリのメモリが一時的に約 2 倍になる
+# 切替は 1 分程度で終わるため、5 分平均が 2 回連続で超えた場合に発報する
+resource "aws_cloudwatch_metric_alarm" "app_server_memory" {
+  alarm_name          = "${var.app_name}-app-server-memory-used"
+  alarm_description   = "EC2 instance memory usage exceeded threshold"
+  namespace           = "CWAgent"
+  metric_name         = "mem_used_percent"
+  statistic           = "Average"
+  period              = 300
+  evaluation_periods  = 2
+  threshold           = var.memory_used_percent_threshold
+  comparison_operator = "GreaterThanThreshold"
+  # EC2 の再作成後に observer を apply し忘れ、旧インスタンスを監視し続けている場合も発報させる
+  treat_missing_data = "breaching"
+
+  dimensions = {
+    InstanceId = local.instance_id
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+
+  tags = {
+    Name = "${var.app_name}-app-server-memory-alarm"
+  }
+}
+
 # 日次ベースバックアップが 26 時間成功していない (1 時間毎に評価し、26 回連続でデータ無しなら発報)
 resource "aws_cloudwatch_metric_alarm" "db_base_backup_missing" {
   alarm_name          = "${var.app_name}-db-base-backup-missing"
@@ -145,6 +172,33 @@ resource "aws_cloudwatch_metric_alarm" "db_down" {
 
   tags = {
     Name = "${var.app_name}-db-down-alarm"
+  }
+}
+
+# PostgreSQL がデータページの読み込み時にチェックサム不一致を検知した
+# PostgreSQL 停止中は送られないため、欠損は異常扱いしない (停止・check の停止は db-down で検知する)
+# 累計値のため、原因を調べて復旧した後に pg_stat_reset() でリセットするまで発報し続ける
+resource "aws_cloudwatch_metric_alarm" "db_checksum_failures" {
+  alarm_name          = "${var.app_name}-db-checksum-failures"
+  alarm_description   = "PostgreSQL detected data page checksum failures"
+  namespace           = "CWAgent"
+  metric_name         = "DbChecksumFailures"
+  statistic           = "Maximum"
+  period              = 300
+  evaluation_periods  = 1
+  threshold           = 0
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    AppName = var.app_name
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+
+  tags = {
+    Name = "${var.app_name}-db-checksum-failures-alarm"
   }
 }
 

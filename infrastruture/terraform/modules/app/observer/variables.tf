@@ -34,6 +34,12 @@ variable "db_error_log_threshold" {
   default     = 5
 }
 
+variable "memory_used_percent_threshold" {
+  description = "Memory usage percentage (5-minute average) that triggers the alarm."
+  type        = number
+  default     = 90
+}
+
 variable "disk_used_percent_threshold" {
   description = "Disk usage percentage of / and /data/postgresql that triggers the alarm."
   type        = number

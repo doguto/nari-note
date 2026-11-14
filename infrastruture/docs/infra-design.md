@@ -17,7 +17,27 @@
 - 秘匿値 (JWT・DB 接続・外部 API キー等) は SSM Parameter Store の `/<app_name>/...` に置き、Terraform で投入する
 - 画像は S3 (`<app_name>-images`) に保存し、CloudFront (OAC) で配信する
 - DB のバックアップは WAL-G による S3 への継続アーカイブ + DLM の EBS スナップショット。詳細は [db-backup-recovery.md](db-backup-recovery.md)
-- 監視は CloudWatch (ログ・アラーム) → SNS でメール通知 (`app/logger`, `app/observer`)。コストは `budget` で月額予算アラートを設定している
+- 監視は CloudWatch (ログ・アラーム) → SNS でメール通知 (`app/logger`, `app/observer`)。EC2 の CPU・メモリ使用率・ステータスチェックと、DB の項目 ([db-backup-recovery.md](db-backup-recovery.md#監視-appobserver)) をアラームにしている。コストは `budget` で月額予算アラートを設定している
+
+## OS・PostgreSQL の更新
+
+| 対象 | 方法 |
+| --- | --- |
+| OS (PostgreSQL を含む) のセキュリティ更新 | dnf-automatic が毎日 05:00 JST 頃に適用する (`modules/app/server/dnf-automatic*.conf`)。AL2023 のリポジトリは `releasever=latest` で常に最新リリースを参照する |
+| PostgreSQL のマイナー更新 | dnf-automatic の後に `nari-note-post-update` (`modules/app/server/nari-note-post-update.sh`) が `postgresql17*` をセキュリティ更新に限らず適用する |
+| 更新の反映 | `nari-note-post-update` が `dnf needs-restarting -s` で古いバイナリのまま動いている PostgreSQL を検出して再起動する (数秒停止する)。カーネル等の更新時は dnf-automatic が OS を再起動する。アプリ・nginx は自動では再起動せず、次回デプロイか OS 再起動で反映される |
+| 前提条件 | 直近 6 時間以内にベースバックアップが成功していない日は更新を見送る。`nari-note-post-update` は `nari-note-db-backup` と同じロックを取り、ベースバックアップ・リストアの実行中は PostgreSQL の更新・再起動を翌日に見送る |
+
+結果は `journalctl -u dnf-automatic` で確認する。実行中のバージョンの確認と手動での更新は Session Manager で接続して以下を実行する。
+
+```bash
+sudo -u postgres psql -Atc 'SELECT version(), pg_postmaster_start_time()'
+rpm -q --last postgresql17-server
+sudo dnf needs-restarting -s
+# 手動で更新する場合 (先にベースバックアップを取る)
+sudo nari-note-db-backup base
+sudo dnf -y upgrade 'postgresql17*' && sudo systemctl restart postgresql
+```
 
 ## Terraform / Terragrunt の構成方針
 
