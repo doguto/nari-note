@@ -66,6 +66,8 @@ sequenceDiagram
 - バケット名は `<app_name>-db-backup`。バージョニング・SSE-S3・パブリックアクセスブロックを有効にする
 - `wal-g/` は作成から `retention_days` (既定 8 日) で失効する。ベースバックアップは日次のため、常に 7 日以上の PITR 範囲が残る。旧バージョンは 7 日で失効
 - EC2 ロールには `s3:PutObject` / `s3:GetObject` / `s3:ListBucket` のみ付与し、`s3:DeleteObject` は付与しない (乗っ取り・誤操作でバックアップを消されないため。世代削除はライフサイクルに任せる)
+- 管理者の誤操作・認証情報の漏洩に備え、S3 Object Lock (GOVERNANCE) の既定の保持期間 `object_lock_days` (既定 7 日) を設定している。保持期間中のバージョンは `s3:BypassGovernanceRetention` を明示しない限り削除・上書き削除できない。ライフサイクルによる失効 (削除マーカーの付与) は保持期間中でも行われ、旧バージョンの完全削除は保持期間の経過後に行われる
+- WAL-G の PUT には AWS SDK が Content-MD5 を付けるため、既定の保持期間があってもアップロードは失敗しない。WAL-G を更新したときは `wal-push` / `backup-push` が成功することを dev で確認する
 
 ### PostgreSQL / WAL-G の設定
 
