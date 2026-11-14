@@ -89,24 +89,15 @@ sequenceDiagram
 | ベースバックアップ欠落 | `DbBackupSuccess{Type=base}` が 26 時間記録されない (欠損は異常扱い)。取得したベースバックアップにページ破損がある場合も成功を記録しない |
 | WAL アーカイブ滞留 | `DbWalArchivePendingFiles` がしきい値 (`wal_archive_pending_threshold`) を 2 回連続で超える |
 | PostgreSQL 停止 | `DbUp` が 2 回連続で 0 (欠損は異常扱い) |
-| 接続数 | `DbConnectionsUsedPercent` (クライアント接続数 / `max_connections`) がしきい値 (`db_connections_used_percent_threshold`、既定 80%) を 2 回連続で超える |
-| トランザクション ID の周回 | `DbMaxXidAge` (`max(age(datfrozenxid))`) がしきい値 (`db_xid_age_threshold`、既定 5 億) を超える |
 | データページ破損 | `DbChecksumFailures` (`pg_stat_database.checksum_failures` の合計) が 1 以上 |
 | ディスク使用率 | `DiskUsedPercent{MountPath}` が `/`・`/data/postgresql` それぞれでしきい値 (`disk_used_percent_threshold`、既定 80%) を 2 回連続で超える (欠損は異常扱い) |
 | PostgreSQL エラーログ | `/<app_name>/postgresql` の ERROR / FATAL / PANIC 件数がしきい値を超える |
 
-アラームを設定せず、調査用に送っているメトリクス。
-
-| メトリクス | 内容 |
-| --- | --- |
-| `DbConnections` | クライアント接続数 |
-| `DbLongestTransactionSeconds` | 実行中のトランザクションのうち最長の経過秒数 (アプリ用ロールは `statement_timeout` / `idle_in_transaction_session_timeout` で打ち切られるため、主に手作業のセッションが対象) |
-| `DbDeadlocks` | 前回の check からのデッドロック発生数 (デッドロックは ERROR としてログにも出る) |
-
 - S3 障害時も DB は止まらないが、未送信の WAL が `pg_wal` に溜まりディスクを圧迫するため滞留とディスク使用率を監視する
 - ルートボリューム (8GiB) は swap・dnf キャッシュ・`extract` の一時 DB 展開先を兼ねるため、データ用 EBS と別に監視する
 - いずれも `nari-note-db-backup check` (5 分毎) が送る。check が止まるとすべてデータ欠損になり、各アラームが発報する
-- 接続数・トランザクション ID・データページ破損は PostgreSQL が停止していると送られないため、欠損を異常扱いしない (停止・check の停止は PostgreSQL 停止のアラームで検知する)
+- データページ破損は PostgreSQL が停止していると送られないため、欠損を異常扱いしない (停止・check の停止は PostgreSQL 停止のアラームで検知する)
+- CloudWatch の無料枠 (アラーム 10 個・カスタムメトリクス 10 個) に収めるため、接続数・トランザクション ID の周回 (`age(datfrozenxid)`) 等、現状の規模と設定 (`max_connections` / `statement_timeout` / `idle_in_transaction_session_timeout`) で起こりにくいものは監視していない。必要時は `pg_stat_activity` / `pg_database` を直接確認する
 - autovacuum (1 秒以上) と一時ファイルの書き出しは `postgresql.conf` の `log_autovacuum_min_duration` / `log_temp_files` で PostgreSQL のログに出る
 - アラームの無い dev では `app/server` の `enable_db_health_check = false` で check を無効にしている (スクリプトの S3 配布時に埋め込まれ、`install` が check の timer を配置しない)
 - `restore` は PostgreSQL を停止するため、実行中は PostgreSQL 停止のアラームが発報する

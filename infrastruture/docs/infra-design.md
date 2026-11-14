@@ -17,7 +17,7 @@
 - 秘匿値 (JWT・DB 接続・外部 API キー等) は SSM Parameter Store の `/<app_name>/...` に置き、Terraform で投入する
 - 画像は S3 (`<app_name>-images`) に保存し、CloudFront (OAC) で配信する
 - DB のバックアップは WAL-G による S3 への継続アーカイブ + DLM の EBS スナップショット。詳細は [db-backup-recovery.md](db-backup-recovery.md)
-- 監視は CloudWatch (ログ・アラーム) → SNS でメール通知 (`app/logger`, `app/observer`)。EC2 の CPU・メモリ・スワップ使用率・ステータスチェックと、DB の項目 ([db-backup-recovery.md](db-backup-recovery.md#監視-appobserver)) をアラームにしている。コストは `budget` で月額予算アラートを設定している
+- 監視は CloudWatch (ログ・アラーム) → SNS でメール通知 (`app/logger`, `app/observer`)。EC2 の CPU・メモリ使用率・ステータスチェックと、DB の項目 ([db-backup-recovery.md](db-backup-recovery.md#監視-appobserver)) をアラームにしている。コストは `budget` で月額予算アラートを設定している
 
 ## OS・PostgreSQL の更新
 
