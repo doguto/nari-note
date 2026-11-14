@@ -16,15 +16,18 @@ if ! flock -n 9; then
   exit 0
 fi
 
+# 失敗しても dnf-automatic が適用したセキュリティ更新の反映 (再起動) は行うため続行し、最後に終了コードで失敗を残す
+failed=0
+
 # dnf-automatic はセキュリティ更新のみを適用するが、PostgreSQL はバグ修正のみのマイナーリリースも適用する (RDS の自動マイナーバージョンアップグレード相当)
-dnf -y upgrade 'postgresql17*'
+dnf -y upgrade 'postgresql17*' || { log "PostgreSQL のマイナー更新の適用に失敗しました"; failed=1; }
 
 # パッケージを更新しても、稼働中のプロセスは再起動するまで古いバイナリ・ライブラリを使い続ける
-services="$(dnf needs-restarting -s)"
+services="$(dnf needs-restarting -s)" || { log "dnf needs-restarting に失敗したため、再起動の要否を判定できません"; exit 1; }
 
 if grep -qx 'postgresql.service' <<< "${services}"; then
   log "PostgreSQL を再起動します"
-  systemctl restart postgresql
+  systemctl restart postgresql || { log "PostgreSQL の再起動に失敗しました"; failed=1; }
 fi
 
 # アプリと nginx は再起動中に API が応答しなくなるため、自動では再起動しない (アプリは次回デプロイ、OS 再起動時に反映される)
@@ -32,3 +35,5 @@ others="$(grep -vx 'postgresql.service' <<< "${services}" || true)"
 if [[ -n "${others}" ]]; then
   log "再起動が必要なサービス: $(tr '\n' ' ' <<< "${others}")"
 fi
+
+exit "${failed}"
