@@ -179,6 +179,15 @@ public class CourseRepository : ICourseRepository
         return (courses, totalCount);
     }
 
+    public async Task<int> CountPublishedByAuthorAsync(UserId authorId)
+    {
+        var now = this.timeProvider.UtcNow();
+
+        return await this.context.Courses
+                                 .Where(c => c.UserId == authorId && c.PublishedAt.HasValue && c.PublishedAt.Value <= now)
+                                 .CountAsync();
+    }
+
     public async Task<(List<CourseSummary> Courses, int TotalCount)> FindPublishedSummariesByTagAsync(string tagName, int limit, int offset)
     {
         var now = timeProvider.UtcNow();

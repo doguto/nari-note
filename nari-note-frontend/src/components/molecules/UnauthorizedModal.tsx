@@ -41,7 +41,7 @@ export function UnauthorizedModal({
           <Button variant="outline" onClick={onCancel} className="border-brand-border text-brand-text hover:bg-brand-bg-gradient-to">
             キャンセル
           </Button>
-          <Button onClick={onNavigateToSignIn} className="bg-brand-primary hover:bg-brand-primary-hover">
+          <Button onClick={onNavigateToSignIn}>
             サインイン
           </Button>
         </DialogFooter>

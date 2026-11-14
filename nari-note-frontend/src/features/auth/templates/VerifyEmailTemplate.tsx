@@ -19,7 +19,7 @@ export function VerifyEmailTemplate({ status, error }: VerifyEmailTemplateProps)
       {status === 'success' && (
         <div className="mt-4 space-y-6">
           <p className="text-gray-700">メールアドレスの認証が完了しました。</p>
-          <Button asChild className="w-full bg-brand-primary hover:bg-brand-primary-hover">
+          <Button asChild className="w-full">
             <Link href="/">ホームへ</Link>
           </Button>
         </div>

@@ -5,7 +5,7 @@ export { TagChip } from './TagChip';
 export { TextareaField } from './TextareaField';
 export { ImageUploadField } from './ImageUploadField';
 export { FollowButton } from './FollowButton';
-export { FollowStats } from './FollowStats';
+export { ProfileStat } from './ProfileStat';
 export { LikeButton } from './LikeButton';
 export { LoadingSpinner } from './LoadingSpinner';
 export { EmptyState } from './EmptyState';

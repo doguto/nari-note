@@ -88,7 +88,7 @@ export function SignUpTemplate({
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-brand-primary hover:bg-brand-primary-hover"
+          className="w-full"
         >
           {isLoading ? '登録中...' : '新規登録'}
         </Button>

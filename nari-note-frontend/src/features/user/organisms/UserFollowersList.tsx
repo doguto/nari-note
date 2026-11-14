@@ -1,4 +1,5 @@
-import { LoadingSpinner, ErrorMessage } from '@/components/ui';
+import { Users } from 'lucide-react';
+import { EmptyState, LoadingSpinner, ErrorMessage } from '@/components/ui';
 import { UserListItem } from '@/components/molecules';
 import type { FollowerUserDto } from '@/lib/api/types';
 
@@ -45,13 +46,11 @@ export function UserFollowersList({
       )}
 
       {!isLoading && !error && users && users.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          {emptyMessage}
-        </div>
+        <EmptyState variant="panel" title={emptyMessage} icon={<Users />} />
       )}
 
       {!isLoading && !error && users && users.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-1 rounded-xl border border-gray-200 bg-white p-2 sm:p-4">
           {users.map((user) => (
             user.id && user.username ? (
               <UserListItem

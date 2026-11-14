@@ -18,7 +18,7 @@ export function CourseArticleEditList({ articles, courseId }: CourseArticleEditL
           </h2>
           <Link
             href={`/articles/new?courseId=${courseId}`}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-brand-primary rounded-lg hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-brand-primary-dark rounded-lg hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" />
             記事を追加
@@ -41,7 +41,7 @@ export function CourseArticleEditList({ articles, courseId }: CourseArticleEditL
         </h2>
         <Link
           href={`/articles/new?courseId=${courseId}`}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-brand-primary rounded-lg hover:opacity-90 transition-opacity"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-brand-primary-dark rounded-lg hover:opacity-90 transition-opacity"
         >
           <Plus className="w-4 h-4" />
           記事を追加

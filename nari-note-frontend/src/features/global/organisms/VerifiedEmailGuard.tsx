@@ -33,7 +33,7 @@ export function VerifiedEmailGuard({ children }: VerifiedEmailGuardProps) {
         </p>
         <Button
           onClick={ensureVerifiedEmail}
-          className="bg-brand-primary hover:bg-brand-primary-hover"
+         
         >
           確認メールを再送する
         </Button>

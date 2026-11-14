@@ -11,6 +11,7 @@ namespace NariNoteBackend.Tests.Application.Service;
 public class GetUserProfileServiceTest
 {
     readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
+    readonly ICourseRepository courseRepository = Substitute.For<ICourseRepository>();
     readonly IFollowRepository followRepository = Substitute.For<IFollowRepository>();
     readonly ILikeRepository likeRepository = Substitute.For<ILikeRepository>();
     readonly GetUserProfileService service;
@@ -25,6 +26,7 @@ public class GetUserProfileServiceTest
             this.userRepository,
             this.followRepository,
             this.articleRepository,
+            this.courseRepository,
             this.likeRepository
         );
     }
@@ -35,6 +37,7 @@ public class GetUserProfileServiceTest
         this.followRepository.CountFollowersAsync(this.user.Id).Returns(3);
         this.followRepository.CountFollowingsAsync(this.user.Id).Returns(5);
         this.articleRepository.CountByAuthorAsync(this.user.Id).Returns(7);
+        this.courseRepository.CountPublishedByAuthorAsync(this.user.Id).Returns(2);
         this.likeRepository.CountLikedArticlesByUserAsync(this.user.Id).Returns(11);
 
         var response = await this.service.ExecuteAsync(new GetUserProfileRequest { Id = this.user.Id });
@@ -48,6 +51,7 @@ public class GetUserProfileServiceTest
         Assert.Equal(3, response.FollowerCount);
         Assert.Equal(5, response.FollowingCount);
         Assert.Equal(7, response.ArticleCount);
+        Assert.Equal(2, response.CourseCount);
         Assert.Equal(11, response.LikedArticleCount);
     }
 

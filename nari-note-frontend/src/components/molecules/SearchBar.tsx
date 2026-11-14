@@ -42,7 +42,7 @@ export function SearchBar({
         </div>
         <Button 
           onClick={onSearch}
-          className="bg-brand-primary hover:bg-brand-primary-hover text-white px-6"
+          className="px-6"
         >
           検索
         </Button>
