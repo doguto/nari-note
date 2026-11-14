@@ -1,6 +1,9 @@
 locals {
   instance_id = data.terraform_remote_state.server.outputs.instance_id
 
+  log_export_function_name = data.terraform_remote_state.logger.outputs.log_export_function_name
+  log_export_role_name     = data.terraform_remote_state.logger.outputs.log_export_role_name
+
   # ディスク使用率を監視するファイルシステム (nari-note-db-backup の DISK_MOUNT_PATHS と揃える)
   disk_mount_paths = {
     root            = "/"
@@ -249,5 +252,34 @@ resource "aws_cloudwatch_metric_alarm" "db_error_log" {
 
   tags = {
     Name = "${var.app_name}-db-error-log-alarm"
+  }
+}
+
+# ログの S3 エクスポート (app/logger) がリトライ後も失敗したら通知する
+# アラームは無料枠 (10 個) を使い切っているため、Lambda の非同期呼び出しの失敗時送信先で SNS に直接送る
+resource "aws_lambda_function_event_invoke_config" "log_export" {
+  function_name          = local.log_export_function_name
+  maximum_retry_attempts = 2
+
+  destination_config {
+    on_failure {
+      destination = aws_sns_topic.alerts.arn
+    }
+  }
+
+  depends_on = [aws_iam_role_policy.log_export_alerts_publish]
+}
+
+# 失敗時送信先への配信は関数の実行ロールで行われる
+resource "aws_iam_role_policy" "log_export_alerts_publish" {
+  name   = "${var.app_name}-log-export-alerts-publish"
+  role   = local.log_export_role_name
+  policy = data.aws_iam_policy_document.log_export_alerts_publish.json
+}
+
+data "aws_iam_policy_document" "log_export_alerts_publish" {
+  statement {
+    actions   = ["sns:Publish"]
+    resources = [aws_sns_topic.alerts.arn]
   }
 }

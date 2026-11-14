@@ -8,6 +8,7 @@ terraform {
 
 dependencies {
   paths = [
-    "../server"
+    "../server",
+    "../logger"
   ]
 }
