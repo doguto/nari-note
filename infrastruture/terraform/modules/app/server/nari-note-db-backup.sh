@@ -9,9 +9,9 @@
 #   nari-note-db-backup install <app_name> <bucket>
 #       WAL-G・設定・systemd timer を配置する (冪等)。userdata から呼ばれる
 #   nari-note-db-backup base
-#       ベースバックアップを取得する (systemd timer から日次で呼ばれる)
+#       ベースバックアップを取得し、ページ破損が無いことを確認する (systemd timer から日次で呼ばれる)
 #   nari-note-db-backup check
-#       PostgreSQL の死活・ディスク使用率・未アーカイブの WAL 数を CloudWatch へ送る (systemd timer から 5 分毎に呼ばれる)
+#       PostgreSQL の死活・DB 内部の状態・ディスク使用率・未アーカイブの WAL 数を CloudWatch へ送る (systemd timer から 5 分毎に呼ばれる)
 #   nari-note-db-backup list
 #       S3 上のベースバックアップ一覧を表示する
 #   nari-note-db-backup restore <latest|時刻> [-y]
@@ -37,6 +37,8 @@ STATE_DIR="/var/lib/nari-note-db-backup"
 PENDING_RESTORE_FILE="${STATE_DIR}/pending-restore"
 # mtime が最後にベースバックアップが成功した時刻。dnf-automatic が更新前の確認に使う
 LAST_BASE_SUCCESS_FILE="${STATE_DIR}/last-base-success"
+# pg_stat_database.deadlocks は累計値のため、前回 check 時の値を残して差分を送る
+DEADLOCKS_TOTAL_FILE="${STATE_DIR}/deadlocks-total"
 LOCK_FILE="/run/nari-note-db-backup.lock"
 SELF="/usr/local/bin/nari-note-db-backup"
 
@@ -284,10 +286,46 @@ WantedBy=timers.target"
   log "install 完了 (bucket: ${bucket})"
 }
 
+# WAL-G はページ破損を検知しても backup-push を成功扱いで終え、破損ブロックを files_metadata.json の CorruptBlocks に記録するだけのため、
+# ここで確認して失敗扱いにする (成功を記録しなければベースバックアップ欠落のアラームで気付ける)
+verify_latest_backup_pages() {
+  local backup corrupt
+  backup="$(walg backup-list --detail --json | python3 -c '
+import datetime, json, re, sys
+
+latest = None
+for backup in json.load(sys.stdin) or []:
+    finished = re.sub(r"\.\d+", "", backup["finish_time"]).replace("Z", "+00:00")
+    finished_epoch = datetime.datetime.fromisoformat(finished).timestamp()
+    if latest is None or finished_epoch > latest[0]:
+        latest = (finished_epoch, backup["backup_name"])
+if latest is None:
+    sys.exit(1)
+print(latest[1])
+')" || { log "取得したベースバックアップを特定できませんでした"; return 1; }
+
+  corrupt="$(aws s3 cp --region "${AWS_REGION}" --quiet \
+    "s3://${DB_BACKUP_BUCKET}/wal-g/basebackups_005/${backup}/files_metadata.json" - | python3 -c '
+import json, sys
+
+for path, desc in sorted((json.load(sys.stdin).get("Files") or {}).items()):
+    info = desc.get("CorruptBlocks")
+    if info:
+        print("%s: %d blocks (%s)" % (path, info["CorruptBlocksCount"], info["SomeCorruptBlocks"]))
+')" || { log "${backup} の files_metadata.json を確認できませんでした"; return 1; }
+
+  if [[ -n "${corrupt}" ]]; then
+    log "ベースバックアップ ${backup} でページ破損を検知しました"
+    printf '%s\n' "${corrupt}" >&2
+    return 1
+  fi
+}
+
 run_base_backup() {
   systemctl is-active --quiet postgresql || die "PostgreSQL が起動していません"
   log "ベースバックアップを取得します"
   walg backup-push "${PGDATA}"
+  verify_latest_backup_pages || die "ベースバックアップの検証に失敗しました"
   touch "${LAST_BASE_SUCCESS_FILE}"
   put_metric DbBackupSuccess 1 Count "Type=base"
   log "ベースバックアップ完了"
@@ -297,6 +335,51 @@ cmd_base() {
   load_env
   acquire_lock
   run_base_backup
+}
+
+# RDS の DatabaseConnections / MaximumUsedTransactionIDs / Deadlocks 相当のメトリクスを送る
+report_db_stats() {
+  local stats
+  stats="$(psql_at 5432 -F ' ' -c "
+    SELECT
+      (SELECT count(*) FROM pg_stat_activity WHERE backend_type = 'client backend' AND pid <> pg_backend_pid()),
+      current_setting('max_connections')::int,
+      (SELECT max(age(datfrozenxid)) FROM pg_database),
+      (SELECT coalesce(max(extract(epoch FROM now() - xact_start)), 0)::bigint FROM pg_stat_activity
+        WHERE backend_type = 'client backend' AND xact_start IS NOT NULL AND pid <> pg_backend_pid()),
+      (SELECT coalesce(sum(deadlocks), 0) FROM pg_stat_database),
+      (SELECT coalesce(sum(checksum_failures), 0) FROM pg_stat_database)")" \
+    || { log "PostgreSQL の統計情報を取得できませんでした"; return 1; }
+
+  local connections max_connections xid_age longest_xact_seconds deadlocks_total checksum_failures
+  read -r connections max_connections xid_age longest_xact_seconds deadlocks_total checksum_failures <<< "${stats}"
+  local value
+  for value in "${connections}" "${max_connections}" "${xid_age}" "${longest_xact_seconds}" "${deadlocks_total}" "${checksum_failures}"; do
+    [[ "${value}" =~ ^[0-9]+$ ]] || { log "PostgreSQL の統計情報を解釈できませんでした: ${stats}"; return 1; }
+  done
+
+  # 統計のリセット・再起動で累計値が減った場合は、リセット後の値をそのまま差分とみなす
+  local deadlocks_previous deadlocks=0
+  deadlocks_previous="$(cat "${DEADLOCKS_TOTAL_FILE}" 2>/dev/null || true)"
+  if [[ "${deadlocks_previous}" =~ ^[0-9]+$ ]]; then
+    if (( deadlocks_total >= deadlocks_previous )); then
+      deadlocks=$((deadlocks_total - deadlocks_previous))
+    else
+      deadlocks="${deadlocks_total}"
+    fi
+  fi
+  echo "${deadlocks_total}" > "${DEADLOCKS_TOTAL_FILE}"
+
+  local failed=0
+  put_metric DbConnections "${connections}" Count || { log "DbConnections の送信に失敗しました"; failed=1; }
+  put_metric DbConnectionsUsedPercent "$((connections * 100 / max_connections))" Percent \
+    || { log "DbConnectionsUsedPercent の送信に失敗しました"; failed=1; }
+  put_metric DbMaxXidAge "${xid_age}" Count || { log "DbMaxXidAge の送信に失敗しました"; failed=1; }
+  put_metric DbLongestTransactionSeconds "${longest_xact_seconds}" Seconds \
+    || { log "DbLongestTransactionSeconds の送信に失敗しました"; failed=1; }
+  put_metric DbDeadlocks "${deadlocks}" Count || { log "DbDeadlocks の送信に失敗しました"; failed=1; }
+  put_metric DbChecksumFailures "${checksum_failures}" Count || { log "DbChecksumFailures の送信に失敗しました"; failed=1; }
+  return "${failed}"
 }
 
 # 経過時間ではなく未送信の WAL 数を見る。アクセスが無いと WAL が切り替わらず、
@@ -311,6 +394,10 @@ cmd_check() {
     db_up=1
   fi
   put_metric DbUp "${db_up}" Count || { log "DbUp の送信に失敗しました"; failed=1; }
+
+  if (( db_up == 1 )); then
+    report_db_stats || failed=1
+  fi
 
   local mount_path used_percent
   for mount_path in "${DISK_MOUNT_PATHS[@]}"; do

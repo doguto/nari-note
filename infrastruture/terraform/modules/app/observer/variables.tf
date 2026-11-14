@@ -34,6 +34,30 @@ variable "db_error_log_threshold" {
   default     = 5
 }
 
+variable "memory_used_percent_threshold" {
+  description = "Memory usage percentage (5-minute average) that triggers the alarm."
+  type        = number
+  default     = 90
+}
+
+variable "swap_used_percent_threshold" {
+  description = "Swap usage percentage (5-minute average) that triggers the alarm."
+  type        = number
+  default     = 50
+}
+
+variable "db_connections_used_percent_threshold" {
+  description = "Percentage of max_connections in use by client backends that triggers the alarm."
+  type        = number
+  default     = 80
+}
+
+variable "db_xid_age_threshold" {
+  description = "Maximum age(datfrozenxid) across databases that triggers the alarm. Wraparound protection stops writes at about 2 billion."
+  type        = number
+  default     = 500000000
+}
+
 variable "disk_used_percent_threshold" {
   description = "Disk usage percentage of / and /data/postgresql that triggers the alarm."
   type        = number
