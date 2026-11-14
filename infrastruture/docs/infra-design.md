@@ -26,7 +26,7 @@
 | OS (PostgreSQL を含む) のセキュリティ更新 | dnf-automatic が毎日 05:00 JST 頃に適用する (`modules/app/server/dnf-automatic*.conf`)。AL2023 のリポジトリは `releasever=latest` で常に最新リリースを参照する |
 | PostgreSQL のマイナー更新 | dnf-automatic の後に `nari-note-post-update` (`modules/app/server/nari-note-post-update.sh`) が `postgresql17*` をセキュリティ更新に限らず適用する |
 | 更新の反映 | `nari-note-post-update` が `dnf needs-restarting -s` で古いバイナリのまま動いている PostgreSQL を検出して再起動する (数秒停止する)。カーネル等の更新時は dnf-automatic が OS を再起動する。アプリ・nginx は自動では再起動せず、次回デプロイか OS 再起動で反映される |
-| 前提条件 | 直近 6 時間以内にベースバックアップが成功していない日は更新を見送る |
+| 前提条件 | 直近 6 時間以内にベースバックアップが成功していない日は更新を見送る。`nari-note-post-update` は `nari-note-db-backup` と同じロックを取り、ベースバックアップ・リストアの実行中は PostgreSQL の更新・再起動を翌日に見送る |
 
 結果は `journalctl -u dnf-automatic` で確認する。実行中のバージョンの確認と手動での更新は Session Manager で接続して以下を実行する。
 

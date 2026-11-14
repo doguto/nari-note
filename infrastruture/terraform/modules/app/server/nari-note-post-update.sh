@@ -2,9 +2,19 @@
 # dnf-automatic の後に実行する。userdata が /usr/local/sbin/nari-note-post-update に配置し、dnf-automatic.service.conf の ExecStartPost から呼ばれる
 set -euo pipefail
 
+# nari-note-db-backup と同じロック。実行中のベースバックアップ・リストアを PostgreSQL の更新・再起動で中断させない
+LOCK_FILE="/run/nari-note-db-backup.lock"
+
 log() {
   echo "[nari-note-post-update] $*"
 }
+
+exec 9>"${LOCK_FILE}"
+if ! flock -n 9; then
+  # 再起動が必要な状態は残るため、翌日の実行で再び判定される
+  log "nari-note-db-backup の処理が実行中のため、PostgreSQL の更新・再起動を見送ります"
+  exit 0
+fi
 
 # dnf-automatic はセキュリティ更新のみを適用するが、PostgreSQL はバグ修正のみのマイナーリリースも適用する (RDS の自動マイナーバージョンアップグレード相当)
 dnf -y upgrade 'postgresql17*'
