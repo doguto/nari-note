@@ -30,8 +30,18 @@ if grep -qx 'postgresql.service' <<< "${services}"; then
   systemctl restart postgresql || { log "PostgreSQL の再起動に失敗しました"; failed=1; }
 fi
 
-# アプリと nginx は再起動中に API が応答しなくなるため、自動では再起動しない (アプリは次回デプロイ、OS 再起動時に反映される)
-others="$(grep -vx 'postgresql.service' <<< "${services}" || true)"
+# reload では master が古いバイナリのまま worker を作り直すだけなので、USR2 による無停止のバイナリ入れ替えを使う
+if grep -qx 'nginx.service' <<< "${services}"; then
+  if [[ -x /usr/bin/nginx-upgrade ]]; then
+    log "nginx のバイナリを無停止で入れ替えます"
+    /usr/bin/nginx-upgrade || { log "nginx のバイナリの入れ替えに失敗しました"; failed=1; }
+  else
+    log "nginx-upgrade が無いため、nginx の更新の反映を見送ります"
+  fi
+fi
+
+# アプリは再起動中に API が応答しなくなるため、自動では再起動しない (次回デプロイ、OS 再起動時に反映される)
+others="$(grep -vx -e 'postgresql.service' -e 'nginx.service' <<< "${services}" || true)"
 if [[ -n "${others}" ]]; then
   log "再起動が必要なサービス: $(tr '\n' ' ' <<< "${others}")"
 fi
