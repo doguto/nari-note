@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,8 @@ export function UnauthorizedModal({
   onNavigateToSignUp,
   onCancel,
 }: UnauthorizedModalProps) {
+  const signInButtonRef = useRef<HTMLButtonElement>(null);
+
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       onCancel();
@@ -33,8 +36,11 @@ export function UnauthorizedModal({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         className="bg-brand-bg-light border-brand-border"
-        // 先頭のキャンセルに初期フォーカスの枠が出て目立つのを避ける
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        // 既定では先頭のキャンセルにフォーカスが当たるため、主操作のログインに置く
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          signInButtonRef.current?.focus();
+        }}
       >
         <DialogHeader>
           <DialogTitle className="text-brand-text">ログインが必要です</DialogTitle>
@@ -49,7 +55,7 @@ export function UnauthorizedModal({
           <Button variant="outline" onClick={onNavigateToSignUp} className="border-brand-border text-brand-text hover:bg-brand-bg-gradient-to">
             新規登録
           </Button>
-          <Button onClick={onNavigateToSignIn}>
+          <Button ref={signInButtonRef} onClick={onNavigateToSignIn}>
             ログイン
           </Button>
         </DialogFooter>
