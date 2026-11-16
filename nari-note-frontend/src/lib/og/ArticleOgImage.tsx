@@ -35,7 +35,7 @@ export function formatCaptured(pieces: CapturedPiece[]): string {
   return pieces.map((p) => (p.count > 1 ? `${p.type}${p.count}` : p.type)).join(' ');
 }
 
-/** satori で描画する記事の OG 画像（左に局面、右にタイトル） */
+// X 等はカード左下に URL を重ねて表示するため、持駒が隠れないよう局面を右に置く
 export function ArticleOgImage({ title, authorName, board }: ArticleOgImageProps) {
   return (
     <div
@@ -48,19 +48,13 @@ export function ArticleOgImage({ title, authorName, board }: ArticleOgImageProps
         fontFamily: 'Noto Sans JP',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-        <CapturedRow mark="△" pieces={board.captured.gote} />
-        <OgBoard board={board} />
-        <CapturedRow mark="▲" pieces={board.captured.sente} />
-      </div>
-
       <div
         style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          paddingLeft: 56,
+          paddingRight: 56,
           paddingTop: 16,
           paddingBottom: 16,
         }}
@@ -82,6 +76,12 @@ export function ArticleOgImage({ title, authorName, board }: ArticleOgImageProps
           <div style={{ display: 'flex', fontSize: 32, color: COLORS.text }}>{authorName}</div>
           <div style={{ display: 'flex', fontSize: 36, fontWeight: 700, color: COLORS.brand }}>なりノート</div>
         </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <CapturedRow mark="△" pieces={board.captured.gote} />
+        <OgBoard board={board} />
+        <CapturedRow mark="▲" pieces={board.captured.sente} />
       </div>
     </div>
   );
