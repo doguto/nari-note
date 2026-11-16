@@ -1,17 +1,7 @@
 name: Frontend Check
 
-# push（develop / main）でも実行するのは、PR から参照できるキャッシュをデフォルトブランチ側に作るため。
-# PR で作ったキャッシュはその PR 内でしか使えない
 on:
   pull_request:
-    paths:
-      - "nari-note-frontend/**"
-      - ".github/actions/setup-frontend/**"
-      - ".github/workflows/frontend-check.yml"
-  push:
-    branches:
-      - develop
-      - main
     paths:
       - "nari-note-frontend/**"
       - ".github/actions/setup-frontend/**"
