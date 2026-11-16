@@ -37,6 +37,11 @@ export function UnauthorizedProvider({ children }: { children: ReactNode }) {
     router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
   }, [router, pathname, searchParams]);
 
+  const handleNavigateToSignUp = useCallback(() => {
+    setIsModalOpen(false);
+    router.push('/signup');
+  }, [router]);
+
   const handleCancel = useCallback(() => {
     setIsModalOpen(false);
   }, []);
@@ -47,6 +52,7 @@ export function UnauthorizedProvider({ children }: { children: ReactNode }) {
       <UnauthorizedModal
         open={isModalOpen}
         onNavigateToSignIn={handleNavigateToSignIn}
+        onNavigateToSignUp={handleNavigateToSignUp}
         onCancel={handleCancel}
       />
     </UnauthorizedContext.Provider>
