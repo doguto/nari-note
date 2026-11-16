@@ -21,6 +21,22 @@ resource "aws_s3_bucket_versioning" "db_backup" {
   }
 }
 
+# EC2 の権限に頼らず、管理者の誤操作や認証情報の漏洩でもバックアップを消されないようにする
+# GOVERNANCE は s3:BypassGovernanceRetention を持つ管理者なら解除できる (dev の force_destroy もこれで消せる)
+# WAL-G の PUT には SDK が Content-MD5 を付けるため、既定の保持期間を設定してもアップロードは失敗しない
+resource "aws_s3_bucket_object_lock_configuration" "db_backup" {
+  bucket = aws_s3_bucket.db_backup.id
+
+  rule {
+    default_retention {
+      mode = "GOVERNANCE"
+      days = var.object_lock_days
+    }
+  }
+
+  depends_on = [aws_s3_bucket_versioning.db_backup]
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "db_backup" {
   bucket = aws_s3_bucket.db_backup.id
 

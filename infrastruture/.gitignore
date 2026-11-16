@@ -1,5 +1,7 @@
 **/.terraform/*
 **/.terragrunt-cache/*
+# Lambda の zip など、モジュールが plan / apply 時に生成するもの
+**/.build/
 
 *.tfstate
 # 例外的にbackendのみS3に置けないのでローカルでGit管理する

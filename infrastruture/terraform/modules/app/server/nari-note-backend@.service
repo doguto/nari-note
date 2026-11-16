@@ -11,6 +11,8 @@ WorkingDirectory=/opt/nari-note-backend/%i
 ExecStart=/opt/nari-note-backend/%i/nari-note-backend
 Restart=always
 RestartSec=5
+# メモリ枯渇時は PostgreSQL・nginx より先にアプリを OOM Killer の対象にする (Restart=always で復帰する)
+OOMScoreAdjust=500
 # 停止時は処理中のリクエストを捌き切ってから終了させる (ASP.NET Core の既定のシャットダウン猶予は 30 秒)
 TimeoutStopSec=35
 Environment=ASPNETCORE_ENVIRONMENT=Production

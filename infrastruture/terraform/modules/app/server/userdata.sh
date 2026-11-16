@@ -30,7 +30,9 @@ aws s3 cp --recursive "s3://${app_name}-deploy/${server_config_prefix}/" "$${CON
 
 # == dnf-automatic ==
 # PostgreSQL を含む OS のセキュリティ更新を毎日自動で適用し、必要な時だけ OS を再起動する
-dnf install -y dnf-automatic
+# dnf-plugins-core は nari-note-post-update が使う needs-restarting を含む
+dnf install -y dnf-automatic dnf-plugins-core
+install -m 755 "$${CONFIG_DIR}/nari-note-post-update.sh" /usr/local/sbin/nari-note-post-update
 install -m 644 "$${CONFIG_DIR}/dnf-automatic.conf" /etc/dnf/automatic.conf
 mkdir -p /etc/systemd/system/dnf-automatic.timer.d
 install -m 644 "$${CONFIG_DIR}/dnf-automatic.timer.conf" /etc/systemd/system/dnf-automatic.timer.d/override.conf
@@ -105,7 +107,7 @@ install -m 644 "$${CONFIG_DIR}/amazon-cloudwatch-agent.json" /opt/aws/amazon-clo
 # contrib は shared_preload_libraries で読み込む pg_stat_statements に必要。無いと PostgreSQL が起動しない
 dnf install -y postgresql17 postgresql17-server postgresql17-contrib
 
-PGDATA="/data/postgresql"
+PGDATA="${pgdata}"
 
 # PostgreSQL データ用の EBS ボリュームを特定し、未フォーマットなら初期化してマウントする
 # (インスタンスの user_data 変更による再作成時にもデータを失わないよう、ルートボリュームとは独立させている)
@@ -135,12 +137,8 @@ mountpoint -q "$${PGDATA}" || mount "$${PGDATA}"
 chown postgres:postgres "$${PGDATA}"
 chmod 700 "$${PGDATA}"
 
-# データディレクトリを EBS ボリューム上のパスに向ける
 mkdir -p /etc/systemd/system/postgresql.service.d
-cat > /etc/systemd/system/postgresql.service.d/override.conf <<EOF
-[Service]
-Environment=PGDATA=$${PGDATA}
-EOF
+install -m 644 "$${CONFIG_DIR}/postgresql.service.conf" /etc/systemd/system/postgresql.service.d/override.conf
 systemctl daemon-reload
 
 # ストレージ上のページ破損を読み込み時に検知できるよう data checksums を有効にする
