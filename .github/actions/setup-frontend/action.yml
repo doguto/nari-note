@@ -1,0 +1,24 @@
+name: Setup frontend
+description: Node.js をセットアップし、node_modules をキャッシュから復元する（キャッシュが無い場合のみ npm ci）
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    # ~/.npm ではなく node_modules を直接キャッシュし、ヒット時は npm ci 自体を省略する
+    - name: Cache node_modules
+      id: node-modules-cache
+      uses: actions/cache@v4
+      with:
+        path: nari-note-frontend/node_modules
+        key: node-modules-${{ runner.os }}-node24-${{ hashFiles('nari-note-frontend/package-lock.json') }}
+
+    - name: Install dependencies
+      if: steps.node-modules-cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: nari-note-frontend
+      run: npm ci

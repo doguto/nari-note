@@ -1,0 +1,43 @@
+name: Warm Cache
+
+# PR で作ったキャッシュはその PR 内でしか参照できないため、
+# 依存が変わったときだけデフォルトブランチ上でセットアップのみを実行し、全 PR から使えるキャッシュを作る。
+# lint / build / test は実行しない
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "nari-note-frontend/package-lock.json"
+      - "nari-note-backend/global.json"
+      - "nari-note-backend/**/*.csproj"
+      - ".github/actions/**"
+      - ".github/workflows/warm-cache.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup frontend
+        uses: ./.github/actions/setup-frontend
+
+  backend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup backend
+        uses: ./.github/actions/setup-backend
