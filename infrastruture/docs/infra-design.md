@@ -64,7 +64,7 @@ sudo dnf -y upgrade 'postgresql17*' && sudo systemctl restart postgresql
 | バックエンド | 手動 | 手元からリリース対象のコミットで `scripts/deploy.sh` を実行する |
 | インフラ | 手動 | 対象ユニットで `terragrunt plan` / `apply` |
 
-GitHub Actions は PR 時のチェック (Backend Build / Test, Frontend Check) とフロントのデプロイのみを行う。
+GitHub Actions は PR 時のチェック (Backend Test, Frontend Check) とフロントのデプロイのみを行う。
 手元でフロントをデプロイ・確認する場合は `nari-note-frontend` で `npm run deploy` / `npm run preview` (OpenNext でビルドして wrangler で実行) を使う。
 
 ```mermaid

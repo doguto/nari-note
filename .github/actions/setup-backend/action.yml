@@ -1,0 +1,35 @@
+name: Setup backend
+description: global.json の .NET SDK をセットアップし、SDK と NuGet パッケージをキャッシュから復元して dotnet restore する
+
+runs:
+  using: composite
+  steps:
+    # ランナーイメージに global.json の SDK が入っておらず毎回約 200MB をダウンロードするため、
+    # インストール先をホーム配下に変えて SDK ごとキャッシュする
+    - name: Set .NET install directory
+      shell: bash
+      run: echo "DOTNET_INSTALL_DIR=$HOME/.dotnet" >> "$GITHUB_ENV"
+
+    - name: Cache .NET SDK
+      uses: actions/cache@v4
+      with:
+        path: ~/.dotnet
+        key: dotnet-sdk-${{ runner.os }}-${{ hashFiles('nari-note-backend/global.json') }}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: nari-note-backend/global.json
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: nuget-${{ runner.os }}-${{ hashFiles('nari-note-backend/**/*.csproj') }}
+        restore-keys: |
+          nuget-${{ runner.os }}-
+
+    - name: Restore dependencies
+      shell: bash
+      working-directory: nari-note-backend
+      run: dotnet restore nari-note-backend.sln
