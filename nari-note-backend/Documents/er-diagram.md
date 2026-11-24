@@ -149,6 +149,7 @@ erDiagram
         string Usi "(ParentPositionId, Usi) で一意"
         string Label "記譜"
         string Memo "max 200"
+        string Condition "まとめた局面で行き先が分かれるときの条件, max 100"
     }
     ShapeGroups {
         int Id PK
