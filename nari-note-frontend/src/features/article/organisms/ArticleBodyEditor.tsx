@@ -5,7 +5,7 @@ import { parseKifuEmbed } from '@/lib/kif-player';
 import { useUploadArticleImage } from '@/lib/api';
 import { useRequireVerifiedEmail } from '@/lib/hooks';
 import { KifuEmbedDialog } from './KifuEmbedDialog';
-import { BoardEditorDialog } from './BoardEditorDialog';
+import { BoardEditorDialog } from '@/components/organisms';
 import type { KifuItem } from '../types/kifu';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
