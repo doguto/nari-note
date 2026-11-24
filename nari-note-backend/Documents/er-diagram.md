@@ -22,6 +22,15 @@ erDiagram
     Articles ||--o{ Notifications : ""
     Users ||--o{ EmailVerifications : ""
     Users ||--o{ PasswordResetTokens : ""
+    Users ||--o{ Books : "作る"
+    Books ||--o{ BookPositions : ""
+    Books ||--o{ BookMoves : ""
+    Books ||--o{ ShapeGroups : ""
+    Books ||--o{ ShapeCandidates : ""
+    ShapeGroups ||--o{ BookPositions : "まとめる"
+    BookPositions ||--o{ BookMoves : "親 (ParentPositionId)"
+    BookPositions ||--o{ BookMoves : "子 (ChildPositionId)"
+    BookPositions ||--o{ ShapeCandidates : "A / B"
 
     Users {
         uuid Id PK
@@ -119,12 +128,52 @@ erDiagram
         datetime FailedAt "nullable"
         string LastError "nullable"
     }
+    Books {
+        int Id PK
+        uuid UserId FK
+        string Name "max 100"
+        string RootSfen "開始局面"
+    }
+    BookPositions {
+        int Id PK
+        int BookId FK
+        string Sfen "手数を 1 に正規化, (BookId, Sfen) で一意"
+        int ShapeGroupId FK
+        bool CandidatesScanned "同じ形の候補を探し終えたか"
+    }
+    BookMoves {
+        int Id PK
+        int BookId FK
+        int ParentPositionId FK
+        int ChildPositionId FK
+        string Usi "(ParentPositionId, Usi) で一意"
+        string Label "記譜"
+        string Memo "max 200"
+    }
+    ShapeGroups {
+        int Id PK
+        int BookId FK
+        string Name "max 100"
+        string Memo "研究メモ, max 10000"
+    }
+    ShapeCandidates {
+        int Id PK
+        int BookId FK
+        int PositionAId FK
+        int PositionBId FK
+        string Status "Queued / Running / Done / Failed"
+        string Verdict "same / same_with_delta / same_until / different / skipped"
+        int Delta "nullable"
+        int ConfirmedDepth "nullable"
+        string Decision "Pending / Merged / Rejected"
+    }
 ```
 
 ## 補足
 
 - 全テーブルに `CreatedAt` / `UpdatedAt` がある（`EntityBase`。未設定なら保存時に `NariNoteDbContext` が設定する）
 - ID は Vogen の ValueObject（`UserId` 等）。Users / Articles / Courses / Tags は UUID v7 をアプリ側で採番し、それ以外は int の IDENTITY 列
-- 外部キーはすべて `ON DELETE CASCADE`。ユーザー削除（退会・未認証ユーザー削除）で記事・講座・いいね・コメント・フォロー・通知・各種トークンがまとめて消え、講座を削除すると所属する記事も消える
+- 外部キーは `BookPositions.ShapeGroupId`（`NO ACTION`）以外すべて `ON DELETE CASCADE`。ユーザー削除（退会・未認証ユーザー削除）で記事・講座・いいね・コメント・フォロー・通知・各種トークンがまとめて消え、講座を削除すると所属する記事も消える
 - 一意制約: `Users.Email`（`lower(Email)`）、`Users.Name`、`Tags.Name`、`EmailVerifications.Token`、`PasswordResetTokens.Token`、`(ArticleId, TagId)`、`(UserId, ArticleId)` の Likes、`(UserId, CourseId)` の CourseLikes、`(FollowerId, FollowingId)` の Follows
 - `OutboxMessages` は他テーブルと関連を持たない配送キュー（[architecture.md](./architecture.md#バックグラウンドジョブ)）
+- マイ定跡: 局面（`BookPositions`）と手（`BookMoves`）が定跡のグラフになる。手順前後で同じ局面になれば同じ行に合流する。本質的に同じ形とした局面は `ShapeGroups` でまとめ、研究メモを共有する。まとめていない局面も 1 局面だけのグループに属し、グループの代表局面は最小 ID の局面。`ShapeCandidates` は `ShapeJudgeWorker` がエンジンサービスで判定した結果で、まとめるかは本人が決める

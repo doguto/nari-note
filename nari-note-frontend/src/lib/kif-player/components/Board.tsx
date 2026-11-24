@@ -12,6 +12,7 @@ interface BoardProps {
   className?: string;
   highlightCell?: { colIndex: number; rowIndex: number };
   selectedCell?: { row: number; col: number } | null;
+  markedCells?: { row: number; col: number }[];
   onCellClick?: (row: number, col: number) => void;
 }
 
@@ -23,7 +24,7 @@ function getSizeClasses(size: BoardSize = 'md') {
   }
 }
 
-export function Board({ board, size = 'md', className, highlightCell, selectedCell, onCellClick }: BoardProps) {
+export function Board({ board, size = 'md', className, highlightCell, selectedCell, markedCells, onCellClick }: BoardProps) {
   const { cellW, cellH, labelW, text, pieceSize } = getSizeClasses(size);
 
   return (
@@ -69,17 +70,21 @@ export function Board({ board, size = 'md', className, highlightCell, selectedCe
               const ci = idx % 9;
               const ri = Math.floor(idx / 9);
               const isSel = selectedCell?.row === ri && selectedCell?.col === ci;
+              const isMarked = markedCells?.some((c) => c.row === ri && c.col === ci);
               return (
                 <div
                   key={idx}
                   className={cn(
-                    'flex items-center justify-center',
+                    'relative flex items-center justify-center',
                     cellW, cellH,
                     onCellClick && 'cursor-pointer',
                     isSel && 'bg-yellow-300/70',
                   )}
                   onClick={() => onCellClick?.(ri, ci)}
                 >
+                  {isMarked && (
+                    <span className="absolute w-1/3 h-1/3 rounded-full bg-brand-primary/50 pointer-events-none" aria-hidden="true" />
+                  )}
                   {piece && (
                     <KomaImage
                       type={piece.type}

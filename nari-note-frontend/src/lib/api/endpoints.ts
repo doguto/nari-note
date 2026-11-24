@@ -3,14 +3,20 @@
 
 import { apiClient } from './client';
 import type {
+  AnalyzeBookPositionRequest,
+  AnalyzeBookPositionResponse,
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
+  CreateBookRequest,
+  CreateBookResponse,
   CreateCommentRequest,
   CreateCommentResponse,
   CreateCourseRequest,
   CreateCourseResponse,
   DeleteArticleRequest,
+  DeleteBookMoveRequest,
+  DeleteBookRequest,
   DeleteCourseRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
@@ -24,6 +30,10 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetBookPositionRequest,
+  GetBookPositionResponse,
+  GetBookRequest,
+  GetBookResponse,
   GetCourseContentForEditResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
@@ -42,13 +52,20 @@ import type {
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
+  GetMyBooksResponse,
   GetMyCoursesResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  MergeShapeCandidateRequest,
+  MergeShapeCandidateResponse,
+  RejectShapeCandidateRequest,
+  RejectShapeCandidateResponse,
   ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SaveBookLinesRequest,
+  SaveBookLinesResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SearchCoursesRequest,
@@ -56,16 +73,22 @@ import type {
   SignInRequest,
   SignUpRequest,
   SignUpResponse,
+  SplitShapeGroupRequest,
+  SplitShapeGroupResponse,
   ToggleFollowRequest,
   ToggleFollowResponse,
   ToggleLikeRequest,
   ToggleLikeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
+  UpdateBookMoveRequest,
+  UpdateBookMoveResponse,
   UpdateCourseRequest,
   UpdateCourseResponse,
   UpdatePasswordRequest,
   UpdatePasswordResponse,
+  UpdateShapeGroupRequest,
+  UpdateShapeGroupResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
   UploadArticleImageResponse,
@@ -176,6 +199,60 @@ export const authApi = {
   },
   withdraw: async (data: WithdrawRequest): Promise<WithdrawResponse> => {
     const response = await apiClient.post<WithdrawResponse>('/api/auth/withdraw', data);
+    return response;
+  },
+};
+
+// Books API
+export const booksApi = {
+  getMyBooks: async (): Promise<GetMyBooksResponse> => {
+    const response = await apiClient.get<GetMyBooksResponse>('/api/books/my');
+    return response;
+  },
+  createBook: async (data: CreateBookRequest): Promise<CreateBookResponse> => {
+    const response = await apiClient.post<CreateBookResponse>('/api/books', data);
+    return response;
+  },
+  getBook: async (data: GetBookRequest): Promise<GetBookResponse> => {
+    const response = await apiClient.get<GetBookResponse>(`/api/books/${data.id}`);
+    return response;
+  },
+  deleteBook: async (data: DeleteBookRequest): Promise<void> => {
+    await apiClient.delete(`/api/books/${data.id}`);
+  },
+  getBookPosition: async (data: GetBookPositionRequest): Promise<GetBookPositionResponse> => {
+    const response = await apiClient.get<GetBookPositionResponse>(`/api/books/${data.id}/positions/${data.positionId}`);
+    return response;
+  },
+  analyzeBookPosition: async (data: AnalyzeBookPositionRequest): Promise<AnalyzeBookPositionResponse> => {
+    const response = await apiClient.post<AnalyzeBookPositionResponse>(`/api/books/${data.id}/analysis`, data);
+    return response;
+  },
+  saveBookLines: async (data: SaveBookLinesRequest): Promise<SaveBookLinesResponse> => {
+    const response = await apiClient.post<SaveBookLinesResponse>(`/api/books/${data.id}/lines`, data);
+    return response;
+  },
+  splitShapeGroup: async (data: SplitShapeGroupRequest): Promise<SplitShapeGroupResponse> => {
+    const response = await apiClient.post<SplitShapeGroupResponse>(`/api/books/${data.id}/positions/${data.positionId}/split`);
+    return response;
+  },
+  updateBookMove: async (data: UpdateBookMoveRequest): Promise<UpdateBookMoveResponse> => {
+    const response = await apiClient.put<UpdateBookMoveResponse>(`/api/books/${data.id}/moves/${data.moveId}`, data);
+    return response;
+  },
+  deleteBookMove: async (data: DeleteBookMoveRequest): Promise<void> => {
+    await apiClient.delete(`/api/books/${data.id}/moves/${data.moveId}`);
+  },
+  updateShapeGroup: async (data: UpdateShapeGroupRequest): Promise<UpdateShapeGroupResponse> => {
+    const response = await apiClient.put<UpdateShapeGroupResponse>(`/api/books/${data.id}/groups/${data.groupId}`, data);
+    return response;
+  },
+  mergeShapeCandidate: async (data: MergeShapeCandidateRequest): Promise<MergeShapeCandidateResponse> => {
+    const response = await apiClient.post<MergeShapeCandidateResponse>(`/api/books/${data.id}/candidates/${data.candidateId}/merge`);
+    return response;
+  },
+  rejectShapeCandidate: async (data: RejectShapeCandidateRequest): Promise<RejectShapeCandidateResponse> => {
+    const response = await apiClient.post<RejectShapeCandidateResponse>(`/api/books/${data.id}/candidates/${data.candidateId}/reject`);
     return response;
   },
 };

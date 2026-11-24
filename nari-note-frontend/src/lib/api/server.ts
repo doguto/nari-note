@@ -46,6 +46,10 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetBookPositionRequest,
+  GetBookPositionResponse,
+  GetBookRequest,
+  GetBookResponse,
   GetCourseContentForEditResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
@@ -64,6 +68,7 @@ import type {
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
+  GetMyBooksResponse,
   GetMyCoursesResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
@@ -156,6 +161,25 @@ export async function getCurrentUser(): Promise<AuthResponse> {
   const url = `${getBaseUrl()}/api/auth/me`;
 
   return serverFetch<AuthResponse>(url);
+}
+
+// Books Server Functions
+export async function getMyBooks(): Promise<GetMyBooksResponse> {
+  const url = `${getBaseUrl()}/api/books/my`;
+
+  return serverFetch<GetMyBooksResponse>(url);
+}
+
+export async function getBook(params: GetBookRequest): Promise<GetBookResponse> {
+  const url = `${getBaseUrl()}/api/books/${params.id}`;
+
+  return serverFetch<GetBookResponse>(url);
+}
+
+export async function getBookPosition(params: GetBookPositionRequest): Promise<GetBookPositionResponse> {
+  const url = `${getBaseUrl()}/api/books/${params.id}/positions/${params.positionId}`;
+
+  return serverFetch<GetBookPositionResponse>(url);
 }
 
 // Courses Server Functions
