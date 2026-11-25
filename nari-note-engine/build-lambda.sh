@@ -4,7 +4,8 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 EVAL_FILE="${EVAL_FILE:-${HERE}/engine/eval/nn.bin}"
-YANEURAOU_REF="${YANEURAOU_REF:-master}"
+# 判定はエンジンの探索結果が変わらないことを前提にしているので、版は固定し、上げるときはここを書き換える
+YANEURAOU_REF="${YANEURAOU_REF:-c046f30bef11527c84fd04a1ead5a47abfa910c8}"
 OUT_DIR="${HERE}/build"
 BUILD_IMAGE="public.ecr.aws/lambda/python:3.13"
 
@@ -33,7 +34,10 @@ set -euo pipefail
 PKG=$(command -v dnf || command -v microdnf)
 "${PKG}" install -y gcc-c++ make git zip >/dev/null
 
-git clone --quiet --depth 1 --branch "${YANEURAOU_REF}" https://github.com/yaneurao/YaneuraOu.git /tmp/yaneuraou
+# --branch はコミット SHA を受け付けないので、fetch で取得する
+git init --quiet /tmp/yaneuraou
+git -C /tmp/yaneuraou fetch --quiet --depth 1 https://github.com/yaneurao/YaneuraOu.git "${YANEURAOU_REF}"
+git -C /tmp/yaneuraou checkout --quiet FETCH_HEAD
 echo "YaneuraOu: ${YANEURAOU_REF} $(git -C /tmp/yaneuraou rev-parse --short HEAD)"
 make -C /tmp/yaneuraou/source -j"$(nproc)" normal COMPILER=g++ YANEURAOU_EDITION=YANEURAOU_ENGINE_NNUE TARGET_CPU=AVX2 >/dev/null
 

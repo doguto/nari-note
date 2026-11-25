@@ -46,7 +46,9 @@ python server.py --port 8790
 | 環境変数 | 内容 |
 | --- | --- |
 | `EVAL_FILE` | NNUE の評価関数ファイル。既定は `engine/eval/nn.bin`。zip の中では `engine/eval/nn.bin` に置く |
-| `YANEURAOU_REF` | ビルドするやねうら王のブランチまたはタグ。既定は `master` |
+| `YANEURAOU_REF` | ビルドするやねうら王のコミット SHA（ブランチ名・タグ名も可）。既定は `build-lambda.sh` に固定した SHA |
+
+判定はエンジンの探索結果が変わらないことを前提にしているので、やねうら王の版は `build-lambda.sh` の既定値で固定している。版を上げると評価値や最善手が変わり、上げる前と後の判定結果が混ざる。上げるときは既定値の SHA を書き換えてコミットし、デプロイする。
 
 デプロイはリポジトリルートで `scripts/deploy-engine.sh` を実行する。zip をビルドして `<app_name>-deploy` バケットの `engine/releases/<日時>-<コミット>/` と `engine/latest/` に置き、Lambda のコードを差し替える。関数がまだ無い場合は zip を置くだけで終わるので、その後に `app/engine` を apply する（関数は `engine/latest/` の zip で作られる）。
 
