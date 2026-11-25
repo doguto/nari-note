@@ -1,3 +1,4 @@
+using Amazon.Lambda;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
@@ -87,20 +88,29 @@ public static class InfrastructureServiceInstaller
             ?? throw new InvalidOperationException("Frontend:BaseUrl が設定されていません");
         services.AddSingleton(new EmailMessageStore(frontendBaseUrl));
         services.AddHttpClient<IDiscordNotifier, DiscordWebhookNotifier>(client => client.Timeout = ExternalRequestTimeout);
-        // エンジンサービスは API サーバーとは別に動かす。URL が無い環境では解析と判定を無効にする
+        // エンジンは API サーバーとは別に動かす。本番は Lambda、ローカルは nari-note-engine の HTTP サーバーを呼び、どちらも無い環境では解析と判定を無効にする
+        var shogiEngineFunctionName = configuration["ShogiEngine:FunctionName"];
         var shogiEngineBaseUrl = configuration["ShogiEngine:BaseUrl"];
-        if (string.IsNullOrWhiteSpace(shogiEngineBaseUrl))
+        if (!string.IsNullOrWhiteSpace(shogiEngineFunctionName))
         {
-            services.AddSingleton<IShogiEngineGateway, DisabledShogiEngineGateway>();
+            // 判定は 1 件で数十秒かかる
+            services.AddSingleton<IAmazonLambda>(_ => new AmazonLambdaClient(new AmazonLambdaConfig { Timeout = ShogiEngineTimeout }));
+            services.AddSingleton<IShogiEngineGateway>(sp => new LambdaShogiEngineGateway(
+                sp.GetRequiredService<IAmazonLambda>(),
+                shogiEngineFunctionName
+            ));
         }
-        else
+        else if (!string.IsNullOrWhiteSpace(shogiEngineBaseUrl))
         {
             services.AddHttpClient<IShogiEngineGateway, HttpShogiEngineGateway>(client =>
             {
                 client.BaseAddress = new Uri(shogiEngineBaseUrl.TrimEnd('/') + "/");
-                // 判定は 1 件で数十秒かかる
                 client.Timeout = ShogiEngineTimeout;
             });
+        }
+        else
+        {
+            services.AddSingleton<IShogiEngineGateway, DisabledShogiEngineGateway>();
         }
 
         if (env.IsDevelopment())
