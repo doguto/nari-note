@@ -61,9 +61,13 @@ public class LambdaShogiEngineGateway : IShogiEngineGateway
                 cancellationToken
             );
         }
-        catch (AmazonServiceException ex)
+        catch (System.Exception ex) when (ex is AmazonServiceException or AmazonClientException)
         {
             throw new HttpRequestException($"エンジンの呼び出しに失敗しました: {ex.Message}", ex);
+        }
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new HttpRequestException("エンジンの呼び出しがタイムアウトしました", ex);
         }
 
         using var reader = new StreamReader(response.Payload);

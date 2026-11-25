@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Amazon.Lambda;
 using Amazon.Lambda.Model;
+using Amazon.Runtime;
 using NariNoteBackend.Infrastructure.Gateway;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -96,5 +97,34 @@ public class LambdaShogiEngineGatewayTest
             .ThrowsAsync(new TooManyRequestsException("Rate exceeded"));
 
         await Assert.ThrowsAsync<HttpRequestException>(() => this.gateway.AnalyzeAsync("sfen-a"));
+    }
+
+    [Fact]
+    public async Task 接続できなかったら_HttpRequestException_にする()
+    {
+        this.lambda.InvokeAsync(Arg.Any<InvokeRequest>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new AmazonClientException("Unable to connect"));
+
+        await Assert.ThrowsAsync<HttpRequestException>(() => this.gateway.JudgeAsync("sfen-a", "sfen-b"));
+    }
+
+    [Fact]
+    public async Task クライアント側でタイムアウトしたら_HttpRequestException_にする()
+    {
+        this.lambda.InvokeAsync(Arg.Any<InvokeRequest>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new TaskCanceledException("The request was canceled due to the configured HttpClient.Timeout"));
+
+        await Assert.ThrowsAsync<HttpRequestException>(() => this.gateway.JudgeAsync("sfen-a", "sfen-b"));
+    }
+
+    [Fact]
+    public async Task 呼び出し元が止めたときはキャンセルのまま伝える()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        this.lambda.InvokeAsync(Arg.Any<InvokeRequest>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new TaskCanceledException());
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => this.gateway.JudgeAsync("sfen-a", "sfen-b", cts.Token));
     }
 }
