@@ -30,6 +30,12 @@ python server.py --port 8790
 
 関数は `<app_name>-shogi-engine`（Python 3.13、x86_64、1,769MB = 1 vCPU、タイムアウト 300 秒）。Terraform は `infrastruture/terraform/modules/app/engine`。
 
+### タイムアウトと同時実行数
+
+- 課金は実行時間に比例し、1 回の呼び出しは最長でタイムアウトの 300 秒分かかる。判定は通常数十秒で終わる
+- バックエンドの Lambda クライアントは、タイムアウトを関数より長い 310 秒にし、自動再試行を切っている（`InfrastructureServiceInstaller`）。関数のタイムアウトを変えるときは、このクライアント側の値も合わせて変える
+- 同時実行数は予約していない（`reserved_concurrency = null`）ので、アカウントの上限まで広がる。新しいアカウントは上限が 10 と低く、この状態で予約すると apply が失敗する。Service Quotas で上限が引き上がったら、`prod/app/engine` の `inputs` で `reserved_concurrency` を設定して、同時に動く数（＝ 課金の上限）を抑える
+
 ### ビルドとデプロイ
 
 `build-lambda.sh` は Lambda と同じ Amazon Linux のイメージ（`public.ecr.aws/lambda/python:3.13`）の中で、やねうら王（NNUE、AVX2）を g++ でビルドし、評価関数・cshogi・このディレクトリの Python ファイルと合わせて `build/nari-note-engine.zip` にまとめる。Docker が必要。
