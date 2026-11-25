@@ -33,9 +33,10 @@ python server.py --port 8790
 ### タイムアウトと同時実行数
 
 - 課金は実行時間に比例し、1 回の呼び出しは最長でタイムアウトの 300 秒分かかる。判定は通常数十秒で終わる
-- バックエンドの Lambda クライアントは、タイムアウトを関数より長い 310 秒にし、自動再試行を切っている（`InfrastructureServiceInstaller`）。関数のタイムアウトを変えるときは、このクライアント側の値も合わせて変える
-- 同時実行数は予約していない（`reserved_concurrency = null`）ので、アカウントの上限まで広がる。新しいアカウントは上限が 10 と低く、この状態で予約すると apply が失敗する。Service Quotas で上限が引き上がったら、`prod/app/engine` の `inputs` で `reserved_concurrency` を設定して、同時に動く数（＝ 課金の上限）を抑える
-- 上限に達すると Lambda は呼び出しを断る（TooManyRequests）。クライアントは再試行しないので、局面の解析はエラーになる。同じ形の判定は失敗にせず待ち行列に戻し、`ShapeJudgeWorker` の待機の後に判定し直す
+- バックエンドの Lambda クライアントは、タイムアウトを関数より長い 310 秒にし（Invoke API はクライアントの読み取りタイムアウトを関数のタイムアウトより長くするよう求めている）、自動再試行を切っている（`InfrastructureServiceInstaller`）。関数のタイムアウトを変えるときは、このクライアント側の値も合わせて変える
+- 同時実行数は予約していない（`reserved_concurrency = null`）ので、リージョン内のアカウント全体の上限（既定 1,000）まで広がる。新規アカウントはこの上限が低く設定されていて、使用状況に応じて AWS が自動で引き上げる
+- 予約できるのは「予約されていない同時実行数 − 100」まで（予約しない関数のために常に 100 が残される）。上限が低いうちは予約すると apply が失敗するので、上限が十分に上がってから、`prod/app/engine` の `inputs` で `reserved_concurrency` を設定して、同時に動く数（＝ 課金の上限）を抑える。上限は Service Quotas で引き上げを申請することもできる
+- 上限に達すると Lambda は呼び出しを `TooManyRequestsException`（429）で断る。クライアントは再試行しないので、局面の解析はエラーになる。同じ形の判定は失敗にせず待ち行列に戻し、`ShapeJudgeWorker` の待機の後に判定し直す
 - `ShapeJudgeProcessor` は判定を 1 件ずつ順に呼ぶので、判定が同時に使うのは 1 つだけ。判定を並列にするときは、並列度を同時実行数の上限（予約したならその値）より十分小さくし、解析の分を残す
 
 ### ビルドとデプロイ
@@ -73,3 +74,10 @@ HTTP サーバーでは同じ入出力を `POST /analyze` / `POST /candidates` /
 4. d 手先までの一致: d = 6 手。各手で 2 を繰り返し、評価値の差 Δ が δ = 50cp 以内なら「同じ」、Δ の幅が δ 以内なら「Δ付きで同じ」
 
 探索は `Threads=1`、局面ごとに `usinewgame`、ノード数固定で決定的にする。1 回の判定の中では同じ探索を繰り返すので、リクエストの間だけ結果をメモリに持つ（リクエストをまたいでは持たない）。ノード上限で打ち切ると MultiPV の一部の行が前の反復の深さで出力されるため、`PvInterval=0` と `ConsiderationMode=true` で全反復を出させ、全行の深さがそろった最後の出力を採用する。
+
+## 参考
+
+- [Lambda のクォータ](https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/gettingstarted-limits.html)
+- [予約済み同時実行数の設定](https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/configuration-concurrency.html)
+- [Invoke API（TooManyRequestsException、クライアントのタイムアウト）](https://docs.aws.amazon.com/lambda/latest/api/API_Invoke.html)
+- [Lambda での AVX2 の利用](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-avx2.html)
