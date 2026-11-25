@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using Amazon.Lambda;
 using Amazon.Lambda.Model;
@@ -60,6 +61,10 @@ public class LambdaShogiEngineGateway : IShogiEngineGateway
                 },
                 cancellationToken
             );
+        }
+        catch (TooManyRequestsException ex)
+        {
+            throw new HttpRequestException($"エンジンの同時実行数の上限に達しました: {ex.Message}", ex, HttpStatusCode.TooManyRequests);
         }
         catch (System.Exception ex) when (ex is AmazonServiceException or AmazonClientException)
         {

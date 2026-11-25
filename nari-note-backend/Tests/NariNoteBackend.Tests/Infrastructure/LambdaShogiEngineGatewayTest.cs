@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using Amazon.Lambda;
@@ -91,12 +92,13 @@ public class LambdaShogiEngineGatewayTest
     }
 
     [Fact]
-    public async Task 呼び出し自体に失敗したら_HttpRequestException_にする()
+    public async Task 同時実行数の上限で断られたら_429_の_HttpRequestException_にする()
     {
         this.lambda.InvokeAsync(Arg.Any<InvokeRequest>(), Arg.Any<CancellationToken>())
             .ThrowsAsync(new TooManyRequestsException("Rate exceeded"));
 
-        await Assert.ThrowsAsync<HttpRequestException>(() => this.gateway.AnalyzeAsync("sfen-a"));
+        var ex = await Assert.ThrowsAsync<HttpRequestException>(() => this.gateway.AnalyzeAsync("sfen-a"));
+        Assert.Equal(HttpStatusCode.TooManyRequests, ex.StatusCode);
     }
 
     [Fact]
