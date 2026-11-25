@@ -28,6 +28,11 @@ public class NariNoteDbContext : DbContext
     public DbSet<EmailVerification> EmailVerifications { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
+    public DbSet<Book> Books { get; set; }
+    public DbSet<BookPosition> BookPositions { get; set; }
+    public DbSet<BookMove> BookMoves { get; set; }
+    public DbSet<ShapeGroup> ShapeGroups { get; set; }
+    public DbSet<ShapeCandidate> ShapeCandidates { get; set; }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
@@ -309,6 +314,135 @@ public class NariNoteDbContext : DbContext
 
             x.Property(k => k.ArticleId)
              .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<Book>(x =>
+        {
+            x.HasOne(b => b.User)
+             .WithMany()
+             .HasForeignKey(b => b.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(b => b.Id)
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
+
+            x.Property(b => b.UserId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<ShapeGroup>(x =>
+        {
+            x.HasOne(g => g.Book)
+             .WithMany(b => b.ShapeGroups)
+             .HasForeignKey(g => g.BookId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(g => g.Id)
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
+
+            x.Property(g => g.BookId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<BookPosition>(x =>
+        {
+            x.HasOne(p => p.Book)
+             .WithMany(b => b.Positions)
+             .HasForeignKey(p => p.BookId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // 定跡の削除時は局面とグループが同じ文で消えるため、文末に検査される NO ACTION にする
+            x.HasOne(p => p.ShapeGroup)
+             .WithMany(g => g.Positions)
+             .HasForeignKey(p => p.ShapeGroupId)
+             .OnDelete(DeleteBehavior.NoAction);
+
+            x.Property(p => p.Id)
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
+
+            x.Property(p => p.BookId)
+             .HasVogenConversion();
+
+            x.Property(p => p.ShapeGroupId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<BookMove>(x =>
+        {
+            x.HasOne(m => m.Book)
+             .WithMany(b => b.Moves)
+             .HasForeignKey(m => m.BookId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasOne(m => m.ParentPosition)
+             .WithMany()
+             .HasForeignKey(m => m.ParentPositionId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasOne(m => m.ChildPosition)
+             .WithMany()
+             .HasForeignKey(m => m.ChildPositionId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(m => m.Id)
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
+
+            x.Property(m => m.BookId)
+             .HasVogenConversion();
+
+            x.Property(m => m.ParentPositionId)
+             .HasVogenConversion();
+
+            x.Property(m => m.ChildPositionId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<ShapeCandidate>(x =>
+        {
+            x.HasOne(c => c.Book)
+             .WithMany(b => b.ShapeCandidates)
+             .HasForeignKey(c => c.BookId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasOne(c => c.PositionA)
+             .WithMany()
+             .HasForeignKey(c => c.PositionAId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasOne(c => c.PositionB)
+             .WithMany()
+             .HasForeignKey(c => c.PositionBId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(c => c.Id)
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
+
+            x.Property(c => c.BookId)
+             .HasVogenConversion();
+
+            x.Property(c => c.PositionAId)
+             .HasVogenConversion();
+
+            x.Property(c => c.PositionBId)
+             .HasVogenConversion();
+
+            x.Property(c => c.Status)
+             .HasConversion<string>()
+             .HasMaxLength(16);
+
+            x.Property(c => c.Decision)
+             .HasConversion<string>()
+             .HasMaxLength(16);
         });
     }
 }

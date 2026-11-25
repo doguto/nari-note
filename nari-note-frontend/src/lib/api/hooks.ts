@@ -2,16 +2,22 @@
 // Do not edit manually
 
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type UseQueryOptions } from '@tanstack/react-query';
-import { articlesApi, authApi, coursesApi, healthApi, tagsApi, usersApi } from './endpoints';
+import { articlesApi, authApi, booksApi, coursesApi, healthApi, tagsApi, usersApi } from './endpoints';
 import type {
+  AnalyzeBookPositionRequest,
+  AnalyzeBookPositionResponse,
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
+  CreateBookRequest,
+  CreateBookResponse,
   CreateCommentRequest,
   CreateCommentResponse,
   CreateCourseRequest,
   CreateCourseResponse,
   DeleteArticleRequest,
+  DeleteBookMoveRequest,
+  DeleteBookRequest,
   DeleteCourseRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
@@ -25,6 +31,10 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
+  GetBookPositionRequest,
+  GetBookPositionResponse,
+  GetBookRequest,
+  GetBookResponse,
   GetCourseContentForEditResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
@@ -43,13 +53,20 @@ import type {
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
+  GetMyBooksResponse,
   GetMyCoursesResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  MergeShapeCandidateRequest,
+  MergeShapeCandidateResponse,
+  RejectShapeCandidateRequest,
+  RejectShapeCandidateResponse,
   ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SaveBookLinesRequest,
+  SaveBookLinesResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SearchCoursesRequest,
@@ -57,16 +74,22 @@ import type {
   SignInRequest,
   SignUpRequest,
   SignUpResponse,
+  SplitShapeGroupRequest,
+  SplitShapeGroupResponse,
   ToggleFollowRequest,
   ToggleFollowResponse,
   ToggleLikeRequest,
   ToggleLikeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
+  UpdateBookMoveRequest,
+  UpdateBookMoveResponse,
   UpdateCourseRequest,
   UpdateCourseResponse,
   UpdatePasswordRequest,
   UpdatePasswordResponse,
+  UpdateShapeGroupRequest,
+  UpdateShapeGroupResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
   UploadArticleImageResponse,
@@ -90,6 +113,11 @@ export const queryKeys = {
   },
   auth: {
     getCurrentUser: ['auth', 'getCurrentUser'] as const,
+  },
+  books: {
+    getMyBooks: ['books', 'getMyBooks'] as const,
+    getBook: ['books', 'getBook'] as const,
+    getBookPosition: ['books', 'getBookPosition'] as const,
   },
   courses: {
     getCourses: ['courses', 'getCourses'] as const,
@@ -363,6 +391,151 @@ export function useWithdraw(options?: UseMutationOptions<WithdrawResponse, Error
     mutationFn: (data) => authApi.withdraw(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['auth'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+// Books Hooks
+export function useGetMyBooks(options?: Omit<UseQueryOptions<GetMyBooksResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetMyBooksResponse>({
+    queryKey: queryKeys.books.getMyBooks,
+    queryFn: () => booksApi.getMyBooks(),
+    ...options,
+  });
+}
+
+export function useCreateBook(options?: UseMutationOptions<CreateBookResponse, Error, CreateBookRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<CreateBookResponse, Error, CreateBookRequest>({
+    ...options,
+    mutationFn: (data) => booksApi.createBook(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useGetBook(params: GetBookRequest, options?: Omit<UseQueryOptions<GetBookResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetBookResponse>({
+    queryKey: [...queryKeys.books.getBook, params],
+    queryFn: () => booksApi.getBook(params),
+    ...options,
+  });
+}
+
+export function useDeleteBook(options?: UseMutationOptions<void, Error, DeleteBookRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeleteBookRequest>({
+    ...options,
+    mutationFn: (data) => booksApi.deleteBook(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useGetBookPosition(params: GetBookPositionRequest, options?: Omit<UseQueryOptions<GetBookPositionResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetBookPositionResponse>({
+    queryKey: [...queryKeys.books.getBookPosition, params],
+    queryFn: () => booksApi.getBookPosition(params),
+    ...options,
+  });
+}
+
+export function useAnalyzeBookPosition(options?: UseMutationOptions<AnalyzeBookPositionResponse, Error, AnalyzeBookPositionRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<AnalyzeBookPositionResponse, Error, AnalyzeBookPositionRequest>({
+    ...options,
+    mutationFn: (data) => booksApi.analyzeBookPosition(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useSaveBookLines(options?: UseMutationOptions<SaveBookLinesResponse, Error, SaveBookLinesRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<SaveBookLinesResponse, Error, SaveBookLinesRequest>({
+    ...options,
+    mutationFn: (data) => booksApi.saveBookLines(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useSplitShapeGroup(options?: UseMutationOptions<SplitShapeGroupResponse, Error, SplitShapeGroupRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<SplitShapeGroupResponse, Error, SplitShapeGroupRequest>({
+    ...options,
+    mutationFn: (data) => booksApi.splitShapeGroup(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useUpdateBookMove(options?: UseMutationOptions<UpdateBookMoveResponse, Error, UpdateBookMoveRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UpdateBookMoveResponse, Error, UpdateBookMoveRequest>({
+    ...options,
+    mutationFn: (data) => booksApi.updateBookMove(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useDeleteBookMove(options?: UseMutationOptions<void, Error, DeleteBookMoveRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeleteBookMoveRequest>({
+    ...options,
+    mutationFn: (data) => booksApi.deleteBookMove(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useUpdateShapeGroup(options?: UseMutationOptions<UpdateShapeGroupResponse, Error, UpdateShapeGroupRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UpdateShapeGroupResponse, Error, UpdateShapeGroupRequest>({
+    ...options,
+    mutationFn: (data) => booksApi.updateShapeGroup(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useMergeShapeCandidate(options?: UseMutationOptions<MergeShapeCandidateResponse, Error, MergeShapeCandidateRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<MergeShapeCandidateResponse, Error, MergeShapeCandidateRequest>({
+    ...options,
+    mutationFn: (data) => booksApi.mergeShapeCandidate(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useRejectShapeCandidate(options?: UseMutationOptions<RejectShapeCandidateResponse, Error, RejectShapeCandidateRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<RejectShapeCandidateResponse, Error, RejectShapeCandidateRequest>({
+    ...options,
+    mutationFn: (data) => booksApi.rejectShapeCandidate(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
       options?.onSuccess?.(...args);
     },
   });

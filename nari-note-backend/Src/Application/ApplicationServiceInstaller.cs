@@ -51,5 +51,18 @@ public static class ApplicationServiceInstaller
         services.AddScoped<ResetPasswordService>();
         services.AddScoped<UploadUserIconService>();
         services.AddScoped<UploadArticleImageService>();
+        services.AddScoped<GetMyBooksService>();
+        services.AddScoped<CreateBookService>();
+        services.AddScoped<DeleteBookService>();
+        services.AddScoped<GetBookService>();
+        services.AddScoped<GetBookPositionService>();
+        services.AddScoped<AnalyzeBookPositionService>();
+        services.AddScoped<SaveBookLinesService>();
+        services.AddScoped<DeleteBookMoveService>();
+        services.AddScoped<UpdateBookMoveService>();
+        services.AddScoped<UpdateShapeGroupService>();
+        services.AddScoped<MergeShapeCandidateService>();
+        services.AddScoped<RejectShapeCandidateService>();
+        services.AddScoped<SplitShapeGroupService>();
     }
 }

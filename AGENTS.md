@@ -12,6 +12,7 @@ nari-note は将棋記事の投稿・共有プラットフォームの Web ア�
 | --- | --- |
 | `nari-note-backend/` | ASP.NET Core Web API（`Src/` 本体、`Tests/`、`Migrations/`、`Documents/`） |
 | `nari-note-frontend/` | Next.js アプリ（`src/` 本体、`docs/`） |
+| `nari-note-engine/` | マイ定跡の研究盤が使う将棋エンジンサービス（Python）。局面の解析と同じ形の判定を HTTP で提供する |
 | `infrastruture/` | AWS インフラ（Terraform + Terragrunt）。ディレクトリ名の綴りはこのまま |
 | `spec/` | 画面・機能の仕様（`*.spec`） |
 | `scripts/` | API クライアント生成、デプロイ等のスクリプト |
@@ -87,6 +88,7 @@ flowchart LR
 | 認証 | HttpOnly Cookie の JWT |
 | 画像 | API が S3 に保存し、ブラウザは CloudFront から取得する |
 | メール・通知 | API が Outbox に積み、バックグラウンドジョブが Resend / Discord に配送する |
+| 将棋エンジン | マイ定跡の解析と同じ形の判定は、API が `ShogiEngine:BaseUrl` のエンジンサービス（`nari-note-engine/`）を呼ぶ。EC2 とは別に動かし、未設定の環境では無効 |
 
 EC2 の運用系（SSM Parameter Store、CloudWatch / SNS、デプロイ成果物の S3、DB 用 EBS）とデプロイフローは [infrastruture/docs/infra-design.md](infrastruture/docs/infra-design.md) を参照。
 

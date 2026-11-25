@@ -13,9 +13,10 @@ interface BoardEditorDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: (bod: string) => void;
   initialBod?: string;
+  confirmLabel?: string;
 }
 
-export function BoardEditorDialog({ open, onOpenChange, onConfirm, initialBod }: BoardEditorDialogProps) {
+export function BoardEditorDialog({ open, onOpenChange, onConfirm, initialBod, confirmLabel }: BoardEditorDialogProps) {
   const {
     board,
     senteCaptured,
@@ -169,7 +170,7 @@ export function BoardEditorDialog({ open, onOpenChange, onConfirm, initialBod }:
           <Button variant="outline" onClick={clearBoard} type="button" size="sm">空の盤面</Button>
           <Button variant="outline" onClick={resetBoard} type="button" size="sm">初期配置に戻す</Button>
           <Button variant="outline" onClick={handleClose} type="button" size="sm">キャンセル</Button>
-          <Button onClick={handleConfirm} type="button" size="sm">{initialBod ? '更新' : '挿入'}</Button>
+          <Button onClick={handleConfirm} type="button" size="sm">{confirmLabel ?? (initialBod ? '更新' : '挿入')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -15,6 +15,7 @@ namespace NariNoteBackend.Infrastructure;
 public static class InfrastructureServiceInstaller
 {
     static readonly TimeSpan ExternalRequestTimeout = TimeSpan.FromSeconds(10);
+    static readonly TimeSpan ShogiEngineTimeout = TimeSpan.FromMinutes(5);
 
     // 本番 PostgreSQL の max_connections (infrastruture/terraform/prod/app/server/postgresql.conf) より小さく保つこと
     // 上限を超えた分は DB に拒否されずプール内で Timeout まで待機させる
@@ -60,12 +61,16 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<IKifuRepository, KifuRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IOutboxMessageRepository, OutboxMessageRepository>();
+        services.AddScoped<IBookRepository, BookRepository>();
 
         services.AddScoped<OutboxProcessor>();
         services.AddHostedService<OutboxWorker>();
 
         services.AddScoped<UnverifiedUserDeletionProcessor>();
         services.AddHostedService<UnverifiedUserDeletionWorker>();
+
+        services.AddScoped<ShapeJudgeProcessor>();
+        services.AddHostedService<ShapeJudgeWorker>();
 
         // Register helpers
         services.AddSingleton(TimeProvider.System);
@@ -82,6 +87,22 @@ public static class InfrastructureServiceInstaller
             ?? throw new InvalidOperationException("Frontend:BaseUrl が設定されていません");
         services.AddSingleton(new EmailMessageStore(frontendBaseUrl));
         services.AddHttpClient<IDiscordNotifier, DiscordWebhookNotifier>(client => client.Timeout = ExternalRequestTimeout);
+        // エンジンサービスは API サーバーとは別に動かす。URL が無い環境では解析と判定を無効にする
+        var shogiEngineBaseUrl = configuration["ShogiEngine:BaseUrl"];
+        if (string.IsNullOrWhiteSpace(shogiEngineBaseUrl))
+        {
+            services.AddSingleton<IShogiEngineGateway, DisabledShogiEngineGateway>();
+        }
+        else
+        {
+            services.AddHttpClient<IShogiEngineGateway, HttpShogiEngineGateway>(client =>
+            {
+                client.BaseAddress = new Uri(shogiEngineBaseUrl.TrimEnd('/') + "/");
+                // 判定は 1 件で数十秒かかる
+                client.Timeout = ShogiEngineTimeout;
+            });
+        }
+
         if (env.IsDevelopment())
             services.AddScoped<IImageStorageGateway, LocalImageStorageGateway>();
         else

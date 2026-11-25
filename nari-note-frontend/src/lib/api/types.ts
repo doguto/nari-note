@@ -2,6 +2,16 @@
 // Do not edit manually
 
 
+export interface AnalyzeBookPositionRequest {
+  id?: number;
+  sfen: string;
+}
+
+export interface AnalyzeBookPositionResponse {
+  isAvailable: boolean;
+  lines: EngineLineDto[];
+}
+
 export interface ArticleDto {
   id: string;
   title: string;
@@ -36,6 +46,60 @@ export interface AuthResponse {
   userName?: string;
   userIconImageUrl?: string;
   isEmailVerified: boolean;
+}
+
+export interface BookGraphDto {
+  rootGroupId: number;
+  currentGroupId: number;
+  nodes: BookGraphNodeDto[];
+  edges: BookGraphEdgeDto[];
+}
+
+export interface BookGraphEdgeDto {
+  fromGroupId: number;
+  toGroupId: number;
+  label: string;
+  condition: string;
+  isConditional: boolean;
+}
+
+export interface BookGraphNodeDto {
+  groupId: number;
+  representativePositionId: number;
+  moveLabel: string;
+  name: string;
+  positionCount: number;
+  isLeaf: boolean;
+  hasMemo: boolean;
+}
+
+export interface BookLineDto {
+  fromPositionId: number;
+  usis: string[];
+}
+
+export interface BookMoveDto {
+  id: number;
+  usi: string;
+  label: string;
+  memo: string;
+  condition: string;
+  conditionSuggestions: string[];
+  childPositionId: number;
+}
+
+export interface BookPathStepDto {
+  parentPositionId: number;
+  positionId: number;
+  usi: string;
+  label: string;
+}
+
+export interface BookSummaryDto {
+  id: number;
+  name: string;
+  positionCount: number;
+  updatedAt: string;
 }
 
 export interface CommentDto {
@@ -97,6 +161,16 @@ export interface CreateArticleResponse {
   createdAt: string;
 }
 
+export interface CreateBookRequest {
+  name: string;
+  rootSfen?: string;
+}
+
+export interface CreateBookResponse {
+  id: number;
+  rootPositionId: number;
+}
+
 export interface CreateCommentRequest {
   articleId?: string;
   message: string;
@@ -119,8 +193,24 @@ export interface DeleteArticleRequest {
   id?: string;
 }
 
+export interface DeleteBookMoveRequest {
+  id?: number;
+  moveId?: number;
+}
+
+export interface DeleteBookRequest {
+  id?: number;
+}
+
 export interface DeleteCourseRequest {
   id?: string;
+}
+
+export interface EngineLineDto {
+  usi: string;
+  label: string;
+  score: number;
+  pv: string[];
 }
 
 export interface ErrorResponse {
@@ -197,6 +287,37 @@ export interface GetArticlesRequest {
 
 export interface GetArticlesResponse {
   articles: ArticleThumbnailDto[];
+}
+
+export interface GetBookPositionRequest {
+  id?: number;
+  positionId?: number;
+}
+
+export interface GetBookPositionResponse {
+  bookId: number;
+  bookName: string;
+  positionId: number;
+  sfen: string;
+  isSenteTurn: boolean;
+  lastMoveUsi?: string;
+  path: BookPathStepDto[];
+  legalMoves: string[];
+  moves: BookMoveDto[];
+  group: ShapeGroupDto;
+  proposals: ShapeProposalDto[];
+  graph: BookGraphDto;
+  pendingJudgeCount: number;
+}
+
+export interface GetBookRequest {
+  id?: number;
+}
+
+export interface GetBookResponse {
+  id: number;
+  name: string;
+  rootPositionId: number;
 }
 
 export interface GetCourseContentForEditResponse {
@@ -299,6 +420,10 @@ export interface GetMyArticlesResponse {
   articles: ArticleThumbnailDto[];
 }
 
+export interface GetMyBooksResponse {
+  books: BookSummaryDto[];
+}
+
 export interface GetMyCoursesResponse {
   courses: CourseDto[];
 }
@@ -344,6 +469,24 @@ export interface KifuDto {
 export interface LogoutRequest {
 }
 
+export interface MergeShapeCandidateRequest {
+  id?: number;
+  candidateId?: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface MergeShapeCandidateResponse {
+}
+
+export interface RejectShapeCandidateRequest {
+  id?: number;
+  candidateId?: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface RejectShapeCandidateResponse {
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ResendVerificationEmailResponse {
 }
@@ -355,6 +498,20 @@ export interface ResetPasswordRequest {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ResetPasswordResponse {
+}
+
+export interface SaveBookLinesRequest {
+  id?: number;
+  lines: BookLineDto[];
+}
+
+export interface SaveBookLinesResponse {
+  positions: SavedPositionDto[];
+}
+
+export interface SavedPositionDto {
+  sfen: string;
+  positionId: number;
 }
 
 export interface SearchArticlesRequest {
@@ -379,6 +536,31 @@ export interface SearchCoursesResponse {
   totalCount: number;
 }
 
+export interface ShapeGroupDto {
+  id: number;
+  name: string;
+  memo: string;
+  nameSuggestions: string[];
+  members: ShapeMemberDto[];
+}
+
+export interface ShapeMemberDto {
+  positionId: number;
+  isCurrent: boolean;
+  isRepresentative: boolean;
+  diff: string;
+}
+
+export interface ShapeProposalDto {
+  candidateId: number;
+  otherPositionId: number;
+  otherName: string;
+  verdict: string;
+  delta?: number;
+  confirmedDepth?: number;
+  diff: string;
+}
+
 export interface SignInRequest {
   usernameOrEmail: string;
   password: string;
@@ -392,6 +574,15 @@ export interface SignUpRequest {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface SignUpResponse {
+}
+
+export interface SplitShapeGroupRequest {
+  id?: number;
+  positionId?: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface SplitShapeGroupResponse {
 }
 
 export interface TagDto {
@@ -433,6 +624,17 @@ export interface UpdateArticleResponse {
   updatedAt: string;
 }
 
+export interface UpdateBookMoveRequest {
+  id?: number;
+  moveId?: number;
+  memo?: string;
+  condition?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UpdateBookMoveResponse {
+}
+
 export interface UpdateCourseRequest {
   id?: string;
   name?: string;
@@ -452,6 +654,17 @@ export interface UpdatePasswordRequest {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdatePasswordResponse {
+}
+
+export interface UpdateShapeGroupRequest {
+  id?: number;
+  groupId?: number;
+  name?: string;
+  memo?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UpdateShapeGroupResponse {
 }
 
 export interface UpdateUserProfileRequest {
