@@ -41,7 +41,10 @@ mkdir -p /tmp/pkg/engine/eval
 cp /tmp/yaneuraou/source/YaneuraOu-by-gcc /tmp/pkg/engine/
 cp "/eval/${EVAL_NAME}" /tmp/pkg/engine/eval/nn.bin
 pip install --quiet --root-user-action=ignore --disable-pip-version-check --target /tmp/pkg -r /src/requirements.txt
-cp /src/lambda_function.py /src/service.py /src/usi.py /src/judge.py /src/candidates.py /src/position.py /tmp/pkg/
+# server.py はローカル用の HTTP サーバーなので同梱しない
+find /src -maxdepth 1 -name "*.py" ! -name server.py -exec cp {} /tmp/pkg/ \;
+# 同梱漏れは Lambda でだけ ImportError になるので、ここで読み込めることを確かめる
+(cd /tmp/pkg && python3 -c "import lambda_function")
 
 cd /tmp/pkg
 zip -q -r -9 /out/nari-note-engine.zip .
