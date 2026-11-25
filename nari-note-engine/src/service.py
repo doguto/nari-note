@@ -9,7 +9,7 @@ from judge import Params, judge
 from position import board_of, normalize_sfen
 from usi import Engine
 
-HERE = Path(__file__).parent
+ENGINE_DIR = Path(__file__).resolve().parent.parent / "engine"
 ANALYZE_NODES = 2_000_000
 ANALYZE_MULTIPV = 3
 ENGINE_OPTIONS = {"USI_Hash": "64"}
@@ -19,7 +19,7 @@ def engine_path() -> str:
     path = os.environ.get("ENGINE_PATH")
     if path:
         return path
-    found = sorted(p for p in (HERE / "engine").glob("*") if p.suffix in ("", ".exe") and p.is_file())
+    found = sorted(p for p in ENGINE_DIR.glob("*") if p.suffix in ("", ".exe") and p.is_file())
     if not found:
         raise RuntimeError("ENGINE_PATH か engine/ にエンジンの実行ファイルを置いてください")
     return str(found[0])

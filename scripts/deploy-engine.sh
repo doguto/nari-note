@@ -37,7 +37,7 @@ echo "  Function : ${FUNCTION_NAME}"
 echo ""
 
 echo "[1/3] ビルド中..."
-"${ENGINE_DIR}/build-lambda.sh"
+"${ENGINE_DIR}/scripts/build-lambda.sh"
 
 echo "[2/3] S3 にアップロード中..."
 aws_cli s3 cp "${ZIP_PATH}" "s3://${S3_BUCKET}/${S3_KEY}" --no-progress

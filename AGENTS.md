@@ -91,7 +91,7 @@ flowchart LR
 | 認証 | HttpOnly Cookie の JWT |
 | 画像 | API が S3 に保存し、ブラウザは CloudFront から取得する |
 | メール・通知 | API が Outbox に積み、バックグラウンドジョブが Resend / Discord に配送する |
-| 将棋エンジン | マイ定跡の解析と同じ形の判定は、API が Lambda（`ShogiEngine:FunctionName`）を Invoke して行う。ローカルは `ShogiEngine:BaseUrl` の HTTP サーバー（`nari-note-engine/server.py`）を呼び、どちらも未設定の環境では無効 |
+| 将棋エンジン | マイ定跡の解析と同じ形の判定は、API が Lambda（`ShogiEngine:FunctionName`）を Invoke して行う。ローカルは `ShogiEngine:BaseUrl` の HTTP サーバー（`nari-note-engine/src/server.py`）を呼び、どちらも未設定の環境では無効 |
 
 EC2 の運用系（SSM Parameter Store、CloudWatch / SNS、デプロイ成果物の S3、DB 用 EBS）とデプロイフローは [infrastruture/docs/infra-design.md](infrastruture/docs/infra-design.md) を参照。
 

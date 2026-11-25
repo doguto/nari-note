@@ -2,11 +2,11 @@
 # Lambda に配る zip を作る。Lambda と同じ Amazon Linux のイメージの中でやねうら王をビルドし、評価関数と Python の依存を同梱する
 set -euo pipefail
 
-HERE="$(cd "$(dirname "$0")" && pwd)"
-EVAL_FILE="${EVAL_FILE:-${HERE}/engine/eval/nn.bin}"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+EVAL_FILE="${EVAL_FILE:-${ROOT}/engine/eval/nn.bin}"
 # 判定はエンジンの探索結果が変わらないことを前提にしているので、版は固定し、上げるときはここを書き換える
 YANEURAOU_REF="${YANEURAOU_REF:-c046f30bef11527c84fd04a1ead5a47abfa910c8}"
-OUT_DIR="${HERE}/build"
+OUT_DIR="${ROOT}/build"
 BUILD_IMAGE="public.ecr.aws/lambda/python:3.13"
 
 if [[ ! -f "${EVAL_FILE}" ]]; then
@@ -25,7 +25,7 @@ to_host_path() {
 MSYS_NO_PATHCONV=1 docker run --rm --platform linux/amd64 \
   --entrypoint /bin/bash \
   -e YANEURAOU_REF="${YANEURAOU_REF}" \
-  -v "$(to_host_path "${HERE}"):/src:ro" \
+  -v "$(to_host_path "${ROOT}"):/work:ro" \
   -v "$(to_host_path "$(dirname "${EVAL_FILE}")"):/eval:ro" \
   -e EVAL_NAME="$(basename "${EVAL_FILE}")" \
   -v "$(to_host_path "${OUT_DIR}"):/out" \
@@ -44,9 +44,9 @@ make -C /tmp/yaneuraou/source -j"$(nproc)" normal COMPILER=g++ YANEURAOU_EDITION
 mkdir -p /tmp/pkg/engine/eval
 cp /tmp/yaneuraou/source/YaneuraOu-by-gcc /tmp/pkg/engine/
 cp "/eval/${EVAL_NAME}" /tmp/pkg/engine/eval/nn.bin
-pip install --quiet --root-user-action=ignore --disable-pip-version-check --target /tmp/pkg -r /src/requirements.txt
+pip install --quiet --root-user-action=ignore --disable-pip-version-check --target /tmp/pkg -r /work/requirements.txt
 # server.py はローカル用の HTTP サーバーなので同梱しない
-find /src -maxdepth 1 -name "*.py" ! -name server.py -exec cp {} /tmp/pkg/ \;
+find /work/src -maxdepth 1 -name "*.py" ! -name server.py -exec cp {} /tmp/pkg/ \;
 # 同梱漏れは Lambda でだけ ImportError になるので、ここで読み込めることを確かめる
 (cd /tmp/pkg && python3 -c "import lambda_function")
 

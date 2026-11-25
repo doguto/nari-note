@@ -4,11 +4,13 @@
 
 | ファイル | 内容 |
 | --- | --- |
-| `service.py` | 解析・候補の絞り込み・判定の入口。Lambda と HTTP サーバーで共通 |
-| `lambda_function.py` | Lambda のハンドラー |
-| `server.py` | ローカル用の HTTP サーバー |
-| `judge.py` / `candidates.py` / `position.py` / `usi.py` | 判定、候補の絞り込み、局面の操作、USI エンジンとの通信 |
-| `build-lambda.sh` | Lambda に配る zip を作る |
+| `src/service.py` | 解析・候補の絞り込み・判定の入口。Lambda と HTTP サーバーで共通 |
+| `src/lambda_function.py` | Lambda のハンドラー |
+| `src/server.py` | ローカル用の HTTP サーバー |
+| `src/judge.py` / `candidates.py` / `position.py` / `usi.py` | 判定、候補の絞り込み、局面の操作、USI エンジンとの通信 |
+| `scripts/build-lambda.sh` | Lambda に配る zip を作る |
+| `engine/` | ローカルで使うエンジンと、zip に入れる評価関数を置く（Git 管理外） |
+| `build/` | ビルドした zip（Git 管理外） |
 
 ## ローカルで動かす
 
@@ -16,7 +18,7 @@
 cd nari-note-engine
 pip install -r requirements.txt
 # やねうら王系のエンジン（評価関数込み）を engine/ に置くか、ENGINE_PATH で指定する
-python server.py --port 8790
+python src/server.py --port 8790
 ```
 
 バックエンドは環境変数 `ShogiEngine__BaseUrl=http://localhost:8790` を付けて起動する。
@@ -41,14 +43,14 @@ python server.py --port 8790
 
 ### ビルドとデプロイ
 
-`build-lambda.sh` は Lambda と同じ Amazon Linux のイメージ（`public.ecr.aws/lambda/python:3.13`）の中で、やねうら王（NNUE、AVX2）を g++ でビルドし、評価関数・cshogi・このディレクトリの Python ファイルと合わせて `build/nari-note-engine.zip` にまとめる。Docker が必要。
+`scripts/build-lambda.sh` は Lambda と同じ Amazon Linux のイメージ（`public.ecr.aws/lambda/python:3.13`）の中で、やねうら王（NNUE、AVX2）を g++ でビルドし、評価関数・cshogi・`src/` の Python ファイル（`server.py` を除く）と合わせて `build/nari-note-engine.zip` にまとめる。Docker が必要。
 
 | 環境変数 | 内容 |
 | --- | --- |
 | `EVAL_FILE` | NNUE の評価関数ファイル。既定は `engine/eval/nn.bin`。zip の中では `engine/eval/nn.bin` に置く |
-| `YANEURAOU_REF` | ビルドするやねうら王のコミット SHA（ブランチ名・タグ名も可）。既定は `build-lambda.sh` に固定した SHA |
+| `YANEURAOU_REF` | ビルドするやねうら王のコミット SHA（ブランチ名・タグ名も可）。既定は `scripts/build-lambda.sh` に固定した SHA |
 
-判定はエンジンの探索結果が変わらないことを前提にしているので、やねうら王の版は `build-lambda.sh` の既定値で固定している。版を上げると評価値や最善手が変わり、上げる前と後の判定結果が混ざる。上げるときは既定値の SHA を書き換えてコミットし、デプロイする。
+判定はエンジンの探索結果が変わらないことを前提にしているので、やねうら王の版は `scripts/build-lambda.sh` の既定値で固定している。版を上げると評価値や最善手が変わり、上げる前と後の判定結果が混ざる。上げるときは既定値の SHA を書き換えてコミットし、デプロイする。
 
 デプロイはリポジトリルートで `scripts/deploy-engine.sh` を実行する。zip をビルドして `<app_name>-deploy` バケットの `engine/releases/<日時>-<コミット>/` と `engine/latest/` に置き、Lambda のコードを差し替える。関数がまだ無い場合は zip を置くだけで終わるので、その後に `app/engine` を apply する（関数は `engine/latest/` の zip で作られる）。
 
@@ -70,8 +72,8 @@ HTTP サーバーでは同じ入出力を `POST /analyze` / `POST /candidates` /
 
 盤面の見た目ではなく、この先の振る舞いが同じかで判定する。
 
-1. 候補の絞り込み（`candidates.py`）: 手番が同じ、駒割の差が 1 枚以内、差分が 3 単位以内。差分の単位は、片方の局面にしかない駒を同じ種類同士で対応づけた 1 組
-2. 最善手の一致（`judge.py`）: MultiPV 2、200 万ノード。1 位と 2 位の差が 30cp 未満のときは、相手の最善手を `searchmoves` で指させた評価値の低下が 30cp 未満なら一致とみなす
+1. 候補の絞り込み（`src/candidates.py`）: 手番が同じ、駒割の差が 1 枚以内、差分が 3 単位以内。差分の単位は、片方の局面にしかない駒を同じ種類同士で対応づけた 1 組
+2. 最善手の一致（`src/judge.py`）: MultiPV 2、200 万ノード。1 位と 2 位の差が 30cp 未満のときは、相手の最善手を `searchmoves` で指させた評価値の低下が 30cp 未満なら一致とみなす
 3. 差分が効いていないことの確認: 差分の一部だけを寄せた中間局面（最大 6 局面）で、最善手の後悔値が τ = max(50cp, 2 × 拮抗差) 未満
 4. d 手先までの一致: d = 6 手。各手で 2 を繰り返し、評価値の差 Δ が δ = 50cp 以内なら「同じ」、Δ の幅が δ 以内なら「Δ付きで同じ」
 
