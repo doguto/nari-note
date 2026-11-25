@@ -119,7 +119,6 @@ export function BookResearchTemplate(props: BookResearchTemplateProps) {
       disabled={isBusy}
       canBack={view.ply > 0}
       canForward={view.moves.length > 0}
-      showKeyboardHint={isWide}
       onMove={onMove}
       onFirst={onFirst}
       onBack={onBack}
