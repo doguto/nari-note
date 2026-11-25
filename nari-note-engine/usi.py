@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import json
-import sqlite3
 import subprocess
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 MATE_SCORE = 32000
@@ -23,7 +21,6 @@ class SearchResult:
     nodes: int = 0
     nps: int = 0
     elapsed: float = 0.0
-    cached: bool = field(default=False, compare=False)
 
     @property
     def best(self) -> Line:
@@ -41,7 +38,7 @@ def _parse_score(tokens: list[str], i: int) -> int:
 
 
 class Engine:
-    def __init__(self, path: str, options: dict[str, str], cache_path: Path | None = None):
+    def __init__(self, path: str, options: dict[str, str]):
         self.proc = subprocess.Popen(
             [path],
             cwd=str(Path(path).parent),
@@ -51,11 +48,9 @@ class Engine:
             encoding="utf-8",
             bufsize=1,
         )
-        self.name = ""
         self._send("usi")
-        for line in self._read_until("usiok"):
-            if line.startswith("id name "):
-                self.name = line[len("id name "):]
+        for _ in self._read_until("usiok"):
+            pass
         # ノード数を固定した探索を決定的にするため、スレッドは 1 に固定する
         merged = {
             "Threads": "1",
@@ -68,17 +63,10 @@ class Engine:
         }
         for k, v in merged.items():
             self._send(f"setoption name {k} value {v}")
-        # 探索結果はハッシュサイズ等のオプションでも変わるので、キャッシュのキーに含める
-        self.engine_id = self.name + " | " + ",".join(f"{k}={v}" for k, v in sorted(merged.items()))
         self.multipv = None
         self._ready()
-        self.cache = sqlite3.connect(cache_path, timeout=30, check_same_thread=False) if cache_path else None
-        if self.cache:
-            self.cache.execute(
-                "create table if not exists engine_results ("
-                "sfen text, engine text, nodes integer, multipv integer, searchmoves text,"
-                "result text, primary key (sfen, engine, nodes, multipv, searchmoves))"
-            )
+        # 1 回の判定の中で同じ探索を繰り返すので、リクエストの間だけ結果を覚えておく
+        self.memo: dict[tuple[str, int, int, str], SearchResult] = {}
 
     def _send(self, cmd: str) -> None:
         self.proc.stdin.write(cmd + "\n")
@@ -101,15 +89,9 @@ class Engine:
 
     def search(self, sfen: str, nodes: int, multipv: int = 1, searchmoves: list[str] | None = None) -> SearchResult:
         sm = " ".join(searchmoves or [])
-        key = (sfen, self.engine_id, nodes, multipv, sm)
-        if self.cache:
-            row = self.cache.execute(
-                "select result from engine_results where sfen=? and engine=? and nodes=? and multipv=? and searchmoves=?",
-                key,
-            ).fetchone()
-            if row:
-                data = json.loads(row[0])
-                return SearchResult([Line(**l) for l in data["lines"]], data["nodes"], data["nps"], data["elapsed"], True)
+        key = (sfen, nodes, multipv, sm)
+        if key in self.memo:
+            return self.memo[key]
 
         if self.multipv != multipv:
             self._send(f"setoption name MultiPV value {multipv}")
@@ -156,12 +138,7 @@ class Engine:
         if bestmove == "resign":
             ordered = [Line("resign", -MATE_SCORE, [])]
         result = SearchResult(ordered, total_nodes, nps, elapsed)
-        if self.cache:
-            self.cache.execute(
-                "insert or replace into engine_results values (?, ?, ?, ?, ?, ?)",
-                (*key, json.dumps(asdict(result))),
-            )
-            self.cache.commit()
+        self.memo[key] = result
         return result
 
     def close(self) -> None:
@@ -170,5 +147,3 @@ class Engine:
             self.proc.wait(timeout=5)
         except Exception:
             self.proc.kill()
-        if self.cache:
-            self.cache.close()
