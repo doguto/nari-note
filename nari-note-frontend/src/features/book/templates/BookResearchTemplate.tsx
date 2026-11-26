@@ -8,6 +8,7 @@ import { ErrorAlert } from '@/components/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMediaQuery } from '@/lib/hooks';
 import type { BookMoveDto, EngineLineDto, GetBookPositionResponse } from '@/lib/api/types';
+import type { AnalysisEngineId } from '../utils/analysisEngine';
 import {
   type BookMoveChange,
   BoardCard,
@@ -37,7 +38,14 @@ interface BookResearchTemplateProps {
   data: GetBookPositionResponse;
   view: ResearchView;
   draft: { count: number; isSaving: boolean; onSave: () => void; onDiscard: () => void };
-  analysis: { isLoading: boolean; isAvailable: boolean; hasError: boolean; lines: EngineLineDto[] };
+  analysis: {
+    isLoading: boolean;
+    isAvailable: boolean;
+    hasError: boolean;
+    lines: EngineLineDto[];
+    engine: AnalysisEngineId;
+    onEngineChange: (engine: AnalysisEngineId) => void;
+  };
   isBusy: boolean;
   errorMessage?: string;
   selectedMoveIndex: number;
@@ -143,6 +151,8 @@ export function BookResearchTemplate(props: BookResearchTemplateProps) {
       isAvailable={analysis.isAvailable}
       hasError={analysis.hasError}
       lines={analysis.lines}
+      engine={analysis.engine}
+      onEngineChange={analysis.onEngineChange}
       registeredUsis={view.moves.map((m) => m.usi)}
       disabled={isBusy}
       onPlay={onMove}

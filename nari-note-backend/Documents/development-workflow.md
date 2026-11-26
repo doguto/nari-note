@@ -75,7 +75,8 @@ dotnet ef migrations remove                # 直前のマイグレーション�
 | `Cors:AllowedOrigins` | CORS で許可するオリジン |
 | `resend_api_token` | メール送信（Resend）の API トークン |
 | `discord_general_webhook_url` | Discord 通知の Webhook URL |
-| `ShogiEngine:BaseUrl` | マイ定跡の研究盤が使うエンジンサービス（`nari-note-engine/`）の URL。未設定なら局面の解析と同じ形の判定を行わない |
+| `ShogiEngine:FunctionName` | マイ定跡の研究盤が使う将棋エンジンの Lambda の関数名（本番。SSM の `/app` から読む） |
+| `ShogiEngine:BaseUrl` | ローカルで動かす将棋エンジン（`nari-note-engine/src/server.py`）の URL。`FunctionName` と両方無ければ局面の解析と同じ形の判定を行わない |
 | `image_delivery_bucket_name` / `image_delivery_domain` | 画像を保存する S3 バケットと配信ドメイン（Development 以外） |
 | `sentry_dsn` | Sentry の DSN |
 | `Serilog` | ログ出力の設定（本番はファイルにも出力） |

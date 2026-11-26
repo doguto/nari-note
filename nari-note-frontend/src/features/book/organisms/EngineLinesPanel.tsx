@@ -2,6 +2,7 @@
 
 import { Check, Plus } from 'lucide-react';
 import type { EngineLineDto } from '@/lib/api/types';
+import { ANALYSIS_ENGINES, type AnalysisEngineId } from '../utils/analysisEngine';
 import { formatScore } from '../utils/score';
 
 interface EngineLinesPanelProps {
@@ -9,12 +10,48 @@ interface EngineLinesPanelProps {
   isAvailable: boolean;
   hasError: boolean;
   lines: EngineLineDto[];
+  engine: AnalysisEngineId;
+  onEngineChange: (engine: AnalysisEngineId) => void;
   registeredUsis: string[];
   disabled?: boolean;
   onPlay: (usi: string) => void;
 }
 
-export function EngineLinesPanel({ isLoading, isAvailable, hasError, lines, registeredUsis, disabled, onPlay }: EngineLinesPanelProps) {
+export function EngineLinesPanel({ engine, onEngineChange, ...rest }: EngineLinesPanelProps) {
+  const unavailable = !rest.isLoading && !rest.hasError && !rest.isAvailable;
+  return (
+    <div className="flex flex-col gap-3">
+      {!unavailable && (
+        <div role="radiogroup" aria-label="解析に使うAI" className="grid grid-cols-2 gap-1 rounded-lg bg-brand-bg-gradient-to p-1">
+          {ANALYSIS_ENGINES.map((e) => (
+            <button
+              key={e.id}
+              type="button"
+              role="radio"
+              aria-checked={engine === e.id}
+              className="flex min-h-10 flex-col items-center justify-center rounded-md px-2 text-xs text-brand-secondary-text hover:text-brand-text aria-checked:bg-white aria-checked:font-bold aria-checked:text-brand-primary-dark aria-checked:shadow-sm"
+              onClick={() => onEngineChange(e.id)}
+            >
+              <span>{e.label}</span>
+              <span className="text-[11px] font-normal">{e.description}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      <EngineLines {...rest} />
+    </div>
+  );
+}
+
+function EngineLines({
+  isLoading,
+  isAvailable,
+  hasError,
+  lines,
+  registeredUsis,
+  disabled,
+  onPlay,
+}: Omit<EngineLinesPanelProps, 'engine' | 'onEngineChange'>) {
   if (hasError) return <p className="text-sm text-red-600">解析に失敗しました。時間をおいて開き直してください。</p>;
   if (isLoading) return <p className="text-sm text-brand-secondary-text">解析中...</p>;
   if (!isAvailable) return <p className="text-sm text-brand-secondary-text">この環境ではAIを使えません。</p>;

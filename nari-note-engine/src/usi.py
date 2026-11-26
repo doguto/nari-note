@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import json
-import sqlite3
 import subprocess
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 MATE_SCORE = 32000
@@ -23,7 +21,6 @@ class SearchResult:
     nodes: int = 0
     nps: int = 0
     elapsed: float = 0.0
-    cached: bool = field(default=False, compare=False)
 
     @property
     def best(self) -> Line:
@@ -41,7 +38,7 @@ def _parse_score(tokens: list[str], i: int) -> int:
 
 
 class Engine:
-    def __init__(self, path: str, options: dict[str, str], cache_path: Path | None = None):
+    def __init__(self, path: str, options: dict[str, str]):
         self.proc = subprocess.Popen(
             [path],
             cwd=str(Path(path).parent),
@@ -51,11 +48,9 @@ class Engine:
             encoding="utf-8",
             bufsize=1,
         )
-        self.name = ""
         self._send("usi")
-        for line in self._read_until("usiok"):
-            if line.startswith("id name "):
-                self.name = line[len("id name "):]
+        for _ in self._read_until("usiok"):
+            pass
         # ノード数を固定した探索を決定的にするため、スレッドは 1 に固定する
         merged = {
             "Threads": "1",
@@ -68,17 +63,10 @@ class Engine:
         }
         for k, v in merged.items():
             self._send(f"setoption name {k} value {v}")
-        # 探索結果はハッシュサイズ等のオプションでも変わるので、キャッシュのキーに含める
-        self.engine_id = self.name + " | " + ",".join(f"{k}={v}" for k, v in sorted(merged.items()))
         self.multipv = None
         self._ready()
-        self.cache = sqlite3.connect(cache_path, timeout=30, check_same_thread=False) if cache_path else None
-        if self.cache:
-            self.cache.execute(
-                "create table if not exists engine_results ("
-                "sfen text, engine text, nodes integer, multipv integer, searchmoves text,"
-                "result text, primary key (sfen, engine, nodes, multipv, searchmoves))"
-            )
+        # 1 回の判定の中で同じ探索を繰り返すので、リクエストの間だけ結果を覚えておく
+        self.memo: dict[tuple[str, int, int, str], SearchResult] = {}
 
     def _send(self, cmd: str) -> None:
         self.proc.stdin.write(cmd + "\n")
@@ -101,15 +89,9 @@ class Engine:
 
     def search(self, sfen: str, nodes: int, multipv: int = 1, searchmoves: list[str] | None = None) -> SearchResult:
         sm = " ".join(searchmoves or [])
-        key = (sfen, self.engine_id, nodes, multipv, sm)
-        if self.cache:
-            row = self.cache.execute(
-                "select result from engine_results where sfen=? and engine=? and nodes=? and multipv=? and searchmoves=?",
-                key,
-            ).fetchone()
-            if row:
-                data = json.loads(row[0])
-                return SearchResult([Line(**l) for l in data["lines"]], data["nodes"], data["nps"], data["elapsed"], True)
+        key = (sfen, nodes, multipv, sm)
+        if key in self.memo:
+            return self.memo[key]
 
         if self.multipv != multipv:
             self._send(f"setoption name MultiPV value {multipv}")
@@ -121,7 +103,7 @@ class Engine:
         started = time.perf_counter()
         self._send(cmd)
 
-        blocks: list[list[tuple[int, Line]]] = []
+        blocks: list[dict[int, tuple[int, Line]]] = []
         total_nodes = nps = 0
         bestmove = ""
         for raw in self._read_until("bestmove"):
@@ -137,9 +119,10 @@ class Engine:
             score = _parse_score(tokens, tokens.index("score"))
             pv = tokens[tokens.index("pv") + 1:]
             depth = int(tokens[tokens.index("depth") + 1]) if "depth" in tokens else 0
-            if idx == 1 or not blocks:
-                blocks.append([])
-            blocks[-1].append((depth, Line(pv[0], score, pv)))
+            # 1 位の行が bound 付きで読み飛ばされると次の反復が 2 位から始まるので、同じ順位が再び来たら新しい組にする
+            if not blocks or idx == 1 or idx in blocks[-1]:
+                blocks.append({})
+            blocks[-1][idx] = (depth, Line(pv[0], score, pv))
             if "nodes" in tokens:
                 total_nodes = int(tokens[tokens.index("nodes") + 1])
             if "nps" in tokens:
@@ -148,20 +131,17 @@ class Engine:
 
         # ノード上限で打ち切ると MultiPV の一部の行が前の反復の深さのまま出力されるので、全行の深さがそろった最後の組を使う
         width = max((len(b) for b in blocks), default=0)
-        complete = [b for b in blocks if len(b) == width and len({d for d, _ in b}) == 1]
-        chosen = complete[-1] if complete else (blocks[-1] if blocks else [])
-        ordered = [line for _, line in chosen]
+        complete = [
+            b for b in blocks if sorted(b) == list(range(1, width + 1)) and len({d for d, _ in b.values()}) == 1
+        ]
+        chosen = complete[-1] if complete else (blocks[-1] if blocks else {})
+        ordered = [chosen[i][1] for i in sorted(chosen)]
         if not ordered and bestmove not in ("resign", "win"):
             ordered = [Line(bestmove, 0, [bestmove])]
         if bestmove == "resign":
             ordered = [Line("resign", -MATE_SCORE, [])]
         result = SearchResult(ordered, total_nodes, nps, elapsed)
-        if self.cache:
-            self.cache.execute(
-                "insert or replace into engine_results values (?, ?, ?, ?, ?, ?)",
-                (*key, json.dumps(asdict(result))),
-            )
-            self.cache.commit()
+        self.memo[key] = result
         return result
 
     def close(self) -> None:
@@ -170,5 +150,3 @@ class Engine:
             self.proc.wait(timeout=5)
         except Exception:
             self.proc.kill()
-        if self.cache:
-            self.cache.close()

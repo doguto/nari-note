@@ -31,14 +31,14 @@ public class AnalyzeBookPositionServiceTest
     }
 
     [Fact]
-    public async Task 読み筋を記譜にし評価値を先手から見た値にする()
+    public async Task 選んだエンジンで解析し読み筋を記譜にし評価値を先手から見た値にする()
     {
         var position = this.builder.Line("7g7f");
-        this.shogiEngineGateway.AnalyzeAsync(position.Sfen).Returns([
+        this.shogiEngineGateway.AnalyzeAsync(position.Sfen, AnalysisEngine.TsuyouraouMicro).Returns([
             new EngineLine { Usi = "3c3d", Score = 50, Pv = ["3c3d", "8h2b+", "3a2b"] },
         ]);
 
-        var response = await this.service.ExecuteAsync(this.owner.Id, new AnalyzeBookPositionRequest { Id = this.book.Id, Sfen = position.Sfen });
+        var response = await this.service.ExecuteAsync(this.owner.Id, new AnalyzeBookPositionRequest { Id = this.book.Id, Sfen = position.Sfen, Engine = AnalysisEngine.TsuyouraouMicro });
 
         Assert.True(response.IsAvailable);
         var line = Assert.Single(response.Lines);
@@ -52,17 +52,17 @@ public class AnalyzeBookPositionServiceTest
     {
         this.shogiEngineGateway.IsEnabled.Returns(false);
 
-        var response = await this.service.ExecuteAsync(this.owner.Id, new AnalyzeBookPositionRequest { Id = this.book.Id, Sfen = this.builder.Root.Sfen });
+        var response = await this.service.ExecuteAsync(this.owner.Id, new AnalyzeBookPositionRequest { Id = this.book.Id, Sfen = this.builder.Root.Sfen, Engine = AnalysisEngine.TsuyouraouMini });
 
         Assert.False(response.IsAvailable);
-        await this.shogiEngineGateway.DidNotReceiveWithAnyArgs().AnalyzeAsync(null!);
+        await this.shogiEngineGateway.DidNotReceiveWithAnyArgs().AnalyzeAsync(null!, null!);
     }
 
     [Fact]
     public async Task 持ち主以外は解析できない()
     {
         await Assert.ThrowsAsync<ForbiddenException>(() =>
-            this.service.ExecuteAsync(new UserBuilder().Build().Id, new AnalyzeBookPositionRequest { Id = this.book.Id, Sfen = this.builder.Root.Sfen })
+            this.service.ExecuteAsync(new UserBuilder().Build().Id, new AnalyzeBookPositionRequest { Id = this.book.Id, Sfen = this.builder.Root.Sfen, Engine = AnalysisEngine.TsuyouraouMini })
         );
     }
 
@@ -70,9 +70,9 @@ public class AnalyzeBookPositionServiceTest
     public async Task 保存していない局面も解析できる()
     {
         const string sfen = "lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL w - 1";
-        this.shogiEngineGateway.AnalyzeAsync(sfen).Returns([new EngineLine { Usi = "3c3d", Score = 10, Pv = ["3c3d"] }]);
+        this.shogiEngineGateway.AnalyzeAsync(sfen, AnalysisEngine.TsuyouraouMini).Returns([new EngineLine { Usi = "3c3d", Score = 10, Pv = ["3c3d"] }]);
 
-        var response = await this.service.ExecuteAsync(this.owner.Id, new AnalyzeBookPositionRequest { Id = this.book.Id, Sfen = sfen });
+        var response = await this.service.ExecuteAsync(this.owner.Id, new AnalyzeBookPositionRequest { Id = this.book.Id, Sfen = sfen, Engine = AnalysisEngine.TsuyouraouMini });
 
         Assert.Equal("△３四歩", Assert.Single(response.Lines).Label);
     }
@@ -81,7 +81,7 @@ public class AnalyzeBookPositionServiceTest
     public async Task 形式の正しくない局面はArgumentExceptionになる()
     {
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            this.service.ExecuteAsync(this.owner.Id, new AnalyzeBookPositionRequest { Id = this.book.Id, Sfen = "xx" })
+            this.service.ExecuteAsync(this.owner.Id, new AnalyzeBookPositionRequest { Id = this.book.Id, Sfen = "xx", Engine = AnalysisEngine.TsuyouraouMini })
         );
     }
 }

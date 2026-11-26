@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using NariNoteBackend.Domain.Shogi;
 using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Dto.Request;
@@ -11,4 +12,8 @@ public class AnalyzeBookPositionRequest
     [Required(ErrorMessage = "局面は必須です")]
     [MaxLength(200)]
     public required string Sfen { get; set; }
+
+    [Required(ErrorMessage = "エンジンは必須です")]
+    [AllowedValues(AnalysisEngine.TsuyouraouMini, AnalysisEngine.TsuyouraouMicro, ErrorMessage = "未対応のエンジンです")]
+    public required string Engine { get; set; }
 }

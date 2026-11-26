@@ -1,3 +1,4 @@
+using Amazon.Lambda;
 using Microsoft.EntityFrameworkCore;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
@@ -16,6 +17,8 @@ public static class InfrastructureServiceInstaller
 {
     static readonly TimeSpan ExternalRequestTimeout = TimeSpan.FromSeconds(10);
     static readonly TimeSpan ShogiEngineTimeout = TimeSpan.FromMinutes(5);
+    // Lambda の関数側のタイムアウト（infrastruture の app/engine、300 秒）より長くし、関数のタイムアウトをエラー応答として受け取る
+    static readonly TimeSpan ShogiEngineLambdaTimeout = TimeSpan.FromSeconds(310);
 
     // 本番 PostgreSQL の max_connections (infrastruture/terraform/prod/app/server/postgresql.conf) より小さく保つこと
     // 上限を超えた分は DB に拒否されずプール内で Timeout まで待機させる
@@ -87,20 +90,33 @@ public static class InfrastructureServiceInstaller
             ?? throw new InvalidOperationException("Frontend:BaseUrl が設定されていません");
         services.AddSingleton(new EmailMessageStore(frontendBaseUrl));
         services.AddHttpClient<IDiscordNotifier, DiscordWebhookNotifier>(client => client.Timeout = ExternalRequestTimeout);
-        // エンジンサービスは API サーバーとは別に動かす。URL が無い環境では解析と判定を無効にする
+        // エンジンは API サーバーとは別に動かす。本番は Lambda、ローカルは nari-note-engine の HTTP サーバーを呼び、どちらも無い環境では解析と判定を無効にする
+        var shogiEngineFunctionName = configuration["ShogiEngine:FunctionName"];
         var shogiEngineBaseUrl = configuration["ShogiEngine:BaseUrl"];
-        if (string.IsNullOrWhiteSpace(shogiEngineBaseUrl))
+        if (!string.IsNullOrWhiteSpace(shogiEngineFunctionName))
         {
-            services.AddSingleton<IShogiEngineGateway, DisabledShogiEngineGateway>();
+            // 判定は 1 件で数十秒かかるので、SDK の自動再試行で同じ判定を二重に走らせない
+            services.AddSingleton<IAmazonLambda>(_ => new AmazonLambdaClient(new AmazonLambdaConfig
+            {
+                Timeout = ShogiEngineLambdaTimeout,
+                MaxErrorRetry = 0,
+            }));
+            services.AddSingleton<IShogiEngineGateway>(sp => new LambdaShogiEngineGateway(
+                sp.GetRequiredService<IAmazonLambda>(),
+                shogiEngineFunctionName
+            ));
         }
-        else
+        else if (!string.IsNullOrWhiteSpace(shogiEngineBaseUrl))
         {
             services.AddHttpClient<IShogiEngineGateway, HttpShogiEngineGateway>(client =>
             {
                 client.BaseAddress = new Uri(shogiEngineBaseUrl.TrimEnd('/') + "/");
-                // 判定は 1 件で数十秒かかる
                 client.Timeout = ShogiEngineTimeout;
             });
+        }
+        else
+        {
+            services.AddSingleton<IShogiEngineGateway, DisabledShogiEngineGateway>();
         }
 
         if (env.IsDevelopment())

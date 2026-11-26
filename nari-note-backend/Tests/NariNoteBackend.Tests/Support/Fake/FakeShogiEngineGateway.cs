@@ -10,9 +10,14 @@ public class FakeShogiEngineGateway : IShogiEngineGateway
     public List<EngineCandidate>? Candidates { get; set; }
     public EngineVerdict Verdict { get; set; } = new() { Kind = "same", Delta = 0, ConfirmedDepth = 6 };
     public List<(string A, string B)> Judged { get; } = new();
+    // 判定で投げる例外。null のときは Verdict を返す
+    public System.Exception? JudgeException { get; set; }
 
-    public Task<List<EngineLine>> AnalyzeAsync(string sfen, CancellationToken cancellationToken = default)
+    public List<string> AnalyzedEngines { get; } = new();
+
+    public Task<List<EngineLine>> AnalyzeAsync(string sfen, string engine, CancellationToken cancellationToken = default)
     {
+        this.AnalyzedEngines.Add(engine);
         return Task.FromResult(this.Lines.ToList());
     }
 
@@ -29,6 +34,7 @@ public class FakeShogiEngineGateway : IShogiEngineGateway
     public Task<EngineVerdict> JudgeAsync(string sfenA, string sfenB, CancellationToken cancellationToken = default)
     {
         this.Judged.Add((sfenA, sfenB));
+        if (this.JudgeException != null) return Task.FromException<EngineVerdict>(this.JudgeException);
         return Task.FromResult(this.Verdict);
     }
 
@@ -36,8 +42,10 @@ public class FakeShogiEngineGateway : IShogiEngineGateway
     {
         this.IsEnabled = true;
         this.Lines.Clear();
+        this.AnalyzedEngines.Clear();
         this.Candidates = null;
         this.Verdict = new EngineVerdict { Kind = "same", Delta = 0, ConfirmedDepth = 6 };
         this.Judged.Clear();
+        this.JudgeException = null;
     }
 }

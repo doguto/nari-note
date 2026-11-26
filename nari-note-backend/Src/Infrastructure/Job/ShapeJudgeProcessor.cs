@@ -1,3 +1,4 @@
+using System.Net;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Repository;
@@ -95,6 +96,14 @@ public class ShapeJudgeProcessor
             candidate.Delta = verdict.Delta;
             candidate.ConfirmedDepth = verdict.ConfirmedDepth;
             candidate.Reason = Truncate(verdict.Reason);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests)
+        {
+            // 同時実行数が一時的に埋まっているだけなので、失敗にせず待ち行列に戻して後で判定し直す
+            this.logger.LogWarning(ex, "Shape judge throttled. CandidateId={CandidateId}", candidate.Id);
+            candidate.Status = ShapeCandidateStatus.Queued;
+            await this.bookRepository.SaveAsync();
+            return false;
         }
         catch (System.Exception ex) when (ex is HttpRequestException or TaskCanceledException && !cancellationToken.IsCancellationRequested)
         {

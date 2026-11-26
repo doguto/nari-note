@@ -97,6 +97,29 @@ public class ShapeJudgeProcessorTest : IntegrationTestBase
     }
 
     [Fact]
+    public async Task 同時実行数の上限で断られた判定は失敗にせず待ち行列に戻す()
+    {
+        await CreateTwoLinesAsync();
+        Factory.ShogiEngineGateway.JudgeException = new HttpRequestException("throttled", null, HttpStatusCode.TooManyRequests);
+
+        await ProcessAllAsync();
+
+        Assert.NotEmpty(Factory.ShogiEngineGateway.Judged);
+        Assert.All(await QueryAsync(db => db.ShapeCandidates.ToListAsync()), c => Assert.Equal(ShapeCandidateStatus.Queued, c.Status));
+    }
+
+    [Fact]
+    public async Task 呼び出しに失敗した判定は失敗として残す()
+    {
+        await CreateTwoLinesAsync();
+        Factory.ShogiEngineGateway.JudgeException = new HttpRequestException("engine crashed");
+
+        await ProcessAllAsync();
+
+        Assert.All(await QueryAsync(db => db.ShapeCandidates.ToListAsync()), c => Assert.Equal(ShapeCandidateStatus.Failed, c.Status));
+    }
+
+    [Fact]
     public async Task エンジンが無い環境では何もしない()
     {
         await CreateTwoLinesAsync();

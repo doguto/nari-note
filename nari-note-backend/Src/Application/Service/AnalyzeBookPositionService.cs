@@ -34,7 +34,7 @@ public class AnalyzeBookPositionService
         var sfen = shogi.ToSfen();
         var sente = shogi.Turn == Side.Sente;
 
-        var lines = await this.shogiEngineGateway.AnalyzeAsync(sfen);
+        var lines = await this.shogiEngineGateway.AnalyzeAsync(sfen, request.Engine);
         return new AnalyzeBookPositionResponse
         {
             IsAvailable = true,
