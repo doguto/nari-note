@@ -103,7 +103,7 @@ class Engine:
         started = time.perf_counter()
         self._send(cmd)
 
-        blocks: list[list[tuple[int, Line]]] = []
+        blocks: list[dict[int, tuple[int, Line]]] = []
         total_nodes = nps = 0
         bestmove = ""
         for raw in self._read_until("bestmove"):
@@ -119,9 +119,10 @@ class Engine:
             score = _parse_score(tokens, tokens.index("score"))
             pv = tokens[tokens.index("pv") + 1:]
             depth = int(tokens[tokens.index("depth") + 1]) if "depth" in tokens else 0
-            if idx == 1 or not blocks:
-                blocks.append([])
-            blocks[-1].append((depth, Line(pv[0], score, pv)))
+            # 1 位の行が bound 付きで読み飛ばされると次の反復が 2 位から始まるので、同じ順位が再び来たら新しい組にする
+            if not blocks or idx == 1 or idx in blocks[-1]:
+                blocks.append({})
+            blocks[-1][idx] = (depth, Line(pv[0], score, pv))
             if "nodes" in tokens:
                 total_nodes = int(tokens[tokens.index("nodes") + 1])
             if "nps" in tokens:
@@ -130,9 +131,11 @@ class Engine:
 
         # ノード上限で打ち切ると MultiPV の一部の行が前の反復の深さのまま出力されるので、全行の深さがそろった最後の組を使う
         width = max((len(b) for b in blocks), default=0)
-        complete = [b for b in blocks if len(b) == width and len({d for d, _ in b}) == 1]
-        chosen = complete[-1] if complete else (blocks[-1] if blocks else [])
-        ordered = [line for _, line in chosen]
+        complete = [
+            b for b in blocks if sorted(b) == list(range(1, width + 1)) and len({d for d, _ in b.values()}) == 1
+        ]
+        chosen = complete[-1] if complete else (blocks[-1] if blocks else {})
+        ordered = [chosen[i][1] for i in sorted(chosen)]
         if not ordered and bestmove not in ("resign", "win"):
             ordered = [Line(bestmove, 0, [bestmove])]
         if bestmove == "resign":
