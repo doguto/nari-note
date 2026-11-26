@@ -17,17 +17,17 @@ public class UpdateShapeGroupServiceTest
     [Fact]
     public async Task 指定した項目だけを更新する()
     {
-        var repository = Substitute.For<IBookRepository>();
+        var repository = Substitute.For<IPlaybookRepository>();
         var owner = new UserBuilder().Build();
-        var builder = new BookBuilder(owner);
+        var builder = new PlaybookBuilder(owner);
         var group = builder.Root.ShapeGroup;
         group.Name = "平手";
-        var book = builder.Build();
-        repository.FindForceGraphByIdAsync(book.Id).Returns(book);
+        var playbook = builder.Build();
+        repository.FindForceGraphByIdAsync(playbook.Id).Returns(playbook);
 
         await new UpdateShapeGroupService(repository, new TestTimeProvider()).ExecuteAsync(
             owner.Id,
-            new UpdateShapeGroupRequest { Id = book.Id, GroupId = group.Id, Memo = "初期局面" }
+            new UpdateShapeGroupRequest { Id = playbook.Id, GroupId = group.Id, Memo = "初期局面" }
         );
 
         Assert.Equal("平手", group.Name);

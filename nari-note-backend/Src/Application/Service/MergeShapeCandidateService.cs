@@ -14,43 +14,43 @@ public class MergeShapeCandidateService
 {
     const int MemoMaxLength = 10000;
 
-    readonly IBookRepository bookRepository;
+    readonly IPlaybookRepository playbookRepository;
     readonly TimeProvider timeProvider;
 
-    public MergeShapeCandidateService(IBookRepository bookRepository, TimeProvider timeProvider)
+    public MergeShapeCandidateService(IPlaybookRepository playbookRepository, TimeProvider timeProvider)
     {
-        this.bookRepository = bookRepository;
+        this.playbookRepository = playbookRepository;
         this.timeProvider = timeProvider;
     }
 
     public async Task<MergeShapeCandidateResponse> ExecuteAsync(UserId userId, MergeShapeCandidateRequest request)
     {
-        var book = await this.bookRepository.FindForceGraphByIdAsync(request.Id);
-        BookAccess.EnsureOwner(book, userId);
-        var candidate = book.ShapeCandidates.FirstOrDefault(c => c.Id == request.CandidateId)
+        var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
+        PlaybookAccess.EnsureOwner(playbook, userId);
+        var candidate = playbook.ShapeCandidates.FirstOrDefault(c => c.Id == request.CandidateId)
             ?? throw new KeyNotFoundException($"候補{request.CandidateId}が存在しません");
         if (candidate.Status != ShapeCandidateStatus.Done) throw new InvalidOperationException("判定が終わっていない候補はまとめられません");
 
-        var keep = book.ShapeGroups.First(g => g.Id == BookAccess.FindPosition(book, candidate.PositionAId).ShapeGroupId);
-        var drop = book.ShapeGroups.First(g => g.Id == BookAccess.FindPosition(book, candidate.PositionBId).ShapeGroupId);
+        var keep = playbook.ShapeGroups.First(g => g.Id == PlaybookAccess.FindPosition(playbook, candidate.PositionAId).ShapeGroupId);
+        var drop = playbook.ShapeGroups.First(g => g.Id == PlaybookAccess.FindPosition(playbook, candidate.PositionBId).ShapeGroupId);
         if (keep.Id != drop.Id)
         {
             var memo = string.Join("\n", new[] { keep.Memo, drop.Memo }.Where(m => m.Length > 0));
             if (memo.Length > MemoMaxLength) throw new ArgumentException("まとめると研究メモが10000文字を超えます。先にメモを短くしてください");
 
-            foreach (var p in book.Positions.Where(p => p.ShapeGroupId == drop.Id))
+            foreach (var p in playbook.Positions.Where(p => p.ShapeGroupId == drop.Id))
             {
                 p.ShapeGroup = keep;
                 p.ShapeGroupId = keep.Id;
             }
             keep.Memo = memo;
             if (keep.Name.Length == 0) keep.Name = drop.Name;
-            this.bookRepository.RemoveShapeGroup(drop);
+            this.playbookRepository.RemoveShapeGroup(drop);
         }
 
         candidate.Decision = ShapeCandidateDecision.Merged;
-        book.UpdatedAt = this.timeProvider.UtcNow();
-        await this.bookRepository.SaveAsync();
+        playbook.UpdatedAt = this.timeProvider.UtcNow();
+        await this.playbookRepository.SaveAsync();
         return new MergeShapeCandidateResponse();
     }
 }

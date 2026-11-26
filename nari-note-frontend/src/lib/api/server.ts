@@ -46,10 +46,6 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
-  GetBookPositionRequest,
-  GetBookPositionResponse,
-  GetBookRequest,
-  GetBookResponse,
   GetCourseContentForEditResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
@@ -68,8 +64,12 @@ import type {
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
-  GetMyBooksResponse,
   GetMyCoursesResponse,
+  GetMyPlaybooksResponse,
+  GetPlaybookPositionRequest,
+  GetPlaybookPositionResponse,
+  GetPlaybookRequest,
+  GetPlaybookResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -163,25 +163,6 @@ export async function getCurrentUser(): Promise<AuthResponse> {
   return serverFetch<AuthResponse>(url);
 }
 
-// Books Server Functions
-export async function getMyBooks(): Promise<GetMyBooksResponse> {
-  const url = `${getBaseUrl()}/api/books/my`;
-
-  return serverFetch<GetMyBooksResponse>(url);
-}
-
-export async function getBook(params: GetBookRequest): Promise<GetBookResponse> {
-  const url = `${getBaseUrl()}/api/books/${params.id}`;
-
-  return serverFetch<GetBookResponse>(url);
-}
-
-export async function getBookPosition(params: GetBookPositionRequest): Promise<GetBookPositionResponse> {
-  const url = `${getBaseUrl()}/api/books/${params.id}/positions/${params.positionId}`;
-
-  return serverFetch<GetBookPositionResponse>(url);
-}
-
 // Courses Server Functions
 export async function getCourses(params: GetCoursesRequest): Promise<GetCoursesResponse> {
   const url = new URL('/api/courses', getBaseUrl());
@@ -252,6 +233,25 @@ export async function getHealth(): Promise<GetHealthResponse> {
   const url = `${getBaseUrl()}/api/health`;
 
   return serverFetch<GetHealthResponse>(url);
+}
+
+// Playbooks Server Functions
+export async function getMyPlaybooks(): Promise<GetMyPlaybooksResponse> {
+  const url = `${getBaseUrl()}/api/playbooks/my`;
+
+  return serverFetch<GetMyPlaybooksResponse>(url);
+}
+
+export async function getPlaybook(params: GetPlaybookRequest): Promise<GetPlaybookResponse> {
+  const url = `${getBaseUrl()}/api/playbooks/${params.id}`;
+
+  return serverFetch<GetPlaybookResponse>(url);
+}
+
+export async function getPlaybookPosition(params: GetPlaybookPositionRequest): Promise<GetPlaybookPositionResponse> {
+  const url = `${getBaseUrl()}/api/playbooks/${params.id}/positions/${params.positionId}`;
+
+  return serverFetch<GetPlaybookPositionResponse>(url);
 }
 
 // Tags Server Functions

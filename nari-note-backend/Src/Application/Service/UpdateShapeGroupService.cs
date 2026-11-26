@@ -12,26 +12,26 @@ namespace NariNoteBackend.Application.Service;
 
 public class UpdateShapeGroupService
 {
-    readonly IBookRepository bookRepository;
+    readonly IPlaybookRepository playbookRepository;
     readonly TimeProvider timeProvider;
 
-    public UpdateShapeGroupService(IBookRepository bookRepository, TimeProvider timeProvider)
+    public UpdateShapeGroupService(IPlaybookRepository playbookRepository, TimeProvider timeProvider)
     {
-        this.bookRepository = bookRepository;
+        this.playbookRepository = playbookRepository;
         this.timeProvider = timeProvider;
     }
 
     public async Task<UpdateShapeGroupResponse> ExecuteAsync(UserId userId, UpdateShapeGroupRequest request)
     {
-        var book = await this.bookRepository.FindForceGraphByIdAsync(request.Id);
-        BookAccess.EnsureOwner(book, userId);
-        var group = book.ShapeGroups.FirstOrDefault(g => g.Id == request.GroupId)
+        var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
+        PlaybookAccess.EnsureOwner(playbook, userId);
+        var group = playbook.ShapeGroups.FirstOrDefault(g => g.Id == request.GroupId)
             ?? throw new KeyNotFoundException($"形{request.GroupId}が存在しません");
 
         if (request.Name != null) group.Name = request.Name;
         if (request.Memo != null) group.Memo = request.Memo;
-        book.UpdatedAt = this.timeProvider.UtcNow();
-        await this.bookRepository.SaveAsync();
+        playbook.UpdatedAt = this.timeProvider.UtcNow();
+        await this.playbookRepository.SaveAsync();
         return new UpdateShapeGroupResponse();
     }
 }

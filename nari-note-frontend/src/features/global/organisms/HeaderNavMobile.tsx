@@ -34,7 +34,7 @@ export function HeaderNavMobile() {
           講座を作成
         </Link>
         <Link
-          href="/books"
+          href="/playbooks"
           className="text-white hover:text-brand-primary transition-colors text-sm whitespace-nowrap"
           style={{ fontFamily: 'serif' }}
         >

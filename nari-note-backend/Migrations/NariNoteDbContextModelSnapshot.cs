@@ -98,135 +98,6 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("ArticleTags");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Book", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("RootSfen")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Books");
-                });
-
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.BookMove", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ChildPositionId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Condition")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
-                    b.Property<string>("Memo")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<int>("ParentPositionId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Usi")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("character varying(8)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookId");
-
-                    b.HasIndex("ChildPositionId");
-
-                    b.HasIndex("ParentPositionId", "Usi")
-                        .IsUnique();
-
-                    b.ToTable("BookMoves");
-                });
-
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.BookPosition", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("CandidatesScanned")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Sfen")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<int>("ShapeGroupId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CandidatesScanned");
-
-                    b.HasIndex("ShapeGroupId");
-
-                    b.HasIndex("BookId", "Sfen")
-                        .IsUnique();
-
-                    b.ToTable("BookPositions");
-                });
-
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Comment", b =>
                 {
                     b.Property<int>("Id")
@@ -588,7 +459,38 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("PasswordResetTokens");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.ShapeCandidate", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Playbook", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RootSfen")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Playbooks");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookMove", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -596,8 +498,97 @@ namespace NariNoteBackend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BookId")
+                    b.Property<Guid>("ChildPositionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Condition")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Memo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("ParentPositionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PlaybookId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Usi")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChildPositionId");
+
+                    b.HasIndex("PlaybookId");
+
+                    b.HasIndex("ParentPositionId", "Usi")
+                        .IsUnique();
+
+                    b.ToTable("PlaybookMoves");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookPosition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("CandidatesScanned")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PlaybookId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Sfen")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("ShapeGroupId")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CandidatesScanned");
+
+                    b.HasIndex("ShapeGroupId");
+
+                    b.HasIndex("PlaybookId", "Sfen")
+                        .IsUnique();
+
+                    b.ToTable("PlaybookPositions");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.ShapeCandidate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("ConfirmedDepth")
                         .HasColumnType("integer");
@@ -613,11 +604,14 @@ namespace NariNoteBackend.Migrations
                     b.Property<int?>("Delta")
                         .HasColumnType("integer");
 
-                    b.Property<int>("PositionAId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("PlaybookId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("PositionBId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("PositionAId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PositionBId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Reason")
                         .HasMaxLength(500)
@@ -637,7 +631,7 @@ namespace NariNoteBackend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BookId");
+                    b.HasIndex("PlaybookId");
 
                     b.HasIndex("PositionBId");
 
@@ -657,9 +651,6 @@ namespace NariNoteBackend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BookId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -673,12 +664,15 @@ namespace NariNoteBackend.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<Guid>("PlaybookId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BookId");
+                    b.HasIndex("PlaybookId");
 
                     b.ToTable("ShapeGroups");
                 });
@@ -798,63 +792,6 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("Article");
 
                     b.Navigation("Tag");
-                });
-
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Book", b =>
-                {
-                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.BookMove", b =>
-                {
-                    b.HasOne("NariNoteBackend.Domain.Entity.Book", "Book")
-                        .WithMany("Moves")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NariNoteBackend.Domain.Entity.BookPosition", "ChildPosition")
-                        .WithMany()
-                        .HasForeignKey("ChildPositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NariNoteBackend.Domain.Entity.BookPosition", "ParentPosition")
-                        .WithMany()
-                        .HasForeignKey("ParentPositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("ChildPosition");
-
-                    b.Navigation("ParentPosition");
-                });
-
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.BookPosition", b =>
-                {
-                    b.HasOne("NariNoteBackend.Domain.Entity.Book", "Book")
-                        .WithMany("Positions")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NariNoteBackend.Domain.Entity.ShapeGroup", "ShapeGroup")
-                        .WithMany("Positions")
-                        .HasForeignKey("ShapeGroupId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("ShapeGroup");
                 });
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Comment", b =>
@@ -996,27 +933,84 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.ShapeCandidate", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Playbook", b =>
                 {
-                    b.HasOne("NariNoteBackend.Domain.Entity.Book", "Book")
-                        .WithMany("ShapeCandidates")
-                        .HasForeignKey("BookId")
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NariNoteBackend.Domain.Entity.BookPosition", "PositionA")
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookMove", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.PlaybookPosition", "ChildPosition")
+                        .WithMany()
+                        .HasForeignKey("ChildPositionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NariNoteBackend.Domain.Entity.PlaybookPosition", "ParentPosition")
+                        .WithMany()
+                        .HasForeignKey("ParentPositionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NariNoteBackend.Domain.Entity.Playbook", "Playbook")
+                        .WithMany("Moves")
+                        .HasForeignKey("PlaybookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChildPosition");
+
+                    b.Navigation("ParentPosition");
+
+                    b.Navigation("Playbook");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookPosition", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.Playbook", "Playbook")
+                        .WithMany("Positions")
+                        .HasForeignKey("PlaybookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NariNoteBackend.Domain.Entity.ShapeGroup", "ShapeGroup")
+                        .WithMany("Positions")
+                        .HasForeignKey("ShapeGroupId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Playbook");
+
+                    b.Navigation("ShapeGroup");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.ShapeCandidate", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.Playbook", "Playbook")
+                        .WithMany("ShapeCandidates")
+                        .HasForeignKey("PlaybookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NariNoteBackend.Domain.Entity.PlaybookPosition", "PositionA")
                         .WithMany()
                         .HasForeignKey("PositionAId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NariNoteBackend.Domain.Entity.BookPosition", "PositionB")
+                    b.HasOne("NariNoteBackend.Domain.Entity.PlaybookPosition", "PositionB")
                         .WithMany()
                         .HasForeignKey("PositionBId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Book");
+                    b.Navigation("Playbook");
 
                     b.Navigation("PositionA");
 
@@ -1025,13 +1019,13 @@ namespace NariNoteBackend.Migrations
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.ShapeGroup", b =>
                 {
-                    b.HasOne("NariNoteBackend.Domain.Entity.Book", "Book")
+                    b.HasOne("NariNoteBackend.Domain.Entity.Playbook", "Playbook")
                         .WithMany("ShapeGroups")
-                        .HasForeignKey("BookId")
+                        .HasForeignKey("PlaybookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Book");
+                    b.Navigation("Playbook");
                 });
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
@@ -1045,7 +1039,14 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("Likes");
                 });
 
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Book", b =>
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Course", b =>
+                {
+                    b.Navigation("Articles");
+
+                    b.Navigation("CourseLikes");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Playbook", b =>
                 {
                     b.Navigation("Moves");
 
@@ -1054,13 +1055,6 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("ShapeCandidates");
 
                     b.Navigation("ShapeGroups");
-                });
-
-            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Course", b =>
-                {
-                    b.Navigation("Articles");
-
-                    b.Navigation("CourseLikes");
                 });
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.ShapeGroup", b =>

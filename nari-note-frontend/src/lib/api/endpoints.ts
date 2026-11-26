@@ -3,21 +3,21 @@
 
 import { apiClient } from './client';
 import type {
-  AnalyzeBookPositionRequest,
-  AnalyzeBookPositionResponse,
+  AnalyzePlaybookPositionRequest,
+  AnalyzePlaybookPositionResponse,
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
-  CreateBookRequest,
-  CreateBookResponse,
   CreateCommentRequest,
   CreateCommentResponse,
   CreateCourseRequest,
   CreateCourseResponse,
+  CreatePlaybookRequest,
+  CreatePlaybookResponse,
   DeleteArticleRequest,
-  DeleteBookMoveRequest,
-  DeleteBookRequest,
   DeleteCourseRequest,
+  DeletePlaybookMoveRequest,
+  DeletePlaybookRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   GetArticleCommentsRequest,
@@ -30,10 +30,6 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
-  GetBookPositionRequest,
-  GetBookPositionResponse,
-  GetBookRequest,
-  GetBookResponse,
   GetCourseContentForEditResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
@@ -52,8 +48,12 @@ import type {
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
-  GetMyBooksResponse,
   GetMyCoursesResponse,
+  GetMyPlaybooksResponse,
+  GetPlaybookPositionRequest,
+  GetPlaybookPositionResponse,
+  GetPlaybookRequest,
+  GetPlaybookResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -64,8 +64,8 @@ import type {
   ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
-  SaveBookLinesRequest,
-  SaveBookLinesResponse,
+  SavePlaybookLinesRequest,
+  SavePlaybookLinesResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SearchCoursesRequest,
@@ -81,12 +81,12 @@ import type {
   ToggleLikeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
-  UpdateBookMoveRequest,
-  UpdateBookMoveResponse,
   UpdateCourseRequest,
   UpdateCourseResponse,
   UpdatePasswordRequest,
   UpdatePasswordResponse,
+  UpdatePlaybookMoveRequest,
+  UpdatePlaybookMoveResponse,
   UpdateShapeGroupRequest,
   UpdateShapeGroupResponse,
   UpdateUserProfileRequest,
@@ -203,60 +203,6 @@ export const authApi = {
   },
 };
 
-// Books API
-export const booksApi = {
-  getMyBooks: async (): Promise<GetMyBooksResponse> => {
-    const response = await apiClient.get<GetMyBooksResponse>('/api/books/my');
-    return response;
-  },
-  createBook: async (data: CreateBookRequest): Promise<CreateBookResponse> => {
-    const response = await apiClient.post<CreateBookResponse>('/api/books', data);
-    return response;
-  },
-  getBook: async (data: GetBookRequest): Promise<GetBookResponse> => {
-    const response = await apiClient.get<GetBookResponse>(`/api/books/${data.id}`);
-    return response;
-  },
-  deleteBook: async (data: DeleteBookRequest): Promise<void> => {
-    await apiClient.delete(`/api/books/${data.id}`);
-  },
-  getBookPosition: async (data: GetBookPositionRequest): Promise<GetBookPositionResponse> => {
-    const response = await apiClient.get<GetBookPositionResponse>(`/api/books/${data.id}/positions/${data.positionId}`);
-    return response;
-  },
-  analyzeBookPosition: async (data: AnalyzeBookPositionRequest): Promise<AnalyzeBookPositionResponse> => {
-    const response = await apiClient.post<AnalyzeBookPositionResponse>(`/api/books/${data.id}/analysis`, data);
-    return response;
-  },
-  saveBookLines: async (data: SaveBookLinesRequest): Promise<SaveBookLinesResponse> => {
-    const response = await apiClient.post<SaveBookLinesResponse>(`/api/books/${data.id}/lines`, data);
-    return response;
-  },
-  splitShapeGroup: async (data: SplitShapeGroupRequest): Promise<SplitShapeGroupResponse> => {
-    const response = await apiClient.post<SplitShapeGroupResponse>(`/api/books/${data.id}/positions/${data.positionId}/split`);
-    return response;
-  },
-  updateBookMove: async (data: UpdateBookMoveRequest): Promise<UpdateBookMoveResponse> => {
-    const response = await apiClient.put<UpdateBookMoveResponse>(`/api/books/${data.id}/moves/${data.moveId}`, data);
-    return response;
-  },
-  deleteBookMove: async (data: DeleteBookMoveRequest): Promise<void> => {
-    await apiClient.delete(`/api/books/${data.id}/moves/${data.moveId}`);
-  },
-  updateShapeGroup: async (data: UpdateShapeGroupRequest): Promise<UpdateShapeGroupResponse> => {
-    const response = await apiClient.put<UpdateShapeGroupResponse>(`/api/books/${data.id}/groups/${data.groupId}`, data);
-    return response;
-  },
-  mergeShapeCandidate: async (data: MergeShapeCandidateRequest): Promise<MergeShapeCandidateResponse> => {
-    const response = await apiClient.post<MergeShapeCandidateResponse>(`/api/books/${data.id}/candidates/${data.candidateId}/merge`);
-    return response;
-  },
-  rejectShapeCandidate: async (data: RejectShapeCandidateRequest): Promise<RejectShapeCandidateResponse> => {
-    const response = await apiClient.post<RejectShapeCandidateResponse>(`/api/books/${data.id}/candidates/${data.candidateId}/reject`);
-    return response;
-  },
-};
-
 // Courses API
 export const coursesApi = {
   getCourses: async (data: GetCoursesRequest): Promise<GetCoursesResponse> => {
@@ -304,6 +250,60 @@ export const coursesApi = {
 export const healthApi = {
   getHealth: async (): Promise<GetHealthResponse> => {
     const response = await apiClient.get<GetHealthResponse>('/api/health');
+    return response;
+  },
+};
+
+// Playbooks API
+export const playbooksApi = {
+  getMyPlaybooks: async (): Promise<GetMyPlaybooksResponse> => {
+    const response = await apiClient.get<GetMyPlaybooksResponse>('/api/playbooks/my');
+    return response;
+  },
+  createPlaybook: async (data: CreatePlaybookRequest): Promise<CreatePlaybookResponse> => {
+    const response = await apiClient.post<CreatePlaybookResponse>('/api/playbooks', data);
+    return response;
+  },
+  getPlaybook: async (data: GetPlaybookRequest): Promise<GetPlaybookResponse> => {
+    const response = await apiClient.get<GetPlaybookResponse>(`/api/playbooks/${data.id}`);
+    return response;
+  },
+  deletePlaybook: async (data: DeletePlaybookRequest): Promise<void> => {
+    await apiClient.delete(`/api/playbooks/${data.id}`);
+  },
+  getPlaybookPosition: async (data: GetPlaybookPositionRequest): Promise<GetPlaybookPositionResponse> => {
+    const response = await apiClient.get<GetPlaybookPositionResponse>(`/api/playbooks/${data.id}/positions/${data.positionId}`);
+    return response;
+  },
+  analyzePlaybookPosition: async (data: AnalyzePlaybookPositionRequest): Promise<AnalyzePlaybookPositionResponse> => {
+    const response = await apiClient.post<AnalyzePlaybookPositionResponse>(`/api/playbooks/${data.id}/analysis`, data);
+    return response;
+  },
+  savePlaybookLines: async (data: SavePlaybookLinesRequest): Promise<SavePlaybookLinesResponse> => {
+    const response = await apiClient.post<SavePlaybookLinesResponse>(`/api/playbooks/${data.id}/lines`, data);
+    return response;
+  },
+  splitShapeGroup: async (data: SplitShapeGroupRequest): Promise<SplitShapeGroupResponse> => {
+    const response = await apiClient.post<SplitShapeGroupResponse>(`/api/playbooks/${data.id}/positions/${data.positionId}/split`);
+    return response;
+  },
+  updatePlaybookMove: async (data: UpdatePlaybookMoveRequest): Promise<UpdatePlaybookMoveResponse> => {
+    const response = await apiClient.put<UpdatePlaybookMoveResponse>(`/api/playbooks/${data.id}/moves/${data.moveId}`, data);
+    return response;
+  },
+  deletePlaybookMove: async (data: DeletePlaybookMoveRequest): Promise<void> => {
+    await apiClient.delete(`/api/playbooks/${data.id}/moves/${data.moveId}`);
+  },
+  updateShapeGroup: async (data: UpdateShapeGroupRequest): Promise<UpdateShapeGroupResponse> => {
+    const response = await apiClient.put<UpdateShapeGroupResponse>(`/api/playbooks/${data.id}/groups/${data.groupId}`, data);
+    return response;
+  },
+  mergeShapeCandidate: async (data: MergeShapeCandidateRequest): Promise<MergeShapeCandidateResponse> => {
+    const response = await apiClient.post<MergeShapeCandidateResponse>(`/api/playbooks/${data.id}/candidates/${data.candidateId}/merge`);
+    return response;
+  },
+  rejectShapeCandidate: async (data: RejectShapeCandidateRequest): Promise<RejectShapeCandidateResponse> => {
+    const response = await apiClient.post<RejectShapeCandidateResponse>(`/api/playbooks/${data.id}/candidates/${data.candidateId}/reject`);
     return response;
   },
 };

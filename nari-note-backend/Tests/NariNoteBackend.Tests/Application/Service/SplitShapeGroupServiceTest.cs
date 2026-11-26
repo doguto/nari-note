@@ -14,18 +14,18 @@ namespace NariNoteBackend.Tests.Application.Service;
 
 public class SplitShapeGroupServiceTest
 {
-    readonly IBookRepository bookRepository = Substitute.For<IBookRepository>();
+    readonly IPlaybookRepository playbookRepository = Substitute.For<IPlaybookRepository>();
     readonly User owner = new UserBuilder().Build();
-    readonly BookBuilder builder;
-    readonly Book book;
+    readonly PlaybookBuilder builder;
+    readonly Playbook playbook;
     readonly SplitShapeGroupService service;
 
     public SplitShapeGroupServiceTest()
     {
-        this.builder = new BookBuilder(this.owner);
-        this.book = this.builder.Build();
-        this.bookRepository.FindForceGraphByIdAsync(this.book.Id).Returns(this.book);
-        this.service = new SplitShapeGroupService(this.bookRepository, new TestTimeProvider());
+        this.builder = new PlaybookBuilder(this.owner);
+        this.playbook = this.builder.Build();
+        this.playbookRepository.FindForceGraphByIdAsync(this.playbook.Id).Returns(this.playbook);
+        this.service = new SplitShapeGroupService(this.playbookRepository, new TestTimeProvider());
     }
 
     [Fact]
@@ -36,12 +36,12 @@ public class SplitShapeGroupServiceTest
         this.builder.Merge(a, b);
         var original = a.ShapeGroup;
 
-        await this.service.ExecuteAsync(this.owner.Id, new SplitShapeGroupRequest { Id = this.book.Id, PositionId = b.Id });
+        await this.service.ExecuteAsync(this.owner.Id, new SplitShapeGroupRequest { Id = this.playbook.Id, PositionId = b.Id });
 
         Assert.NotSame(original, b.ShapeGroup);
         Assert.Same(original, a.ShapeGroup);
-        this.bookRepository.Received(1).AddShapeGroup(b.ShapeGroup);
-        await this.bookRepository.Received(1).SaveAsync();
+        this.playbookRepository.Received(1).AddShapeGroup(b.ShapeGroup);
+        await this.playbookRepository.Received(1).SaveAsync();
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class SplitShapeGroupServiceTest
         var a = this.builder.Line("7g7f");
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            this.service.ExecuteAsync(this.owner.Id, new SplitShapeGroupRequest { Id = this.book.Id, PositionId = a.Id })
+            this.service.ExecuteAsync(this.owner.Id, new SplitShapeGroupRequest { Id = this.playbook.Id, PositionId = a.Id })
         );
     }
 }

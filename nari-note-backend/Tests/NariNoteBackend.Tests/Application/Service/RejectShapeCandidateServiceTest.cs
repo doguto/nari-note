@@ -17,16 +17,16 @@ public class RejectShapeCandidateServiceTest
     [Fact]
     public async Task 候補を別のままにする()
     {
-        var repository = Substitute.For<IBookRepository>();
+        var repository = Substitute.For<IPlaybookRepository>();
         var owner = new UserBuilder().Build();
-        var builder = new BookBuilder(owner);
+        var builder = new PlaybookBuilder(owner);
         var candidate = builder.Candidate(builder.Line("7g7f"), builder.Line("2g2f"));
-        var book = builder.Build();
-        repository.FindForceGraphByIdAsync(book.Id).Returns(book);
+        var playbook = builder.Build();
+        repository.FindForceGraphByIdAsync(playbook.Id).Returns(playbook);
 
         await new RejectShapeCandidateService(repository).ExecuteAsync(
             owner.Id,
-            new RejectShapeCandidateRequest { Id = book.Id, CandidateId = candidate.Id }
+            new RejectShapeCandidateRequest { Id = playbook.Id, CandidateId = candidate.Id }
         );
 
         Assert.Equal(ShapeCandidateDecision.Rejected, candidate.Decision);

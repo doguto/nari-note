@@ -11,22 +11,22 @@ namespace NariNoteBackend.Tests.Application.Service;
 
 public class MergeShapeCandidateServiceTest
 {
-    readonly IBookRepository bookRepository = Substitute.For<IBookRepository>();
+    readonly IPlaybookRepository playbookRepository = Substitute.For<IPlaybookRepository>();
     readonly User owner = new UserBuilder().Build();
-    readonly BookBuilder builder;
-    readonly Book book;
-    readonly BookPosition a;
-    readonly BookPosition b;
+    readonly PlaybookBuilder builder;
+    readonly Playbook playbook;
+    readonly PlaybookPosition a;
+    readonly PlaybookPosition b;
     readonly MergeShapeCandidateService service;
 
     public MergeShapeCandidateServiceTest()
     {
-        this.builder = new BookBuilder(this.owner);
-        this.book = this.builder.Build();
+        this.builder = new PlaybookBuilder(this.owner);
+        this.playbook = this.builder.Build();
         this.a = this.builder.Line("7g7f", "3c3d");
         this.b = this.builder.Line("9g9f", "9c9d", "7g7f", "3c3d");
-        this.bookRepository.FindForceGraphByIdAsync(this.book.Id).Returns(this.book);
-        this.service = new MergeShapeCandidateService(this.bookRepository, new TestTimeProvider());
+        this.playbookRepository.FindForceGraphByIdAsync(this.playbook.Id).Returns(this.playbook);
+        this.service = new MergeShapeCandidateService(this.playbookRepository, new TestTimeProvider());
     }
 
     [Fact]
@@ -38,14 +38,14 @@ public class MergeShapeCandidateServiceTest
         var dropped = this.b.ShapeGroup;
         var candidate = this.builder.Candidate(this.a, this.b);
 
-        await this.service.ExecuteAsync(this.owner.Id, new MergeShapeCandidateRequest { Id = this.book.Id, CandidateId = candidate.Id });
+        await this.service.ExecuteAsync(this.owner.Id, new MergeShapeCandidateRequest { Id = this.playbook.Id, CandidateId = candidate.Id });
 
         Assert.Equal(this.a.ShapeGroupId, this.b.ShapeGroupId);
         Assert.Equal("角道を開け合った形\n端歩の突き合いあり", this.a.ShapeGroup.Memo);
         Assert.Equal("端歩型", this.a.ShapeGroup.Name);
         Assert.Equal(ShapeCandidateDecision.Merged, candidate.Decision);
-        this.bookRepository.Received(1).RemoveShapeGroup(dropped);
-        await this.bookRepository.Received(1).SaveAsync();
+        this.playbookRepository.Received(1).RemoveShapeGroup(dropped);
+        await this.playbookRepository.Received(1).SaveAsync();
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class MergeShapeCandidateServiceTest
         candidate.Status = ShapeCandidateStatus.Queued;
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            this.service.ExecuteAsync(this.owner.Id, new MergeShapeCandidateRequest { Id = this.book.Id, CandidateId = candidate.Id })
+            this.service.ExecuteAsync(this.owner.Id, new MergeShapeCandidateRequest { Id = this.playbook.Id, CandidateId = candidate.Id })
         );
     }
 
@@ -67,7 +67,7 @@ public class MergeShapeCandidateServiceTest
         var candidate = this.builder.Candidate(this.a, this.b);
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            this.service.ExecuteAsync(this.owner.Id, new MergeShapeCandidateRequest { Id = this.book.Id, CandidateId = candidate.Id })
+            this.service.ExecuteAsync(this.owner.Id, new MergeShapeCandidateRequest { Id = this.playbook.Id, CandidateId = candidate.Id })
         );
         Assert.NotEqual(this.a.ShapeGroupId, this.b.ShapeGroupId);
     }
@@ -78,7 +78,7 @@ public class MergeShapeCandidateServiceTest
         var candidate = this.builder.Candidate(this.a, this.b);
 
         await Assert.ThrowsAsync<ForbiddenException>(() =>
-            this.service.ExecuteAsync(new UserBuilder().Build().Id, new MergeShapeCandidateRequest { Id = this.book.Id, CandidateId = candidate.Id })
+            this.service.ExecuteAsync(new UserBuilder().Build().Id, new MergeShapeCandidateRequest { Id = this.playbook.Id, CandidateId = candidate.Id })
         );
     }
 }

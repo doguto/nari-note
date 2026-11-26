@@ -41,14 +41,14 @@ public partial struct TagId;
 [ValueObject<Guid>(Conversions.EfCoreValueConverter)]
 public partial struct UserId;
 
-[ValueObject<int>(Conversions.EfCoreValueConverter)]
-public partial struct BookId;
+[ValueObject<Guid>(Conversions.EfCoreValueConverter)]
+public partial struct PlaybookId;
+
+[ValueObject<Guid>(Conversions.EfCoreValueConverter)]
+public partial struct PlaybookPositionId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
-public partial struct BookPositionId;
-
-[ValueObject<int>(Conversions.EfCoreValueConverter)]
-public partial struct BookMoveId;
+public partial struct PlaybookMoveId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
 public partial struct ShapeGroupId;

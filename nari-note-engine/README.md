@@ -35,7 +35,7 @@ engine/
     （同じ構成）
 ```
 
-エンジン名は `src/service.py` の `ENGINES`、`scripts/build-lambda.sh` の `ENGINES`、バックエンドの `AnalysisEngine`、フロントの `features/book/utils/analysisEngine.ts` で揃える。
+エンジン名は `src/service.py` の `ENGINES`、`scripts/build-lambda.sh` の `ENGINES`、バックエンドの `AnalysisEngine`、フロントの `features/playbook/utils/analysisEngine.ts` で揃える。
 
 ## ローカルで動かす
 

@@ -12,29 +12,29 @@ namespace NariNoteBackend.Application.Service;
 
 public class SplitShapeGroupService
 {
-    readonly IBookRepository bookRepository;
+    readonly IPlaybookRepository playbookRepository;
     readonly TimeProvider timeProvider;
 
-    public SplitShapeGroupService(IBookRepository bookRepository, TimeProvider timeProvider)
+    public SplitShapeGroupService(IPlaybookRepository playbookRepository, TimeProvider timeProvider)
     {
-        this.bookRepository = bookRepository;
+        this.playbookRepository = playbookRepository;
         this.timeProvider = timeProvider;
     }
 
     public async Task<SplitShapeGroupResponse> ExecuteAsync(UserId userId, SplitShapeGroupRequest request)
     {
-        var book = await this.bookRepository.FindForceGraphByIdAsync(request.Id);
-        BookAccess.EnsureOwner(book, userId);
-        var position = BookAccess.FindPosition(book, request.PositionId);
-        if (book.Positions.Count(p => p.ShapeGroupId == position.ShapeGroupId) <= 1)
+        var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
+        PlaybookAccess.EnsureOwner(playbook, userId);
+        var position = PlaybookAccess.FindPosition(playbook, request.PositionId);
+        if (playbook.Positions.Count(p => p.ShapeGroupId == position.ShapeGroupId) <= 1)
             throw new InvalidOperationException("この局面だけの形は分けられません");
 
-        var group = new ShapeGroup { Book = book };
-        this.bookRepository.AddShapeGroup(group);
+        var group = new ShapeGroup { Playbook = playbook };
+        this.playbookRepository.AddShapeGroup(group);
         position.ShapeGroup = group;
 
-        book.UpdatedAt = this.timeProvider.UtcNow();
-        await this.bookRepository.SaveAsync();
+        playbook.UpdatedAt = this.timeProvider.UtcNow();
+        await this.playbookRepository.SaveAsync();
         return new SplitShapeGroupResponse();
     }
 }

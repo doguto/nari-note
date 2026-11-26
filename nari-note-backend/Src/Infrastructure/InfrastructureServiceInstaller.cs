@@ -64,7 +64,7 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<IKifuRepository, KifuRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IOutboxMessageRepository, OutboxMessageRepository>();
-        services.AddScoped<IBookRepository, BookRepository>();
+        services.AddScoped<IPlaybookRepository, PlaybookRepository>();
 
         services.AddScoped<OutboxProcessor>();
         services.AddHostedService<OutboxWorker>();

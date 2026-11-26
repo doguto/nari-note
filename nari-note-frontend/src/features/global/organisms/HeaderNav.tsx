@@ -33,7 +33,7 @@ export function HeaderNav() {
         講座を作成
       </Link>
       <Link
-        href="/books"
+        href="/playbooks"
         className="text-white hover:text-brand-primary transition-colors text-sm"
         style={{ fontFamily: 'serif' }}
       >

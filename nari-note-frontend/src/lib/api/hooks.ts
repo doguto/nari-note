@@ -2,23 +2,23 @@
 // Do not edit manually
 
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type UseQueryOptions } from '@tanstack/react-query';
-import { articlesApi, authApi, booksApi, coursesApi, healthApi, tagsApi, usersApi } from './endpoints';
+import { articlesApi, authApi, coursesApi, healthApi, playbooksApi, tagsApi, usersApi } from './endpoints';
 import type {
-  AnalyzeBookPositionRequest,
-  AnalyzeBookPositionResponse,
+  AnalyzePlaybookPositionRequest,
+  AnalyzePlaybookPositionResponse,
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
-  CreateBookRequest,
-  CreateBookResponse,
   CreateCommentRequest,
   CreateCommentResponse,
   CreateCourseRequest,
   CreateCourseResponse,
+  CreatePlaybookRequest,
+  CreatePlaybookResponse,
   DeleteArticleRequest,
-  DeleteBookMoveRequest,
-  DeleteBookRequest,
   DeleteCourseRequest,
+  DeletePlaybookMoveRequest,
+  DeletePlaybookRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   GetArticleCommentsRequest,
@@ -31,10 +31,6 @@ import type {
   GetArticlesByTagResponse,
   GetArticlesRequest,
   GetArticlesResponse,
-  GetBookPositionRequest,
-  GetBookPositionResponse,
-  GetBookRequest,
-  GetBookResponse,
   GetCourseContentForEditResponse,
   GetCourseContentRequest,
   GetCourseContentResponse,
@@ -53,8 +49,12 @@ import type {
   GetLikedArticlesRequest,
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
-  GetMyBooksResponse,
   GetMyCoursesResponse,
+  GetMyPlaybooksResponse,
+  GetPlaybookPositionRequest,
+  GetPlaybookPositionResponse,
+  GetPlaybookRequest,
+  GetPlaybookResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
@@ -65,8 +65,8 @@ import type {
   ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
-  SaveBookLinesRequest,
-  SaveBookLinesResponse,
+  SavePlaybookLinesRequest,
+  SavePlaybookLinesResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SearchCoursesRequest,
@@ -82,12 +82,12 @@ import type {
   ToggleLikeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
-  UpdateBookMoveRequest,
-  UpdateBookMoveResponse,
   UpdateCourseRequest,
   UpdateCourseResponse,
   UpdatePasswordRequest,
   UpdatePasswordResponse,
+  UpdatePlaybookMoveRequest,
+  UpdatePlaybookMoveResponse,
   UpdateShapeGroupRequest,
   UpdateShapeGroupResponse,
   UpdateUserProfileRequest,
@@ -114,11 +114,6 @@ export const queryKeys = {
   auth: {
     getCurrentUser: ['auth', 'getCurrentUser'] as const,
   },
-  books: {
-    getMyBooks: ['books', 'getMyBooks'] as const,
-    getBook: ['books', 'getBook'] as const,
-    getBookPosition: ['books', 'getBookPosition'] as const,
-  },
   courses: {
     getCourses: ['courses', 'getCourses'] as const,
     searchCourses: ['courses', 'searchCourses'] as const,
@@ -130,6 +125,11 @@ export const queryKeys = {
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
+  },
+  playbooks: {
+    getMyPlaybooks: ['playbooks', 'getMyPlaybooks'] as const,
+    getPlaybook: ['playbooks', 'getPlaybook'] as const,
+    getPlaybookPosition: ['playbooks', 'getPlaybookPosition'] as const,
   },
   tags: {
     getPopularTags: ['tags', 'getPopularTags'] as const,
@@ -396,151 +396,6 @@ export function useWithdraw(options?: UseMutationOptions<WithdrawResponse, Error
   });
 }
 
-// Books Hooks
-export function useGetMyBooks(options?: Omit<UseQueryOptions<GetMyBooksResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<GetMyBooksResponse>({
-    queryKey: queryKeys.books.getMyBooks,
-    queryFn: () => booksApi.getMyBooks(),
-    ...options,
-  });
-}
-
-export function useCreateBook(options?: UseMutationOptions<CreateBookResponse, Error, CreateBookRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<CreateBookResponse, Error, CreateBookRequest>({
-    ...options,
-    mutationFn: (data) => booksApi.createBook(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
-export function useGetBook(params: GetBookRequest, options?: Omit<UseQueryOptions<GetBookResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<GetBookResponse>({
-    queryKey: [...queryKeys.books.getBook, params],
-    queryFn: () => booksApi.getBook(params),
-    ...options,
-  });
-}
-
-export function useDeleteBook(options?: UseMutationOptions<void, Error, DeleteBookRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<void, Error, DeleteBookRequest>({
-    ...options,
-    mutationFn: (data) => booksApi.deleteBook(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
-export function useGetBookPosition(params: GetBookPositionRequest, options?: Omit<UseQueryOptions<GetBookPositionResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<GetBookPositionResponse>({
-    queryKey: [...queryKeys.books.getBookPosition, params],
-    queryFn: () => booksApi.getBookPosition(params),
-    ...options,
-  });
-}
-
-export function useAnalyzeBookPosition(options?: UseMutationOptions<AnalyzeBookPositionResponse, Error, AnalyzeBookPositionRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<AnalyzeBookPositionResponse, Error, AnalyzeBookPositionRequest>({
-    ...options,
-    mutationFn: (data) => booksApi.analyzeBookPosition(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
-export function useSaveBookLines(options?: UseMutationOptions<SaveBookLinesResponse, Error, SaveBookLinesRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<SaveBookLinesResponse, Error, SaveBookLinesRequest>({
-    ...options,
-    mutationFn: (data) => booksApi.saveBookLines(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
-export function useSplitShapeGroup(options?: UseMutationOptions<SplitShapeGroupResponse, Error, SplitShapeGroupRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<SplitShapeGroupResponse, Error, SplitShapeGroupRequest>({
-    ...options,
-    mutationFn: (data) => booksApi.splitShapeGroup(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
-export function useUpdateBookMove(options?: UseMutationOptions<UpdateBookMoveResponse, Error, UpdateBookMoveRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<UpdateBookMoveResponse, Error, UpdateBookMoveRequest>({
-    ...options,
-    mutationFn: (data) => booksApi.updateBookMove(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
-export function useDeleteBookMove(options?: UseMutationOptions<void, Error, DeleteBookMoveRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<void, Error, DeleteBookMoveRequest>({
-    ...options,
-    mutationFn: (data) => booksApi.deleteBookMove(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
-export function useUpdateShapeGroup(options?: UseMutationOptions<UpdateShapeGroupResponse, Error, UpdateShapeGroupRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<UpdateShapeGroupResponse, Error, UpdateShapeGroupRequest>({
-    ...options,
-    mutationFn: (data) => booksApi.updateShapeGroup(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
-export function useMergeShapeCandidate(options?: UseMutationOptions<MergeShapeCandidateResponse, Error, MergeShapeCandidateRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<MergeShapeCandidateResponse, Error, MergeShapeCandidateRequest>({
-    ...options,
-    mutationFn: (data) => booksApi.mergeShapeCandidate(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
-export function useRejectShapeCandidate(options?: UseMutationOptions<RejectShapeCandidateResponse, Error, RejectShapeCandidateRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<RejectShapeCandidateResponse, Error, RejectShapeCandidateRequest>({
-    ...options,
-    mutationFn: (data) => booksApi.rejectShapeCandidate(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
 // Courses Hooks
 export function useGetCourses(params: GetCoursesRequest, options?: Omit<UseQueryOptions<GetCoursesResponse>, 'queryKey' | 'queryFn'>) {
   return useQuery<GetCoursesResponse>({
@@ -640,6 +495,151 @@ export function useGetHealth(options?: Omit<UseQueryOptions<GetHealthResponse>, 
     queryKey: queryKeys.health.getHealth,
     queryFn: () => healthApi.getHealth(),
     ...options,
+  });
+}
+
+// Playbooks Hooks
+export function useGetMyPlaybooks(options?: Omit<UseQueryOptions<GetMyPlaybooksResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetMyPlaybooksResponse>({
+    queryKey: queryKeys.playbooks.getMyPlaybooks,
+    queryFn: () => playbooksApi.getMyPlaybooks(),
+    ...options,
+  });
+}
+
+export function useCreatePlaybook(options?: UseMutationOptions<CreatePlaybookResponse, Error, CreatePlaybookRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<CreatePlaybookResponse, Error, CreatePlaybookRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.createPlaybook(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useGetPlaybook(params: GetPlaybookRequest, options?: Omit<UseQueryOptions<GetPlaybookResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetPlaybookResponse>({
+    queryKey: [...queryKeys.playbooks.getPlaybook, params],
+    queryFn: () => playbooksApi.getPlaybook(params),
+    ...options,
+  });
+}
+
+export function useDeletePlaybook(options?: UseMutationOptions<void, Error, DeletePlaybookRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeletePlaybookRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.deletePlaybook(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useGetPlaybookPosition(params: GetPlaybookPositionRequest, options?: Omit<UseQueryOptions<GetPlaybookPositionResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetPlaybookPositionResponse>({
+    queryKey: [...queryKeys.playbooks.getPlaybookPosition, params],
+    queryFn: () => playbooksApi.getPlaybookPosition(params),
+    ...options,
+  });
+}
+
+export function useAnalyzePlaybookPosition(options?: UseMutationOptions<AnalyzePlaybookPositionResponse, Error, AnalyzePlaybookPositionRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<AnalyzePlaybookPositionResponse, Error, AnalyzePlaybookPositionRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.analyzePlaybookPosition(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useSavePlaybookLines(options?: UseMutationOptions<SavePlaybookLinesResponse, Error, SavePlaybookLinesRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<SavePlaybookLinesResponse, Error, SavePlaybookLinesRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.savePlaybookLines(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useSplitShapeGroup(options?: UseMutationOptions<SplitShapeGroupResponse, Error, SplitShapeGroupRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<SplitShapeGroupResponse, Error, SplitShapeGroupRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.splitShapeGroup(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useUpdatePlaybookMove(options?: UseMutationOptions<UpdatePlaybookMoveResponse, Error, UpdatePlaybookMoveRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UpdatePlaybookMoveResponse, Error, UpdatePlaybookMoveRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.updatePlaybookMove(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useDeletePlaybookMove(options?: UseMutationOptions<void, Error, DeletePlaybookMoveRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeletePlaybookMoveRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.deletePlaybookMove(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useUpdateShapeGroup(options?: UseMutationOptions<UpdateShapeGroupResponse, Error, UpdateShapeGroupRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UpdateShapeGroupResponse, Error, UpdateShapeGroupRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.updateShapeGroup(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useMergeShapeCandidate(options?: UseMutationOptions<MergeShapeCandidateResponse, Error, MergeShapeCandidateRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<MergeShapeCandidateResponse, Error, MergeShapeCandidateRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.mergeShapeCandidate(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useRejectShapeCandidate(options?: UseMutationOptions<RejectShapeCandidateResponse, Error, RejectShapeCandidateRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<RejectShapeCandidateResponse, Error, RejectShapeCandidateRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.rejectShapeCandidate(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 

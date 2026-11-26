@@ -4,6 +4,6 @@ namespace NariNoteBackend.Application.Dto.Request;
 
 public class SplitShapeGroupRequest
 {
-    public required BookId Id { get; set; }
-    public required BookPositionId PositionId { get; set; }
+    public required PlaybookId Id { get; set; }
+    public required PlaybookPositionId PositionId { get; set; }
 }

@@ -126,7 +126,7 @@ export function HeaderUserMenu({ userId, userName, userIconImageUrl, onLogout, i
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
-              href="/books"
+              href="/playbooks"
               className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
               style={{ fontFamily: 'serif' }}
             >

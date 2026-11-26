@@ -34,13 +34,13 @@ public class ShapeCandidate : EntityBase
     public ShapeCandidateId Id { get; set; }
 
     [Required]
-    public BookId BookId { get; set; }
+    public PlaybookId PlaybookId { get; set; }
 
     [Required]
-    public BookPositionId PositionAId { get; set; }
+    public PlaybookPositionId PositionAId { get; set; }
 
     [Required]
-    public BookPositionId PositionBId { get; set; }
+    public PlaybookPositionId PositionBId { get; set; }
 
     public ShapeCandidateStatus Status { get; set; } = ShapeCandidateStatus.Queued;
 
@@ -58,9 +58,9 @@ public class ShapeCandidate : EntityBase
     public ShapeCandidateDecision Decision { get; set; } = ShapeCandidateDecision.Pending;
 
     // Navigation Properties
-    public Book Book { get; set; } = null!;
-    public BookPosition PositionA { get; set; } = null!;
-    public BookPosition PositionB { get; set; } = null!;
+    public Playbook Playbook { get; set; } = null!;
+    public PlaybookPosition PositionA { get; set; } = null!;
+    public PlaybookPosition PositionB { get; set; } = null!;
 
     public bool IsProposal => Status == ShapeCandidateStatus.Done
         && Decision == ShapeCandidateDecision.Pending

@@ -5,7 +5,7 @@ namespace NariNoteBackend.Application.Dto.Request;
 
 public class UpdateShapeGroupRequest
 {
-    public BookId Id { get; set; }
+    public PlaybookId Id { get; set; }
     public ShapeGroupId GroupId { get; set; }
 
     [MaxLength(100, ErrorMessage = "形の名前は100文字以内で入力してください")]

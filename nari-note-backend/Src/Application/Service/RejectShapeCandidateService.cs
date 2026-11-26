@@ -12,22 +12,22 @@ namespace NariNoteBackend.Application.Service;
 
 public class RejectShapeCandidateService
 {
-    readonly IBookRepository bookRepository;
+    readonly IPlaybookRepository playbookRepository;
 
-    public RejectShapeCandidateService(IBookRepository bookRepository)
+    public RejectShapeCandidateService(IPlaybookRepository playbookRepository)
     {
-        this.bookRepository = bookRepository;
+        this.playbookRepository = playbookRepository;
     }
 
     public async Task<RejectShapeCandidateResponse> ExecuteAsync(UserId userId, RejectShapeCandidateRequest request)
     {
-        var book = await this.bookRepository.FindForceGraphByIdAsync(request.Id);
-        BookAccess.EnsureOwner(book, userId);
-        var candidate = book.ShapeCandidates.FirstOrDefault(c => c.Id == request.CandidateId)
+        var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
+        PlaybookAccess.EnsureOwner(playbook, userId);
+        var candidate = playbook.ShapeCandidates.FirstOrDefault(c => c.Id == request.CandidateId)
             ?? throw new KeyNotFoundException($"候補{request.CandidateId}が存在しません");
 
         candidate.Decision = ShapeCandidateDecision.Rejected;
-        await this.bookRepository.SaveAsync();
+        await this.playbookRepository.SaveAsync();
         return new RejectShapeCandidateResponse();
     }
 }

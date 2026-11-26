@@ -28,9 +28,9 @@ public class NariNoteDbContext : DbContext
     public DbSet<EmailVerification> EmailVerifications { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
-    public DbSet<Book> Books { get; set; }
-    public DbSet<BookPosition> BookPositions { get; set; }
-    public DbSet<BookMove> BookMoves { get; set; }
+    public DbSet<Playbook> Playbooks { get; set; }
+    public DbSet<PlaybookPosition> PlaybookPositions { get; set; }
+    public DbSet<PlaybookMove> PlaybookMoves { get; set; }
     public DbSet<ShapeGroup> ShapeGroups { get; set; }
     public DbSet<ShapeCandidate> ShapeCandidates { get; set; }
 
@@ -316,7 +316,7 @@ public class NariNoteDbContext : DbContext
              .HasVogenConversion();
         });
 
-        modelBuilder.Entity<Book>(x =>
+        modelBuilder.Entity<Playbook>(x =>
         {
             x.HasOne(b => b.User)
              .WithMany()
@@ -324,9 +324,10 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(b => b.Id)
-             .HasVogenConversion()
-             .ValueGeneratedOnAdd()
-             .UseIdentityByDefaultColumn();
+             .HasValueGenerator<PlaybookIdValueGenerator>();
+
+            x.Property(b => b.Id)
+             .HasVogenConversion();
 
             x.Property(b => b.UserId)
              .HasVogenConversion();
@@ -334,9 +335,9 @@ public class NariNoteDbContext : DbContext
 
         modelBuilder.Entity<ShapeGroup>(x =>
         {
-            x.HasOne(g => g.Book)
+            x.HasOne(g => g.Playbook)
              .WithMany(b => b.ShapeGroups)
-             .HasForeignKey(g => g.BookId)
+             .HasForeignKey(g => g.PlaybookId)
              .OnDelete(DeleteBehavior.Cascade);
 
             x.Property(g => g.Id)
@@ -344,15 +345,15 @@ public class NariNoteDbContext : DbContext
              .ValueGeneratedOnAdd()
              .UseIdentityByDefaultColumn();
 
-            x.Property(g => g.BookId)
+            x.Property(g => g.PlaybookId)
              .HasVogenConversion();
         });
 
-        modelBuilder.Entity<BookPosition>(x =>
+        modelBuilder.Entity<PlaybookPosition>(x =>
         {
-            x.HasOne(p => p.Book)
+            x.HasOne(p => p.Playbook)
              .WithMany(b => b.Positions)
-             .HasForeignKey(p => p.BookId)
+             .HasForeignKey(p => p.PlaybookId)
              .OnDelete(DeleteBehavior.Cascade);
 
             // 定跡の削除時は局面とグループが同じ文で消えるため、文末に検査される NO ACTION にする
@@ -362,22 +363,23 @@ public class NariNoteDbContext : DbContext
              .OnDelete(DeleteBehavior.NoAction);
 
             x.Property(p => p.Id)
-             .HasVogenConversion()
-             .ValueGeneratedOnAdd()
-             .UseIdentityByDefaultColumn();
+             .HasValueGenerator<PlaybookPositionIdValueGenerator>();
 
-            x.Property(p => p.BookId)
+            x.Property(p => p.Id)
+             .HasVogenConversion();
+
+            x.Property(p => p.PlaybookId)
              .HasVogenConversion();
 
             x.Property(p => p.ShapeGroupId)
              .HasVogenConversion();
         });
 
-        modelBuilder.Entity<BookMove>(x =>
+        modelBuilder.Entity<PlaybookMove>(x =>
         {
-            x.HasOne(m => m.Book)
+            x.HasOne(m => m.Playbook)
              .WithMany(b => b.Moves)
-             .HasForeignKey(m => m.BookId)
+             .HasForeignKey(m => m.PlaybookId)
              .OnDelete(DeleteBehavior.Cascade);
 
             x.HasOne(m => m.ParentPosition)
@@ -395,7 +397,7 @@ public class NariNoteDbContext : DbContext
              .ValueGeneratedOnAdd()
              .UseIdentityByDefaultColumn();
 
-            x.Property(m => m.BookId)
+            x.Property(m => m.PlaybookId)
              .HasVogenConversion();
 
             x.Property(m => m.ParentPositionId)
@@ -407,9 +409,9 @@ public class NariNoteDbContext : DbContext
 
         modelBuilder.Entity<ShapeCandidate>(x =>
         {
-            x.HasOne(c => c.Book)
+            x.HasOne(c => c.Playbook)
              .WithMany(b => b.ShapeCandidates)
-             .HasForeignKey(c => c.BookId)
+             .HasForeignKey(c => c.PlaybookId)
              .OnDelete(DeleteBehavior.Cascade);
 
             x.HasOne(c => c.PositionA)
@@ -427,7 +429,7 @@ public class NariNoteDbContext : DbContext
              .ValueGeneratedOnAdd()
              .UseIdentityByDefaultColumn();
 
-            x.Property(c => c.BookId)
+            x.Property(c => c.PlaybookId)
              .HasVogenConversion();
 
             x.Property(c => c.PositionAId)
