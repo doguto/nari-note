@@ -25,9 +25,9 @@ public class LambdaShogiEngineGateway : IShogiEngineGateway
 
     public bool IsEnabled => true;
 
-    public async Task<List<EngineLine>> AnalyzeAsync(string sfen, CancellationToken cancellationToken = default)
+    public async Task<List<EngineLine>> AnalyzeAsync(string sfen, string engine, CancellationToken cancellationToken = default)
     {
-        var result = await this.InvokeAsync<AnalyzeResult>(new { action = "analyze", sfen }, cancellationToken);
+        var result = await this.InvokeAsync<AnalyzeResult>(new { action = "analyze", sfen, engine }, cancellationToken);
         return result.Lines;
     }
 

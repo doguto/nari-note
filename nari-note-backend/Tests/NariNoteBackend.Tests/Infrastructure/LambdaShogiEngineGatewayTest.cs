@@ -37,16 +37,17 @@ public class LambdaShogiEngineGatewayTest
     JsonElement SentPayload() => JsonDocument.Parse(this.sent!.Payload).RootElement;
 
     [Fact]
-    public async Task 解析は_action_と局面を送り読み筋を受け取る()
+    public async Task 解析は_action_と局面とエンジンを送り読み筋を受け取る()
     {
         Respond("""{"lines": [{"usi": "2g2f", "score": 73, "pv": ["2g2f", "8c8d"]}]}""");
 
-        var lines = await this.gateway.AnalyzeAsync("sfen-a");
+        var lines = await this.gateway.AnalyzeAsync("sfen-a", "tsuyouraou-micro");
 
         Assert.Equal(FunctionName, this.sent!.FunctionName);
         Assert.Equal(InvocationType.RequestResponse, this.sent.InvocationType);
         Assert.Equal("analyze", SentPayload().GetProperty("action").GetString());
         Assert.Equal("sfen-a", SentPayload().GetProperty("sfen").GetString());
+        Assert.Equal("tsuyouraou-micro", SentPayload().GetProperty("engine").GetString());
         var line = Assert.Single(lines);
         Assert.Equal("2g2f", line.Usi);
         Assert.Equal(73, line.Score);
@@ -97,7 +98,7 @@ public class LambdaShogiEngineGatewayTest
         this.lambda.InvokeAsync(Arg.Any<InvokeRequest>(), Arg.Any<CancellationToken>())
             .ThrowsAsync(new TooManyRequestsException("Rate exceeded"));
 
-        var ex = await Assert.ThrowsAsync<HttpRequestException>(() => this.gateway.AnalyzeAsync("sfen-a"));
+        var ex = await Assert.ThrowsAsync<HttpRequestException>(() => this.gateway.AnalyzeAsync("sfen-a", "tsuyouraou-micro"));
         Assert.Equal(HttpStatusCode.TooManyRequests, ex.StatusCode);
     }
 

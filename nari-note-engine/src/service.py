@@ -9,29 +9,41 @@ from judge import Params, judge
 from position import board_of, normalize_sfen
 from usi import Engine
 
-ENGINE_DIR = Path(__file__).resolve().parent.parent / "engine"
+SRC_DIR = Path(__file__).resolve().parent
+# Lambda の zip では engine/ がこのファイルと同じ階層に、リポジトリでは src/ の隣にある
+ENGINE_DIR = SRC_DIR / "engine" if (SRC_DIR / "engine").is_dir() else SRC_DIR.parent / "engine"
 ANALYZE_NODES = 2_000_000
 ANALYZE_MULTIPV = 3
+ENGINES = ("tsuyouraou-mini", "tsuyouraou-micro")
+# 判定はエンジンの探索結果が変わらないことを前提にしているので、解析で選べるエンジンとは別に固定する
+JUDGE_ENGINE = "tsuyouraou-mini"
 ENGINE_OPTIONS = {"USI_Hash": "64"}
+# つようら王の作者が示す FV_SCALE の最適値
+EVAL_OPTIONS = {"FV_SCALE": "24"}
 
 
-def engine_path() -> str:
+def engine_command(engine: str) -> tuple[str, dict[str, str]]:
+    if engine not in ENGINES:
+        raise ValueError(f"未対応のエンジンです: {engine}")
+    directory = ENGINE_DIR / engine
+    found = [p for p in (directory / "YaneuraOu-by-gcc", *sorted(directory.glob("*.exe"))) if p.is_file()]
+    if found:
+        return str(found[0]), {**ENGINE_OPTIONS, **EVAL_OPTIONS}
+    # 評価関数を埋め込んだエンジンなどで手元の動作だけ確かめるときは、どのエンジンを選んでもこれを使う
     path = os.environ.get("ENGINE_PATH")
     if path:
-        return path
-    found = sorted(p for p in ENGINE_DIR.glob("*") if p.suffix in ("", ".exe") and p.is_file())
-    if not found:
-        raise RuntimeError("ENGINE_PATH か engine/ にエンジンの実行ファイルを置いてください")
-    return str(found[0])
+        return path, ENGINE_OPTIONS
+    raise RuntimeError(f"engine/{engine}/ にエンジンの実行ファイルを置くか、ENGINE_PATH を指定してください")
 
 
 class EngineSlot:
-    def __init__(self) -> None:
+    def __init__(self, engine: str) -> None:
+        self.name = engine
         self.engine: Engine | None = None
 
     def run(self, fn: Callable[[Engine], object]):
         if self.engine is None:
-            self.engine = Engine(engine_path(), ENGINE_OPTIONS)
+            self.engine = Engine(*engine_command(self.name))
         self.engine.memo.clear()
         try:
             return fn(self.engine)

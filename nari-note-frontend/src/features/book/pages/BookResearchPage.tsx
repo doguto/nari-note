@@ -17,6 +17,7 @@ import {
   useUpdateBookMove,
   useUpdateShapeGroup,
 } from '@/lib/api';
+import { useAnalysisEngine } from '../hooks/useAnalysisEngine';
 import { useResearchDraft } from '../hooks/useResearchDraft';
 import { type ResearchMove, type ResearchView, BookResearchTemplate } from '../templates';
 import { destinationOf, legalMoves, moveLabel, play as playOn } from '../utils/shogiRules';
@@ -42,6 +43,7 @@ export function BookResearchPage({ bookId }: BookResearchPageProps) {
   // 保存していない局面を見ているときの、その局面の SFEN
   const [draftSfen, setDraftSfen] = useState<string | null>(null);
   const draft = useResearchDraft();
+  const [engine, setEngine] = useAnalysisEngine();
 
   const book = useGetBook({ id: bookId });
   const requested = Number(searchParams.get('p'));
@@ -66,8 +68,8 @@ export function BookResearchPage({ bookId }: BookResearchPageProps) {
   const viewSfen = optimistic?.sfen ?? draftSfen ?? data?.sfen;
 
   const analysis = useQuery({
-    queryKey: ['bookAnalysis', bookId, viewSfen],
-    queryFn: () => booksApi.analyzeBookPosition({ id: bookId, sfen: viewSfen! }),
+    queryKey: ['bookAnalysis', bookId, viewSfen, engine],
+    queryFn: () => booksApi.analyzeBookPosition({ id: bookId, sfen: viewSfen!, engine }),
     enabled: !!viewSfen && !optimistic,
     staleTime: Infinity,
     retry: false,
@@ -246,6 +248,8 @@ export function BookResearchPage({ bookId }: BookResearchPageProps) {
         isAvailable: analysis.data?.isAvailable ?? false,
         hasError: !!analysis.error,
         lines: analysis.data?.lines ?? [],
+        engine,
+        onEngineChange: setEngine,
       }}
       isBusy={isBusy}
       errorMessage={errorMessage}

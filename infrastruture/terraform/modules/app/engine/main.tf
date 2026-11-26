@@ -18,12 +18,6 @@ resource "aws_lambda_function" "engine" {
   timeout                        = var.timeout
   reserved_concurrent_executions = var.reserved_concurrency
 
-  environment {
-    variables = {
-      ENGINE_PATH = "/var/task/engine/YaneuraOu-by-gcc"
-    }
-  }
-
   logging_config {
     log_format = "Text"
     log_group  = aws_cloudwatch_log_group.engine.name

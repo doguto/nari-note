@@ -7,7 +7,7 @@ public class DisabledShogiEngineGateway : IShogiEngineGateway
 {
     public bool IsEnabled => false;
 
-    public Task<List<EngineLine>> AnalyzeAsync(string sfen, CancellationToken cancellationToken = default)
+    public Task<List<EngineLine>> AnalyzeAsync(string sfen, string engine, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(new List<EngineLine>());
     }

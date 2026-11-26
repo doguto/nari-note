@@ -13,8 +13,11 @@ public class FakeShogiEngineGateway : IShogiEngineGateway
     // 判定で投げる例外。null のときは Verdict を返す
     public System.Exception? JudgeException { get; set; }
 
-    public Task<List<EngineLine>> AnalyzeAsync(string sfen, CancellationToken cancellationToken = default)
+    public List<string> AnalyzedEngines { get; } = new();
+
+    public Task<List<EngineLine>> AnalyzeAsync(string sfen, string engine, CancellationToken cancellationToken = default)
     {
+        this.AnalyzedEngines.Add(engine);
         return Task.FromResult(this.Lines.ToList());
     }
 
@@ -39,6 +42,7 @@ public class FakeShogiEngineGateway : IShogiEngineGateway
     {
         this.IsEnabled = true;
         this.Lines.Clear();
+        this.AnalyzedEngines.Clear();
         this.Candidates = null;
         this.Verdict = new EngineVerdict { Kind = "same", Delta = 0, ConfirmedDepth = 6 };
         this.Judged.Clear();

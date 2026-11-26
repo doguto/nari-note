@@ -9,15 +9,40 @@
 | `src/server.py` | ローカル用の HTTP サーバー |
 | `src/judge.py` / `candidates.py` / `position.py` / `usi.py` | 判定、候補の絞り込み、局面の操作、USI エンジンとの通信 |
 | `scripts/build-lambda.sh` | Lambda に配る zip を作る |
-| `engine/` | ローカルで使うエンジンと、zip に入れる評価関数を置く（Git 管理外） |
+| `engine/` | エンジンと評価関数を `engine/<エンジン名>/` に置く（Git 管理外） |
 | `build/` | ビルドした zip（Git 管理外） |
+
+## エンジン
+
+研究盤の解析では、次の 2 つからユーザーが選ぶ。どちらもやねうら王（GPLv3）に、やねうら王の作者が MIT License で公開している評価関数を載せたもの。評価関数は [pixivFANBOX](https://yaneurao.fanbox.cc/posts/12761272) から入手する。
+
+| エンジン名 | 評価関数 | NNUE のアーキテクチャ |
+| --- | --- | --- |
+| `tsuyouraou-mini` | つようら王11mini | `SFNN_ka2_4096_8_64_progress8` |
+| `tsuyouraou-micro` | つようら王11micro | `SFNN_ka2_2048_8_64_progress8` |
+
+- アーキテクチャはやねうら王のビルド時に埋め込まれるので、評価関数ごとに実行ファイルを分ける
+- progress 付きのアーキテクチャは、`nn.bin` と同じフォルダに `progress.bin` が要る。配布物に入っているライセンス表記も同じフォルダに置く
+- `FV_SCALE` は作者が示す最適値の 24 にする（`src/service.py`）
+- 同じ形の判定は `tsuyouraou-mini` に固定する（`JUDGE_ENGINE`）。解析で選ばれたエンジンは判定には使わない
+
+```
+engine/
+  tsuyouraou-mini/
+    YaneuraOu-by-gcc または *.exe   # ローカルで使う実行ファイル（zip にはビルドしたものを入れる）
+    eval/nn.bin, eval/progress.bin
+  tsuyouraou-micro/
+    （同じ構成）
+```
+
+エンジン名は `src/service.py` の `ENGINES`、`scripts/build-lambda.sh` の `ENGINES`、バックエンドの `AnalysisEngine`、フロントの `features/book/utils/analysisEngine.ts` で揃える。
 
 ## ローカルで動かす
 
 ```bash
 cd nari-note-engine
 pip install -r requirements.txt
-# やねうら王系のエンジン（評価関数込み）を engine/ に置くか、ENGINE_PATH で指定する
+# engine/<エンジン名>/ に実行ファイルと評価関数を置くか、ENGINE_PATH で指定する
 python src/server.py --port 8790
 ```
 
@@ -25,7 +50,7 @@ python src/server.py --port 8790
 
 | 環境変数 | 内容 |
 | --- | --- |
-| `ENGINE_PATH` | エンジンの実行ファイル。省略時は `engine/` の最初のファイル |
+| `ENGINE_PATH` | `engine/<エンジン名>/` に実行ファイルが無いときに、どのエンジン名でも使う実行ファイル。評価関数を埋め込んだエンジンで手元の動作だけ確かめるとき用 |
 | `HOST` / `PORT` | 待ち受けアドレス。既定は `127.0.0.1:8790` |
 
 ## Lambda
@@ -43,11 +68,10 @@ python src/server.py --port 8790
 
 ### ビルドとデプロイ
 
-`scripts/build-lambda.sh` は Lambda と同じ Amazon Linux のイメージ（`public.ecr.aws/lambda/python:3.13`）の中で、やねうら王（NNUE、AVX2）を g++ でビルドし、評価関数・cshogi・`src/` の Python ファイル（`server.py` を除く）と合わせて `build/nari-note-engine.zip` にまとめる。Docker が必要。
+`scripts/build-lambda.sh` は Lambda と同じ Amazon Linux のイメージ（`public.ecr.aws/lambda/python:3.13`）の中で、エンジンごとにやねうら王（AVX2）を g++ でビルドし、`engine/<エンジン名>/eval/`・cshogi・`src/` の Python ファイル（`server.py` を除く）と合わせて `build/nari-note-engine.zip` にまとめる。Docker が必要。
 
 | 環境変数 | 内容 |
 | --- | --- |
-| `EVAL_FILE` | NNUE の評価関数ファイル。既定は `engine/eval/nn.bin`。zip の中では `engine/eval/nn.bin` に置く |
 | `YANEURAOU_REF` | ビルドするやねうら王のコミット SHA（ブランチ名・タグ名も可）。既定は `scripts/build-lambda.sh` に固定した SHA |
 
 判定はエンジンの探索結果が変わらないことを前提にしているので、やねうら王の版は `scripts/build-lambda.sh` の既定値で固定している。版を上げると評価値や最善手が変わり、上げる前と後の判定結果が混ざる。上げるときは既定値の SHA を書き換えてコミットし、デプロイする。
@@ -60,7 +84,7 @@ python src/server.py --port 8790
 
 | action | 入力 | 出力 |
 | --- | --- | --- |
-| `analyze` | `{sfen}` | `{lines: [{usi, score, pv}]}`。score は手番側から見た値、MultiPV 3、200 万ノード |
+| `analyze` | `{sfen, engine}` | `{lines: [{usi, score, pv}]}`。score は手番側から見た値、MultiPV 3、200 万ノード |
 | `candidates` | `{sfen, others: [sfen]}` | `{candidates: [{sfen, unit_count}]}`。エンジンを使わずに、同じ形かもしれない局面を絞る |
 | `judge` | `{p, q}` | `{kind, delta, confirmed_depth, reason}` |
 

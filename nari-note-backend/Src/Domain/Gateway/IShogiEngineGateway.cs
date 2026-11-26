@@ -26,7 +26,7 @@ public class EngineVerdict
 public interface IShogiEngineGateway
 {
     bool IsEnabled { get; }
-    Task<List<EngineLine>> AnalyzeAsync(string sfen, CancellationToken cancellationToken = default);
+    Task<List<EngineLine>> AnalyzeAsync(string sfen, string engine, CancellationToken cancellationToken = default);
     Task<List<EngineCandidate>> FindCandidatesAsync(string sfen, List<string> others, CancellationToken cancellationToken = default);
     Task<EngineVerdict> JudgeAsync(string sfenA, string sfenB, CancellationToken cancellationToken = default);
 }

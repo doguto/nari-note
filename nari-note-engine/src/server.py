@@ -14,8 +14,8 @@ log = logging.getLogger("nari-note-engine")
 
 class LockedSlot(service.EngineSlot):
     # 解析と判定でプロセスを分け、判定中でも解析を待たせない。同じプロセスへの要求は直列にする
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, engine: str) -> None:
+        super().__init__(engine)
         self.lock = threading.Lock()
 
     def run(self, fn):
@@ -24,7 +24,7 @@ class LockedSlot(service.EngineSlot):
 
 
 class Handler(BaseHTTPRequestHandler):
-    analyzer: LockedSlot
+    analyzers: dict[str, LockedSlot]
     judger: LockedSlot
 
     def log_message(self, format, *args):
@@ -48,7 +48,10 @@ class Handler(BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length") or 0)
             body = json.loads(self.rfile.read(length) or b"{}")
             if self.path == "/analyze":
-                return self._send(200, service.analyze(self.analyzer, body["sfen"]))
+                engine = body["engine"]
+                if engine not in self.analyzers:
+                    raise ValueError(f"未対応のエンジンです: {engine}")
+                return self._send(200, service.analyze(self.analyzers[engine], body["sfen"]))
             if self.path == "/candidates":
                 return self._send(200, service.candidates(body["sfen"], body.get("others", [])))
             if self.path == "/judge":
@@ -68,8 +71,8 @@ def main() -> None:
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    Handler.analyzer = LockedSlot()
-    Handler.judger = LockedSlot()
+    Handler.analyzers = {engine: LockedSlot(engine) for engine in service.ENGINES}
+    Handler.judger = LockedSlot(service.JUDGE_ENGINE)
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     log.info("nari-note-engine listening on %s:%d", args.host, args.port)
     server.serve_forever()

@@ -130,13 +130,30 @@ public class BooksControllerTest : IntegrationTestBase
         var (client, book) = await CreateBookAsync(owner);
         Factory.ShogiEngineGateway.Lines.Add(new EngineLine { Usi = "7g7f", Score = 40, Pv = ["7g7f", "3c3d"] });
 
-        var response = await client.PostAsJsonAsync($"/api/books/{book.Id}/analysis", new { sfen = ShogiPosition.Hirate });
+        var response = await client.PostAsJsonAsync(
+            $"/api/books/{book.Id}/analysis",
+            new { sfen = ShogiPosition.Hirate, engine = AnalysisEngine.TsuyouraouMicro }
+        );
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await ReadAsync<AnalyzeBookPositionResponse>(response);
         var line = Assert.Single(body.Lines);
         Assert.Equal(["▲７六歩", "△３四歩"], line.Pv);
         Assert.Equal(40, line.Score);
+        Assert.Equal([AnalysisEngine.TsuyouraouMicro], Factory.ShogiEngineGateway.AnalyzedEngines);
+    }
+
+    [Fact]
+    public async Task 未対応のエンジンでの解析は400を返す()
+    {
+        var owner = new UserBuilder().Build();
+        await SeedAsync(owner);
+        var (client, book) = await CreateBookAsync(owner);
+
+        var response = await client.PostAsJsonAsync($"/api/books/{book.Id}/analysis", new { sfen = ShogiPosition.Hirate, engine = "unknown" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Empty(Factory.ShogiEngineGateway.AnalyzedEngines);
     }
 
     [Fact]

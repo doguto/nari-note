@@ -5,6 +5,7 @@
 export interface AnalyzeBookPositionRequest {
   id?: number;
   sfen: string;
+  engine: string;
 }
 
 export interface AnalyzeBookPositionResponse {
