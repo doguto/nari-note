@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NariNoteBackend.Migrations
 {
     [DbContext(typeof(NariNoteDbContext))]
-    [Migration("20261126092113_AddPlaybooks")]
+    [Migration("20261126094034_AddPlaybooks")]
     partial class AddPlaybooks
     {
         /// <inheritdoc />
@@ -507,8 +507,8 @@ namespace NariNoteBackend.Migrations
 
                     b.Property<string>("Memo")
                         .IsRequired()
-                        .HasMaxLength(10000)
-                        .HasColumnType("character varying(10000)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("Name")
                         .IsRequired()

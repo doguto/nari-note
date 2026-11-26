@@ -16,6 +16,6 @@ public class UpdatePlaybookNodeRequest
     [MaxLength(PlaybookNode.NameMaxLength, ErrorMessage = "形の名前は100文字以内で入力してください")]
     public string? Name { get; set; }
 
-    [MaxLength(PlaybookNode.MemoMaxLength, ErrorMessage = "研究メモは10000文字以内で入力してください")]
+    [MaxLength(PlaybookNode.MemoMaxLength, ErrorMessage = "研究メモは2000文字以内で入力してください")]
     public string? Memo { get; set; }
 }

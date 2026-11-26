@@ -136,7 +136,7 @@ erDiagram
         int Id PK
         uuid PlaybookId FK
         string Name "max 100"
-        string Memo "研究メモ, max 10000"
+        string Memo "研究メモ, max 2000"
     }
     PlaybookNodeBoards {
         uuid Id PK "登録順に大きくなる UUID v7"

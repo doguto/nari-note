@@ -31,7 +31,7 @@ public class MergePlaybookNodesService
         if (keep == drop) return new MergePlaybookNodesResponse();
 
         var memo = string.Join("\n", new[] { keep.Memo, drop.Memo }.Where(m => m.Length > 0));
-        if (memo.Length > PlaybookNode.MemoMaxLength) throw new ArgumentException("まとめると研究メモが10000文字を超えます。先にメモを短くしてください");
+        if (memo.Length > PlaybookNode.MemoMaxLength) throw new ArgumentException("まとめると研究メモが2000文字を超えます。先にメモを短くしてください");
 
         foreach (var board in drop.Boards.ToList())
         {

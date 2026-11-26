@@ -504,8 +504,8 @@ namespace NariNoteBackend.Migrations
 
                     b.Property<string>("Memo")
                         .IsRequired()
-                        .HasMaxLength(10000)
-                        .HasColumnType("character varying(10000)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("Name")
                         .IsRequired()

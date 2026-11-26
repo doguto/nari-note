@@ -9,7 +9,7 @@ namespace NariNoteBackend.Domain.Entity;
 public class PlaybookNode : EntityBase
 {
     public const int NameMaxLength = 100;
-    public const int MemoMaxLength = 10000;
+    public const int MemoMaxLength = 2000;
 
     [Key]
     public PlaybookNodeId Id { get; set; }

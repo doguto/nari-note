@@ -15,7 +15,7 @@ export function ResearchMemoPanel({ plain, memo, onSave }: ResearchMemoPanelProp
       <textarea
         defaultValue={memo}
         rows={5}
-        maxLength={10000}
+        maxLength={2000}
         aria-label="研究メモ"
         placeholder="この形の狙い、結論、気になる変化など"
         className="resize-y rounded-lg border border-brand-border px-3 py-2 text-sm leading-relaxed text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary-light"
