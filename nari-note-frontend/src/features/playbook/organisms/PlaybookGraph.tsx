@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { GitBranch } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { type Chain, type ChainMove, type CollapsedNode, collapseGraph } from '../utils/collapseGraph';
+import { type Chain, type ChainMove, type CollapsedNode, collapseGraph, graphNodeIdOf } from '../utils/collapseGraph';
 import { NODE_HEIGHT, layoutGraph } from '../utils/graphLayout';
 import type { PlaybookTree } from '../utils/playbookTree';
 
@@ -45,7 +45,7 @@ export function PlaybookGraph({ tree, currentSfen, className, onSelect }: Playbo
     return layoutGraph<CollapsedNode, (typeof chains)[number]>(collapsed.nodes, chains, collapsed.rootId);
   }, [tree]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const current = tree.boards.get(currentSfen)?.nodeId;
+  const current = graphNodeIdOf(tree, currentSfen);
 
   useEffect(() => {
     const box = containerRef.current;

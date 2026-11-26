@@ -21,17 +21,18 @@ public class RemovePlaybookMoveService
         this.timeProvider = timeProvider;
     }
 
-    // 手を外すと、その先にしかない局面・ノード・手順も消える
+    // 手を外すと、その先にしかない局面・遷移・ノードも消える
     public async Task<RemovePlaybookMoveResponse> ExecuteAsync(UserId userId, RemovePlaybookMoveRequest request)
     {
         var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
         PlaybookAccess.EnsureOwner(playbook, userId);
 
-        var tree = PlaybookTree.Load(playbook);
-        var sfen = ShogiBoard.Normalize(request.Sfen);
+        var graph = new PlaybookGraph(playbook, this.playbookRepository);
+        var board = graph.FindForceBoard(ShogiBoard.Normalize(request.Sfen));
         var usi = ShogiMove.Parse(request.Usi).ToUsi();
-        if (!tree.RemoveMove(sfen, usi)) throw new KeyNotFoundException($"指し手{usi}が存在しません");
-        PlaybookAccess.Rebuild(playbook, tree, this.playbookRepository);
+        var transition = graph.Outgoing(board).FirstOrDefault(t => t.Usi == usi)
+            ?? throw new KeyNotFoundException($"指し手{usi}が存在しません");
+        graph.RemoveTransition(transition);
 
         playbook.UpdatedAt = this.timeProvider.UtcNow();
         await this.playbookRepository.SaveAsync();

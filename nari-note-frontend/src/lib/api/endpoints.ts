@@ -86,8 +86,8 @@ import type {
   UpdatePasswordResponse,
   UpdatePlaybookNodeRequest,
   UpdatePlaybookNodeResponse,
-  UpdatePlaybookStepRequest,
-  UpdatePlaybookStepResponse,
+  UpdatePlaybookTransitionRequest,
+  UpdatePlaybookTransitionResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
   UploadArticleImageResponse,
@@ -298,8 +298,8 @@ export const playbooksApi = {
     const response = await apiClient.post<SplitPlaybookBoardResponse>(`/api/playbooks/${data.id}/boards/${data.boardId}/split`);
     return response;
   },
-  updatePlaybookStep: async (data: UpdatePlaybookStepRequest): Promise<UpdatePlaybookStepResponse> => {
-    const response = await apiClient.put<UpdatePlaybookStepResponse>(`/api/playbooks/${data.id}/steps/${data.stepId}`, data);
+  updatePlaybookTransition: async (data: UpdatePlaybookTransitionRequest): Promise<UpdatePlaybookTransitionResponse> => {
+    const response = await apiClient.put<UpdatePlaybookTransitionResponse>(`/api/playbooks/${data.id}/transitions/${data.transitionId}`, data);
     return response;
   },
 };

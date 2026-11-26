@@ -48,7 +48,7 @@ public partial struct PlaybookId;
 public partial struct PlaybookNodeId;
 
 [ValueObject<Guid>(Conversions.EfCoreValueConverter)]
-public partial struct PlaybookNodeBoardId;
+public partial struct PlaybookBoardId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
-public partial struct PlaybookNodeStepId;
+public partial struct PlaybookBoardTransitionId;

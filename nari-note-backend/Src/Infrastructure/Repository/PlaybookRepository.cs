@@ -66,7 +66,7 @@ public class PlaybookRepository : IPlaybookRepository
         var playbook = await this.context.Playbooks
                              .Include(b => b.Nodes)
                              .Include(b => b.Boards)
-                             .Include(b => b.Steps)
+                             .Include(b => b.Transitions)
                              .AsSplitQuery()
                              .FirstOrDefaultAsync(b => b.Id == id);
         if (playbook == null) throw new KeyNotFoundException($"定跡{id}が存在しません");
@@ -75,15 +75,15 @@ public class PlaybookRepository : IPlaybookRepository
 
     public void AddNode(PlaybookNode node) => this.context.PlaybookNodes.Add(node);
 
-    public void AddBoard(PlaybookNodeBoard board) => this.context.PlaybookNodeBoards.Add(board);
+    public void AddBoard(PlaybookBoard board) => this.context.PlaybookBoards.Add(board);
 
-    public void AddStep(PlaybookNodeStep step) => this.context.PlaybookNodeSteps.Add(step);
+    public void AddTransition(PlaybookBoardTransition transition) => this.context.PlaybookBoardTransitions.Add(transition);
 
     public void RemoveNode(PlaybookNode node) => this.context.PlaybookNodes.Remove(node);
 
-    public void RemoveBoard(PlaybookNodeBoard board) => this.context.PlaybookNodeBoards.Remove(board);
+    public void RemoveBoard(PlaybookBoard board) => this.context.PlaybookBoards.Remove(board);
 
-    public void RemoveStep(PlaybookNodeStep step) => this.context.PlaybookNodeSteps.Remove(step);
+    public void RemoveTransition(PlaybookBoardTransition transition) => this.context.PlaybookBoardTransitions.Remove(transition);
 
     public async Task SaveAsync()
     {

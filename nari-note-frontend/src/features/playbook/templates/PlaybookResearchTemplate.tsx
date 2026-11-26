@@ -69,7 +69,7 @@ interface PlaybookResearchTemplateProps {
   onBack: () => void;
   onForward: () => void;
   onMove: (usi: string) => void;
-  onChangeCondition: (stepId: number, condition: string) => void;
+  onChangeCondition: (transitionId: number, condition: string) => void;
   onDeleteMove: (usi: string) => void;
   onRename: (name: string) => void;
   onSaveMemo: (memo: string) => void;

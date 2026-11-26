@@ -1,16 +1,15 @@
 import type {
   GetPlaybookResponse,
-  PlaybookNodeBoardDto,
+  PlaybookBoardDto,
+  PlaybookBoardTransitionDto,
   PlaybookNodeDto,
-  PlaybookNodeStepDto,
 } from '@/lib/api/types';
-import { destinationOf, moveLabel, play } from './shogiRules';
+import { destinationOf, moveLabel } from './shogiRules';
 
 export interface TreeMove {
   usi: string;
   child: string;
-  // 手順の 1 手目のときだけ、その手順（条件を持つ）を指す
-  step?: PlaybookNodeStepDto;
+  transition: PlaybookBoardTransitionDto;
 }
 
 export interface PathStep {
@@ -19,30 +18,26 @@ export interface PathStep {
   label: string;
 }
 
-// 定跡を 1 手ごとの木に展開したもの。途中の局面は手順を指し直して求める
+// 定跡の局面を SFEN で引き、遷移を局面ごとの次の手として並べたもの
 export interface PlaybookTree {
   rootSfen: string;
   children: Map<string, TreeMove[]>;
   parents: Map<string, { sfen: string; usi: string }>;
-  boards: Map<string, PlaybookNodeBoardDto>;
-  boardsById: Map<string, PlaybookNodeBoardDto>;
+  boards: Map<string, PlaybookBoardDto>;
+  boardsById: Map<string, PlaybookBoardDto>;
   nodes: Map<number, PlaybookNodeDto>;
-  steps: PlaybookNodeStepDto[];
 }
 
 export function buildPlaybookTree(data: GetPlaybookResponse): PlaybookTree {
   const boardsById = new Map(data.boards.map((b) => [b.id, b]));
   const children = new Map<string, TreeMove[]>();
-  for (const step of data.steps) {
-    let sfen = boardsById.get(step.fromBoardId)?.sfen;
-    if (!sfen) continue;
-    step.usis.forEach((usi, i) => {
-      const child = play(sfen!, usi);
-      const list = children.get(sfen!) ?? [];
-      list.push({ usi, child, step: i === 0 ? step : undefined });
-      children.set(sfen!, list);
-      sfen = child;
-    });
+  for (const transition of data.transitions) {
+    const from = boardsById.get(transition.fromBoardId);
+    const to = boardsById.get(transition.toBoardId);
+    if (!from || !to) continue;
+    const list = children.get(from.sfen) ?? [];
+    list.push({ usi: transition.usi, child: to.sfen, transition });
+    children.set(from.sfen, list);
   }
 
   const parents = new Map<string, { sfen: string; usi: string }>();
@@ -65,12 +60,11 @@ export function buildPlaybookTree(data: GetPlaybookResponse): PlaybookTree {
     boards: new Map(data.boards.map((b) => [b.sfen, b])),
     boardsById,
     nodes: new Map(data.nodes.map((n) => [n.id, n])),
-    steps: data.steps,
   };
 }
 
 export function contains(tree: PlaybookTree, sfen: string): boolean {
-  return sfen === tree.rootSfen || tree.parents.has(sfen);
+  return tree.boards.has(sfen);
 }
 
 // 開始局面からの手順。「同」を付けるため、直前の手の行き先を引き継いで記譜する
@@ -92,6 +86,6 @@ export function pathTo(tree: PlaybookTree, sfen: string): PathStep[] {
 }
 
 export function nodeOf(tree: PlaybookTree, sfen: string): PlaybookNodeDto | undefined {
-  const board = tree.boards.get(sfen);
-  return board ? tree.nodes.get(board.nodeId) : undefined;
+  const nodeId = tree.boards.get(sfen)?.nodeId;
+  return nodeId != null ? tree.nodes.get(nodeId) : undefined;
 }

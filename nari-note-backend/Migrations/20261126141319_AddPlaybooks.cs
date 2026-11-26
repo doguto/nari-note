@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -59,26 +58,26 @@ namespace NariNoteBackend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlaybookNodeBoards",
+                name: "PlaybookBoards",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PlaybookId = table.Column<Guid>(type: "uuid", nullable: false),
-                    NodeId = table.Column<int>(type: "integer", nullable: false),
+                    NodeId = table.Column<int>(type: "integer", nullable: true),
                     Sfen = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlaybookNodeBoards", x => x.Id);
+                    table.PrimaryKey("PK_PlaybookBoards", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlaybookNodeBoards_PlaybookNodes_NodeId",
+                        name: "FK_PlaybookBoards_PlaybookNodes_NodeId",
                         column: x => x.NodeId,
                         principalTable: "PlaybookNodes",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_PlaybookNodeBoards_Playbooks_PlaybookId",
+                        name: "FK_PlaybookBoards_Playbooks_PlaybookId",
                         column: x => x.PlaybookId,
                         principalTable: "Playbooks",
                         principalColumn: "Id",
@@ -86,36 +85,36 @@ namespace NariNoteBackend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlaybookNodeSteps",
+                name: "PlaybookBoardTransitions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     PlaybookId = table.Column<Guid>(type: "uuid", nullable: false),
                     FromBoardId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ToBoardId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Usis = table.Column<List<string>>(type: "text[]", nullable: false),
+                    ToBoardId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Usi = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
                     Condition = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlaybookNodeSteps", x => x.Id);
+                    table.PrimaryKey("PK_PlaybookBoardTransitions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlaybookNodeSteps_PlaybookNodeBoards_FromBoardId",
+                        name: "FK_PlaybookBoardTransitions_PlaybookBoards_FromBoardId",
                         column: x => x.FromBoardId,
-                        principalTable: "PlaybookNodeBoards",
+                        principalTable: "PlaybookBoards",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlaybookNodeSteps_PlaybookNodeBoards_ToBoardId",
+                        name: "FK_PlaybookBoardTransitions_PlaybookBoards_ToBoardId",
                         column: x => x.ToBoardId,
-                        principalTable: "PlaybookNodeBoards",
+                        principalTable: "PlaybookBoards",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlaybookNodeSteps_Playbooks_PlaybookId",
+                        name: "FK_PlaybookBoardTransitions_Playbooks_PlaybookId",
                         column: x => x.PlaybookId,
                         principalTable: "Playbooks",
                         principalColumn: "Id",
@@ -123,35 +122,36 @@ namespace NariNoteBackend.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaybookNodeBoards_NodeId",
-                table: "PlaybookNodeBoards",
+                name: "IX_PlaybookBoards_NodeId",
+                table: "PlaybookBoards",
                 column: "NodeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaybookNodeBoards_PlaybookId_Sfen",
-                table: "PlaybookNodeBoards",
+                name: "IX_PlaybookBoards_PlaybookId_Sfen",
+                table: "PlaybookBoards",
                 columns: new[] { "PlaybookId", "Sfen" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaybookBoardTransitions_FromBoardId_ToBoardId",
+                table: "PlaybookBoardTransitions",
+                columns: new[] { "FromBoardId", "ToBoardId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaybookBoardTransitions_PlaybookId",
+                table: "PlaybookBoardTransitions",
+                column: "PlaybookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaybookBoardTransitions_ToBoardId",
+                table: "PlaybookBoardTransitions",
+                column: "ToBoardId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlaybookNodes_PlaybookId",
                 table: "PlaybookNodes",
                 column: "PlaybookId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlaybookNodeSteps_FromBoardId",
-                table: "PlaybookNodeSteps",
-                column: "FromBoardId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlaybookNodeSteps_PlaybookId",
-                table: "PlaybookNodeSteps",
-                column: "PlaybookId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlaybookNodeSteps_ToBoardId",
-                table: "PlaybookNodeSteps",
-                column: "ToBoardId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Playbooks_UserId",
@@ -163,10 +163,10 @@ namespace NariNoteBackend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PlaybookNodeSteps");
+                name: "PlaybookBoardTransitions");
 
             migrationBuilder.DropTable(
-                name: "PlaybookNodeBoards");
+                name: "PlaybookBoards");
 
             migrationBuilder.DropTable(
                 name: "PlaybookNodes");

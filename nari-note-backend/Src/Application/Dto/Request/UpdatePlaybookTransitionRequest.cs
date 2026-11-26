@@ -4,12 +4,12 @@ using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Dto.Request;
 
-public class UpdatePlaybookStepRequest
+public class UpdatePlaybookTransitionRequest
 {
     public PlaybookId Id { get; set; }
-    public PlaybookNodeStepId StepId { get; set; }
+    public PlaybookBoardTransitionId TransitionId { get; set; }
 
     [Required]
-    [MaxLength(PlaybookNodeStep.ConditionMaxLength, ErrorMessage = "条件は100文字以内で入力してください")]
+    [MaxLength(PlaybookBoardTransition.ConditionMaxLength, ErrorMessage = "条件は100文字以内で入力してください")]
     public required string Condition { get; set; }
 }

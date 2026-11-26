@@ -2,9 +2,9 @@ using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Dto;
 
-public class PlaybookNodeBoardDto
+public class PlaybookBoardDto
 {
-    public PlaybookNodeBoardId Id { get; set; }
-    public PlaybookNodeId NodeId { get; set; }
+    public PlaybookBoardId Id { get; set; }
+    public PlaybookNodeId? NodeId { get; set; }
     public required string Sfen { get; set; }
 }

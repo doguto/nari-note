@@ -13,7 +13,7 @@ import {
   useSavePlaybookLines,
   useSplitPlaybookBoard,
   useUpdatePlaybookNode,
-  useUpdatePlaybookStep,
+  useUpdatePlaybookTransition,
 } from '@/lib/api';
 import { useAnalysisEngine } from '../hooks/useAnalysisEngine';
 import { useResearchDraft } from '../hooks/useResearchDraft';
@@ -30,7 +30,7 @@ function isTyping(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
 }
 
-// 定跡の全体を 1 回取得し、手順を手元で指し直して局面を行き来する。URL にはノードの盤面だけを載せる
+// 定跡の全体を 1 回取得し、手元で局面を行き来する。URL には保存済みの局面だけを載せる
 export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -78,7 +78,7 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
   });
   const removeMove = useRemovePlaybookMove({ onError: onError('手を外せませんでした。') });
   const updateNode = useUpdatePlaybookNode({ onError: onError('保存できませんでした。') });
-  const updateStep = useUpdatePlaybookStep({ onError: onError('保存できませんでした。') });
+  const updateTransition = useUpdatePlaybookTransition({ onError: onError('保存できませんでした。') });
   const merge = useMergePlaybookNodes({ onError: onError('まとめられませんでした。') });
   const split = useSplitPlaybookBoard({ onError: onError('分けられませんでした。') });
 
@@ -101,14 +101,15 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
     if (!tree || !sfen) return null;
     const last = path[path.length - 1];
     const previousTo = last ? destinationOf(last.usi) : undefined;
-    const suggestions = new Map((inspection.data?.conditionSuggestions ?? []).map((c) => [c.stepId, c.suggestions]));
+    const suggestions = new Map((inspection.data?.conditionSuggestions ?? []).map((c) => [c.transitionId, c.suggestions]));
+    const isNode = tree.boards.get(sfen)?.nodeId != null;
     const saved: ResearchMove[] = (tree.children.get(sfen) ?? []).map((m) => ({
       usi: m.usi,
       label: moveLabel(sfen, m.usi, previousTo),
       isDraft: false,
-      stepId: m.step?.id,
-      condition: m.step?.condition ?? '',
-      conditionSuggestions: (m.step && suggestions.get(m.step.id)) ?? [],
+      transitionId: isNode ? m.transition.id : undefined,
+      condition: m.transition.condition,
+      conditionSuggestions: suggestions.get(m.transition.id) ?? [],
     }));
     const savedUsis = new Set(saved.map((m) => m.usi));
     const drafts: ResearchMove[] = draft
@@ -128,11 +129,11 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
 
   const shape = useMemo((): ResearchShape => {
     const board = sfen ? tree?.boards.get(sfen) : undefined;
-    const node = board ? tree?.nodes.get(board.nodeId) : undefined;
-    const boardCount = board && tree ? [...tree.boards.values()].filter((b) => b.nodeId === board.nodeId).length : 0;
+    const node = board?.nodeId != null ? tree?.nodes.get(board.nodeId) : undefined;
+    const boardCount = node && tree ? [...tree.boards.values()].filter((b) => b.nodeId === node.id).length : board ? 1 : 0;
     const info = inspection.data?.boardId === board?.id ? inspection.data : undefined;
     return {
-      isNode: !!board,
+      isNode: !!node,
       name: node?.name ?? '',
       memo: node?.memo ?? '',
       boardCount,
@@ -236,7 +237,7 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
       onBack={goBack}
       onForward={goForward}
       onMove={play}
-      onChangeCondition={(stepId, condition) => updateStep.mutate({ id: playbookId, stepId, condition })}
+      onChangeCondition={(transitionId, condition) => updateTransition.mutate({ id: playbookId, transitionId, condition })}
       onDeleteMove={(usi) => removeMove.mutate({ id: playbookId, sfen, usi })}
       onRename={(name) => updateNode.mutate({ id: playbookId, sfen, name })}
       onSaveMemo={(memo) => updateNode.mutate({ id: playbookId, sfen, memo })}

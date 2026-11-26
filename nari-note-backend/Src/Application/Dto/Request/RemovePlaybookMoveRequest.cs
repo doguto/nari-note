@@ -9,10 +9,10 @@ public class RemovePlaybookMoveRequest
     public PlaybookId Id { get; set; }
 
     [Required(ErrorMessage = "局面は必須です")]
-    [MaxLength(PlaybookNodeBoard.SfenMaxLength)]
+    [MaxLength(PlaybookBoard.SfenMaxLength)]
     public required string Sfen { get; set; }
 
     [Required(ErrorMessage = "指し手は必須です")]
-    [MaxLength(8)]
+    [MaxLength(PlaybookBoardTransition.UsiMaxLength)]
     public required string Usi { get; set; }
 }

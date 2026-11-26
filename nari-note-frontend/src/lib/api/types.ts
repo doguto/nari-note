@@ -347,8 +347,8 @@ export interface GetPlaybookResponse {
   name: string;
   rootSfen: string;
   nodes: PlaybookNodeDto[];
-  boards: PlaybookNodeBoardDto[];
-  steps: PlaybookNodeStepDto[];
+  boards: PlaybookBoardDto[];
+  transitions: PlaybookBoardTransitionDto[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -388,7 +388,7 @@ export interface InspectPlaybookBoardRequest {
 }
 
 export interface InspectPlaybookBoardResponse {
-  boardId?: string;
+  boardId: string;
   nameSuggestions: string[];
   members: PlaybookMemberDto[];
   similar: PlaybookSimilarBoardDto[];
@@ -415,8 +415,22 @@ export interface MergePlaybookNodesRequest {
 export interface MergePlaybookNodesResponse {
 }
 
+export interface PlaybookBoardDto {
+  id: string;
+  nodeId?: number;
+  sfen: string;
+}
+
+export interface PlaybookBoardTransitionDto {
+  id: number;
+  fromBoardId: string;
+  toBoardId: string;
+  usi: string;
+  condition: string;
+}
+
 export interface PlaybookConditionSuggestionDto {
-  stepId: number;
+  transitionId: number;
   suggestions: string[];
 }
 
@@ -431,24 +445,10 @@ export interface PlaybookMemberDto {
   diff: string;
 }
 
-export interface PlaybookNodeBoardDto {
-  id: string;
-  nodeId: number;
-  sfen: string;
-}
-
 export interface PlaybookNodeDto {
   id: number;
   name: string;
   memo: string;
-}
-
-export interface PlaybookNodeStepDto {
-  id: number;
-  fromBoardId: string;
-  toBoardId?: string;
-  usis: string[];
-  condition: string;
 }
 
 export interface PlaybookSimilarBoardDto {
@@ -612,14 +612,14 @@ export interface UpdatePlaybookNodeRequest {
 export interface UpdatePlaybookNodeResponse {
 }
 
-export interface UpdatePlaybookStepRequest {
+export interface UpdatePlaybookTransitionRequest {
   id?: string;
-  stepId?: number;
+  transitionId?: number;
   condition: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface UpdatePlaybookStepResponse {
+export interface UpdatePlaybookTransitionResponse {
 }
 
 export interface UpdateUserProfileRequest {

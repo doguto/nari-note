@@ -62,6 +62,6 @@ public static class ApplicationServiceInstaller
         services.AddScoped<UpdatePlaybookNodeService>();
         services.AddScoped<MergePlaybookNodesService>();
         services.AddScoped<SplitPlaybookBoardService>();
-        services.AddScoped<UpdatePlaybookStepService>();
+        services.AddScoped<UpdatePlaybookTransitionService>();
     }
 }

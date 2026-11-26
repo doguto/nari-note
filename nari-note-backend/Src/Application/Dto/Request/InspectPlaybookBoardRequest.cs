@@ -9,6 +9,6 @@ public class InspectPlaybookBoardRequest
     public PlaybookId Id { get; set; }
 
     [Required(ErrorMessage = "局面は必須です")]
-    [MaxLength(PlaybookNodeBoard.SfenMaxLength)]
+    [MaxLength(PlaybookBoard.SfenMaxLength)]
     public required string Sfen { get; set; }
 }

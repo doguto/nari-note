@@ -26,19 +26,17 @@ public class InspectPlaybookBoardService
         var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
         PlaybookAccess.EnsureOwner(playbook, userId);
 
-        var sfen = ShogiBoard.Normalize(request.Sfen);
-        if (!PlaybookTree.Load(playbook).Contains(sfen)) throw new KeyNotFoundException("この定跡に無い局面です");
-        var shogi = ShogiBoard.FromSfen(sfen);
-        var board = playbook.Boards.FirstOrDefault(b => b.Sfen == sfen);
-        var name = board?.Node.Name ?? "";
+        var graph = new PlaybookGraph(playbook, this.playbookRepository);
+        var board = graph.FindForceBoard(ShogiBoard.Normalize(request.Sfen));
+        var shogi = ShogiBoard.FromSfen(board.Sfen);
+        var name = board.Node?.Name ?? "";
         var response = new InspectPlaybookBoardResponse
         {
-            BoardId = board?.Id,
+            BoardId = board.Id,
             NameSuggestions = ShogiFeatures.NameSuggestions(shogi).Where(n => n != name).ToList(),
         };
-        if (board == null) return response;
+        if (board.Node is not { } node) return response;
 
-        var node = board.Node;
         var representative = PlaybookAccess.Representative(node);
         response.Members = node.Boards
             .OrderBy(b => b.Id.Value)
@@ -50,15 +48,16 @@ public class InspectPlaybookBoardService
                 Diff = ShogiDiff.Describe(shogi, ShogiBoard.FromSfen(b.Sfen)),
             })
             .ToList();
-        response.Similar = FindSimilar(playbook, board, shogi);
-        response.ConditionSuggestions = SuggestConditions(playbook, board, shogi);
+        response.Similar = FindSimilar(playbook, node, shogi);
+        response.ConditionSuggestions = SuggestConditions(graph, board, node, shogi);
         return response;
     }
 
-    static List<PlaybookSimilarBoardDto> FindSimilar(Playbook playbook, PlaybookNodeBoard board, ShogiBoard shogi)
+    // 候補はノードに属する局面だけにする。手順の途中の局面は 1 手違いで似ているだけなので出さない
+    static List<PlaybookSimilarBoardDto> FindSimilar(Playbook playbook, PlaybookNode node, ShogiBoard shogi)
     {
         return playbook.Boards
-            .Where(b => b.Node != board.Node)
+            .Where(b => b.Node != null && b.Node != node)
             .Select(b => (Board: b, Shogi: ShogiBoard.FromSfen(b.Sfen)))
             .Select(x => (x.Board, x.Shogi, Units: ShogiSimilarity.UnitCount(shogi, x.Shogi)))
             .Where(x => x.Units.HasValue)
@@ -68,33 +67,34 @@ public class InspectPlaybookBoardService
             .Select(x => new PlaybookSimilarBoardDto
             {
                 BoardId = x.Board.Id,
-                NodeName = x.Board.Node.Name,
+                NodeName = x.Board.Node!.Name,
                 Diff = ShogiDiff.Describe(shogi, x.Shogi),
             })
             .ToList();
     }
 
-    // 同じ手で別のノードへ進む盤面との違いこそが条件なので、それを先に比べる
-    static List<PlaybookConditionSuggestionDto> SuggestConditions(Playbook playbook, PlaybookNodeBoard board, ShogiBoard shogi)
+    // 同じ手で別の行き先へ進む局面との違いこそが条件なので、それを先に比べる
+    static List<PlaybookConditionSuggestionDto> SuggestConditions(PlaybookGraph graph, PlaybookBoard board, PlaybookNode node, ShogiBoard shogi)
     {
-        var siblings = board.Node.Boards.Where(b => b != board).ToList();
+        var siblings = node.Boards.Where(b => b != board).ToList();
         if (siblings.Count == 0) return new List<PlaybookConditionSuggestionDto>();
 
-        var stepsByBoard = playbook.Steps.ToLookup(s => s.FromBoardId);
-        return stepsByBoard[board.Id]
-            .OrderBy(s => s.Id.Value)
-            .Select(step =>
+        return graph.Outgoing(board)
+            .Select(transition =>
             {
-                var target = step.ToBoard?.NodeId;
+                var target = Destination(transition);
                 var ordered = siblings
-                    .OrderByDescending(s => stepsByBoard[s.Id].Any(o => o.Usis[0] == step.Usis[0] && o.ToBoard?.NodeId != target))
+                    .OrderByDescending(s => graph.Outgoing(s).Any(o => o.Usi == transition.Usi && !Equals(Destination(o), target)))
                     .Select(s => ShogiBoard.FromSfen(s.Sfen));
                 return new PlaybookConditionSuggestionDto
                 {
-                    StepId = step.Id,
-                    Suggestions = ShogiFeatures.ConditionSuggestions(shogi, ordered).Where(c => c != step.Condition).ToList(),
+                    TransitionId = transition.Id,
+                    Suggestions = ShogiFeatures.ConditionSuggestions(shogi, ordered).Where(c => c != transition.Condition).ToList(),
                 };
             })
             .ToList();
     }
+
+    // 行き先がノードに属していれば、まとめた局面のどれに着いても同じ行き先とみなす
+    static object Destination(PlaybookBoardTransition transition) => (object?)transition.ToBoard.Node ?? transition.ToBoard;
 }

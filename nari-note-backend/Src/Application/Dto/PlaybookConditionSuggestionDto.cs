@@ -4,6 +4,6 @@ namespace NariNoteBackend.Application.Dto;
 
 public class PlaybookConditionSuggestionDto
 {
-    public PlaybookNodeStepId StepId { get; set; }
+    public PlaybookBoardTransitionId TransitionId { get; set; }
     public List<string> Suggestions { get; set; } = new();
 }

@@ -6,7 +6,7 @@ namespace NariNoteBackend.Infrastructure.Database;
 
 // 盤面は ID の順を登録順として扱う（ノードの代表の盤面など）。1 回の保存で同じミリ秒に複数の盤面を作るので、
 // ミリ秒の中でも順序が保たれるよう、UUIDv7 の rand_a をカウンターにする（RFC 9562 6.2 Method 1）
-public class PlaybookNodeBoardIdValueGenerator : ValueGenerator<PlaybookNodeBoardId>
+public class PlaybookBoardIdValueGenerator : ValueGenerator<PlaybookBoardId>
 {
     const int CounterMax = 0xFFF;
 
@@ -16,9 +16,9 @@ public class PlaybookNodeBoardIdValueGenerator : ValueGenerator<PlaybookNodeBoar
 
     public override bool GeneratesTemporaryValues => false;
 
-    public override PlaybookNodeBoardId Next(EntityEntry entry)
+    public override PlaybookBoardId Next(EntityEntry entry)
     {
-        return PlaybookNodeBoardId.From(NextGuid());
+        return PlaybookBoardId.From(NextGuid());
     }
 
     static Guid NextGuid()

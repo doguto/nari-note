@@ -87,8 +87,8 @@ import type {
   UpdatePasswordResponse,
   UpdatePlaybookNodeRequest,
   UpdatePlaybookNodeResponse,
-  UpdatePlaybookStepRequest,
-  UpdatePlaybookStepResponse,
+  UpdatePlaybookTransitionRequest,
+  UpdatePlaybookTransitionResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
   UploadArticleImageResponse,
@@ -618,11 +618,11 @@ export function useSplitPlaybookBoard(options?: UseMutationOptions<SplitPlaybook
   });
 }
 
-export function useUpdatePlaybookStep(options?: UseMutationOptions<UpdatePlaybookStepResponse, Error, UpdatePlaybookStepRequest>) {
+export function useUpdatePlaybookTransition(options?: UseMutationOptions<UpdatePlaybookTransitionResponse, Error, UpdatePlaybookTransitionRequest>) {
   const queryClient = useQueryClient();
-  return useMutation<UpdatePlaybookStepResponse, Error, UpdatePlaybookStepRequest>({
+  return useMutation<UpdatePlaybookTransitionResponse, Error, UpdatePlaybookTransitionRequest>({
     ...options,
-    mutationFn: (data) => playbooksApi.updatePlaybookStep(data),
+    mutationFn: (data) => playbooksApi.updatePlaybookTransition(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
       options?.onSuccess?.(...args);

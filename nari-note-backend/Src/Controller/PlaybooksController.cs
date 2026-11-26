@@ -22,7 +22,7 @@ public class PlaybooksController : ApplicationController
     readonly SavePlaybookLinesService savePlaybookLinesService;
     readonly SplitPlaybookBoardService splitPlaybookBoardService;
     readonly UpdatePlaybookNodeService updatePlaybookNodeService;
-    readonly UpdatePlaybookStepService updatePlaybookStepService;
+    readonly UpdatePlaybookTransitionService updatePlaybookTransitionService;
 
     public PlaybooksController(
         AnalyzePlaybookBoardService analyzePlaybookBoardService,
@@ -36,7 +36,7 @@ public class PlaybooksController : ApplicationController
         SavePlaybookLinesService savePlaybookLinesService,
         SplitPlaybookBoardService splitPlaybookBoardService,
         UpdatePlaybookNodeService updatePlaybookNodeService,
-        UpdatePlaybookStepService updatePlaybookStepService
+        UpdatePlaybookTransitionService updatePlaybookTransitionService
     )
     {
         this.analyzePlaybookBoardService = analyzePlaybookBoardService;
@@ -50,7 +50,7 @@ public class PlaybooksController : ApplicationController
         this.savePlaybookLinesService = savePlaybookLinesService;
         this.splitPlaybookBoardService = splitPlaybookBoardService;
         this.updatePlaybookNodeService = updatePlaybookNodeService;
-        this.updatePlaybookStepService = updatePlaybookStepService;
+        this.updatePlaybookTransitionService = updatePlaybookTransitionService;
     }
 
     [HttpGet("my")]
@@ -149,21 +149,21 @@ public class PlaybooksController : ApplicationController
 
     [HttpPost("{id}/boards/{boardId}/split")]
     [Auth(AuthLevel.Authenticated)]
-    public async Task<ActionResult<SplitPlaybookBoardResponse>> SplitPlaybookBoard(PlaybookId id, PlaybookNodeBoardId boardId)
+    public async Task<ActionResult<SplitPlaybookBoardResponse>> SplitPlaybookBoard(PlaybookId id, PlaybookBoardId boardId)
     {
         var request = new SplitPlaybookBoardRequest { Id = id, BoardId = boardId };
         var response = await this.splitPlaybookBoardService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
-    [HttpPut("{id}/steps/{stepId}")]
+    [HttpPut("{id}/transitions/{transitionId}")]
     [Auth(AuthLevel.Authenticated)]
     [ValidateModelState]
-    public async Task<ActionResult<UpdatePlaybookStepResponse>> UpdatePlaybookStep(PlaybookId id, PlaybookNodeStepId stepId, [FromBody] UpdatePlaybookStepRequest request)
+    public async Task<ActionResult<UpdatePlaybookTransitionResponse>> UpdatePlaybookTransition(PlaybookId id, PlaybookBoardTransitionId transitionId, [FromBody] UpdatePlaybookTransitionRequest request)
     {
         request.Id = id;
-        request.StepId = stepId;
-        var response = await this.updatePlaybookStepService.ExecuteAsync(UserId!.Value, request);
+        request.TransitionId = transitionId;
+        var response = await this.updatePlaybookTransitionService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 }

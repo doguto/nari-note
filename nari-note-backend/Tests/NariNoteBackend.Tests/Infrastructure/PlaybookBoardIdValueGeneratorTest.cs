@@ -2,12 +2,12 @@ using NariNoteBackend.Infrastructure.Database;
 
 namespace NariNoteBackend.Tests.Infrastructure;
 
-public class PlaybookNodeBoardIdValueGeneratorTest
+public class PlaybookBoardIdValueGeneratorTest
 {
     [Fact]
     public void 同じミリ秒に続けて作っても作った順に大きくなる()
     {
-        var generator = new PlaybookNodeBoardIdValueGenerator();
+        var generator = new PlaybookBoardIdValueGenerator();
 
         var ids = Enumerable.Range(0, 10000).Select(_ => generator.Next(null!).Value).ToList();
 

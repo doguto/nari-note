@@ -4,7 +4,7 @@ namespace NariNoteBackend.Application.Dto;
 
 public class PlaybookMemberDto
 {
-    public PlaybookNodeBoardId BoardId { get; set; }
+    public PlaybookBoardId BoardId { get; set; }
     public bool IsCurrent { get; set; }
     public bool IsRepresentative { get; set; }
     public required string Diff { get; set; }

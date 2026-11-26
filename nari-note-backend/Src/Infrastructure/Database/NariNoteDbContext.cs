@@ -30,8 +30,8 @@ public class NariNoteDbContext : DbContext
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
     public DbSet<Playbook> Playbooks { get; set; }
     public DbSet<PlaybookNode> PlaybookNodes { get; set; }
-    public DbSet<PlaybookNodeBoard> PlaybookNodeBoards { get; set; }
-    public DbSet<PlaybookNodeStep> PlaybookNodeSteps { get; set; }
+    public DbSet<PlaybookBoard> PlaybookBoards { get; set; }
+    public DbSet<PlaybookBoardTransition> PlaybookBoardTransitions { get; set; }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
@@ -348,58 +348,58 @@ public class NariNoteDbContext : DbContext
              .HasVogenConversion();
         });
 
-        modelBuilder.Entity<PlaybookNodeBoard>(x =>
+        modelBuilder.Entity<PlaybookBoard>(x =>
         {
             x.HasOne(b => b.Playbook)
              .WithMany(p => p.Boards)
              .HasForeignKey(b => b.PlaybookId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            // 定跡の削除時は盤面とノードが同じ文で消えるため、文末に検査される NO ACTION にする
+            // 定跡の削除時は局面とノードが同じ文で消えるため、DB 側は文末に検査される NO ACTION にする
             x.HasOne(b => b.Node)
              .WithMany(n => n.Boards)
              .HasForeignKey(b => b.NodeId)
-             .OnDelete(DeleteBehavior.NoAction);
+             .OnDelete(DeleteBehavior.ClientSetNull);
 
             x.Property(b => b.Id)
-             .HasValueGenerator<PlaybookNodeBoardIdValueGenerator>();
+             .HasValueGenerator<PlaybookBoardIdValueGenerator>();
 
             x.Property(b => b.Id)
              .HasVogenConversion();
 
             x.Property(b => b.PlaybookId)
              .HasVogenConversion();
-
-            x.Property(b => b.NodeId)
-             .HasVogenConversion();
         });
 
-        modelBuilder.Entity<PlaybookNodeStep>(x =>
+        modelBuilder.Entity<PlaybookBoardTransition>(x =>
         {
-            x.HasOne(s => s.Playbook)
-             .WithMany(p => p.Steps)
-             .HasForeignKey(s => s.PlaybookId)
+            x.HasOne(t => t.Playbook)
+             .WithMany(p => p.Transitions)
+             .HasForeignKey(t => t.PlaybookId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            x.HasOne(s => s.FromBoard)
+            x.HasOne(t => t.FromBoard)
              .WithMany()
-             .HasForeignKey(s => s.FromBoardId)
+             .HasForeignKey(t => t.FromBoardId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            x.HasOne(s => s.ToBoard)
+            x.HasOne(t => t.ToBoard)
              .WithMany()
-             .HasForeignKey(s => s.ToBoardId)
+             .HasForeignKey(t => t.ToBoardId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            x.Property(s => s.Id)
+            x.Property(t => t.Id)
              .HasVogenConversion()
              .ValueGeneratedOnAdd()
              .UseIdentityByDefaultColumn();
 
-            x.Property(s => s.PlaybookId)
+            x.Property(t => t.PlaybookId)
              .HasVogenConversion();
 
-            x.Property(s => s.FromBoardId)
+            x.Property(t => t.FromBoardId)
+             .HasVogenConversion();
+
+            x.Property(t => t.ToBoardId)
              .HasVogenConversion();
         });
     }

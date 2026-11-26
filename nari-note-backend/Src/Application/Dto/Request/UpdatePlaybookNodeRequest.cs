@@ -4,13 +4,13 @@ using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Dto.Request;
 
-// 局面で指定する。まだノードでない手順の途中の局面なら、そこをノードにする
+// 局面で指定する。ノードに属さない局面に名前かメモを付けると、その局面のノードを作る
 public class UpdatePlaybookNodeRequest
 {
     public PlaybookId Id { get; set; }
 
     [Required(ErrorMessage = "局面は必須です")]
-    [MaxLength(PlaybookNodeBoard.SfenMaxLength)]
+    [MaxLength(PlaybookBoard.SfenMaxLength)]
     public required string Sfen { get; set; }
 
     [MaxLength(PlaybookNode.NameMaxLength, ErrorMessage = "形の名前は100文字以内で入力してください")]

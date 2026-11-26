@@ -10,28 +10,28 @@ using NariNoteBackend.Extension;
 
 namespace NariNoteBackend.Application.Service;
 
-public class UpdatePlaybookStepService
+public class UpdatePlaybookTransitionService
 {
     readonly IPlaybookRepository playbookRepository;
     readonly TimeProvider timeProvider;
 
-    public UpdatePlaybookStepService(IPlaybookRepository playbookRepository, TimeProvider timeProvider)
+    public UpdatePlaybookTransitionService(IPlaybookRepository playbookRepository, TimeProvider timeProvider)
     {
         this.playbookRepository = playbookRepository;
         this.timeProvider = timeProvider;
     }
 
-    public async Task<UpdatePlaybookStepResponse> ExecuteAsync(UserId userId, UpdatePlaybookStepRequest request)
+    public async Task<UpdatePlaybookTransitionResponse> ExecuteAsync(UserId userId, UpdatePlaybookTransitionRequest request)
     {
         var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
         PlaybookAccess.EnsureOwner(playbook, userId);
 
-        var step = playbook.Steps.FirstOrDefault(s => s.Id == request.StepId)
-            ?? throw new KeyNotFoundException($"手順{request.StepId}が存在しません");
-        step.Condition = request.Condition.Trim();
+        var transition = playbook.Transitions.FirstOrDefault(t => t.Id == request.TransitionId)
+            ?? throw new KeyNotFoundException($"遷移{request.TransitionId}が存在しません");
+        transition.Condition = request.Condition.Trim();
 
         playbook.UpdatedAt = this.timeProvider.UtcNow();
         await this.playbookRepository.SaveAsync();
-        return new UpdatePlaybookStepResponse();
+        return new UpdatePlaybookTransitionResponse();
     }
 }

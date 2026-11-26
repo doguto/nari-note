@@ -7,8 +7,8 @@ using NSubstitute;
 
 namespace NariNoteBackend.Tests.Support.Builder;
 
-// Service の単体テスト用に、ノード・盤面・手順を持つ定跡をメモリ上に組み立てる。
-// 手順の分け方は本番と同じ PlaybookTree と Rebuild に任せ、ID は連番で振る。DB に投入する結合テストでは使わない
+// Service の単体テスト用に、ノード・局面・遷移を持つ定跡をメモリ上に組み立てる。
+// 局面と遷移の足し方は本番と同じ PlaybookGraph に任せ、ID は連番で振る。DB に投入する結合テストでは使わない
 public class PlaybookBuilder
 {
     static int sequence;
@@ -27,56 +27,40 @@ public class PlaybookBuilder
             RootSfen = sfen,
             UpdatedAt = TestTimeProvider.DefaultUtcNow.AddDays(-1),
         };
-        var node = new PlaybookNode { Playbook = this.playbook };
-        var root = new PlaybookNodeBoard { Playbook = this.playbook, Node = node, Sfen = sfen };
-        node.Boards.Add(root);
-        this.playbook.Nodes.Add(node);
-        this.playbook.Boards.Add(root);
+        this.playbook.Boards.Add(new PlaybookBoard { Playbook = this.playbook, Sfen = sfen });
         this.AssignIds();
     }
 
-    public PlaybookNodeBoard Root => this.BoardAt(this.playbook.RootSfen)!;
+    public PlaybookBoard Root => this.BoardAt(this.playbook.RootSfen)!;
 
     public Playbook Build() => this.playbook;
 
-    public PlaybookNodeBoard? BoardAt(string sfen) => this.playbook.Boards.FirstOrDefault(b => b.Sfen == sfen);
+    public PlaybookBoard? BoardAt(string sfen) => this.playbook.Boards.FirstOrDefault(b => b.Sfen == sfen);
 
     // 開始局面からの手順を足し、終点の局面の SFEN を返す
     public string Line(params string[] usis)
     {
-        var tree = PlaybookTree.Load(this.playbook);
-        tree.AddLine(usis);
-        PlaybookAccess.Rebuild(this.playbook, tree, this.repository);
+        new PlaybookGraph(this.playbook, this.repository).AddLine(usis);
         this.AssignIds();
         return Play(this.playbook.RootSfen, usis);
     }
 
-    // 局面に名前を付けてノードにする
-    public PlaybookNodeBoard Name(string sfen, string name)
+    public PlaybookBoard Name(string sfen, string name)
     {
-        var board = this.BoardAt(sfen);
-        if (board == null)
-        {
-            var node = new PlaybookNode { Playbook = this.playbook };
-            board = new PlaybookNodeBoard { Playbook = this.playbook, Node = node, Sfen = sfen };
-            node.Boards.Add(board);
-            this.playbook.Nodes.Add(node);
-            this.playbook.Boards.Add(board);
-        }
-        board.Node.Name = name;
-        PlaybookAccess.Rebuild(this.playbook, PlaybookTree.Load(this.playbook), this.repository);
+        var board = this.BoardAt(sfen) ?? throw new InvalidOperationException("定跡に無い局面です");
+        new PlaybookGraph(this.playbook, this.repository).EnsureNode(board).Name = name;
         this.AssignIds();
         return board;
     }
 
-    public void Merge(PlaybookNodeBoard keep, PlaybookNodeBoard drop)
+    public void Merge(PlaybookBoard keep, PlaybookBoard drop)
     {
-        var dropNode = drop.Node;
+        var dropNode = drop.Node!;
         foreach (var board in dropNode.Boards.ToList())
         {
             board.Node = keep.Node;
             board.NodeId = keep.NodeId;
-            keep.Node.Boards.Add(board);
+            keep.Node!.Boards.Add(board);
         }
         this.playbook.Nodes.Remove(dropNode);
     }
@@ -95,18 +79,18 @@ public class PlaybookBuilder
             node.Id = PlaybookNodeId.From(Next());
             node.PlaybookId = this.playbook.Id;
         }
-        foreach (var board in this.playbook.Boards.Where(b => !b.Id.IsInitialized()))
+        foreach (var board in this.playbook.Boards)
         {
-            board.Id = PlaybookNodeBoardId.From(NextGuid());
+            if (!board.Id.IsInitialized()) board.Id = PlaybookBoardId.From(NextGuid());
             board.PlaybookId = this.playbook.Id;
+            board.NodeId = board.Node?.Id;
         }
-        foreach (var board in this.playbook.Boards) board.NodeId = board.Node.Id;
-        foreach (var step in this.playbook.Steps)
+        foreach (var transition in this.playbook.Transitions)
         {
-            if (!step.Id.IsInitialized()) step.Id = PlaybookNodeStepId.From(Next());
-            step.PlaybookId = this.playbook.Id;
-            step.FromBoardId = step.FromBoard.Id;
-            step.ToBoardId = step.ToBoard?.Id;
+            if (!transition.Id.IsInitialized()) transition.Id = PlaybookBoardTransitionId.From(Next());
+            transition.PlaybookId = this.playbook.Id;
+            transition.FromBoardId = transition.FromBoard.Id;
+            transition.ToBoardId = transition.ToBoard.Id;
         }
     }
 

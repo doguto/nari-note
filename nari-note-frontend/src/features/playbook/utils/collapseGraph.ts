@@ -1,6 +1,5 @@
-import type { PlaybookNodeStepDto } from '@/lib/api/types';
-import type { PlaybookTree } from './playbookTree';
-import { destinationOf, moveLabel, play } from './shogiRules';
+import type { PlaybookTree, TreeMove } from './playbookTree';
+import { destinationOf, moveLabel } from './shogiRules';
 
 export interface ChainMove {
   usi: string;
@@ -31,21 +30,38 @@ export interface CollapsedGraph {
 }
 
 const ROOT_LABEL = '開始';
+// ノードの ID は 1 から、省略記号の行き先は負の数で振るので、ノードに属さない開始局面は 0 にする
+const ROOT_ID = 0;
 
-// 名前を付けたノードだけを描き、その間の名前のないノードと手順の途中の局面は、手の並びとして辺にまとめる
+function rootIdOf(tree: PlaybookTree): number {
+  return tree.boards.get(tree.rootSfen)?.nodeId ?? ROOT_ID;
+}
+
+// グラフに描く点の ID。開始局面と名前を付けたノードの局面だけが点になる
+export function graphNodeIdOf(tree: PlaybookTree, sfen: string): number | undefined {
+  const rootId = rootIdOf(tree);
+  if (sfen === tree.rootSfen) return rootId;
+  const nodeId = tree.boards.get(sfen)?.nodeId;
+  if (nodeId == null) return undefined;
+  return nodeId === rootId || (tree.nodes.get(nodeId)?.name ?? '') !== '' ? nodeId : undefined;
+}
+
+// 開始局面と名前を付けたノードだけを描き、その間の局面は手の並びとして辺にまとめる
 export function collapseGraph(tree: PlaybookTree): CollapsedGraph {
-  const rootId = tree.boards.get(tree.rootSfen)!.nodeId;
-  const isNamed = (nodeId: number) => nodeId === rootId || (tree.nodes.get(nodeId)?.name ?? '') !== '';
-  const stepsFrom = new Map<string, PlaybookNodeStepDto[]>();
-  for (const s of tree.steps) stepsFrom.set(s.fromBoardId, [...(stepsFrom.get(s.fromBoardId) ?? []), s]);
-  const boardsOf = (nodeId: number) => [...tree.boards.values()].filter((b) => b.nodeId === nodeId);
+  const rootId = rootIdOf(tree);
+  const sfensByNode = new Map<number, string[]>();
+  for (const board of tree.boards.values()) {
+    const id = graphNodeIdOf(tree, board.sfen);
+    if (id !== undefined) sfensByNode.set(id, [...(sfensByNode.get(id) ?? []), board.sfen]);
+  }
 
-  const nodes: CollapsedNode[] = [...tree.nodes.values()]
-    .filter((n) => isNamed(n.id))
-    .map((n) => {
-      const boards = boardsOf(n.id);
-      return { id: n.id, label: n.name || ROOT_LABEL, positionCount: boards.length, sfen: boards[0].sfen, isStub: false };
-    });
+  const nodes: CollapsedNode[] = [...sfensByNode.entries()].map(([id, sfens]) => ({
+    id,
+    label: tree.nodes.get(id)?.name || ROOT_LABEL,
+    positionCount: sfens.length,
+    sfen: id === rootId && !tree.nodes.has(id) ? tree.rootSfen : sfens[0],
+    isStub: false,
+  }));
 
   const chains: Chain[] = [];
   let stubId = 0;
@@ -55,59 +71,60 @@ export function collapseGraph(tree: PlaybookTree): CollapsedGraph {
     return stubId;
   };
 
-  const conditional = conditionalSteps(tree, stepsFrom);
+  const conditional = conditionalTransitions(tree);
   const walk = (
     from: number,
-    step: PlaybookNodeStepDto,
+    parentSfen: string,
+    move: TreeMove,
     moves: ChainMove[],
     conditions: string[],
     isConditional: boolean,
     visited: Set<string>,
   ) => {
-    let sfen = tree.boardsById.get(step.fromBoardId)!.sfen;
-    let previousTo = moves.length > 0 ? destinationOf(moves[moves.length - 1].usi) : undefined;
-    const nextMoves = [...moves];
-    for (const usi of step.usis) {
-      const child = play(sfen, usi);
-      nextMoves.push({ usi, label: moveLabel(sfen, usi, previousTo), sfen: child });
-      previousTo = destinationOf(usi);
-      sfen = child;
-    }
-    const nextConditions = step.condition ? [...conditions, step.condition] : conditions;
-    const target = step.toBoardId ? tree.boardsById.get(step.toBoardId) : undefined;
-    const outgoing = target ? (stepsFrom.get(target.id) ?? []) : [];
+    const previousTo = moves.length > 0 ? destinationOf(moves[moves.length - 1].usi) : undefined;
+    const nextMoves = [...moves, { usi: move.usi, label: moveLabel(parentSfen, move.usi, previousTo), sfen: move.child }];
+    const nextConditions = move.transition.condition ? [...conditions, move.transition.condition] : conditions;
+    const target = graphNodeIdOf(tree, move.child);
+    const outgoing = tree.children.get(move.child) ?? [];
 
-    if (target && isNamed(target.nodeId)) {
-      chains.push({ from, to: target.nodeId, moves: nextMoves, conditions: nextConditions, isConditional });
-    } else if (!target || visited.has(target.id) || outgoing.length === 0) {
-      chains.push({ from, to: stub(sfen), moves: nextMoves, conditions: nextConditions, isConditional });
+    if (target !== undefined) {
+      chains.push({ from, to: target, moves: nextMoves, conditions: nextConditions, isConditional });
+    } else if (visited.has(move.child) || outgoing.length === 0) {
+      chains.push({ from, to: stub(move.child), moves: nextMoves, conditions: nextConditions, isConditional });
     } else {
-      for (const next of outgoing) walk(from, next, nextMoves, nextConditions, isConditional, new Set([...visited, target.id]));
+      const nextVisited = new Set([...visited, move.child]);
+      for (const next of outgoing) walk(from, move.child, next, nextMoves, nextConditions, isConditional, nextVisited);
     }
   };
 
-  for (const node of nodes.filter((n) => !n.isStub)) {
-    for (const board of boardsOf(node.id)) {
-      for (const step of stepsFrom.get(board.id) ?? []) walk(node.id, step, [], [], conditional.has(step.id), new Set([board.id]));
+  for (const [id, sfens] of sfensByNode) {
+    for (const sfen of sfens) {
+      for (const move of tree.children.get(sfen) ?? []) {
+        walk(id, sfen, move, [], [], conditional.has(move.transition.id), new Set([sfen]));
+      }
     }
   }
 
   return { nodes, chains, rootId };
 }
 
-// まとめた盤面から同じ手を指して行き先が分かれるのは、盤面の違いで手の意味が変わるところ
-function conditionalSteps(tree: PlaybookTree, stepsFrom: Map<string, PlaybookNodeStepDto[]>): Set<number> {
-  const groups = new Map<string, PlaybookNodeStepDto[]>();
+// まとめた局面から同じ手を指して行き先が分かれるのは、局面の違いで手の意味が変わるところ
+function conditionalTransitions(tree: PlaybookTree): Set<number> {
+  const groups = new Map<string, TreeMove[]>();
   for (const board of tree.boards.values()) {
-    for (const step of stepsFrom.get(board.id) ?? []) {
-      const key = `${board.nodeId}:${step.usis[0]}`;
-      groups.set(key, [...(groups.get(key) ?? []), step]);
+    if (board.nodeId == null) continue;
+    for (const move of tree.children.get(board.sfen) ?? []) {
+      const key = `${board.nodeId}:${move.usi}`;
+      groups.set(key, [...(groups.get(key) ?? []), move]);
     }
   }
+  const destinationOfMove = (move: TreeMove) => {
+    const nodeId = tree.boards.get(move.child)?.nodeId;
+    return nodeId != null ? `node:${nodeId}` : `board:${move.transition.toBoardId}`;
+  };
   const result = new Set<number>();
-  for (const steps of groups.values()) {
-    const targets = new Set(steps.map((s) => (s.toBoardId ? `node:${tree.boardsById.get(s.toBoardId)?.nodeId}` : `open:${s.id}`)));
-    if (targets.size > 1) steps.forEach((s) => result.add(s.id));
+  for (const moves of groups.values()) {
+    if (new Set(moves.map(destinationOfMove)).size > 1) moves.forEach((m) => result.add(m.transition.id));
   }
   return result;
 }

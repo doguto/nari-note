@@ -21,31 +21,18 @@ public class UpdatePlaybookNodeService
         this.timeProvider = timeProvider;
     }
 
-    // 手順の途中の局面に名前やメモを付けるとノードになり、名前もメモも消すと手順の途中に戻る
+    // ノードに属さない局面に名前やメモを付けるとノードを作り、名前もメモも消すとノードから外す
     public async Task<UpdatePlaybookNodeResponse> ExecuteAsync(UserId userId, UpdatePlaybookNodeRequest request)
     {
         var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
         PlaybookAccess.EnsureOwner(playbook, userId);
 
-        var tree = PlaybookTree.Load(playbook);
-        var sfen = ShogiBoard.Normalize(request.Sfen);
-        var board = playbook.Boards.FirstOrDefault(b => b.Sfen == sfen);
-        if (board == null)
-        {
-            if (!tree.Contains(sfen)) throw new KeyNotFoundException("この定跡に無い局面です");
-            var created = new PlaybookNode { Playbook = playbook };
-            board = new PlaybookNodeBoard { Playbook = playbook, Node = created, Sfen = sfen };
-            created.Boards.Add(board);
-            playbook.Nodes.Add(created);
-            playbook.Boards.Add(board);
-            this.playbookRepository.AddNode(created);
-            this.playbookRepository.AddBoard(board);
-        }
-
-        var node = board.Node;
+        var graph = new PlaybookGraph(playbook, this.playbookRepository);
+        var board = graph.FindForceBoard(ShogiBoard.Normalize(request.Sfen));
+        var node = graph.EnsureNode(board);
         if (request.Name != null) node.Name = request.Name.Trim();
         if (request.Memo != null) node.Memo = request.Memo;
-        PlaybookAccess.Rebuild(playbook, tree, this.playbookRepository);
+        graph.ReleaseNodeIfEmpty(node);
 
         playbook.UpdatedAt = this.timeProvider.UtcNow();
         await this.playbookRepository.SaveAsync();

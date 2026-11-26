@@ -12,8 +12,8 @@ export interface ResearchMove {
   usi: string;
   label: string;
   isDraft: boolean;
-  // ノードから出る手順の 1 手目のときだけ、その手順の条件を書ける
-  stepId?: number;
+  // ノードに属する局面から出る保存済みの手のときだけ、その遷移の条件を書ける
+  transitionId?: number;
   condition: string;
   conditionSuggestions: string[];
 }
@@ -25,7 +25,7 @@ interface NextMovesPanelProps {
   className?: string;
   onSelect: (index: number) => void;
   onGo: (usi: string) => void;
-  onChangeCondition: (stepId: number, condition: string) => void;
+  onChangeCondition: (transitionId: number, condition: string) => void;
   onDelete: (usi: string) => void;
 }
 
@@ -53,7 +53,7 @@ export function NextMovesPanel({
           {moves.map((m, i) => {
             const selected = i === selectedIndex;
             const score = scores[m.usi];
-            const stepId = m.stepId;
+            const transitionId = m.transitionId;
             return (
               <li
                 key={m.usi}
@@ -91,7 +91,7 @@ export function NextMovesPanel({
                 </div>
                 {selected && !m.isDraft && (
                   <div className="flex flex-col gap-2">
-                    {stepId !== undefined && (
+                    {transitionId !== undefined && (
                       <>
                         <label className="flex items-center gap-2">
                           <span className="flex w-12 flex-none items-center gap-1 text-xs font-bold text-orange-800">
@@ -106,12 +106,12 @@ export function NextMovesPanel({
                             maxLength={100}
                             className={fieldClass}
                             onBlur={(e) => {
-                              if (e.target.value !== m.condition) onChangeCondition(stepId, e.target.value);
+                              if (e.target.value !== m.condition) onChangeCondition(transitionId, e.target.value);
                             }}
                           />
                         </label>
                         <div className="pl-14">
-                          <SuggestionChips label="候補" suggestions={m.conditionSuggestions} onPick={(c) => onChangeCondition(stepId, c)} />
+                          <SuggestionChips label="候補" suggestions={m.conditionSuggestions} onPick={(c) => onChangeCondition(transitionId, c)} />
                         </div>
                       </>
                     )}

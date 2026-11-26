@@ -26,11 +26,7 @@ public class CreatePlaybookService
         var rootSfen = start.ToSfen();
 
         var playbook = new Playbook { UserId = userId, Name = request.Name, RootSfen = rootSfen };
-        var node = new PlaybookNode { Playbook = playbook };
-        var root = new PlaybookNodeBoard { Playbook = playbook, Node = node, Sfen = rootSfen };
-        node.Boards.Add(root);
-        playbook.Nodes.Add(node);
-        playbook.Boards.Add(root);
+        playbook.Boards.Add(new PlaybookBoard { Playbook = playbook, Sfen = rootSfen });
 
         await this.playbookRepository.CreateAsync(playbook);
         return new CreatePlaybookResponse { Id = playbook.Id };
