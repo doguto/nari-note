@@ -29,7 +29,7 @@ resource "aws_lambda_function" "engine" {
 }
 
 resource "aws_cloudwatch_log_group" "engine" {
-  name              = "/aws/lambda/${local.engine_name}"
+  name              = "/${var.app_name}/shogi-engine"
   retention_in_days = var.log_retention_days
 
   tags = {
