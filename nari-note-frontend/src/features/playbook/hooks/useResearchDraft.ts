@@ -2,22 +2,18 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-export type DraftParent = { kind: 'saved'; positionId: string } | { kind: 'draft'; sfen: string };
-
 export interface DraftNode {
   sfen: string;
-  parent: DraftParent;
+  parentSfen: string;
   usi: string;
   label: string;
 }
 
 export interface DraftLine {
-  fromPositionId: string;
-  usis: string[];
+  // 手元の手順がつながる、保存済みの局面
+  anchorSfen: string;
+  nodes: DraftNode[];
 }
-
-const sameParent = (a: DraftParent, b: DraftParent) =>
-  a.kind === b.kind && (a.kind === 'saved' ? a.positionId === (b as typeof a).positionId : a.sfen === (b as typeof a).sfen);
 
 // 研究中に指した手は保存するまで手元だけに置く。局面は SFEN で見分ける
 export function useResearchDraft() {
@@ -32,51 +28,36 @@ export function useResearchDraft() {
     });
   }, []);
 
-  const childrenOf = useCallback((parent: DraftParent) => [...nodes.values()].filter((n) => sameParent(n.parent, parent)), [nodes]);
+  const childrenOf = useCallback((sfen: string) => [...nodes.values()].filter((n) => n.parentSfen === sfen), [nodes]);
 
-  // 局面から、手元の手順をさかのぼって最初の保存済み局面までの手を並べる
+  // 局面から手元の手順をさかのぼり、最初の保存済み局面までの手を並べる
   const lineTo = useCallback(
-    (sfen: string): { anchorId: string; nodes: DraftNode[] } | null => {
+    (sfen: string): DraftLine | null => {
       const chain: DraftNode[] = [];
       let node = nodes.get(sfen);
       while (node) {
         chain.unshift(node);
-        if (node.parent.kind === 'saved') return { anchorId: node.parent.positionId, nodes: chain };
-        node = nodes.get(node.parent.sfen);
+        const parent = nodes.get(node.parentSfen);
+        if (!parent) return { anchorSfen: node.parentSfen, nodes: chain };
+        node = parent;
       }
       return null;
     },
     [nodes],
   );
 
-  const remove = useCallback((sfen: string) => {
-    setNodes((prev) => {
-      const doomed = new Set([sfen]);
-      let grew = true;
-      while (grew) {
-        grew = false;
-        for (const n of prev.values()) {
-          if (n.parent.kind === 'draft' && doomed.has(n.parent.sfen) && !doomed.has(n.sfen)) {
-            doomed.add(n.sfen);
-            grew = true;
-          }
-        }
-      }
-      return new Map([...prev].filter(([key]) => !doomed.has(key)));
-    });
-  }, []);
-
   const clear = useCallback(() => setNodes(new Map()), []);
 
-  // 保存では、手元の木の葉ごとに保存済み局面からの手順として送る
+  // 保存では、手元の木の葉ごとに、保存済みの局面からの手順として送る
   const lines = useMemo((): DraftLine[] => {
-    const parents = new Set([...nodes.values()].filter((n) => n.parent.kind === 'draft').map((n) => (n.parent as { sfen: string }).sfen));
+    const parents = new Set([...nodes.values()].map((n) => n.parentSfen));
     return [...nodes.values()]
       .filter((n) => !parents.has(n.sfen))
       .map((leaf) => lineTo(leaf.sfen))
-      .filter((l): l is { anchorId: string; nodes: DraftNode[] } => l !== null)
-      .map((l) => ({ fromPositionId: l.anchorId, usis: l.nodes.map((n) => n.usi) }));
+      .filter((l): l is DraftLine => l !== null);
   }, [nodes, lineTo]);
 
-  return { nodes, count: nodes.size, add, childrenOf, lineTo, remove, clear, lines };
+  const get = useCallback((sfen: string) => nodes.get(sfen), [nodes]);
+
+  return { count: nodes.size, add, get, childrenOf, lineTo, clear, lines };
 }

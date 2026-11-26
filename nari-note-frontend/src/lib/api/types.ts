@@ -2,13 +2,13 @@
 // Do not edit manually
 
 
-export interface AnalyzePlaybookPositionRequest {
+export interface AnalyzePlaybookBoardRequest {
   id?: string;
   sfen: string;
   engine: string;
 }
 
-export interface AnalyzePlaybookPositionResponse {
+export interface AnalyzePlaybookBoardResponse {
   isAvailable: boolean;
   lines: EngineLineDto[];
 }
@@ -133,7 +133,6 @@ export interface CreatePlaybookRequest {
 
 export interface CreatePlaybookResponse {
   id: string;
-  rootPositionId: string;
 }
 
 export interface DeleteArticleRequest {
@@ -142,11 +141,6 @@ export interface DeleteArticleRequest {
 
 export interface DeleteCourseRequest {
   id?: string;
-}
-
-export interface DeletePlaybookMoveRequest {
-  id?: string;
-  moveId?: number;
 }
 
 export interface DeletePlaybookRequest {
@@ -344,27 +338,6 @@ export interface GetMyPlaybooksResponse {
   playbooks: PlaybookSummaryDto[];
 }
 
-export interface GetPlaybookPositionRequest {
-  id?: string;
-  positionId?: string;
-}
-
-export interface GetPlaybookPositionResponse {
-  playbookId: string;
-  playbookName: string;
-  positionId: string;
-  sfen: string;
-  isSenteTurn: boolean;
-  lastMoveUsi?: string;
-  path: PlaybookPathStepDto[];
-  legalMoves: string[];
-  moves: PlaybookMoveDto[];
-  group: ShapeGroupDto;
-  proposals: ShapeProposalDto[];
-  graph: PlaybookGraphDto;
-  pendingJudgeCount: number;
-}
-
 export interface GetPlaybookRequest {
   id?: string;
 }
@@ -372,7 +345,10 @@ export interface GetPlaybookRequest {
 export interface GetPlaybookResponse {
   id: string;
   name: string;
-  rootPositionId: string;
+  rootSfen: string;
+  nodes: PlaybookNodeDto[];
+  boards: PlaybookNodeBoardDto[];
+  steps: PlaybookNodeStepDto[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -406,6 +382,19 @@ export interface GetUserProfileResponse {
 export interface HealthCheckRequest {
 }
 
+export interface InspectPlaybookBoardRequest {
+  id?: string;
+  sfen: string;
+}
+
+export interface InspectPlaybookBoardResponse {
+  boardId?: string;
+  nameSuggestions: string[];
+  members: PlaybookMemberDto[];
+  similar: PlaybookSimilarBoardDto[];
+  conditionSuggestions: PlaybookConditionSuggestionDto[];
+}
+
 export interface KifuDto {
   name: string;
   kifuText: string;
@@ -416,76 +405,72 @@ export interface KifuDto {
 export interface LogoutRequest {
 }
 
-export interface MergeShapeCandidateRequest {
+export interface MergePlaybookNodesRequest {
   id?: string;
-  candidateId?: number;
+  boardId: string;
+  otherBoardId: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface MergeShapeCandidateResponse {
+export interface MergePlaybookNodesResponse {
 }
 
-export interface PlaybookGraphDto {
-  rootGroupId: number;
-  currentGroupId: number;
-  nodes: PlaybookGraphNodeDto[];
-  edges: PlaybookGraphEdgeDto[];
-}
-
-export interface PlaybookGraphEdgeDto {
-  fromGroupId: number;
-  toGroupId: number;
-  label: string;
-  condition: string;
-  isConditional: boolean;
-}
-
-export interface PlaybookGraphNodeDto {
-  groupId: number;
-  representativePositionId: string;
-  moveLabel: string;
-  name: string;
-  positionCount: number;
-  isLeaf: boolean;
-  hasMemo: boolean;
+export interface PlaybookConditionSuggestionDto {
+  stepId: number;
+  suggestions: string[];
 }
 
 export interface PlaybookLineDto {
-  fromPositionId: string;
   usis: string[];
 }
 
-export interface PlaybookMoveDto {
-  id: number;
-  usi: string;
-  label: string;
-  memo: string;
-  condition: string;
-  conditionSuggestions: string[];
-  childPositionId: string;
+export interface PlaybookMemberDto {
+  boardId: string;
+  isCurrent: boolean;
+  isRepresentative: boolean;
+  diff: string;
 }
 
-export interface PlaybookPathStepDto {
-  parentPositionId: string;
-  positionId: string;
-  usi: string;
-  label: string;
+export interface PlaybookNodeBoardDto {
+  id: string;
+  nodeId: number;
+  sfen: string;
+}
+
+export interface PlaybookNodeDto {
+  id: number;
+  name: string;
+  memo: string;
+}
+
+export interface PlaybookNodeStepDto {
+  id: number;
+  fromBoardId: string;
+  toBoardId?: string;
+  usis: string[];
+  condition: string;
+}
+
+export interface PlaybookSimilarBoardDto {
+  boardId: string;
+  nodeName: string;
+  diff: string;
 }
 
 export interface PlaybookSummaryDto {
   id: string;
   name: string;
-  positionCount: number;
   updatedAt: string;
 }
 
-export interface RejectShapeCandidateRequest {
+export interface RemovePlaybookMoveRequest {
   id?: string;
-  candidateId?: number;
+  sfen: string;
+  usi: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface RejectShapeCandidateResponse {
+export interface RemovePlaybookMoveResponse {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -506,13 +491,8 @@ export interface SavePlaybookLinesRequest {
   lines: PlaybookLineDto[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface SavePlaybookLinesResponse {
-  positions: SavedPositionDto[];
-}
-
-export interface SavedPositionDto {
-  sfen: string;
-  positionId: string;
 }
 
 export interface SearchArticlesRequest {
@@ -537,31 +517,6 @@ export interface SearchCoursesResponse {
   totalCount: number;
 }
 
-export interface ShapeGroupDto {
-  id: number;
-  name: string;
-  memo: string;
-  nameSuggestions: string[];
-  members: ShapeMemberDto[];
-}
-
-export interface ShapeMemberDto {
-  positionId: string;
-  isCurrent: boolean;
-  isRepresentative: boolean;
-  diff: string;
-}
-
-export interface ShapeProposalDto {
-  candidateId: number;
-  otherPositionId: string;
-  otherName: string;
-  verdict: string;
-  delta?: number;
-  confirmedDepth?: number;
-  diff: string;
-}
-
 export interface SignInRequest {
   usernameOrEmail: string;
   password: string;
@@ -577,13 +532,13 @@ export interface SignUpRequest {
 export interface SignUpResponse {
 }
 
-export interface SplitShapeGroupRequest {
+export interface SplitPlaybookBoardRequest {
   id?: string;
-  positionId?: string;
+  boardId?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface SplitShapeGroupResponse {
+export interface SplitPlaybookBoardResponse {
 }
 
 export interface TagDto {
@@ -646,26 +601,25 @@ export interface UpdatePasswordRequest {
 export interface UpdatePasswordResponse {
 }
 
-export interface UpdatePlaybookMoveRequest {
+export interface UpdatePlaybookNodeRequest {
   id?: string;
-  moveId?: number;
-  memo?: string;
-  condition?: string;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface UpdatePlaybookMoveResponse {
-}
-
-export interface UpdateShapeGroupRequest {
-  id?: string;
-  groupId?: number;
+  sfen: string;
   name?: string;
   memo?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface UpdateShapeGroupResponse {
+export interface UpdatePlaybookNodeResponse {
+}
+
+export interface UpdatePlaybookStepRequest {
+  id?: string;
+  stepId?: number;
+  condition: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UpdatePlaybookStepResponse {
 }
 
 export interface UpdateUserProfileRequest {

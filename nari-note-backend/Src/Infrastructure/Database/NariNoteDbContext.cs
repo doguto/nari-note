@@ -29,10 +29,9 @@ public class NariNoteDbContext : DbContext
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
     public DbSet<Playbook> Playbooks { get; set; }
-    public DbSet<PlaybookPosition> PlaybookPositions { get; set; }
-    public DbSet<PlaybookMove> PlaybookMoves { get; set; }
-    public DbSet<ShapeGroup> ShapeGroups { get; set; }
-    public DbSet<ShapeCandidate> ShapeCandidates { get; set; }
+    public DbSet<PlaybookNode> PlaybookNodes { get; set; }
+    public DbSet<PlaybookNodeBoard> PlaybookNodeBoards { get; set; }
+    public DbSet<PlaybookNodeStep> PlaybookNodeSteps { get; set; }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
@@ -333,118 +332,75 @@ public class NariNoteDbContext : DbContext
              .HasVogenConversion();
         });
 
-        modelBuilder.Entity<ShapeGroup>(x =>
+        modelBuilder.Entity<PlaybookNode>(x =>
         {
-            x.HasOne(g => g.Playbook)
-             .WithMany(b => b.ShapeGroups)
-             .HasForeignKey(g => g.PlaybookId)
+            x.HasOne(n => n.Playbook)
+             .WithMany(b => b.Nodes)
+             .HasForeignKey(n => n.PlaybookId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            x.Property(g => g.Id)
+            x.Property(n => n.Id)
              .HasVogenConversion()
              .ValueGeneratedOnAdd()
              .UseIdentityByDefaultColumn();
 
-            x.Property(g => g.PlaybookId)
+            x.Property(n => n.PlaybookId)
              .HasVogenConversion();
         });
 
-        modelBuilder.Entity<PlaybookPosition>(x =>
+        modelBuilder.Entity<PlaybookNodeBoard>(x =>
         {
-            x.HasOne(p => p.Playbook)
-             .WithMany(b => b.Positions)
-             .HasForeignKey(p => p.PlaybookId)
+            x.HasOne(b => b.Playbook)
+             .WithMany(p => p.Boards)
+             .HasForeignKey(b => b.PlaybookId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            // 定跡の削除時は局面とグループが同じ文で消えるため、文末に検査される NO ACTION にする
-            x.HasOne(p => p.ShapeGroup)
-             .WithMany(g => g.Positions)
-             .HasForeignKey(p => p.ShapeGroupId)
+            // 定跡の削除時は盤面とノードが同じ文で消えるため、文末に検査される NO ACTION にする
+            x.HasOne(b => b.Node)
+             .WithMany(n => n.Boards)
+             .HasForeignKey(b => b.NodeId)
              .OnDelete(DeleteBehavior.NoAction);
 
-            x.Property(p => p.Id)
-             .HasValueGenerator<PlaybookPositionIdValueGenerator>();
+            x.Property(b => b.Id)
+             .HasValueGenerator<PlaybookNodeBoardIdValueGenerator>();
 
-            x.Property(p => p.Id)
+            x.Property(b => b.Id)
              .HasVogenConversion();
 
-            x.Property(p => p.PlaybookId)
+            x.Property(b => b.PlaybookId)
              .HasVogenConversion();
 
-            x.Property(p => p.ShapeGroupId)
+            x.Property(b => b.NodeId)
              .HasVogenConversion();
         });
 
-        modelBuilder.Entity<PlaybookMove>(x =>
+        modelBuilder.Entity<PlaybookNodeStep>(x =>
         {
-            x.HasOne(m => m.Playbook)
-             .WithMany(b => b.Moves)
-             .HasForeignKey(m => m.PlaybookId)
+            x.HasOne(s => s.Playbook)
+             .WithMany(p => p.Steps)
+             .HasForeignKey(s => s.PlaybookId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            x.HasOne(m => m.ParentPosition)
+            x.HasOne(s => s.FromBoard)
              .WithMany()
-             .HasForeignKey(m => m.ParentPositionId)
+             .HasForeignKey(s => s.FromBoardId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            x.HasOne(m => m.ChildPosition)
+            x.HasOne(s => s.ToBoard)
              .WithMany()
-             .HasForeignKey(m => m.ChildPositionId)
+             .HasForeignKey(s => s.ToBoardId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            x.Property(m => m.Id)
+            x.Property(s => s.Id)
              .HasVogenConversion()
              .ValueGeneratedOnAdd()
              .UseIdentityByDefaultColumn();
 
-            x.Property(m => m.PlaybookId)
+            x.Property(s => s.PlaybookId)
              .HasVogenConversion();
 
-            x.Property(m => m.ParentPositionId)
+            x.Property(s => s.FromBoardId)
              .HasVogenConversion();
-
-            x.Property(m => m.ChildPositionId)
-             .HasVogenConversion();
-        });
-
-        modelBuilder.Entity<ShapeCandidate>(x =>
-        {
-            x.HasOne(c => c.Playbook)
-             .WithMany(b => b.ShapeCandidates)
-             .HasForeignKey(c => c.PlaybookId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasOne(c => c.PositionA)
-             .WithMany()
-             .HasForeignKey(c => c.PositionAId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.HasOne(c => c.PositionB)
-             .WithMany()
-             .HasForeignKey(c => c.PositionBId)
-             .OnDelete(DeleteBehavior.Cascade);
-
-            x.Property(c => c.Id)
-             .HasVogenConversion()
-             .ValueGeneratedOnAdd()
-             .UseIdentityByDefaultColumn();
-
-            x.Property(c => c.PlaybookId)
-             .HasVogenConversion();
-
-            x.Property(c => c.PositionAId)
-             .HasVogenConversion();
-
-            x.Property(c => c.PositionBId)
-             .HasVogenConversion();
-
-            x.Property(c => c.Status)
-             .HasConversion<string>()
-             .HasMaxLength(16);
-
-            x.Property(c => c.Decision)
-             .HasConversion<string>()
-             .HasMaxLength(16);
         });
     }
 }

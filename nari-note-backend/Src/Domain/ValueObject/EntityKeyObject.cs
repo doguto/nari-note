@@ -44,14 +44,11 @@ public partial struct UserId;
 [ValueObject<Guid>(Conversions.EfCoreValueConverter)]
 public partial struct PlaybookId;
 
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct PlaybookNodeId;
+
 [ValueObject<Guid>(Conversions.EfCoreValueConverter)]
-public partial struct PlaybookPositionId;
+public partial struct PlaybookNodeBoardId;
 
 [ValueObject<int>(Conversions.EfCoreValueConverter)]
-public partial struct PlaybookMoveId;
-
-[ValueObject<int>(Conversions.EfCoreValueConverter)]
-public partial struct ShapeGroupId;
-
-[ValueObject<int>(Conversions.EfCoreValueConverter)]
-public partial struct ShapeCandidateId;
+public partial struct PlaybookNodeStepId;

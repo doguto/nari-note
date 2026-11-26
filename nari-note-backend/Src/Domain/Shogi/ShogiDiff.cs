@@ -19,7 +19,7 @@ public readonly record struct DiffUnit(PieceLocation From, PieceLocation To)
 // 駒は常に 40 枚そろっているので、片方の局面にしかない駒を同じ種類同士で対応づけ、1 組を差分の 1 単位とする
 public static class ShogiDiff
 {
-    public static List<DiffUnit> Units(ShogiPosition a, ShogiPosition b)
+    public static List<DiffUnit> Units(ShogiBoard a, ShogiBoard b)
     {
         var onlyB = Locations(b);
         var onlyA = new List<PieceLocation>();
@@ -44,7 +44,7 @@ public static class ShogiDiff
         return units;
     }
 
-    public static string Describe(ShogiPosition a, ShogiPosition b, int maxUnits = 4)
+    public static string Describe(ShogiBoard a, ShogiBoard b, int maxUnits = 4)
     {
         var units = Units(a, b);
         if (units.Count == 0) return "";
@@ -52,7 +52,7 @@ public static class ShogiDiff
         return string.Join("、", units.Select(u => u.Label()));
     }
 
-    static List<PieceLocation> Locations(ShogiPosition position)
+    static List<PieceLocation> Locations(ShogiBoard position)
     {
         var result = new List<PieceLocation>();
         for (var sq = 0; sq < 81; sq++)

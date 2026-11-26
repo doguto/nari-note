@@ -25,7 +25,7 @@ export function MyPlaybooksPage() {
 
   const { data, isLoading, error, refetch } = useGetMyPlaybooks();
   const createPlaybook = useCreatePlaybook({
-    onSuccess: (res) => router.push(`/playbooks/${res.id}?p=${res.rootPositionId}`),
+    onSuccess: (res) => router.push(`/playbooks/${res.id}`),
     onError: () => setErrorMessage('定跡を作成できませんでした。開始局面の玉の配置や手番を確認してください。'),
   });
   const deletePlaybook = useDeletePlaybook({
@@ -71,7 +71,7 @@ export function MyPlaybooksPage() {
           <DialogHeader>
             <DialogTitle>定跡を削除しますか？</DialogTitle>
             <DialogDescription>
-              「{pendingDelete?.name}」の局面・手・研究メモをすべて削除します。この操作は取り消せません。
+              「{pendingDelete?.name}」の局面・手順・研究メモをすべて削除します。この操作は取り消せません。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

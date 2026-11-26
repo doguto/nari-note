@@ -23,14 +23,12 @@ erDiagram
     Users ||--o{ EmailVerifications : ""
     Users ||--o{ PasswordResetTokens : ""
     Users ||--o{ Playbooks : "作る"
-    Playbooks ||--o{ PlaybookPositions : ""
-    Playbooks ||--o{ PlaybookMoves : ""
-    Playbooks ||--o{ ShapeGroups : ""
-    Playbooks ||--o{ ShapeCandidates : ""
-    ShapeGroups ||--o{ PlaybookPositions : "まとめる"
-    PlaybookPositions ||--o{ PlaybookMoves : "親 (ParentPositionId)"
-    PlaybookPositions ||--o{ PlaybookMoves : "子 (ChildPositionId)"
-    PlaybookPositions ||--o{ ShapeCandidates : "A / B"
+    Playbooks ||--o{ PlaybookNodes : ""
+    Playbooks ||--o{ PlaybookNodeBoards : ""
+    Playbooks ||--o{ PlaybookNodeSteps : ""
+    PlaybookNodes ||--o{ PlaybookNodeBoards : "まとめる"
+    PlaybookNodeBoards ||--o{ PlaybookNodeSteps : "出発 (FromBoardId)"
+    PlaybookNodeBoards |o--o{ PlaybookNodeSteps : "行き先 (ToBoardId)"
 
     Users {
         uuid Id PK
@@ -134,47 +132,33 @@ erDiagram
         string Name "max 100"
         string RootSfen "開始局面"
     }
-    PlaybookPositions {
-        uuid Id PK "登録順に大きくなる UUID v7"
-        uuid PlaybookId FK
-        string Sfen "手数を 1 に正規化, (PlaybookId, Sfen) で一意"
-        int ShapeGroupId FK
-        bool CandidatesScanned "同じ形の候補を探し終えたか"
-    }
-    PlaybookMoves {
-        int Id PK
-        uuid PlaybookId FK
-        uuid ParentPositionId FK
-        uuid ChildPositionId FK
-        string Usi "(ParentPositionId, Usi) で一意"
-        string Label "記譜"
-        string Memo "max 200"
-        string Condition "まとめた局面で行き先が分かれるときの条件, max 100"
-    }
-    ShapeGroups {
+    PlaybookNodes {
         int Id PK
         uuid PlaybookId FK
         string Name "max 100"
         string Memo "研究メモ, max 10000"
     }
-    ShapeCandidates {
+    PlaybookNodeBoards {
+        uuid Id PK "登録順に大きくなる UUID v7"
+        uuid PlaybookId FK
+        int NodeId FK
+        string Sfen "手数を 1 に正規化, (PlaybookId, Sfen) で一意"
+    }
+    PlaybookNodeSteps {
         int Id PK
         uuid PlaybookId FK
-        uuid PositionAId FK
-        uuid PositionBId FK
-        string Status "Queued / Running / Done / Failed"
-        string Verdict "same / same_with_delta / same_until / different / skipped"
-        int Delta "nullable"
-        int ConfirmedDepth "nullable"
-        string Decision "Pending / Merged / Rejected"
+        uuid FromBoardId FK
+        uuid ToBoardId FK "nullable。終点がノードでない手順"
+        text_array Usis "手順"
+        string Condition "まとめた盤面で行き先が分かれるときの条件, max 100"
     }
 ```
 
 ## 補足
 
 - 全テーブルに `CreatedAt` / `UpdatedAt` がある（`EntityBase`。未設定なら保存時に `NariNoteDbContext` が設定する）
-- ID は Vogen の ValueObject（`UserId` 等）。Users / Articles / Courses / Tags / Playbooks / PlaybookPositions は UUID v7 をアプリ側で採番し、それ以外は int の IDENTITY 列。PlaybookPositions は同じミリ秒の中でも登録順に大きくなるよう採番する
-- 外部キーは `PlaybookPositions.ShapeGroupId`（`NO ACTION`）以外すべて `ON DELETE CASCADE`。ユーザー削除（退会・未認証ユーザー削除）で記事・講座・いいね・コメント・フォロー・通知・各種トークンがまとめて消え、講座を削除すると所属する記事も消える
+- ID は Vogen の ValueObject（`UserId` 等）。Users / Articles / Courses / Tags / Playbooks / PlaybookNodeBoards は UUID v7 をアプリ側で採番し、それ以外は int の IDENTITY 列。PlaybookNodeBoards は同じミリ秒の中でも登録順に大きくなるよう採番する
+- 外部キーは `PlaybookNodeBoards.NodeId`（`NO ACTION`）以外すべて `ON DELETE CASCADE`。ユーザー削除（退会・未認証ユーザー削除）で記事・講座・いいね・コメント・フォロー・通知・各種トークンがまとめて消え、講座を削除すると所属する記事も消える
 - 一意制約: `Users.Email`（`lower(Email)`）、`Users.Name`、`Tags.Name`、`EmailVerifications.Token`、`PasswordResetTokens.Token`、`(ArticleId, TagId)`、`(UserId, ArticleId)` の Likes、`(UserId, CourseId)` の CourseLikes、`(FollowerId, FollowingId)` の Follows
 - `OutboxMessages` は他テーブルと関連を持たない配送キュー（[architecture.md](./architecture.md#バックグラウンドジョブ)）
-- マイ定跡: 局面（`PlaybookPositions`）と手（`PlaybookMoves`）が定跡のグラフになる。手順前後で同じ局面になれば同じ行に合流する。本質的に同じ形とした局面は `ShapeGroups` でまとめ、研究メモを共有する。まとめていない局面も 1 局面だけのグループに属し、グループの代表局面は最小 ID（最初に登録した）の局面。`ShapeCandidates` は `ShapeJudgeWorker` がエンジンサービスで判定した結果で、まとめるかは本人が決める
+- マイ定跡: 開始局面・分岐点・手順前後の合流点・名前かメモを付けた局面だけを盤面（`PlaybookNodeBoards`）として持ち、その間の手は手順（`PlaybookNodeSteps.Usis`）にまとめる。途中の局面は行を持たず、手順を指し直して求める。手順は出発の盤面と 1 手目で一意。似た盤面をまとめると 1 つのノード（`PlaybookNodes`）に複数の盤面が属し、名前と研究メモを共有する。ノードの代表は最小 ID（最初に登録した）の盤面

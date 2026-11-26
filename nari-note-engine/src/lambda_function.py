@@ -13,8 +13,4 @@ def handler(event: dict, context) -> dict:
         if engine not in slots:
             raise ValueError(f"未対応のエンジンです: {engine}")
         return service.analyze(slots[engine], event["sfen"])
-    if action == "candidates":
-        return service.candidates(event["sfen"], event.get("others", []))
-    if action == "judge":
-        return service.judge_pair(slots[service.JUDGE_ENGINE], event["p"], event["q"])
     raise ValueError(f"未対応の action です: {action}")

@@ -72,9 +72,6 @@ public static class InfrastructureServiceInstaller
         services.AddScoped<UnverifiedUserDeletionProcessor>();
         services.AddHostedService<UnverifiedUserDeletionWorker>();
 
-        services.AddScoped<ShapeJudgeProcessor>();
-        services.AddHostedService<ShapeJudgeWorker>();
-
         // Register helpers
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<IJwtHelper, JwtHelper>();
@@ -90,7 +87,7 @@ public static class InfrastructureServiceInstaller
             ?? throw new InvalidOperationException("Frontend:BaseUrl が設定されていません");
         services.AddSingleton(new EmailMessageStore(frontendBaseUrl));
         services.AddHttpClient<IDiscordNotifier, DiscordWebhookNotifier>(client => client.Timeout = ExternalRequestTimeout);
-        // エンジンは API サーバーとは別に動かす。本番は Lambda、ローカルは nari-note-engine の HTTP サーバーを呼び、どちらも無い環境では解析と判定を無効にする
+        // エンジンは API サーバーとは別に動かす。本番は Lambda、ローカルは nari-note-engine の HTTP サーバーを呼び、どちらも無い環境では解析を無効にする
         var shogiEngineFunctionName = configuration["ShogiEngine:FunctionName"];
         var shogiEngineBaseUrl = configuration["ShogiEngine:BaseUrl"];
         if (!string.IsNullOrWhiteSpace(shogiEngineFunctionName))

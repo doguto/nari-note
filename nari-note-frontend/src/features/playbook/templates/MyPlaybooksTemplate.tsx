@@ -40,7 +40,7 @@ export function MyPlaybooksTemplate({
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold text-gray-900 sm:text-3xl">マイ定跡</h1>
-        <p className="mt-2 text-sm text-brand-secondary-text">研究盤で指した手がそのまま定跡になります。同じ形の局面は候補として提案されます。</p>
+        <p className="mt-2 text-sm text-brand-secondary-text">研究盤で指した手がそのまま定跡になります。似ている局面は、まとめる候補として出ます。</p>
       </div>
 
       {errorMessage && <ErrorAlert message={errorMessage} />}
@@ -143,7 +143,7 @@ export function MyPlaybooksTemplate({
                       {b.name}
                     </p>
                     <p className="mt-1 text-sm text-gray-600">
-                      {b.positionCount}局面 ・ 更新 {new Date(b.updatedAt).toLocaleDateString('ja-JP')}
+                      更新 {new Date(b.updatedAt).toLocaleDateString('ja-JP')}
                     </p>
                   </div>
                   <ChevronRight className="h-5 w-5 flex-none text-gray-400 group-hover:text-[var(--brand-primary)]" aria-hidden="true" />

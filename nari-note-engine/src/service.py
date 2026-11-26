@@ -4,8 +4,6 @@ import os
 from pathlib import Path
 from typing import Callable
 
-from candidates import generate
-from judge import Params, judge
 from position import board_of, normalize_sfen
 from usi import Engine
 
@@ -15,8 +13,6 @@ ENGINE_DIR = SRC_DIR / "engine" if (SRC_DIR / "engine").is_dir() else SRC_DIR.pa
 ANALYZE_NODES = 2_000_000
 ANALYZE_MULTIPV = 3
 ENGINES = ("tsuyouraou-mini", "tsuyouraou-micro")
-# 判定はエンジンの探索結果が変わらないことを前提にしているので、解析で選べるエンジンとは別に固定する
-JUDGE_ENGINE = "tsuyouraou-mini"
 ENGINE_OPTIONS = {"USI_Hash": "64"}
 # つようら王の作者が示す FV_SCALE の最適値
 EVAL_OPTIONS = {"FV_SCALE": "24"}
@@ -44,7 +40,6 @@ class EngineSlot:
     def run(self, fn: Callable[[Engine], object]):
         if self.engine is None:
             self.engine = Engine(*engine_command(self.name))
-        self.engine.memo.clear()
         try:
             return fn(self.engine)
         except Exception:
@@ -61,23 +56,3 @@ def analyze(slot: EngineSlot, sfen: str) -> dict:
     result = slot.run(lambda e: e.search(sfen, ANALYZE_NODES, multipv=ANALYZE_MULTIPV))
     return {"lines": [{"usi": l.move, "score": l.score, "pv": l.pv} for l in result.lines if l.move != "resign"]}
 
-
-def candidates(sfen: str, others: list[str]) -> dict:
-    target = normalize_sfen(sfen)
-    originals = {normalize_sfen(o): o for o in others}
-    found = [c for c in generate([target, *originals]) if target in (c.p, c.q)]
-    return {
-        "candidates": [
-            {"sfen": originals[c.q if c.p == target else c.p], "unit_count": len(c.units)} for c in found
-        ]
-    }
-
-
-def judge_pair(slot: EngineSlot, p: str, q: str) -> dict:
-    verdict = slot.run(lambda e: judge(e, p, q, Params()))
-    return {
-        "kind": verdict.kind,
-        "delta": verdict.delta,
-        "confirmed_depth": verdict.confirmed_depth,
-        "reason": verdict.reason,
-    }

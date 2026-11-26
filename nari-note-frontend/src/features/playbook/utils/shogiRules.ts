@@ -1,4 +1,4 @@
-// 研究盤で手元だけで指し進めるための将棋のルール。バックエンドの ShogiPosition / ShogiNotation と同じ結果を返す
+// 研究盤で手元だけで指し進めるための将棋のルール。バックエンドの ShogiBoard / ShogiNotation と同じ結果を返す
 // マスの番号は (筋 - 1) * 9 + 段（一段目が 0）
 
 export type Side = 'b' | 'w';

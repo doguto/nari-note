@@ -1,114 +1,86 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ErrorMessage, LoadingSpinner } from '@/components/ui';
 import {
   playbooksApi,
-  queryKeys,
-  useDeletePlaybookMove,
   useGetPlaybook,
-  useGetPlaybookPosition,
-  useMergeShapeCandidate,
-  useRejectShapeCandidate,
+  useInspectPlaybookBoard,
+  useMergePlaybookNodes,
+  useRemovePlaybookMove,
   useSavePlaybookLines,
-  useSplitShapeGroup,
-  useUpdatePlaybookMove,
-  useUpdateShapeGroup,
+  useSplitPlaybookBoard,
+  useUpdatePlaybookNode,
+  useUpdatePlaybookStep,
 } from '@/lib/api';
 import { useAnalysisEngine } from '../hooks/useAnalysisEngine';
 import { useResearchDraft } from '../hooks/useResearchDraft';
-import { type ResearchMove, type ResearchView, PlaybookResearchTemplate } from '../templates';
+import type { ResearchMove } from '../organisms';
+import { type ResearchShape, type ResearchView, PlaybookResearchTemplate } from '../templates';
+import { buildPlaybookTree, contains, pathTo } from '../utils/playbookTree';
 import { destinationOf, legalMoves, moveLabel, play as playOn } from '../utils/shogiRules';
 
 interface PlaybookResearchPageProps {
   playbookId: string;
 }
 
-const JUDGE_POLL_INTERVAL_MS = 10_000;
-
 function isTyping(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
 }
 
+// 定跡の全体を 1 回取得し、手順を手元で指し直して局面を行き来する。URL にはノードの盤面だけを載せる
 export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [selected, setSelected] = useState<{ key: string; index: number } | null>(null);
-  // 保存済みの局面へ進むときは、次の局面が届くまで手元で進めた盤を見せる
-  const [pending, setPending] = useState<{ fromPositionId: string; sfen: string; usi: string } | null>(null);
-  // 保存していない局面を見ているときの、その局面の SFEN
-  const [draftSfen, setDraftSfen] = useState<string | null>(null);
+  const [selected, setSelected] = useState<{ sfen: string; index: number } | null>(null);
+  const [current, setCurrent] = useState<string | null>(null);
   const draft = useResearchDraft();
   const [engine, setEngine] = useAnalysisEngine();
 
   const playbook = useGetPlaybook({ id: playbookId });
-  const requested = searchParams.get('p');
-  const positionId = requested || playbook.data?.rootPositionId;
-  const enabled = positionId !== undefined;
+  const tree = useMemo(() => (playbook.data ? buildPlaybookTree(playbook.data) : null), [playbook.data]);
 
-  const position = useGetPlaybookPosition(
-    { id: playbookId, positionId: positionId ?? '' },
-    {
-      enabled,
-      placeholderData: keepPreviousData,
-      // 裏で同じ形の判定が進んでいる間は、候補が出たら見えるように取り直す
-      refetchInterval: (query) => ((query.state.data?.pendingJudgeCount ?? 0) > 0 ? JUDGE_POLL_INTERVAL_MS : false),
-    },
-  );
-  const data = position.data;
+  const requestedBoard = searchParams.get('b');
+  const sfen = useMemo(() => {
+    if (!tree) return null;
+    if (current && (contains(tree, current) || draft.get(current))) return current;
+    return (requestedBoard && tree.boardsById.get(requestedBoard)?.sfen) || tree.rootSfen;
+  }, [tree, current, requestedBoard, draft]);
 
-  if (pending && data && !position.isPlaceholderData && data.positionId !== pending.fromPositionId) setPending(null);
-  const optimistic = pending && (position.isPlaceholderData || data?.positionId === pending.fromPositionId) ? pending : null;
-
-  const draftLine = draftSfen ? draft.lineTo(draftSfen) : null;
-  const viewSfen = optimistic?.sfen ?? draftSfen ?? data?.sfen;
-
+  const isSaved = !!tree && !!sfen && contains(tree, sfen);
+  const inspection = useInspectPlaybookBoard({ id: playbookId, sfen: sfen ?? '' }, { enabled: isSaved, staleTime: 30_000 });
   const analysis = useQuery({
-    queryKey: ['playbookAnalysis', playbookId, viewSfen, engine],
-    queryFn: () => playbooksApi.analyzePlaybookPosition({ id: playbookId, sfen: viewSfen!, engine }),
-    enabled: !!viewSfen && !optimistic,
+    queryKey: ['playbookAnalysis', playbookId, sfen, engine],
+    queryFn: () => playbooksApi.analyzePlaybookBoard({ id: playbookId, sfen: sfen!, engine }),
+    enabled: !!sfen,
     staleTime: Infinity,
     retry: false,
   });
 
-  const navigate = (id: string) => {
+  const navigate = (next: string) => {
     setErrorMessage(undefined);
-    setDraftSfen(null);
-    router.push(`/playbooks/${playbookId}?p=${id}`);
+    setCurrent(next);
+    const board = tree?.boards.get(next);
+    if (board) router.replace(`/playbooks/${playbookId}?b=${board.id}`, { scroll: false });
   };
   const onError = (message: string) => () => setErrorMessage(message);
 
   const save = useSavePlaybookLines({
-    onSuccess: (res) => {
-      const saved = draftSfen ? res.positions.find((p) => p.sfen === draftSfen) : undefined;
+    // 保存した局面が定跡の取得し直しで現れるまで、下書きを残して盤を保つ
+    onSuccess: async () => {
+      await playbook.refetch();
       draft.clear();
-      if (saved) navigate(saved.positionId);
     },
     onError: onError('保存できませんでした。'),
   });
-  const updateMove = useUpdatePlaybookMove({ onError: onError('保存できませんでした。') });
-  const deleteMove = useDeletePlaybookMove({ onError: onError('手を外せませんでした。') });
-  const updateGroup = useUpdateShapeGroup({ onError: onError('保存できませんでした。') });
-  const merge = useMergeShapeCandidate({ onError: onError('まとめられませんでした。') });
-  const reject = useRejectShapeCandidate({ onError: onError('保存できませんでした。') });
-  const split = useSplitShapeGroup({ onError: onError('分けられませんでした。') });
-
-  useEffect(() => {
-    if (!data || position.isPlaceholderData) return;
-    // 次に開きそうな局面（進む手の先と 1 手前）を先に取っておき、手送りで待たせない
-    const neighbors = [...data.moves.map((m) => m.childPositionId), ...data.path.slice(-1).map((s) => s.parentPositionId)];
-    for (const id of neighbors) {
-      queryClient.prefetchQuery({
-        queryKey: [...queryKeys.playbooks.getPlaybookPosition, { id: playbookId, positionId: id }],
-        queryFn: () => playbooksApi.getPlaybookPosition({ id: playbookId, positionId: id }),
-        staleTime: 30_000,
-      });
-    }
-  }, [data, position.isPlaceholderData, playbookId, queryClient]);
+  const removeMove = useRemovePlaybookMove({ onError: onError('手を外せませんでした。') });
+  const updateNode = useUpdatePlaybookNode({ onError: onError('保存できませんでした。') });
+  const updateStep = useUpdatePlaybookStep({ onError: onError('保存できませんでした。') });
+  const merge = useMergePlaybookNodes({ onError: onError('まとめられませんでした。') });
+  const split = useSplitPlaybookBoard({ onError: onError('分けられませんでした。') });
 
   useEffect(() => {
     if (draft.count === 0) return;
@@ -117,82 +89,77 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
     return () => window.removeEventListener('beforeunload', warn);
   }, [draft.count]);
 
-  const view = useMemo((): ResearchView | null => {
-    if (!data) return null;
-    if (optimistic) {
-      return { sfen: optimistic.sfen, legalMoves: [], lastMoveUsi: optimistic.usi, ply: data.path.length + 1, moves: [], isDraft: false };
-    }
-    if (draftSfen && draftLine) {
-      const node = draftLine.nodes[draftLine.nodes.length - 1];
-      const moves: ResearchMove[] = draft.childrenOf({ kind: 'draft', sfen: draftSfen }).map((n, i) => ({
-        id: -(i + 1),
-        usi: n.usi,
-        label: n.label,
-        memo: '',
-        condition: '',
-        conditionSuggestions: [],
-        childPositionId: '',
-        isDraft: true,
-      }));
-      return {
-        sfen: draftSfen,
-        legalMoves: legalMoves(draftSfen),
-        lastMoveUsi: node.usi,
-        lastMoveLabel: node.label,
-        ply: data.path.length + draftLine.nodes.length,
-        moves,
-        isDraft: true,
-      };
-    }
-    const savedUsis = new Set(data.moves.map((m) => m.usi));
-    const drafts: ResearchMove[] = draft
-      .childrenOf({ kind: 'saved', positionId: data.positionId })
-      .filter((n) => !savedUsis.has(n.usi))
-      .map((n, i) => ({ id: -(i + 1), usi: n.usi, label: n.label, memo: '', condition: '', conditionSuggestions: [], childPositionId: '', isDraft: true }));
-    return {
-      sfen: data.sfen,
-      legalMoves: data.legalMoves,
-      lastMoveUsi: data.lastMoveUsi,
-      lastMoveLabel: data.path[data.path.length - 1]?.label,
-      ply: data.path.length,
-      moves: [...data.moves, ...drafts],
-      isDraft: false,
-    };
-  }, [data, optimistic, draftSfen, draftLine, draft]);
+  const path = useMemo(() => {
+    if (!tree || !sfen) return [];
+    if (contains(tree, sfen)) return pathTo(tree, sfen);
+    const line = draft.lineTo(sfen);
+    if (!line) return [];
+    return [...pathTo(tree, line.anchorSfen), ...line.nodes.map((n) => ({ sfen: n.parentSfen, usi: n.usi, label: n.label }))];
+  }, [tree, sfen, draft]);
 
-  const viewKey = draftSfen ?? String(data?.positionId ?? '');
-  const selectedIndex = selected && selected.key === viewKey ? selected.index : -1;
+  const view = useMemo((): ResearchView | null => {
+    if (!tree || !sfen) return null;
+    const last = path[path.length - 1];
+    const previousTo = last ? destinationOf(last.usi) : undefined;
+    const suggestions = new Map((inspection.data?.conditionSuggestions ?? []).map((c) => [c.stepId, c.suggestions]));
+    const saved: ResearchMove[] = (tree.children.get(sfen) ?? []).map((m) => ({
+      usi: m.usi,
+      label: moveLabel(sfen, m.usi, previousTo),
+      isDraft: false,
+      stepId: m.step?.id,
+      condition: m.step?.condition ?? '',
+      conditionSuggestions: (m.step && suggestions.get(m.step.id)) ?? [],
+    }));
+    const savedUsis = new Set(saved.map((m) => m.usi));
+    const drafts: ResearchMove[] = draft
+      .childrenOf(sfen)
+      .filter((n) => !savedUsis.has(n.usi))
+      .map((n) => ({ usi: n.usi, label: n.label, isDraft: true, condition: '', conditionSuggestions: [] }));
+    return {
+      sfen,
+      legalMoves: legalMoves(sfen),
+      lastMoveUsi: last?.usi,
+      lastMoveLabel: last?.label,
+      ply: path.length,
+      moves: [...saved, ...drafts],
+      isDraft: !contains(tree, sfen),
+    };
+  }, [tree, sfen, path, draft, inspection.data]);
+
+  const shape = useMemo((): ResearchShape => {
+    const board = sfen ? tree?.boards.get(sfen) : undefined;
+    const node = board ? tree?.nodes.get(board.nodeId) : undefined;
+    const boardCount = board && tree ? [...tree.boards.values()].filter((b) => b.nodeId === board.nodeId).length : 0;
+    const info = inspection.data?.boardId === board?.id ? inspection.data : undefined;
+    return {
+      isNode: !!board,
+      name: node?.name ?? '',
+      memo: node?.memo ?? '',
+      boardCount,
+      nameSuggestions: inspection.data?.nameSuggestions ?? [],
+      members: info?.members ?? [],
+      similar: info?.similar ?? [],
+      boardId: board?.id,
+    };
+  }, [tree, sfen, inspection.data]);
+
+  const selectedIndex = selected && selected.sfen === sfen ? selected.index : -1;
 
   const play = (usi: string) => {
-    if (!data || !view) return;
+    if (!tree || !sfen || !view) return;
     setErrorMessage(undefined);
-    if (!draftSfen) {
-      const saved = data.moves.find((m) => m.usi === usi);
-      if (saved) {
-        setPending({ fromPositionId: data.positionId, sfen: playOn(data.sfen, usi), usi });
-        return navigate(saved.childPositionId);
-      }
+    const child = playOn(sfen, usi);
+    if (!contains(tree, child)) {
+      const previousTo = view.lastMoveUsi ? destinationOf(view.lastMoveUsi) : undefined;
+      draft.add({ sfen: child, parentSfen: sfen, usi, label: moveLabel(sfen, usi, previousTo) });
     }
-    const previousTo = view.lastMoveUsi ? destinationOf(view.lastMoveUsi) : undefined;
-    const childSfen = playOn(view.sfen, usi);
-    draft.add({
-      sfen: childSfen,
-      parent: draftSfen ? { kind: 'draft', sfen: draftSfen } : { kind: 'saved', positionId: data.positionId },
-      usi,
-      label: moveLabel(view.sfen, usi, previousTo),
-    });
-    setDraftSfen(childSfen);
+    navigate(child);
   };
 
-  const rootPositionId = playbook.data?.rootPositionId;
-  const goFirst = () => rootPositionId !== undefined && navigate(rootPositionId);
+  const goFirst = () => tree && navigate(tree.rootSfen);
   const goBack = () => {
-    if (draftLine) {
-      const node = draftLine.nodes[draftLine.nodes.length - 1];
-      setDraftSfen(node.parent.kind === 'draft' ? node.parent.sfen : null);
-      return;
-    }
-    if (data && data.path.length > 0) navigate(data.path[data.path.length - 1].parentPositionId);
+    const previous = path[path.length - 1];
+    if (previous) navigate(previous.sfen);
   };
   const goForward = () => {
     const move = view?.moves[selectedIndex >= 0 ? selectedIndex : 0];
@@ -214,33 +181,38 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
         const count = view.moves.length;
         const step = e.key === 'ArrowDown' ? 1 : -1;
         const next = selectedIndex < 0 ? (step > 0 ? 0 : count - 1) : (selectedIndex + step + count) % count;
-        setSelected({ key: viewKey, index: next });
+        setSelected({ sfen: view.sfen, index: next });
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   });
 
-  if (playbook.isLoading || (enabled && position.isLoading && !data)) {
-    return <LoadingSpinner text="定跡を読み込み中..." />;
-  }
-  if (playbook.error || position.error || !data || !view) {
-    return <ErrorMessage message="定跡の取得に失敗しました" onRetry={() => position.refetch()} />;
+  if (playbook.isLoading) return <LoadingSpinner text="定跡を読み込み中..." />;
+  if (playbook.error || !tree || !sfen || !view || !playbook.data) {
+    return <ErrorMessage message="定跡の取得に失敗しました" onRetry={() => playbook.refetch()} />;
   }
 
-  const isBusy = !!optimistic || save.isPending || deleteMove.isPending || merge.isPending || reject.isPending || split.isPending;
+  const isBusy = save.isPending || removeMove.isPending || merge.isPending || split.isPending;
+  const toUsisFromRoot = (anchorSfen: string, usis: string[]) => [...pathTo(tree, anchorSfen).map((p) => p.usi), ...usis];
 
   return (
     <PlaybookResearchTemplate
-      data={data}
+      playbookName={playbook.data.name}
+      tree={tree}
       view={view}
+      shape={shape}
       draft={{
         count: draft.count,
         isSaving: save.isPending,
-        onSave: () => save.mutate({ id: playbookId, lines: draft.lines }),
+        onSave: () =>
+          save.mutate({
+            id: playbookId,
+            lines: draft.lines.map((l) => ({ usis: toUsisFromRoot(l.anchorSfen, l.nodes.map((n) => n.usi)) })),
+          }),
         onDiscard: () => {
           draft.clear();
-          setDraftSfen(null);
+          if (!contains(tree, sfen)) navigate(tree.rootSfen);
         },
       }}
       analysis={{
@@ -254,19 +226,22 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
       isBusy={isBusy}
       errorMessage={errorMessage}
       selectedMoveIndex={selectedIndex}
-      onSelectMove={(index) => setSelected({ key: viewKey, index })}
+      onSelectMove={(index) => setSelected({ sfen, index })}
       onNavigate={navigate}
+      onNavigateBoard={(boardId) => {
+        const board = tree.boardsById.get(boardId);
+        if (board) navigate(board.sfen);
+      }}
       onFirst={goFirst}
       onBack={goBack}
       onForward={goForward}
       onMove={play}
-      onMoveChange={(moveId, change) => updateMove.mutate({ id: playbookId, moveId, ...change })}
-      onDeleteMove={(moveId) => deleteMove.mutate({ id: playbookId, moveId })}
-      onRenameGroup={(name) => updateGroup.mutate({ id: playbookId, groupId: data.group.id, name })}
-      onSaveMemo={(memo) => updateGroup.mutate({ id: playbookId, groupId: data.group.id, memo })}
-      onMerge={(candidateId) => merge.mutate({ id: playbookId, candidateId })}
-      onReject={(candidateId) => reject.mutate({ id: playbookId, candidateId })}
-      onSplit={(id) => split.mutate({ id: playbookId, positionId: id })}
+      onChangeCondition={(stepId, condition) => updateStep.mutate({ id: playbookId, stepId, condition })}
+      onDeleteMove={(usi) => removeMove.mutate({ id: playbookId, sfen, usi })}
+      onRename={(name) => updateNode.mutate({ id: playbookId, sfen, name })}
+      onSaveMemo={(memo) => updateNode.mutate({ id: playbookId, sfen, memo })}
+      onMerge={(otherBoardId) => shape.boardId && merge.mutate({ id: playbookId, boardId: shape.boardId, otherBoardId })}
+      onSplit={(boardId) => split.mutate({ id: playbookId, boardId })}
     />
   );
 }

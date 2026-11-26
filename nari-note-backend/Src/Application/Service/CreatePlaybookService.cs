@@ -21,18 +21,18 @@ public class CreatePlaybookService
 
     public async Task<CreatePlaybookResponse> ExecuteAsync(UserId userId, CreatePlaybookRequest request)
     {
-        var start = ShogiPosition.FromSfen(string.IsNullOrWhiteSpace(request.RootSfen) ? ShogiPosition.Hirate : request.RootSfen);
+        var start = ShogiBoard.FromSfen(string.IsNullOrWhiteSpace(request.RootSfen) ? ShogiBoard.Hirate : request.RootSfen);
         if (!start.IsValidTurn()) throw new ArgumentException("手番でない側の玉に王手がかかっている局面からは始められません");
         var rootSfen = start.ToSfen();
 
         var playbook = new Playbook { UserId = userId, Name = request.Name, RootSfen = rootSfen };
-        var group = new ShapeGroup { Playbook = playbook };
-        // 開始局面は比べる相手がいないため、候補探しを済みにしておく
-        var root = new PlaybookPosition { Playbook = playbook, Sfen = rootSfen, ShapeGroup = group, CandidatesScanned = true };
-        playbook.ShapeGroups.Add(group);
-        playbook.Positions.Add(root);
+        var node = new PlaybookNode { Playbook = playbook };
+        var root = new PlaybookNodeBoard { Playbook = playbook, Node = node, Sfen = rootSfen };
+        node.Boards.Add(root);
+        playbook.Nodes.Add(node);
+        playbook.Boards.Add(root);
 
         await this.playbookRepository.CreateAsync(playbook);
-        return new CreatePlaybookResponse { Id = playbook.Id, RootPositionId = root.Id };
+        return new CreatePlaybookResponse { Id = playbook.Id };
     }
 }

@@ -5,7 +5,7 @@ variable "memory_size" {
 }
 
 variable "timeout" {
-  description = "Timeout in seconds of the engine function. A shape judge takes tens of seconds"
+  description = "Timeout in seconds of the engine function. An analysis takes a few seconds"
   type        = number
   default     = 300
 }

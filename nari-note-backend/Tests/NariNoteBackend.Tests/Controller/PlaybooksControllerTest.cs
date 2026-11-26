@@ -5,6 +5,7 @@ using NariNoteBackend.Application.Dto.Response;
 using NariNoteBackend.Domain.Entity;
 using NariNoteBackend.Domain.Gateway;
 using NariNoteBackend.Domain.Shogi;
+using NariNoteBackend.Domain.ValueObject;
 using NariNoteBackend.Tests.Support.Builder;
 using NariNoteBackend.Tests.Support.Integration;
 
@@ -12,131 +13,191 @@ namespace NariNoteBackend.Tests.Controller;
 
 public class PlaybooksControllerTest : IntegrationTestBase
 {
+    static readonly string Root = ShogiBoard.Normalize(ShogiBoard.Hirate);
+
     public PlaybooksControllerTest(NariNoteApiFactory factory) : base(factory)
     {
     }
 
-    async Task<(HttpClient Client, CreatePlaybookResponse Playbook)> CreatePlaybookAsync(User owner, string name = "角換わり")
+    async Task<(HttpClient Client, Guid PlaybookId)> CreatePlaybookAsync(User owner, string name = "角換わり")
     {
         var client = CreateClientAs(owner);
         var response = await client.PostAsJsonAsync("/api/playbooks", new { name });
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        return (client, await ReadAsync<CreatePlaybookResponse>(response));
+        return (client, (await ReadAsync<CreatePlaybookResponse>(response)).Id.Value);
     }
 
-    async Task<Guid> PlayAsync(HttpClient client, Guid playbookId, Guid positionId, params string[] usis)
+    async Task<(HttpClient Client, Guid PlaybookId)> CreatePlaybookAsync()
     {
-        var response = await client.PostAsJsonAsync($"/api/playbooks/{playbookId}/lines", new { lines = new[] { new { fromPositionId = positionId, usis } } });
+        var owner = new UserBuilder().Build();
+        await SeedAsync(owner);
+        return await CreatePlaybookAsync(owner);
+    }
+
+    static async Task SaveAsync(HttpClient client, Guid playbookId, params string[][] lines)
+    {
+        var response = await client.PostAsJsonAsync($"/api/playbooks/{playbookId}/lines", new { lines = lines.Select(usis => new { usis }) });
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        return (await ReadAsync<SavePlaybookLinesResponse>(response)).Positions.Last().PositionId.Value;
+    }
+
+    async Task<GetPlaybookResponse> GetAsync(HttpClient client, Guid playbookId)
+    {
+        var response = await client.GetAsync($"/api/playbooks/{playbookId}");
+        Assert.True(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
+        return await ReadAsync<GetPlaybookResponse>(response);
+    }
+
+    static PlaybookNodeBoardId BoardIdOf(GetPlaybookResponse playbook, string sfen) => playbook.Boards.Single(b => b.Sfen == sfen).Id;
+
+    [Fact]
+    public async Task 保存した手順は開始局面から終点までの1つの手順になる()
+    {
+        var (client, id) = await CreatePlaybookAsync();
+
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"]);
+
+        var playbook = await GetAsync(client, id);
+        var root = Assert.Single(playbook.Boards);
+        Assert.Equal(Root, root.Sfen);
+        var step = Assert.Single(playbook.Steps);
+        Assert.Equal(["7g7f", "3c3d", "2g2f"], step.Usis);
+        Assert.Null(step.ToBoardId);
     }
 
     [Fact]
-    public async Task 作成した定跡で指した手が手順とグラフに現れる()
+    public async Task 手順の途中で分かれると分岐点がノードになり既存の手順の条件は残る()
     {
-        var owner = new UserBuilder().Build();
-        await SeedAsync(owner);
-        var (client, playbook) = await CreatePlaybookAsync(owner);
-        var root = playbook.RootPositionId.Value;
+        var (client, id) = await CreatePlaybookAsync();
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"]);
+        var stepId = Assert.Single((await GetAsync(client, id)).Steps).Id;
+        await client.PutAsJsonAsync($"/api/playbooks/{id}/steps/{stepId}", new { condition = "角道を開けた" });
 
-        var current = await PlayAsync(client, playbook.Id.Value, root, "7g7f", "3c3d");
-        var response = await client.GetAsync($"/api/playbooks/{playbook.Id}/positions/{current}");
+        await SaveAsync(client, id, ["7g7f", "3c3d", "6g6f"]);
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var body = await ReadAsync<GetPlaybookPositionResponse>(response);
-        Assert.Equal(["▲７六歩", "△３四歩"], body.Path.Select(p => p.Label));
-        Assert.True(body.IsSenteTurn);
-        Assert.Equal(3, body.Graph.Nodes.Count);
-        Assert.Equal(2, body.Graph.Edges.Count);
-        Assert.Equal(2, body.PendingJudgeCount);
-
-        var list = await ReadAsync<GetMyPlaybooksResponse>(await client.GetAsync("/api/playbooks/my"));
-        Assert.Equal(3, Assert.Single(list.Playbooks).PositionCount);
+        var playbook = await GetAsync(client, id);
+        var branch = PlaybookBuilder.Play(Root, "7g7f", "3c3d");
+        Assert.Equal(2, playbook.Boards.Count);
+        Assert.Equal(3, playbook.Steps.Count);
+        var first = playbook.Steps.Single(s => s.Id == stepId);
+        Assert.Equal(["7g7f", "3c3d"], first.Usis);
+        Assert.Equal("角道を開けた", first.Condition);
+        Assert.Equal(BoardIdOf(playbook, branch), first.ToBoardId);
     }
 
     [Fact]
-    public async Task 手順前後で同じ局面になると一つの局面に合流する()
+    public async Task 手順前後で同じ局面になると一つの盤面に合流する()
     {
-        var owner = new UserBuilder().Build();
-        await SeedAsync(owner);
-        var (client, playbook) = await CreatePlaybookAsync(owner);
-        var root = playbook.RootPositionId.Value;
+        var (client, id) = await CreatePlaybookAsync();
 
-        var a = await PlayAsync(client, playbook.Id.Value, root, "7g7f", "3c3d", "2g2f");
-        var b = await PlayAsync(client, playbook.Id.Value, root, "2g2f", "3c3d", "7g7f");
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f", "8c8d"], ["2g2f", "3c3d", "7g7f"]);
 
-        Assert.Equal(a, b);
-        var count = await QueryAsync(db => db.PlaybookPositions.CountAsync(p => p.PlaybookId == playbook.Id));
-        Assert.Equal(6, count);
+        var playbook = await GetAsync(client, id);
+        var merged = PlaybookBuilder.Play(Root, "7g7f", "3c3d", "2g2f");
+        var board = playbook.Boards.Single(b => b.Sfen == merged);
+        Assert.Equal(2, playbook.Steps.Count(s => s.ToBoardId == board.Id));
+        Assert.Equal(1, await QueryAsync(db => db.PlaybookNodeBoards.CountAsync(b => b.Sfen == merged)));
     }
 
     [Fact]
-    public async Task 指せない手は400を返す()
+    public async Task 指せない手が含まれると何も保存しない()
     {
-        var owner = new UserBuilder().Build();
-        await SeedAsync(owner);
-        var (client, playbook) = await CreatePlaybookAsync(owner);
+        var (client, id) = await CreatePlaybookAsync();
 
-        var response = await client.PostAsJsonAsync($"/api/playbooks/{playbook.Id}/lines", new { lines = new[] { new { fromPositionId = playbook.RootPositionId.Value, usis = new[] { "7g7f", "7g7e" } } } });
+        var response = await client.PostAsJsonAsync($"/api/playbooks/{id}/lines", new { lines = new[] { new { usis = new[] { "7g7f", "7g7e" } } } });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(0, await QueryAsync(db => db.PlaybookNodeSteps.CountAsync()));
     }
 
     [Fact]
-    public async Task 手を外すと先の局面も消える()
+    public async Task 手を外すとその先の手順とノードも消え分岐点は手順の途中に戻る()
     {
-        var owner = new UserBuilder().Build();
-        await SeedAsync(owner);
-        var (client, playbook) = await CreatePlaybookAsync(owner);
-        var root = playbook.RootPositionId.Value;
-        await PlayAsync(client, playbook.Id.Value, root, "7g7f", "3c3d");
-        var moveId = await QueryAsync(db => db.PlaybookMoves.Where(m => m.Usi == "7g7f").Select(m => m.Id).SingleAsync());
+        var (client, id) = await CreatePlaybookAsync();
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"], ["7g7f", "3c3d", "6g6f"]);
+        var branch = PlaybookBuilder.Play(Root, "7g7f", "3c3d");
 
-        var response = await client.DeleteAsync($"/api/playbooks/{playbook.Id}/moves/{moveId}");
+        var response = await client.PostAsJsonAsync($"/api/playbooks/{id}/moves/remove", new { sfen = branch, usi = "6g6f" });
 
-        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-        Assert.Equal(1, await QueryAsync(db => db.PlaybookPositions.CountAsync()));
-        Assert.Equal(0, await QueryAsync(db => db.PlaybookMoves.CountAsync()));
-        Assert.Equal(1, await QueryAsync(db => db.ShapeGroups.CountAsync()));
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var playbook = await GetAsync(client, id);
+        Assert.Single(playbook.Boards);
+        Assert.Equal(["7g7f", "3c3d", "2g2f"], Assert.Single(playbook.Steps).Usis);
     }
 
     [Fact]
-    public async Task 形の名前と研究メモと手のメモを保存できる()
+    public async Task 手順の途中の局面に名前を付けるとノードになり名前を消すと戻る()
     {
-        var owner = new UserBuilder().Build();
-        await SeedAsync(owner);
-        var (client, playbook) = await CreatePlaybookAsync(owner);
-        var child = await PlayAsync(client, playbook.Id.Value, playbook.RootPositionId.Value, "7g7f");
-        var state = await ReadAsync<GetPlaybookPositionResponse>(await client.GetAsync($"/api/playbooks/{playbook.Id}/positions/{child}"));
-        var moveId = await QueryAsync(db => db.PlaybookMoves.Select(m => m.Id).SingleAsync());
+        var (client, id) = await CreatePlaybookAsync();
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"]);
+        var middle = PlaybookBuilder.Play(Root, "7g7f", "3c3d");
 
-        var groupResponse = await client.PutAsJsonAsync($"/api/playbooks/{playbook.Id}/groups/{state.Group.Id}", new { name = "角道を開けた形", memo = "次は△３四歩" });
-        var moveResponse = await client.PutAsJsonAsync($"/api/playbooks/{playbook.Id}/moves/{moveId}", new { memo = "角道を開ける" });
+        var named = await client.PutAsJsonAsync($"/api/playbooks/{id}/nodes", new { sfen = middle, name = "角道を開け合った形", memo = "次は飛車先" });
 
-        Assert.Equal(HttpStatusCode.OK, groupResponse.StatusCode);
-        Assert.Equal(HttpStatusCode.OK, moveResponse.StatusCode);
-        var after = await ReadAsync<GetPlaybookPositionResponse>(await client.GetAsync($"/api/playbooks/{playbook.Id}/positions/{playbook.RootPositionId}"));
-        Assert.Equal("角道を開ける", Assert.Single(after.Moves).Memo);
-        var group = await QueryAsync(db => db.ShapeGroups.SingleAsync(g => g.Id == state.Group.Id));
-        Assert.Equal("角道を開けた形", group.Name);
-        Assert.Equal("次は△３四歩", group.Memo);
+        Assert.Equal(HttpStatusCode.OK, named.StatusCode);
+        var playbook = await GetAsync(client, id);
+        var board = playbook.Boards.Single(b => b.Sfen == middle);
+        var node = playbook.Nodes.Single(n => n.Id == board.NodeId);
+        Assert.Equal("角道を開け合った形", node.Name);
+        Assert.Equal("次は飛車先", node.Memo);
+        Assert.Equal(2, playbook.Steps.Count);
+
+        await client.PutAsJsonAsync($"/api/playbooks/{id}/nodes", new { sfen = middle, name = "", memo = "" });
+
+        var cleared = await GetAsync(client, id);
+        Assert.Single(cleared.Boards);
+        Assert.Single(cleared.Steps);
+    }
+
+    [Fact]
+    public async Task 似た盤面をまとめると一つのノードになり分けると戻る()
+    {
+        var (client, id) = await CreatePlaybookAsync();
+        var a = PlaybookBuilder.Play(Root, "7g7f", "3c3d", "2g2f");
+        var b = PlaybookBuilder.Play(Root, "9g9f", "9c9d", "7g7f", "3c3d", "2g2f");
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"], ["9g9f", "9c9d", "7g7f", "3c3d", "2g2f"]);
+        await client.PutAsJsonAsync($"/api/playbooks/{id}/nodes", new { sfen = a, name = "角道を開けた形" });
+        await client.PutAsJsonAsync($"/api/playbooks/{id}/nodes", new { sfen = b, memo = "端歩の研究" });
+        var before = await GetAsync(client, id);
+
+        var inspection = await ReadAsync<InspectPlaybookBoardResponse>(await client.GetAsync($"/api/playbooks/{id}/inspection?sfen={Uri.EscapeDataString(b)}"));
+        var similar = Assert.Single(inspection.Similar);
+        Assert.Equal(BoardIdOf(before, a), similar.BoardId);
+
+        var merge = await client.PostAsJsonAsync($"/api/playbooks/{id}/nodes/merge", new { boardId = BoardIdOf(before, a).Value, otherBoardId = BoardIdOf(before, b).Value });
+
+        Assert.Equal(HttpStatusCode.OK, merge.StatusCode);
+        var merged = await GetAsync(client, id);
+        var node = Assert.Single(merged.Nodes, n => n.Name == "角道を開けた形");
+        Assert.Equal("端歩の研究", node.Memo);
+        Assert.Equal(2, merged.Boards.Count(x => x.NodeId == node.Id));
+
+        var split = await client.PostAsync($"/api/playbooks/{id}/boards/{BoardIdOf(merged, b)}/split", null);
+
+        Assert.Equal(HttpStatusCode.OK, split.StatusCode);
+        var after = await GetAsync(client, id);
+        Assert.Single(after.Boards, x => x.NodeId == node.Id);
+    }
+
+    [Fact]
+    public async Task 定跡に無い局面は調べられない()
+    {
+        var (client, id) = await CreatePlaybookAsync();
+
+        var response = await client.GetAsync($"/api/playbooks/{id}/inspection?sfen={Uri.EscapeDataString(PlaybookBuilder.Play(Root, "2g2f"))}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
     public async Task 解析はエンジンの読み筋を記譜で返す()
     {
-        var owner = new UserBuilder().Build();
-        await SeedAsync(owner);
-        var (client, playbook) = await CreatePlaybookAsync(owner);
+        var (client, id) = await CreatePlaybookAsync();
         Factory.ShogiEngineGateway.Lines.Add(new EngineLine { Usi = "7g7f", Score = 40, Pv = ["7g7f", "3c3d"] });
 
-        var response = await client.PostAsJsonAsync(
-            $"/api/playbooks/{playbook.Id}/analysis",
-            new { sfen = ShogiPosition.Hirate, engine = AnalysisEngine.TsuyouraouMicro }
-        );
+        var response = await client.PostAsJsonAsync($"/api/playbooks/{id}/analysis", new { sfen = ShogiBoard.Hirate, engine = AnalysisEngine.TsuyouraouMicro });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var body = await ReadAsync<AnalyzePlaybookPositionResponse>(response);
+        var body = await ReadAsync<AnalyzePlaybookBoardResponse>(response);
         var line = Assert.Single(body.Lines);
         Assert.Equal(["▲７六歩", "△３四歩"], line.Pv);
         Assert.Equal(40, line.Score);
@@ -146,11 +207,9 @@ public class PlaybooksControllerTest : IntegrationTestBase
     [Fact]
     public async Task 未対応のエンジンでの解析は400を返す()
     {
-        var owner = new UserBuilder().Build();
-        await SeedAsync(owner);
-        var (client, playbook) = await CreatePlaybookAsync(owner);
+        var (client, id) = await CreatePlaybookAsync();
 
-        var response = await client.PostAsJsonAsync($"/api/playbooks/{playbook.Id}/analysis", new { sfen = ShogiPosition.Hirate, engine = "unknown" });
+        var response = await client.PostAsJsonAsync($"/api/playbooks/{id}/analysis", new { sfen = ShogiBoard.Hirate, engine = "unknown" });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Empty(Factory.ShogiEngineGateway.AnalyzedEngines);
@@ -170,34 +229,33 @@ public class PlaybooksControllerTest : IntegrationTestBase
         var owner = new UserBuilder().Build();
         var other = new UserBuilder().Build();
         await SeedAsync(owner, other);
-        var (_, playbook) = await CreatePlaybookAsync(owner);
+        var (_, id) = await CreatePlaybookAsync(owner);
         var client = CreateClientAs(other);
 
-        var get = await client.GetAsync($"/api/playbooks/{playbook.Id}/positions/{playbook.RootPositionId}");
-        var move = await client.PostAsJsonAsync($"/api/playbooks/{playbook.Id}/lines", new { lines = new[] { new { fromPositionId = playbook.RootPositionId.Value, usis = new[] { "7g7f" } } } });
-        var delete = await client.DeleteAsync($"/api/playbooks/{playbook.Id}");
+        var get = await client.GetAsync($"/api/playbooks/{id}");
+        var save = await client.PostAsJsonAsync($"/api/playbooks/{id}/lines", new { lines = new[] { new { usis = new[] { "7g7f" } } } });
+        var delete = await client.DeleteAsync($"/api/playbooks/{id}");
 
         Assert.Equal(HttpStatusCode.Forbidden, get.StatusCode);
-        Assert.Equal(HttpStatusCode.Forbidden, move.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, save.StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, delete.StatusCode);
         var othersList = await ReadAsync<GetMyPlaybooksResponse>(await client.GetAsync("/api/playbooks/my"));
         Assert.Empty(othersList.Playbooks);
     }
 
     [Fact]
-    public async Task 定跡を削除すると局面と手もすべて消える()
+    public async Task 定跡を削除するとノードと盤面と手順もすべて消える()
     {
-        var owner = new UserBuilder().Build();
-        await SeedAsync(owner);
-        var (client, playbook) = await CreatePlaybookAsync(owner);
-        await PlayAsync(client, playbook.Id.Value, playbook.RootPositionId.Value, "7g7f", "3c3d");
+        var (client, id) = await CreatePlaybookAsync();
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"], ["7g7f", "3c3d", "6g6f"]);
 
-        var response = await client.DeleteAsync($"/api/playbooks/{playbook.Id}");
+        var response = await client.DeleteAsync($"/api/playbooks/{id}");
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         Assert.Equal(0, await QueryAsync(db => db.Playbooks.CountAsync()));
-        Assert.Equal(0, await QueryAsync(db => db.PlaybookPositions.CountAsync()));
-        Assert.Equal(0, await QueryAsync(db => db.ShapeGroups.CountAsync()));
+        Assert.Equal(0, await QueryAsync(db => db.PlaybookNodes.CountAsync()));
+        Assert.Equal(0, await QueryAsync(db => db.PlaybookNodeBoards.CountAsync()));
+        Assert.Equal(0, await QueryAsync(db => db.PlaybookNodeSteps.CountAsync()));
     }
 
     [Fact]

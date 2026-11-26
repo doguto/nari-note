@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using NariNoteBackend.Application.Dto;
 using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Dto.Request;

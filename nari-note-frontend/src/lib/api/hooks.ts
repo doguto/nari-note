@@ -4,8 +4,8 @@
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type UseQueryOptions } from '@tanstack/react-query';
 import { articlesApi, authApi, coursesApi, healthApi, playbooksApi, tagsApi, usersApi } from './endpoints';
 import type {
-  AnalyzePlaybookPositionRequest,
-  AnalyzePlaybookPositionResponse,
+  AnalyzePlaybookBoardRequest,
+  AnalyzePlaybookBoardResponse,
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
@@ -17,7 +17,6 @@ import type {
   CreatePlaybookResponse,
   DeleteArticleRequest,
   DeleteCourseRequest,
-  DeletePlaybookMoveRequest,
   DeletePlaybookRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
@@ -51,17 +50,17 @@ import type {
   GetMyArticlesResponse,
   GetMyCoursesResponse,
   GetMyPlaybooksResponse,
-  GetPlaybookPositionRequest,
-  GetPlaybookPositionResponse,
   GetPlaybookRequest,
   GetPlaybookResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
-  MergeShapeCandidateRequest,
-  MergeShapeCandidateResponse,
-  RejectShapeCandidateRequest,
-  RejectShapeCandidateResponse,
+  InspectPlaybookBoardRequest,
+  InspectPlaybookBoardResponse,
+  MergePlaybookNodesRequest,
+  MergePlaybookNodesResponse,
+  RemovePlaybookMoveRequest,
+  RemovePlaybookMoveResponse,
   ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
@@ -74,8 +73,8 @@ import type {
   SignInRequest,
   SignUpRequest,
   SignUpResponse,
-  SplitShapeGroupRequest,
-  SplitShapeGroupResponse,
+  SplitPlaybookBoardRequest,
+  SplitPlaybookBoardResponse,
   ToggleFollowRequest,
   ToggleFollowResponse,
   ToggleLikeRequest,
@@ -86,10 +85,10 @@ import type {
   UpdateCourseResponse,
   UpdatePasswordRequest,
   UpdatePasswordResponse,
-  UpdatePlaybookMoveRequest,
-  UpdatePlaybookMoveResponse,
-  UpdateShapeGroupRequest,
-  UpdateShapeGroupResponse,
+  UpdatePlaybookNodeRequest,
+  UpdatePlaybookNodeResponse,
+  UpdatePlaybookStepRequest,
+  UpdatePlaybookStepResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
   UploadArticleImageResponse,
@@ -129,7 +128,7 @@ export const queryKeys = {
   playbooks: {
     getMyPlaybooks: ['playbooks', 'getMyPlaybooks'] as const,
     getPlaybook: ['playbooks', 'getPlaybook'] as const,
-    getPlaybookPosition: ['playbooks', 'getPlaybookPosition'] as const,
+    inspectPlaybookBoard: ['playbooks', 'inspectPlaybookBoard'] as const,
   },
   tags: {
     getPopularTags: ['tags', 'getPopularTags'] as const,
@@ -539,19 +538,19 @@ export function useDeletePlaybook(options?: UseMutationOptions<void, Error, Dele
   });
 }
 
-export function useGetPlaybookPosition(params: GetPlaybookPositionRequest, options?: Omit<UseQueryOptions<GetPlaybookPositionResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<GetPlaybookPositionResponse>({
-    queryKey: [...queryKeys.playbooks.getPlaybookPosition, params],
-    queryFn: () => playbooksApi.getPlaybookPosition(params),
+export function useInspectPlaybookBoard(params: InspectPlaybookBoardRequest, options?: Omit<UseQueryOptions<InspectPlaybookBoardResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<InspectPlaybookBoardResponse>({
+    queryKey: [...queryKeys.playbooks.inspectPlaybookBoard, params],
+    queryFn: () => playbooksApi.inspectPlaybookBoard(params),
     ...options,
   });
 }
 
-export function useAnalyzePlaybookPosition(options?: UseMutationOptions<AnalyzePlaybookPositionResponse, Error, AnalyzePlaybookPositionRequest>) {
+export function useAnalyzePlaybookBoard(options?: UseMutationOptions<AnalyzePlaybookBoardResponse, Error, AnalyzePlaybookBoardRequest>) {
   const queryClient = useQueryClient();
-  return useMutation<AnalyzePlaybookPositionResponse, Error, AnalyzePlaybookPositionRequest>({
+  return useMutation<AnalyzePlaybookBoardResponse, Error, AnalyzePlaybookBoardRequest>({
     ...options,
-    mutationFn: (data) => playbooksApi.analyzePlaybookPosition(data),
+    mutationFn: (data) => playbooksApi.analyzePlaybookBoard(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
       options?.onSuccess?.(...args);
@@ -571,11 +570,11 @@ export function useSavePlaybookLines(options?: UseMutationOptions<SavePlaybookLi
   });
 }
 
-export function useSplitShapeGroup(options?: UseMutationOptions<SplitShapeGroupResponse, Error, SplitShapeGroupRequest>) {
+export function useRemovePlaybookMove(options?: UseMutationOptions<RemovePlaybookMoveResponse, Error, RemovePlaybookMoveRequest>) {
   const queryClient = useQueryClient();
-  return useMutation<SplitShapeGroupResponse, Error, SplitShapeGroupRequest>({
+  return useMutation<RemovePlaybookMoveResponse, Error, RemovePlaybookMoveRequest>({
     ...options,
-    mutationFn: (data) => playbooksApi.splitShapeGroup(data),
+    mutationFn: (data) => playbooksApi.removePlaybookMove(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
       options?.onSuccess?.(...args);
@@ -583,11 +582,11 @@ export function useSplitShapeGroup(options?: UseMutationOptions<SplitShapeGroupR
   });
 }
 
-export function useUpdatePlaybookMove(options?: UseMutationOptions<UpdatePlaybookMoveResponse, Error, UpdatePlaybookMoveRequest>) {
+export function useUpdatePlaybookNode(options?: UseMutationOptions<UpdatePlaybookNodeResponse, Error, UpdatePlaybookNodeRequest>) {
   const queryClient = useQueryClient();
-  return useMutation<UpdatePlaybookMoveResponse, Error, UpdatePlaybookMoveRequest>({
+  return useMutation<UpdatePlaybookNodeResponse, Error, UpdatePlaybookNodeRequest>({
     ...options,
-    mutationFn: (data) => playbooksApi.updatePlaybookMove(data),
+    mutationFn: (data) => playbooksApi.updatePlaybookNode(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
       options?.onSuccess?.(...args);
@@ -595,11 +594,11 @@ export function useUpdatePlaybookMove(options?: UseMutationOptions<UpdatePlayboo
   });
 }
 
-export function useDeletePlaybookMove(options?: UseMutationOptions<void, Error, DeletePlaybookMoveRequest>) {
+export function useMergePlaybookNodes(options?: UseMutationOptions<MergePlaybookNodesResponse, Error, MergePlaybookNodesRequest>) {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, DeletePlaybookMoveRequest>({
+  return useMutation<MergePlaybookNodesResponse, Error, MergePlaybookNodesRequest>({
     ...options,
-    mutationFn: (data) => playbooksApi.deletePlaybookMove(data),
+    mutationFn: (data) => playbooksApi.mergePlaybookNodes(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
       options?.onSuccess?.(...args);
@@ -607,11 +606,11 @@ export function useDeletePlaybookMove(options?: UseMutationOptions<void, Error, 
   });
 }
 
-export function useUpdateShapeGroup(options?: UseMutationOptions<UpdateShapeGroupResponse, Error, UpdateShapeGroupRequest>) {
+export function useSplitPlaybookBoard(options?: UseMutationOptions<SplitPlaybookBoardResponse, Error, SplitPlaybookBoardRequest>) {
   const queryClient = useQueryClient();
-  return useMutation<UpdateShapeGroupResponse, Error, UpdateShapeGroupRequest>({
+  return useMutation<SplitPlaybookBoardResponse, Error, SplitPlaybookBoardRequest>({
     ...options,
-    mutationFn: (data) => playbooksApi.updateShapeGroup(data),
+    mutationFn: (data) => playbooksApi.splitPlaybookBoard(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
       options?.onSuccess?.(...args);
@@ -619,23 +618,11 @@ export function useUpdateShapeGroup(options?: UseMutationOptions<UpdateShapeGrou
   });
 }
 
-export function useMergeShapeCandidate(options?: UseMutationOptions<MergeShapeCandidateResponse, Error, MergeShapeCandidateRequest>) {
+export function useUpdatePlaybookStep(options?: UseMutationOptions<UpdatePlaybookStepResponse, Error, UpdatePlaybookStepRequest>) {
   const queryClient = useQueryClient();
-  return useMutation<MergeShapeCandidateResponse, Error, MergeShapeCandidateRequest>({
+  return useMutation<UpdatePlaybookStepResponse, Error, UpdatePlaybookStepRequest>({
     ...options,
-    mutationFn: (data) => playbooksApi.mergeShapeCandidate(data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
-      options?.onSuccess?.(...args);
-    },
-  });
-}
-
-export function useRejectShapeCandidate(options?: UseMutationOptions<RejectShapeCandidateResponse, Error, RejectShapeCandidateRequest>) {
-  const queryClient = useQueryClient();
-  return useMutation<RejectShapeCandidateResponse, Error, RejectShapeCandidateRequest>({
-    ...options,
-    mutationFn: (data) => playbooksApi.rejectShapeCandidate(data),
+    mutationFn: (data) => playbooksApi.updatePlaybookStep(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
       options?.onSuccess?.(...args);

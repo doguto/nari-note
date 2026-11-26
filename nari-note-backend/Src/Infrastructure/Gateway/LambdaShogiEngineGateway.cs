@@ -31,21 +31,6 @@ public class LambdaShogiEngineGateway : IShogiEngineGateway
         return result.Lines;
     }
 
-    public async Task<List<EngineCandidate>> FindCandidatesAsync(
-        string sfen,
-        List<string> others,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var result = await this.InvokeAsync<CandidatesResult>(new { action = "candidates", sfen, others }, cancellationToken);
-        return result.Candidates;
-    }
-
-    public async Task<EngineVerdict> JudgeAsync(string sfenA, string sfenB, CancellationToken cancellationToken = default)
-    {
-        return await this.InvokeAsync<EngineVerdict>(new { action = "judge", p = sfenA, q = sfenB }, cancellationToken);
-    }
-
     // 呼び出し側は HTTP のエンジンサービスと同じく HttpRequestException で失敗を扱うので、それに揃える
     async Task<T> InvokeAsync<T>(object payload, CancellationToken cancellationToken)
     {
@@ -89,10 +74,5 @@ public class LambdaShogiEngineGateway : IShogiEngineGateway
     class AnalyzeResult
     {
         public List<EngineLine> Lines { get; init; } = new();
-    }
-
-    class CandidatesResult
-    {
-        public List<EngineCandidate> Candidates { get; init; } = new();
     }
 }

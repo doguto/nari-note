@@ -2,15 +2,16 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import { GitBranch } from 'lucide-react';
-import type { PlaybookGraphDto } from '@/lib/api/types';
 import { cn } from '@/lib/utils';
 import { type Chain, type ChainMove, type CollapsedNode, collapseGraph } from '../utils/collapseGraph';
 import { NODE_HEIGHT, layoutGraph } from '../utils/graphLayout';
+import type { PlaybookTree } from '../utils/playbookTree';
 
 interface PlaybookGraphProps {
-  graph: PlaybookGraphDto;
+  tree: PlaybookTree;
+  currentSfen: string;
   className?: string;
-  onSelect: (positionId: string) => void;
+  onSelect: (sfen: string) => void;
 }
 
 const MOVE_CHAR_WIDTH = 12;
@@ -21,7 +22,7 @@ function labelWidth(chain: Chain): number {
   return Math.max(moveWidth, conditionWidth) + 8;
 }
 
-function MoveChip({ move, isCurrent, onSelect }: { move: ChainMove; isCurrent: boolean; onSelect: (positionId: string) => void }) {
+function MoveChip({ move, isCurrent, onSelect }: { move: ChainMove; isCurrent: boolean; onSelect: (sfen: string) => void }) {
   return (
     <button
       type="button"
@@ -30,27 +31,27 @@ function MoveChip({ move, isCurrent, onSelect }: { move: ChainMove; isCurrent: b
         'whitespace-nowrap rounded-full border px-2 text-xs font-bold leading-5',
         isCurrent ? 'border-brand-primary-dark bg-brand-primary-dark text-white' : 'border-brand-border/60 bg-white text-brand-text hover:bg-brand-primary-light',
       )}
-      onClick={() => onSelect(move.positionId)}
+      onClick={() => onSelect(move.sfen)}
     >
       {move.label}
     </button>
   );
 }
 
-export function PlaybookGraph({ graph, className, onSelect }: PlaybookGraphProps) {
+export function PlaybookGraph({ tree, currentSfen, className, onSelect }: PlaybookGraphProps) {
   const layout = useMemo(() => {
-    const collapsed = collapseGraph(graph);
+    const collapsed = collapseGraph(tree);
     const chains = collapsed.chains.map((c) => ({ ...c, labelWidth: labelWidth(c) }));
     return layoutGraph<CollapsedNode, (typeof chains)[number]>(collapsed.nodes, chains, collapsed.rootId);
-  }, [graph]);
+  }, [tree]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const current = graph.currentGroupId;
+  const current = tree.boards.get(currentSfen)?.nodeId;
 
   useEffect(() => {
     const box = containerRef.current;
     if (!box) return;
-    const node = layout.nodes.find((p) => p.node.id === current);
-    const edge = layout.edges.find((e) => e.edge.moves.some((m) => m.groupId === current));
+    const node = layout.nodes.find((p) => !p.node.isStub && p.node.id === current);
+    const edge = layout.edges.find((e) => e.edge.moves.some((m) => m.sfen === currentSfen));
     const target = node ? { x: node.x, y: node.y } : edge ? { x: edge.lane.x, y: (edge.lane.top + edge.lane.bottom) / 2 } : null;
     if (!target) return;
     box.scrollTo({
@@ -58,7 +59,7 @@ export function PlaybookGraph({ graph, className, onSelect }: PlaybookGraphProps
       top: Math.max(0, target.y - box.clientHeight / 2),
       behavior: 'smooth',
     });
-  }, [current, layout]);
+  }, [current, currentSfen, layout]);
 
   return (
     <div ref={containerRef} className={cn('overflow-auto rounded-lg border border-brand-border/60 bg-brand-bg-light/50', className)}>
@@ -82,11 +83,11 @@ export function PlaybookGraph({ graph, className, onSelect }: PlaybookGraphProps
           const first = edge.moves[0];
           const last = edge.moves[edge.moves.length - 1];
           const hidden = open ? edge.moves.slice(1) : edge.moves.slice(1, -1);
-          const hiddenCurrent = hidden.find((m) => m.groupId === current);
+          const hiddenCurrent = hidden.find((m) => m.sfen === currentSfen);
           const single = edge.moves.length === 1 && !open;
           const middle = (lane.top + lane.bottom) / 2;
           // 名前の付いた行き先は札の方を強調するので、手順の中では強調しない
-          const isCurrentMove = (m: ChainMove) => m.groupId === current && m.groupId !== edge.to;
+          const isCurrentMove = (m: ChainMove) => m.sfen === currentSfen && !(edge.to >= 0 && m === last);
           return (
             <div key={`labels-${i}`}>
               <div
@@ -137,7 +138,7 @@ export function PlaybookGraph({ graph, className, onSelect }: PlaybookGraphProps
                 isCurrent ? 'border-2 border-brand-primary-dark bg-brand-primary-light' : 'border border-brand-border bg-white hover:border-brand-primary-dark',
               )}
               style={{ left: x, top: y, width, height: NODE_HEIGHT }}
-              onClick={() => onSelect(node.positionId)}
+              onClick={() => onSelect(node.sfen)}
             >
               {node.label}
               {node.positionCount > 1 && <span className="text-[10px] text-brand-primary-dark">×{node.positionCount}</span>}

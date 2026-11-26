@@ -11,49 +11,46 @@ namespace NariNoteBackend.Controller;
 [Route("api/[controller]")]
 public class PlaybooksController : ApplicationController
 {
-    readonly SavePlaybookLinesService savePlaybookLinesService;
-    readonly AnalyzePlaybookPositionService analyzePlaybookPositionService;
+    readonly AnalyzePlaybookBoardService analyzePlaybookBoardService;
     readonly CreatePlaybookService createPlaybookService;
-    readonly DeletePlaybookMoveService deletePlaybookMoveService;
     readonly DeletePlaybookService deletePlaybookService;
-    readonly GetPlaybookPositionService getPlaybookPositionService;
-    readonly GetPlaybookService getPlaybookService;
     readonly GetMyPlaybooksService getMyPlaybooksService;
-    readonly MergeShapeCandidateService mergeShapeCandidateService;
-    readonly RejectShapeCandidateService rejectShapeCandidateService;
-    readonly SplitShapeGroupService splitShapeGroupService;
-    readonly UpdatePlaybookMoveService updatePlaybookMoveService;
-    readonly UpdateShapeGroupService updateShapeGroupService;
+    readonly GetPlaybookService getPlaybookService;
+    readonly InspectPlaybookBoardService inspectPlaybookBoardService;
+    readonly MergePlaybookNodesService mergePlaybookNodesService;
+    readonly RemovePlaybookMoveService removePlaybookMoveService;
+    readonly SavePlaybookLinesService savePlaybookLinesService;
+    readonly SplitPlaybookBoardService splitPlaybookBoardService;
+    readonly UpdatePlaybookNodeService updatePlaybookNodeService;
+    readonly UpdatePlaybookStepService updatePlaybookStepService;
 
     public PlaybooksController(
-        SavePlaybookLinesService savePlaybookLinesService,
-        AnalyzePlaybookPositionService analyzePlaybookPositionService,
+        AnalyzePlaybookBoardService analyzePlaybookBoardService,
         CreatePlaybookService createPlaybookService,
-        DeletePlaybookMoveService deletePlaybookMoveService,
         DeletePlaybookService deletePlaybookService,
-        GetPlaybookPositionService getPlaybookPositionService,
-        GetPlaybookService getPlaybookService,
         GetMyPlaybooksService getMyPlaybooksService,
-        MergeShapeCandidateService mergeShapeCandidateService,
-        RejectShapeCandidateService rejectShapeCandidateService,
-        SplitShapeGroupService splitShapeGroupService,
-        UpdatePlaybookMoveService updatePlaybookMoveService,
-        UpdateShapeGroupService updateShapeGroupService
+        GetPlaybookService getPlaybookService,
+        InspectPlaybookBoardService inspectPlaybookBoardService,
+        MergePlaybookNodesService mergePlaybookNodesService,
+        RemovePlaybookMoveService removePlaybookMoveService,
+        SavePlaybookLinesService savePlaybookLinesService,
+        SplitPlaybookBoardService splitPlaybookBoardService,
+        UpdatePlaybookNodeService updatePlaybookNodeService,
+        UpdatePlaybookStepService updatePlaybookStepService
     )
     {
-        this.savePlaybookLinesService = savePlaybookLinesService;
-        this.analyzePlaybookPositionService = analyzePlaybookPositionService;
+        this.analyzePlaybookBoardService = analyzePlaybookBoardService;
         this.createPlaybookService = createPlaybookService;
-        this.deletePlaybookMoveService = deletePlaybookMoveService;
         this.deletePlaybookService = deletePlaybookService;
-        this.getPlaybookPositionService = getPlaybookPositionService;
-        this.getPlaybookService = getPlaybookService;
         this.getMyPlaybooksService = getMyPlaybooksService;
-        this.mergeShapeCandidateService = mergeShapeCandidateService;
-        this.rejectShapeCandidateService = rejectShapeCandidateService;
-        this.splitShapeGroupService = splitShapeGroupService;
-        this.updatePlaybookMoveService = updatePlaybookMoveService;
-        this.updateShapeGroupService = updateShapeGroupService;
+        this.getPlaybookService = getPlaybookService;
+        this.inspectPlaybookBoardService = inspectPlaybookBoardService;
+        this.mergePlaybookNodesService = mergePlaybookNodesService;
+        this.removePlaybookMoveService = removePlaybookMoveService;
+        this.savePlaybookLinesService = savePlaybookLinesService;
+        this.splitPlaybookBoardService = splitPlaybookBoardService;
+        this.updatePlaybookNodeService = updatePlaybookNodeService;
+        this.updatePlaybookStepService = updatePlaybookStepService;
     }
 
     [HttpGet("my")]
@@ -91,22 +88,22 @@ public class PlaybooksController : ApplicationController
         return NoContent();
     }
 
-    [HttpGet("{id}/positions/{positionId}")]
+    [HttpGet("{id}/inspection")]
     [Auth(AuthLevel.Authenticated)]
-    public async Task<ActionResult<GetPlaybookPositionResponse>> GetPlaybookPosition(PlaybookId id, PlaybookPositionId positionId)
+    public async Task<ActionResult<InspectPlaybookBoardResponse>> InspectPlaybookBoard(PlaybookId id, [FromQuery] string sfen)
     {
-        var request = new GetPlaybookPositionRequest { Id = id, PositionId = positionId };
-        var response = await this.getPlaybookPositionService.ExecuteAsync(UserId!.Value, request);
+        var request = new InspectPlaybookBoardRequest { Id = id, Sfen = sfen };
+        var response = await this.inspectPlaybookBoardService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
     [HttpPost("{id}/analysis")]
     [Auth(AuthLevel.Authenticated)]
     [ValidateModelState]
-    public async Task<ActionResult<AnalyzePlaybookPositionResponse>> AnalyzePlaybookPosition(PlaybookId id, [FromBody] AnalyzePlaybookPositionRequest request)
+    public async Task<ActionResult<AnalyzePlaybookBoardResponse>> AnalyzePlaybookBoard(PlaybookId id, [FromBody] AnalyzePlaybookBoardRequest request)
     {
         request.Id = id;
-        var response = await this.analyzePlaybookPositionService.ExecuteAsync(UserId!.Value, request);
+        var response = await this.analyzePlaybookBoardService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
@@ -120,69 +117,53 @@ public class PlaybooksController : ApplicationController
         return Ok(response);
     }
 
-    [HttpPost("{id}/positions/{positionId}/split")]
-    [Auth(AuthLevel.Authenticated)]
-    public async Task<ActionResult<SplitShapeGroupResponse>> SplitShapeGroup(PlaybookId id, PlaybookPositionId positionId)
-    {
-        var request = new SplitShapeGroupRequest { Id = id, PositionId = positionId };
-        var response = await this.splitShapeGroupService.ExecuteAsync(UserId!.Value, request);
-        return Ok(response);
-    }
-
-    [HttpPut("{id}/moves/{moveId}")]
+    [HttpPost("{id}/moves/remove")]
     [Auth(AuthLevel.Authenticated)]
     [ValidateModelState]
-    public async Task<ActionResult<UpdatePlaybookMoveResponse>> UpdatePlaybookMove(
-        PlaybookId id,
-        PlaybookMoveId moveId,
-        [FromBody] UpdatePlaybookMoveRequest request
-    )
+    public async Task<ActionResult<RemovePlaybookMoveResponse>> RemovePlaybookMove(PlaybookId id, [FromBody] RemovePlaybookMoveRequest request)
     {
         request.Id = id;
-        request.MoveId = moveId;
-        var response = await this.updatePlaybookMoveService.ExecuteAsync(UserId!.Value, request);
+        var response = await this.removePlaybookMoveService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
-    [HttpDelete("{id}/moves/{moveId}")]
-    [Auth(AuthLevel.Authenticated)]
-    public async Task<ActionResult> DeletePlaybookMove(PlaybookId id, PlaybookMoveId moveId)
-    {
-        var request = new DeletePlaybookMoveRequest { Id = id, MoveId = moveId };
-        await this.deletePlaybookMoveService.ExecuteAsync(UserId!.Value, request);
-        return NoContent();
-    }
-
-    [HttpPut("{id}/groups/{groupId}")]
+    [HttpPut("{id}/nodes")]
     [Auth(AuthLevel.Authenticated)]
     [ValidateModelState]
-    public async Task<ActionResult<UpdateShapeGroupResponse>> UpdateShapeGroup(
-        PlaybookId id,
-        ShapeGroupId groupId,
-        [FromBody] UpdateShapeGroupRequest request
-    )
+    public async Task<ActionResult<UpdatePlaybookNodeResponse>> UpdatePlaybookNode(PlaybookId id, [FromBody] UpdatePlaybookNodeRequest request)
     {
         request.Id = id;
-        request.GroupId = groupId;
-        var response = await this.updateShapeGroupService.ExecuteAsync(UserId!.Value, request);
+        var response = await this.updatePlaybookNodeService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
-    [HttpPost("{id}/candidates/{candidateId}/merge")]
+    [HttpPost("{id}/nodes/merge")]
     [Auth(AuthLevel.Authenticated)]
-    public async Task<ActionResult<MergeShapeCandidateResponse>> MergeShapeCandidate(PlaybookId id, ShapeCandidateId candidateId)
+    [ValidateModelState]
+    public async Task<ActionResult<MergePlaybookNodesResponse>> MergePlaybookNodes(PlaybookId id, [FromBody] MergePlaybookNodesRequest request)
     {
-        var request = new MergeShapeCandidateRequest { Id = id, CandidateId = candidateId };
-        var response = await this.mergeShapeCandidateService.ExecuteAsync(UserId!.Value, request);
+        request.Id = id;
+        var response = await this.mergePlaybookNodesService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 
-    [HttpPost("{id}/candidates/{candidateId}/reject")]
+    [HttpPost("{id}/boards/{boardId}/split")]
     [Auth(AuthLevel.Authenticated)]
-    public async Task<ActionResult<RejectShapeCandidateResponse>> RejectShapeCandidate(PlaybookId id, ShapeCandidateId candidateId)
+    public async Task<ActionResult<SplitPlaybookBoardResponse>> SplitPlaybookBoard(PlaybookId id, PlaybookNodeBoardId boardId)
     {
-        var request = new RejectShapeCandidateRequest { Id = id, CandidateId = candidateId };
-        var response = await this.rejectShapeCandidateService.ExecuteAsync(UserId!.Value, request);
+        var request = new SplitPlaybookBoardRequest { Id = id, BoardId = boardId };
+        var response = await this.splitPlaybookBoardService.ExecuteAsync(UserId!.Value, request);
+        return Ok(response);
+    }
+
+    [HttpPut("{id}/steps/{stepId}")]
+    [Auth(AuthLevel.Authenticated)]
+    [ValidateModelState]
+    public async Task<ActionResult<UpdatePlaybookStepResponse>> UpdatePlaybookStep(PlaybookId id, PlaybookNodeStepId stepId, [FromBody] UpdatePlaybookStepRequest request)
+    {
+        request.Id = id;
+        request.StepId = stepId;
+        var response = await this.updatePlaybookStepService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 }

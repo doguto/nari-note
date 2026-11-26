@@ -21,9 +21,9 @@ public static class ShogiFeatures
         ("雁木", [("6g", PieceKind.Silver), ("4g", PieceKind.Silver), ("7h", PieceKind.Gold)]),
     ];
 
-    public static List<string> NameSuggestions(ShogiPosition position)
+    public static List<string> NameSuggestions(ShogiBoard position)
     {
-        if (position.ToSfen() == ShogiPosition.Normalize(ShogiPosition.Hirate)) return ["平手"];
+        if (position.ToSfen() == ShogiBoard.Normalize(ShogiBoard.Hirate)) return ["平手"];
 
         var opening = Opening(position);
         var formation = Formation(position);
@@ -45,7 +45,7 @@ public static class ShogiFeatures
     }
 
     // others は同じ形にまとめた別の局面。current との違いを、current 側の状態として言葉にする
-    public static List<string> ConditionSuggestions(ShogiPosition current, IEnumerable<ShogiPosition> others)
+    public static List<string> ConditionSuggestions(ShogiBoard current, IEnumerable<ShogiBoard> others)
     {
         var suggestions = new List<string>();
         foreach (var other in others)
@@ -63,7 +63,7 @@ public static class ShogiFeatures
         return suggestions.Distinct().Take(MaxSuggestions).ToList();
     }
 
-    public static string? Style(ShogiPosition position, Side side)
+    public static string? Style(ShogiBoard position, Side side)
     {
         var rook = Find(position, side, PieceKind.Rook, false).Cast<int?>().FirstOrDefault();
         if (rook is null) return null;
@@ -80,7 +80,7 @@ public static class ShogiFeatures
         };
     }
 
-    public static string? Castle(ShogiPosition position, Side side)
+    public static string? Castle(ShogiBoard position, Side side)
     {
         foreach (var (name, pieces) in Castles)
         {
@@ -89,7 +89,7 @@ public static class ShogiFeatures
         return null;
     }
 
-    static string Opening(ShogiPosition position)
+    static string Opening(ShogiBoard position)
     {
         var sente = Style(position, Side.Sente);
         var gote = Style(position, Side.Gote);
@@ -100,21 +100,21 @@ public static class ShogiFeatures
         return senteStatic ? $"後手{gote}" : $"先手{sente}";
     }
 
-    static string Formation(ShogiPosition position)
+    static string Formation(ShogiBoard position)
     {
-        if (Has(position, ShogiPosition.ParseSquare("5f"), Side.Sente, PieceKind.Silver)
-            || Has(position, ShogiPosition.ParseSquare("5d"), Side.Gote, PieceKind.Silver)) return "腰掛け銀";
+        if (Has(position, ShogiBoard.ParseSquare("5f"), Side.Sente, PieceKind.Silver)
+            || Has(position, ShogiBoard.ParseSquare("5d"), Side.Gote, PieceKind.Silver)) return "腰掛け銀";
         if (Style(position, Side.Sente) != "居飛車") return "";
-        if (Has(position, ShogiPosition.ParseSquare("4f"), Side.Sente, PieceKind.Silver)) return "早繰り銀";
-        if (Has(position, ShogiPosition.ParseSquare("2f"), Side.Sente, PieceKind.Silver)
-            || Has(position, ShogiPosition.ParseSquare("2e"), Side.Sente, PieceKind.Silver)) return "棒銀";
+        if (Has(position, ShogiBoard.ParseSquare("4f"), Side.Sente, PieceKind.Silver)) return "早繰り銀";
+        if (Has(position, ShogiBoard.ParseSquare("2f"), Side.Sente, PieceKind.Silver)
+            || Has(position, ShogiBoard.ParseSquare("2e"), Side.Sente, PieceKind.Silver)) return "棒銀";
         return "";
     }
 
-    static bool IsBishopExchanged(ShogiPosition position) =>
+    static bool IsBishopExchanged(ShogiBoard position) =>
         position.HandCount(Side.Sente, PieceKind.Bishop) + position.HandCount(Side.Gote, PieceKind.Bishop) > 0;
 
-    static string? EdgeLabel(ShogiPosition position, int file) => EdgeState(position, file) switch
+    static string? EdgeLabel(ShogiBoard position, int file) => EdgeState(position, file) switch
     {
         (true, true) => $"{file}筋突き合い",
         (true, false) => $"{file}筋先手だけ",
@@ -122,7 +122,7 @@ public static class ShogiFeatures
         _ => null,
     };
 
-    static string EdgeCondition(ShogiPosition position, int file) => EdgeState(position, file) switch
+    static string EdgeCondition(ShogiBoard position, int file) => EdgeState(position, file) switch
     {
         (true, true) => $"{file}筋を突き合っている",
         (true, false) => $"{file}筋を先手だけ突いている",
@@ -130,7 +130,7 @@ public static class ShogiFeatures
         _ => $"{file}筋を突いていない",
     };
 
-    static (bool Sente, bool Gote) EdgeState(ShogiPosition position, int file)
+    static (bool Sente, bool Gote) EdgeState(ShogiBoard position, int file)
     {
         var sente = Find(position, Side.Sente, PieceKind.Pawn, false).Where(sq => sq / 9 + 1 == file).ToList();
         var gote = Find(position, Side.Gote, PieceKind.Pawn, false).Where(sq => sq / 9 + 1 == file).ToList();
@@ -150,14 +150,14 @@ public static class ShogiFeatures
 
     static int Oriented(string square, Side side)
     {
-        var sq = ShogiPosition.ParseSquare(square);
+        var sq = ShogiBoard.ParseSquare(square);
         return side == Side.Sente ? sq : 80 - sq;
     }
 
-    static bool Has(ShogiPosition position, int square, Side side, PieceKind kind) =>
+    static bool Has(ShogiBoard position, int square, Side side, PieceKind kind) =>
         position[square] is { } p && p.Side == side && p.Kind == kind && !p.Promoted;
 
-    static IEnumerable<int> Find(ShogiPosition position, Side side, PieceKind kind, bool promoted)
+    static IEnumerable<int> Find(ShogiBoard position, Side side, PieceKind kind, bool promoted)
     {
         for (var sq = 0; sq < 81; sq++)
         {

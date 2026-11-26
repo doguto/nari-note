@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # src/service.py の ENGINES と同じ名前にする。NNUE のアーキテクチャはビルド時に埋め込むので、評価関数ごとにビルドする
 ENGINES="tsuyouraou-mini:SFNN_ka2_4096_8_64_progress8 tsuyouraou-micro:SFNN_ka2_2048_8_64_progress8"
-# 判定はエンジンの探索結果が変わらないことを前提にしているので、版は固定し、上げるときはここを書き換える
+# ビルドする日によって評価値が変わらないよう版を固定し、上げるときはここを書き換える
 YANEURAOU_REF="${YANEURAOU_REF:-c046f30bef11527c84fd04a1ead5a47abfa910c8}"
 OUT_DIR="${ROOT}/build"
 BUILD_IMAGE="public.ecr.aws/lambda/python:3.13"

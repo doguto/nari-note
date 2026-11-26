@@ -18,15 +18,14 @@ public class Playbook : EntityBase
     public required string Name { get; set; }
 
     [Required]
-    [MaxLength(PlaybookPosition.SfenMaxLength)]
+    [MaxLength(PlaybookNodeBoard.SfenMaxLength)]
     public required string RootSfen { get; set; }
 
     // Navigation Properties
     public User User { get; set; } = null!;
-    public List<PlaybookPosition> Positions { get; set; } = new();
-    public List<PlaybookMove> Moves { get; set; } = new();
-    public List<ShapeGroup> ShapeGroups { get; set; } = new();
-    public List<ShapeCandidate> ShapeCandidates { get; set; } = new();
+    public List<PlaybookNode> Nodes { get; set; } = new();
+    public List<PlaybookNodeBoard> Boards { get; set; } = new();
+    public List<PlaybookNodeStep> Steps { get; set; } = new();
 
     public bool IsOwnedBy(UserId userId)
     {

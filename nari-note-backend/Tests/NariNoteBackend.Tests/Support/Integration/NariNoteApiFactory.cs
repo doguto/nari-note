@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -103,12 +103,6 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
                 d.ServiceType == typeof(IHostedService) && d.ImplementationType == typeof(UnverifiedUserDeletionWorker)
             );
             services.Remove(cleanupWorker);
-
-            // 同じ形の判定も同様に、必要なテストが ShapeJudgeProcessor を直接呼ぶ
-            var shapeJudgeWorker = services.Single(d =>
-                d.ServiceType == typeof(IHostedService) && d.ImplementationType == typeof(ShapeJudgeWorker)
-            );
-            services.Remove(shapeJudgeWorker);
         });
     }
 }

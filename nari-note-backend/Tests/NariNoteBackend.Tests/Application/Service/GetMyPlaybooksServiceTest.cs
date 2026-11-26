@@ -1,4 +1,4 @@
-using NariNoteBackend.Application.Dto.Request;
+﻿using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Domain.Entity;
@@ -23,7 +23,6 @@ public class GetMyPlaybooksServiceTest
         {
             Id = NariNoteBackend.Domain.ValueObject.PlaybookId.From(Guid.CreateVersion7()),
             Name = "角換わり",
-            PositionCount = 12,
             UpdatedAt = TestTimeProvider.DefaultUtcNow,
         };
         repository.FindSummariesByUserAsync(owner.Id).Returns([summary]);
@@ -32,6 +31,5 @@ public class GetMyPlaybooksServiceTest
 
         var playbook = Assert.Single(response.Playbooks);
         Assert.Equal("角換わり", playbook.Name);
-        Assert.Equal(12, playbook.PositionCount);
     }
 }

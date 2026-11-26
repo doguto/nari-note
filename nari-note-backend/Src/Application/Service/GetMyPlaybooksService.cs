@@ -28,7 +28,6 @@ public class GetMyPlaybooksService
             {
                 Id = b.Id,
                 Name = b.Name,
-                PositionCount = b.PositionCount,
                 UpdatedAt = b.UpdatedAt,
             }).ToList(),
         };

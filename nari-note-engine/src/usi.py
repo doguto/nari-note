@@ -65,8 +65,6 @@ class Engine:
             self._send(f"setoption name {k} value {v}")
         self.multipv = None
         self._ready()
-        # 1 回の判定の中で同じ探索を繰り返すので、リクエストの間だけ結果を覚えておく
-        self.memo: dict[tuple[str, int, int, str], SearchResult] = {}
 
     def _send(self, cmd: str) -> None:
         self.proc.stdin.write(cmd + "\n")
@@ -89,10 +87,6 @@ class Engine:
 
     def search(self, sfen: str, nodes: int, multipv: int = 1, searchmoves: list[str] | None = None) -> SearchResult:
         sm = " ".join(searchmoves or [])
-        key = (sfen, nodes, multipv, sm)
-        if key in self.memo:
-            return self.memo[key]
-
         if self.multipv != multipv:
             self._send(f"setoption name MultiPV value {multipv}")
             self.multipv = multipv
@@ -140,9 +134,7 @@ class Engine:
             ordered = [Line(bestmove, 0, [bestmove])]
         if bestmove == "resign":
             ordered = [Line("resign", -MATE_SCORE, [])]
-        result = SearchResult(ordered, total_nodes, nps, elapsed)
-        self.memo[key] = result
-        return result
+        return SearchResult(ordered, total_nodes, nps, elapsed)
 
     def close(self) -> None:
         try:

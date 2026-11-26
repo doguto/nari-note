@@ -66,13 +66,13 @@ import type {
   GetMyArticlesResponse,
   GetMyCoursesResponse,
   GetMyPlaybooksResponse,
-  GetPlaybookPositionRequest,
-  GetPlaybookPositionResponse,
   GetPlaybookRequest,
   GetPlaybookResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  InspectPlaybookBoardRequest,
+  InspectPlaybookBoardResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SearchCoursesRequest,
@@ -248,10 +248,16 @@ export async function getPlaybook(params: GetPlaybookRequest): Promise<GetPlaybo
   return serverFetch<GetPlaybookResponse>(url);
 }
 
-export async function getPlaybookPosition(params: GetPlaybookPositionRequest): Promise<GetPlaybookPositionResponse> {
-  const url = `${getBaseUrl()}/api/playbooks/${params.id}/positions/${params.positionId}`;
+export async function inspectPlaybookBoard(params: InspectPlaybookBoardRequest): Promise<InspectPlaybookBoardResponse> {
+  const url = new URL(`/api/playbooks/${params.id}/inspection`, getBaseUrl());
+  const query = { sfen: params.sfen };
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  });
 
-  return serverFetch<GetPlaybookPositionResponse>(url);
+  return serverFetch<InspectPlaybookBoardResponse>(url.toString());
 }
 
 // Tags Server Functions

@@ -26,21 +26,6 @@ public class HttpShogiEngineGateway : IShogiEngineGateway
         return result.Lines;
     }
 
-    public async Task<List<EngineCandidate>> FindCandidatesAsync(
-        string sfen,
-        List<string> others,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var result = await this.PostAsync<CandidatesResult>("candidates", new { sfen, others }, cancellationToken);
-        return result.Candidates;
-    }
-
-    public async Task<EngineVerdict> JudgeAsync(string sfenA, string sfenB, CancellationToken cancellationToken = default)
-    {
-        return await this.PostAsync<EngineVerdict>("judge", new { p = sfenA, q = sfenB }, cancellationToken);
-    }
-
     async Task<T> PostAsync<T>(string path, object body, CancellationToken cancellationToken)
     {
         using var response = await this.httpClient.PostAsJsonAsync(path, body, JsonOptions, cancellationToken);
@@ -52,10 +37,5 @@ public class HttpShogiEngineGateway : IShogiEngineGateway
     class AnalyzeResult
     {
         public List<EngineLine> Lines { get; init; } = new();
-    }
-
-    class CandidatesResult
-    {
-        public List<EngineCandidate> Candidates { get; init; } = new();
     }
 }

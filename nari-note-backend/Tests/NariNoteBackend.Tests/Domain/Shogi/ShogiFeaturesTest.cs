@@ -8,8 +8,8 @@ public class ShogiFeaturesTest
     const string KoshikakeNineFile = "ln5nl/1r2gkg2/2psp1spp/p2p1pp2/1p5P1/P1P1SPP2/1PSPP1N1P/2G4R1/LN2KG2L b Bb 31";
     const string KoshikakeSenteNine = "ln5nl/1r2gkg2/p1psp1spp/3p1pp2/1p5P1/P1P1SPP2/1PSPP1N1P/2G4R1/LN2KG2L b Bb 29";
 
-    static ShogiPosition Play(params string[] moves) =>
-        moves.Aggregate(ShogiPosition.FromSfen(ShogiPosition.Hirate), (p, m) => p.Apply(ShogiMove.Parse(m)));
+    static ShogiBoard Play(params string[] moves) =>
+        moves.Aggregate(ShogiBoard.FromSfen(ShogiBoard.Hirate), (p, m) => p.Apply(ShogiMove.Parse(m)));
 
     // 先手は四間飛車の本美濃、後手は居飛車穴熊
     static readonly string[] ShikenbishaVsAnaguma =
@@ -21,13 +21,13 @@ public class ShogiFeaturesTest
     [Fact]
     public void 平手の初期局面は平手だけを候補にする()
     {
-        Assert.Equal(["平手"], ShogiFeatures.NameSuggestions(ShogiPosition.FromSfen(ShogiPosition.Hirate)));
+        Assert.Equal(["平手"], ShogiFeatures.NameSuggestions(ShogiBoard.FromSfen(ShogiBoard.Hirate)));
     }
 
     [Fact]
     public void 角換わり腰掛け銀を見分ける()
     {
-        var suggestions = ShogiFeatures.NameSuggestions(ShogiPosition.FromSfen(Koshikake));
+        var suggestions = ShogiFeatures.NameSuggestions(ShogiBoard.FromSfen(Koshikake));
 
         Assert.Equal(["角換わり腰掛け銀", "角換わり"], suggestions);
     }
@@ -35,7 +35,7 @@ public class ShogiFeaturesTest
     [Fact]
     public void 端歩の突き合いを名前の候補に添える()
     {
-        var suggestions = ShogiFeatures.NameSuggestions(ShogiPosition.FromSfen(KoshikakeNineFile));
+        var suggestions = ShogiFeatures.NameSuggestions(ShogiBoard.FromSfen(KoshikakeNineFile));
 
         Assert.Equal("角換わり腰掛け銀 9筋突き合い", suggestions[0]);
     }
@@ -65,8 +65,8 @@ public class ShogiFeaturesTest
     public void 端歩だけの違いは端歩の状態を条件の候補にする()
     {
         var suggestions = ShogiFeatures.ConditionSuggestions(
-            ShogiPosition.FromSfen(KoshikakeNineFile),
-            [ShogiPosition.FromSfen(Koshikake)]
+            ShogiBoard.FromSfen(KoshikakeNineFile),
+            [ShogiBoard.FromSfen(Koshikake)]
         );
 
         Assert.Equal("9筋を突き合っている", suggestions[0]);
@@ -77,8 +77,8 @@ public class ShogiFeaturesTest
     public void 片方だけ突いた端歩は突いた側を条件にする()
     {
         var suggestions = ShogiFeatures.ConditionSuggestions(
-            ShogiPosition.FromSfen(KoshikakeSenteNine),
-            [ShogiPosition.FromSfen(Koshikake), ShogiPosition.FromSfen(KoshikakeNineFile)]
+            ShogiBoard.FromSfen(KoshikakeSenteNine),
+            [ShogiBoard.FromSfen(Koshikake), ShogiBoard.FromSfen(KoshikakeNineFile)]
         );
 
         Assert.Equal("9筋を先手だけ突いている", suggestions[0]);
@@ -88,8 +88,8 @@ public class ShogiFeaturesTest
     public void 同じ局面や離れすぎた局面からは条件を作らない()
     {
         var suggestions = ShogiFeatures.ConditionSuggestions(
-            ShogiPosition.FromSfen(Koshikake),
-            [ShogiPosition.FromSfen(Koshikake), ShogiPosition.FromSfen(ShogiPosition.Hirate)]
+            ShogiBoard.FromSfen(Koshikake),
+            [ShogiBoard.FromSfen(Koshikake), ShogiBoard.FromSfen(ShogiBoard.Hirate)]
         );
 
         Assert.Empty(suggestions);

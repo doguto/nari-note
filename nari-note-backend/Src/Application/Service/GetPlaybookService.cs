@@ -21,10 +21,32 @@ public class GetPlaybookService
 
     public async Task<GetPlaybookResponse> ExecuteAsync(UserId userId, GetPlaybookRequest request)
     {
-        var playbook = await this.playbookRepository.FindForceByIdAsync(request.Id);
+        var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
         PlaybookAccess.EnsureOwner(playbook, userId);
-        var positions = await this.playbookRepository.FindPositionsAsync(playbook.Id);
-        var root = positions.First(p => p.Sfen == playbook.RootSfen);
-        return new GetPlaybookResponse { Id = playbook.Id, Name = playbook.Name, RootPositionId = root.Id };
+        return new GetPlaybookResponse
+        {
+            Id = playbook.Id,
+            Name = playbook.Name,
+            RootSfen = playbook.RootSfen,
+            Nodes = playbook.Nodes
+                .OrderBy(n => n.Id.Value)
+                .Select(n => new PlaybookNodeDto { Id = n.Id, Name = n.Name, Memo = n.Memo })
+                .ToList(),
+            Boards = playbook.Boards
+                .OrderBy(b => b.Id.Value)
+                .Select(b => new PlaybookNodeBoardDto { Id = b.Id, NodeId = b.NodeId, Sfen = b.Sfen })
+                .ToList(),
+            Steps = playbook.Steps
+                .OrderBy(s => s.Id.Value)
+                .Select(s => new PlaybookNodeStepDto
+                {
+                    Id = s.Id,
+                    FromBoardId = s.FromBoardId,
+                    ToBoardId = s.ToBoardId,
+                    Usis = s.Usis,
+                    Condition = s.Condition,
+                })
+                .ToList(),
+        };
     }
 }

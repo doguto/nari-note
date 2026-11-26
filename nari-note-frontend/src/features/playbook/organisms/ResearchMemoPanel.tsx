@@ -11,7 +11,7 @@ interface ResearchMemoPanelProps {
 // 研究メモは形ごとに 1 つで、まとめた局面すべてで共有する
 export function ResearchMemoPanel({ plain, memo, onSave }: ResearchMemoPanelProps) {
   return (
-    <ResearchPanel plain={plain} title="研究メモ" note="この形にまとめた局面で共有します">
+    <ResearchPanel plain={plain} title="研究メモ" note="この形にまとめた局面で共有します。書くとノードになります">
       <textarea
         defaultValue={memo}
         rows={5}

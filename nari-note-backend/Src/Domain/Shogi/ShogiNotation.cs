@@ -28,7 +28,7 @@ public static class ShogiNotation
     public static string SquareLabel(int square) => $"{FullWidthDigits[square / 9 + 1]}{KanjiDigits[square % 9 + 1]}";
 
     // 曖昧な指し手は KIF と同じく移動元を括弧で添える
-    public static string MoveLabel(ShogiPosition position, ShogiMove move, int? previousTo = null)
+    public static string MoveLabel(ShogiBoard position, ShogiMove move, int? previousTo = null)
     {
         var mark = SideMark(position.Turn);
         var destination = previousTo == move.To ? "同　" : SquareLabel(move.To);
@@ -54,7 +54,7 @@ public static class ShogiNotation
     public static List<string> SequenceLabels(string sfen, IEnumerable<string> usiMoves)
     {
         var labels = new List<string>();
-        var position = ShogiPosition.FromSfen(sfen);
+        var position = ShogiBoard.FromSfen(sfen);
         int? previousTo = null;
         foreach (var usi in usiMoves)
         {

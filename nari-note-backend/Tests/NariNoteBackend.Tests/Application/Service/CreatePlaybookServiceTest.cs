@@ -1,4 +1,4 @@
-using NariNoteBackend.Application.Dto.Request;
+﻿using NariNoteBackend.Application.Dto.Request;
 using NariNoteBackend.Application.Exception;
 using NariNoteBackend.Application.Service;
 using NariNoteBackend.Domain.Entity;
@@ -31,11 +31,11 @@ public class CreatePlaybookServiceTest
         await this.playbookRepository.Received(1).CreateAsync(Arg.Is<Playbook>(b =>
             b.UserId == this.owner.Id
             && b.Name == "角換わり"
-            && b.RootSfen == ShogiPosition.Normalize(ShogiPosition.Hirate)
-            && b.Positions.Count == 1
-            && b.Positions[0].Sfen == b.RootSfen
-            && b.Positions[0].CandidatesScanned
-            && b.ShapeGroups.Count == 1
+            && b.RootSfen == ShogiBoard.Normalize(ShogiBoard.Hirate)
+            && b.Boards.Count == 1
+            && b.Boards[0].Sfen == b.RootSfen
+            && b.Nodes.Count == 1
+            && b.Steps.Count == 0
         ));
     }
 
@@ -46,7 +46,7 @@ public class CreatePlaybookServiceTest
 
         await this.service.ExecuteAsync(this.owner.Id, new CreatePlaybookRequest { Name = "腰掛け銀", RootSfen = sfen });
 
-        await this.playbookRepository.Received(1).CreateAsync(Arg.Is<Playbook>(b => b.RootSfen == ShogiPosition.Normalize(sfen)));
+        await this.playbookRepository.Received(1).CreateAsync(Arg.Is<Playbook>(b => b.RootSfen == ShogiBoard.Normalize(sfen)));
     }
 
     [Fact]

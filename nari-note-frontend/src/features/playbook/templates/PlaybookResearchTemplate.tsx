@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button';
 import { ErrorAlert } from '@/components/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMediaQuery } from '@/lib/hooks';
-import type { PlaybookMoveDto, EngineLineDto, GetPlaybookPositionResponse } from '@/lib/api/types';
+import type { EngineLineDto, PlaybookMemberDto, PlaybookSimilarBoardDto } from '@/lib/api/types';
 import type { AnalysisEngineId } from '../utils/analysisEngine';
+import type { PlaybookTree } from '../utils/playbookTree';
 import {
-  type PlaybookMoveChange,
+  type ResearchMove,
   BoardCard,
   PlaybookGraph,
   EngineLinesPanel,
@@ -18,25 +19,37 @@ import {
   ResearchMemoPanel,
   ShapeHeader,
   ShapeMembersPanel,
-  ShapeProposalsPanel,
+  SimilarBoardsPanel,
 } from '../organisms';
-
-export type ResearchMove = PlaybookMoveDto & { isDraft?: boolean };
 
 // 盤と「ここからの手」に出す内容。保存していない局面を見ているときは手元で作る
 export interface ResearchView {
   sfen: string;
   legalMoves: string[];
-  lastMoveUsi?: string | null;
+  lastMoveUsi?: string;
   lastMoveLabel?: string;
   ply: number;
   moves: ResearchMove[];
   isDraft: boolean;
 }
 
+// 表示中の局面が属する形。手順の途中の局面ではノードがまだ無い
+export interface ResearchShape {
+  isNode: boolean;
+  name: string;
+  memo: string;
+  boardCount: number;
+  nameSuggestions: string[];
+  members: PlaybookMemberDto[];
+  similar: PlaybookSimilarBoardDto[];
+  boardId?: string;
+}
+
 interface PlaybookResearchTemplateProps {
-  data: GetPlaybookPositionResponse;
+  playbookName: string;
+  tree: PlaybookTree;
   view: ResearchView;
+  shape: ResearchShape;
   draft: { count: number; isSaving: boolean; onSave: () => void; onDiscard: () => void };
   analysis: {
     isLoading: boolean;
@@ -50,18 +63,18 @@ interface PlaybookResearchTemplateProps {
   errorMessage?: string;
   selectedMoveIndex: number;
   onSelectMove: (index: number) => void;
-  onNavigate: (positionId: string) => void;
+  onNavigate: (sfen: string) => void;
+  onNavigateBoard: (boardId: string) => void;
   onFirst: () => void;
   onBack: () => void;
   onForward: () => void;
   onMove: (usi: string) => void;
-  onMoveChange: (moveId: number, change: PlaybookMoveChange) => void;
-  onDeleteMove: (moveId: number) => void;
-  onRenameGroup: (name: string) => void;
+  onChangeCondition: (stepId: number, condition: string) => void;
+  onDeleteMove: (usi: string) => void;
+  onRename: (name: string) => void;
   onSaveMemo: (memo: string) => void;
-  onMerge: (candidateId: number) => void;
-  onReject: (candidateId: number) => void;
-  onSplit: (positionId: string) => void;
+  onMerge: (boardId: string) => void;
+  onSplit: (boardId: string) => void;
 }
 
 const tabListClass = 'grid h-auto w-full rounded-lg bg-brand-bg-gradient-to p-1';
@@ -84,8 +97,10 @@ function Card({ title, icon, children, className }: { title?: string; icon?: Rea
 
 export function PlaybookResearchTemplate(props: PlaybookResearchTemplateProps) {
   const {
-    data,
+    playbookName,
+    tree,
     view,
+    shape,
     draft,
     analysis,
     isBusy,
@@ -93,16 +108,16 @@ export function PlaybookResearchTemplate(props: PlaybookResearchTemplateProps) {
     selectedMoveIndex,
     onSelectMove,
     onNavigate,
+    onNavigateBoard,
     onFirst,
     onBack,
     onForward,
     onMove,
-    onMoveChange,
+    onChangeCondition,
     onDeleteMove,
-    onRenameGroup,
+    onRename,
     onSaveMemo,
     onMerge,
-    onReject,
     onSplit,
   } = props;
   const isWide = useMediaQuery('(min-width: 1024px)');
@@ -114,7 +129,16 @@ export function PlaybookResearchTemplate(props: PlaybookResearchTemplateProps) {
       <span className="text-xs text-brand-secondary-text">保存すると名前を付けられます</span>
     </section>
   ) : (
-    <ShapeHeader group={data.group} isBusy={isBusy} onRename={onRenameGroup} onSplit={() => onSplit(data.positionId)} />
+    <ShapeHeader
+      sfen={view.sfen}
+      name={shape.name}
+      boardCount={shape.boardCount}
+      nameSuggestions={shape.nameSuggestions}
+      isNode={shape.isNode}
+      isBusy={isBusy}
+      onRename={onRename}
+      onSplit={() => shape.boardId && onSplit(shape.boardId)}
+    />
   );
   const boardCard = (
     <BoardCard
@@ -141,7 +165,7 @@ export function PlaybookResearchTemplate(props: PlaybookResearchTemplateProps) {
       className="min-h-0 flex-1"
       onSelect={onSelectMove}
       onGo={onMove}
-      onChange={onMoveChange}
+      onChangeCondition={onChangeCondition}
       onDelete={onDeleteMove}
     />
   );
@@ -160,13 +184,13 @@ export function PlaybookResearchTemplate(props: PlaybookResearchTemplateProps) {
   );
   const shapeDetails = (
     <div className="flex flex-col gap-5">
-      <ShapeProposalsPanel plain proposals={data.proposals} isBusy={isBusy} onView={onNavigate} onMerge={onMerge} onReject={onReject} />
-      <ShapeMembersPanel plain members={data.group.members} isBusy={isBusy} onView={onNavigate} onSplit={onSplit} />
-      <ResearchMemoPanel plain key={data.group.id} memo={data.group.memo} onSave={onSaveMemo} />
+      <SimilarBoardsPanel plain similar={shape.similar} isBusy={isBusy} onView={onNavigateBoard} onMerge={onMerge} />
+      <ShapeMembersPanel plain members={shape.members} isBusy={isBusy} onView={onNavigateBoard} onSplit={onSplit} />
+      <ResearchMemoPanel plain key={`${view.sfen}-${shape.memo}`} memo={shape.memo} onSave={onSaveMemo} />
     </div>
   );
-  const graph = <PlaybookGraph graph={data.graph} onSelect={onNavigate} className="min-h-0 flex-1" />;
-  const shapeTabLabel = data.proposals.length > 0 ? `形 ${data.proposals.length}` : '形';
+  const graph = <PlaybookGraph tree={tree} currentSfen={view.sfen} onSelect={onNavigate} className="min-h-0 flex-1" />;
+  const shapeTabLabel = shape.similar.length > 0 ? `形 ${shape.similar.length}` : '形';
 
   const header = (
     <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
@@ -178,14 +202,9 @@ export function PlaybookResearchTemplate(props: PlaybookResearchTemplateProps) {
           <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
           <span>研究盤</span>
         </nav>
-        <h1 className="truncate text-xl font-bold text-brand-text lg:text-2xl">{data.playbookName}</h1>
+        <h1 className="truncate text-xl font-bold text-brand-text lg:text-2xl">{playbookName}</h1>
       </div>
       <div className="flex items-center gap-3">
-        {data.pendingJudgeCount > 0 && (
-          <p className="text-xs text-brand-secondary-text" aria-live="polite">
-            同じ形を判定中（残り {data.pendingJudgeCount} 件）
-          </p>
-        )}
         {draft.count > 0 && (
           <>
             <span className="text-xs text-brand-secondary-text" aria-live="polite">
@@ -236,7 +255,7 @@ export function PlaybookResearchTemplate(props: PlaybookResearchTemplateProps) {
           </TabsContent>
           <TabsContent value="graph" className="mt-0">
             <Card>
-              <PlaybookGraph graph={data.graph} onSelect={onNavigate} className="h-[60dvh]" />
+              <PlaybookGraph tree={tree} currentSfen={view.sfen} onSelect={onNavigate} className="h-[60dvh]" />
             </Card>
           </TabsContent>
           <TabsContent value="ai" className="mt-0">

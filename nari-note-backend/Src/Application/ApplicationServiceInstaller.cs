@@ -55,14 +55,13 @@ public static class ApplicationServiceInstaller
         services.AddScoped<CreatePlaybookService>();
         services.AddScoped<DeletePlaybookService>();
         services.AddScoped<GetPlaybookService>();
-        services.AddScoped<GetPlaybookPositionService>();
-        services.AddScoped<AnalyzePlaybookPositionService>();
+        services.AddScoped<InspectPlaybookBoardService>();
+        services.AddScoped<AnalyzePlaybookBoardService>();
         services.AddScoped<SavePlaybookLinesService>();
-        services.AddScoped<DeletePlaybookMoveService>();
-        services.AddScoped<UpdatePlaybookMoveService>();
-        services.AddScoped<UpdateShapeGroupService>();
-        services.AddScoped<MergeShapeCandidateService>();
-        services.AddScoped<RejectShapeCandidateService>();
-        services.AddScoped<SplitShapeGroupService>();
+        services.AddScoped<RemovePlaybookMoveService>();
+        services.AddScoped<UpdatePlaybookNodeService>();
+        services.AddScoped<MergePlaybookNodesService>();
+        services.AddScoped<SplitPlaybookBoardService>();
+        services.AddScoped<UpdatePlaybookStepService>();
     }
 }

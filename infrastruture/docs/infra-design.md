@@ -17,7 +17,7 @@
 - SSH は開けない。運用操作は SSM (Session Manager / Run Command) で行う
 - 秘匿値 (JWT・DB 接続・外部 API キー等) は SSM Parameter Store の `/<app_name>/...` に置き、Terraform で投入する
 - 画像は S3 (`<app_name>-images`) に保存し、CloudFront (OAC) で配信する
-- マイ定跡の研究盤が使う将棋エンジン (`nari-note-engine/`) は Lambda (`<app_name>-shogi-engine`、zip、x86_64、1 vCPU) で動かす。API は EC2 の IAM ロールで直接 Invoke し、関数名は SSM の `/<app_name>/app/ShogiEngine/FunctionName` から読む。判定は呼び出しごとに並列に動く (`app/engine`)
+- マイ定跡の研究盤が使う将棋エンジン (`nari-note-engine/`) は Lambda (`<app_name>-shogi-engine`、zip、x86_64、1 vCPU) で動かす。API は EC2 の IAM ロールで直接 Invoke し、関数名は SSM の `/<app_name>/app/ShogiEngine/FunctionName` から読む。解析は呼び出しごとに並列に動く (`app/engine`)
 - DB のバックアップは WAL-G による S3 への継続アーカイブ + DLM の EBS スナップショット。詳細は [db-backup-recovery.md](db-backup-recovery.md)
 - 監視は CloudWatch (ログ・アラーム) → SNS でメール通知 (`app/logger`, `app/observer`)。EC2 の CPU・メモリ使用率・ステータスチェックと、DB の項目 ([db-backup-recovery.md](db-backup-recovery.md#監視-appobserver)) をアラームにしている。コストは `budget` で月額予算アラートを設定している
 - CloudWatch Logs (保持 7 日) は、EventBridge Scheduler が毎日 00:30 UTC に起動する Lambda が 2 日前の 1 日分 (UTC) を S3 (`<app_name>-logs`) にエクスポートする。ログがエクスポート可能になるまで最大 12 時間かかるため前日分は対象にしない。S3 には `<ロググループ名>/YYYY/MM/DD/` に gzip で置かれ、90 日で Glacier Instant Retrieval に移し 365 日で削除する。リトライ後も失敗すると SNS でメール通知する。保持期間内の日なら Lambda を `{"date": "YYYY-MM-DD"}` で手動実行して再エクスポートできる (`app/logger`, `app/observer`)
