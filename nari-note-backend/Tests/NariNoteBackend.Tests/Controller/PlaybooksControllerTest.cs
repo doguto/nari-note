@@ -50,40 +50,43 @@ public class PlaybooksControllerTest : IntegrationTestBase
     static PlaybookBoardId BoardIdOf(GetPlaybookResponse playbook, string sfen) => playbook.Boards.Single(b => b.Sfen == sfen).Id;
 
     [Fact]
-    public async Task 保存した手順は1手ごとに局面と遷移になる()
+    public async Task 保存した手順は開始局面から終点までの1つの手順になる()
     {
         var (client, id) = await CreatePlaybookAsync();
 
         await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"]);
 
         var playbook = await GetAsync(client, id);
-        Assert.Equal(4, playbook.Boards.Count);
-        Assert.Contains(playbook.Boards, b => b.Sfen == Root);
-        Assert.Equal(["7g7f", "3c3d", "2g2f"], playbook.Transitions.Select(t => t.Usi));
-        Assert.Empty(playbook.Nodes);
+        var root = Assert.Single(playbook.Boards);
+        Assert.Equal(Root, root.Sfen);
+        var transition = Assert.Single(playbook.Transitions);
+        Assert.Equal(["7g7f", "3c3d", "2g2f"], transition.Usis);
+        Assert.Null(transition.ToBoardId);
     }
 
     [Fact]
-    public async Task 手順を足しても既存の遷移の条件は残る()
+    public async Task 手順の途中で分かれると分岐点がノードになり既存の手順の条件は残る()
     {
         var (client, id) = await CreatePlaybookAsync();
         await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"]);
-        var branch = PlaybookBuilder.Play(Root, "7g7f", "3c3d");
-        var before = await GetAsync(client, id);
-        var transitionId = before.Transitions.Single(t => t.FromBoardId == BoardIdOf(before, branch)).Id;
+        var transitionId = Assert.Single((await GetAsync(client, id)).Transitions).Id;
         var update = await client.PutAsJsonAsync($"/api/playbooks/{id}/transitions/{transitionId}", new { condition = "角道を開けた" });
         Assert.Equal(HttpStatusCode.OK, update.StatusCode);
 
         await SaveAsync(client, id, ["7g7f", "3c3d", "6g6f"]);
 
         var playbook = await GetAsync(client, id);
-        Assert.Equal(5, playbook.Boards.Count);
-        Assert.Equal(2, playbook.Transitions.Count(t => t.FromBoardId == BoardIdOf(playbook, branch)));
-        Assert.Equal("角道を開けた", playbook.Transitions.Single(t => t.Id == transitionId).Condition);
+        var branch = PlaybookBuilder.Play(Root, "7g7f", "3c3d");
+        Assert.Equal(2, playbook.Boards.Count);
+        Assert.Equal(3, playbook.Transitions.Count);
+        var first = playbook.Transitions.Single(t => t.Id == transitionId);
+        Assert.Equal(["7g7f", "3c3d"], first.Usis);
+        Assert.Equal("角道を開けた", first.Condition);
+        Assert.Equal(BoardIdOf(playbook, branch), first.ToBoardId);
     }
 
     [Fact]
-    public async Task 手順前後で同じ局面になると一つの局面に合流する()
+    public async Task 手順前後で同じ局面になると一つのノードに合流する()
     {
         var (client, id) = await CreatePlaybookAsync();
 
@@ -92,7 +95,7 @@ public class PlaybooksControllerTest : IntegrationTestBase
         var playbook = await GetAsync(client, id);
         var merged = PlaybookBuilder.Play(Root, "7g7f", "3c3d", "2g2f");
         var board = playbook.Boards.Single(b => b.Sfen == merged);
-        Assert.Equal(2, playbook.Transitions.Count(t => t.ToBoardId == board.Id));
+        Assert.Equal(2, playbook.Transitions.Count(s => s.ToBoardId == board.Id));
         Assert.Equal(1, await QueryAsync(db => db.PlaybookBoards.CountAsync(b => b.Sfen == merged)));
     }
 
@@ -108,24 +111,111 @@ public class PlaybooksControllerTest : IntegrationTestBase
     }
 
     [Fact]
-    public async Task 手を外すとその先にしかない局面とノードも消える()
+    public async Task 辺を消すとその先にしか無いノードも消え分岐点のノードは残る()
     {
         var (client, id) = await CreatePlaybookAsync();
-        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"], ["7g7f", "3c3d", "6g6f"]);
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f", "8c8d"], ["7g7f", "3c3d", "6g6f"]);
         var branch = PlaybookBuilder.Play(Root, "7g7f", "3c3d");
-        await client.PutAsJsonAsync($"/api/playbooks/{id}/nodes", new { sfen = PlaybookBuilder.Play(branch, "6g6f"), name = "四間飛車" });
+        await client.PutAsJsonAsync($"/api/playbooks/{id}/nodes", new { sfen = PlaybookBuilder.Play(branch, "2g2f"), name = "居飛車" });
+        var before = await GetAsync(client, id);
+        var toIbisha = before.Transitions.Single(t => t.FromBoardId == BoardIdOf(before, branch) && t.Usis[0] == "2g2f");
 
-        var response = await client.PostAsJsonAsync($"/api/playbooks/{id}/moves/remove", new { sfen = branch, usi = "6g6f" });
+        var response = await client.DeleteAsync($"/api/playbooks/{id}/transitions/{toIbisha.Id}");
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         var playbook = await GetAsync(client, id);
-        Assert.Equal(4, playbook.Boards.Count);
-        Assert.Equal(["7g7f", "3c3d", "2g2f"], playbook.Transitions.Select(t => t.Usi));
-        Assert.Empty(playbook.Nodes);
+        Assert.DoesNotContain(playbook.Nodes, n => n.Name == "居飛車");
+        Assert.Equal(new[] { Root, branch }.Order(), playbook.Boards.Select(b => b.Sfen).Order());
+        Assert.Equal(["6g6f"], playbook.Transitions.Single(t => t.FromBoardId == BoardIdOf(playbook, branch)).Usis);
     }
 
     [Fact]
-    public async Task 局面に名前を付けるとノードになり名前とメモを消すとノードから外れる()
+    public async Task 名前を付けずに辺の途中の局面をノードにすると辺が分かれ条件は出発側に残る()
+    {
+        var (client, id) = await CreatePlaybookAsync();
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"]);
+        var transitionId = Assert.Single((await GetAsync(client, id)).Transitions).Id;
+        await client.PutAsJsonAsync($"/api/playbooks/{id}/transitions/{transitionId}", new { condition = "角道を開けた" });
+        var middle = PlaybookBuilder.Play(Root, "7g7f");
+
+        var response = await client.PutAsJsonAsync($"/api/playbooks/{id}/nodes", new { sfen = middle });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var playbook = await GetAsync(client, id);
+        var board = playbook.Boards.Single(b => b.Sfen == middle);
+        Assert.Equal("", playbook.Nodes.Single(n => n.Id == board.NodeId).Name);
+        var first = playbook.Transitions.Single(t => t.Id == transitionId);
+        Assert.Equal(["7g7f"], first.Usis);
+        Assert.Equal(board.Id, first.ToBoardId);
+        Assert.Equal("角道を開けた", first.Condition);
+        var second = playbook.Transitions.Single(t => t.FromBoardId == board.Id);
+        Assert.Equal(["3c3d", "2g2f"], second.Usis);
+    }
+
+    [Fact]
+    public async Task ノードを解除すると前後の辺が一本につながる()
+    {
+        var (client, id) = await CreatePlaybookAsync();
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"]);
+        var middle = PlaybookBuilder.Play(Root, "7g7f");
+        await client.PutAsJsonAsync($"/api/playbooks/{id}/nodes", new { sfen = middle, name = "角道を開けた形" });
+        var before = await GetAsync(client, id);
+        var nodeId = before.Boards.Single(b => b.Sfen == middle).NodeId;
+
+        var response = await client.PostAsync($"/api/playbooks/{id}/nodes/{nodeId}/unlink", null);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var playbook = await GetAsync(client, id);
+        Assert.Single(playbook.Boards);
+        Assert.Equal(["7g7f", "3c3d", "2g2f"], Assert.Single(playbook.Transitions).Usis);
+    }
+
+    [Fact]
+    public async Task 分岐点のノードは解除できない()
+    {
+        var (client, id) = await CreatePlaybookAsync();
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"], ["7g7f", "3c3d", "6g6f"]);
+        var playbook = await GetAsync(client, id);
+        var nodeId = playbook.Boards.Single(b => b.Sfen == PlaybookBuilder.Play(Root, "7g7f", "3c3d")).NodeId;
+
+        var response = await client.PostAsync($"/api/playbooks/{id}/nodes/{nodeId}/unlink", null);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ノードを削除するとその先にしか無い辺とノードも消える()
+    {
+        var (client, id) = await CreatePlaybookAsync();
+        await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f", "8c8d"], ["2g2f", "8c8d"]);
+        var x = PlaybookBuilder.Play(Root, "7g7f", "3c3d");
+        await client.PutAsJsonAsync($"/api/playbooks/{id}/nodes", new { sfen = x, name = "角道を開け合った形" });
+        var before = await GetAsync(client, id);
+        var nodeId = before.Boards.Single(b => b.Sfen == x).NodeId;
+
+        var response = await client.DeleteAsync($"/api/playbooks/{id}/nodes/{nodeId}");
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        var playbook = await GetAsync(client, id);
+        Assert.Single(playbook.Boards);
+        Assert.Equal(["2g2f", "8c8d"], Assert.Single(playbook.Transitions).Usis);
+    }
+
+    [Fact]
+    public async Task 開始局面のノードは削除も解除もできない()
+    {
+        var (client, id) = await CreatePlaybookAsync();
+        var nodeId = Assert.Single((await GetAsync(client, id)).Nodes).Id;
+
+        var delete = await client.DeleteAsync($"/api/playbooks/{id}/nodes/{nodeId}");
+        var unlink = await client.PostAsync($"/api/playbooks/{id}/nodes/{nodeId}/unlink", null);
+
+        Assert.Equal(HttpStatusCode.BadRequest, delete.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, unlink.StatusCode);
+    }
+
+    [Fact]
+    public async Task 辺の途中の局面に名前を付けるとノードになり名前とメモを消すと戻る()
     {
         var (client, id) = await CreatePlaybookAsync();
         await SaveAsync(client, id, ["7g7f", "3c3d", "2g2f"]);
@@ -139,13 +229,13 @@ public class PlaybooksControllerTest : IntegrationTestBase
         var node = playbook.Nodes.Single(n => n.Id == board.NodeId);
         Assert.Equal("角道を開け合った形", node.Name);
         Assert.Equal("次は飛車先", node.Memo);
+        Assert.Equal(2, playbook.Transitions.Count);
 
         await client.PutAsJsonAsync($"/api/playbooks/{id}/nodes", new { sfen = middle, name = "", memo = "" });
 
         var cleared = await GetAsync(client, id);
-        Assert.Empty(cleared.Nodes);
-        Assert.Null(cleared.Boards.Single(b => b.Sfen == middle).NodeId);
-        Assert.Equal(4, cleared.Boards.Count);
+        Assert.Single(cleared.Boards);
+        Assert.Single(cleared.Transitions);
     }
 
     [Fact]

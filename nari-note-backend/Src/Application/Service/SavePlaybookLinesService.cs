@@ -26,11 +26,12 @@ public class SavePlaybookLinesService
         var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
         PlaybookAccess.EnsureOwner(playbook, userId);
 
-        var graph = new PlaybookGraph(playbook, this.playbookRepository);
+        var tree = PlaybookTree.Load(playbook);
         foreach (var line in request.Lines)
         {
-            graph.AddLine(line.Usis);
+            tree.AddLine(line.Usis);
         }
+        PlaybookAccess.Rebuild(playbook, tree, this.playbookRepository);
 
         playbook.UpdatedAt = this.timeProvider.UtcNow();
         await this.playbookRepository.SaveAsync();

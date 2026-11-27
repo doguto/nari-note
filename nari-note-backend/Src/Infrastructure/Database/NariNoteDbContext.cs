@@ -355,11 +355,11 @@ public class NariNoteDbContext : DbContext
              .HasForeignKey(b => b.PlaybookId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            // 定跡の削除時は局面とノードが同じ文で消えるため、DB 側は文末に検査される NO ACTION にする
+            // 定跡の削除時は局面とノードが同じ文で消えるため、文末に検査される NO ACTION にする
             x.HasOne(b => b.Node)
              .WithMany(n => n.Boards)
              .HasForeignKey(b => b.NodeId)
-             .OnDelete(DeleteBehavior.ClientSetNull);
+             .OnDelete(DeleteBehavior.NoAction);
 
             x.Property(b => b.Id)
              .HasValueGenerator<PlaybookBoardIdValueGenerator>();
@@ -368,6 +368,9 @@ public class NariNoteDbContext : DbContext
              .HasVogenConversion();
 
             x.Property(b => b.PlaybookId)
+             .HasVogenConversion();
+
+            x.Property(b => b.NodeId)
              .HasVogenConversion();
         });
 
@@ -397,9 +400,6 @@ public class NariNoteDbContext : DbContext
              .HasVogenConversion();
 
             x.Property(t => t.FromBoardId)
-             .HasVogenConversion();
-
-            x.Property(t => t.ToBoardId)
              .HasVogenConversion();
         });
     }

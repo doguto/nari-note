@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -63,7 +64,7 @@ namespace NariNoteBackend.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PlaybookId = table.Column<Guid>(type: "uuid", nullable: false),
-                    NodeId = table.Column<int>(type: "integer", nullable: true),
+                    NodeId = table.Column<int>(type: "integer", nullable: false),
                     Sfen = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -92,8 +93,8 @@ namespace NariNoteBackend.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     PlaybookId = table.Column<Guid>(type: "uuid", nullable: false),
                     FromBoardId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ToBoardId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Usi = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
+                    ToBoardId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Usis = table.Column<List<string>>(type: "text[]", nullable: false),
                     Condition = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -133,10 +134,9 @@ namespace NariNoteBackend.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaybookBoardTransitions_FromBoardId_ToBoardId",
+                name: "IX_PlaybookBoardTransitions_FromBoardId",
                 table: "PlaybookBoardTransitions",
-                columns: new[] { "FromBoardId", "ToBoardId" },
-                unique: true);
+                column: "FromBoardId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlaybookBoardTransitions_PlaybookId",

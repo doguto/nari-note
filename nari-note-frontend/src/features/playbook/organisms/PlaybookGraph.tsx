@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { GitBranch } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { type Chain, type ChainMove, type CollapsedNode, collapseGraph, graphNodeIdOf } from '../utils/collapseGraph';
+import { type Chain, type ChainMove, type CollapsedNode, collapseGraph } from '../utils/collapseGraph';
 import { NODE_HEIGHT, layoutGraph } from '../utils/graphLayout';
 import type { PlaybookTree } from '../utils/playbookTree';
 
@@ -18,7 +18,7 @@ const MOVE_CHAR_WIDTH = 12;
 // 形を出る手は形のすぐ下、形に入る手は形のすぐ上に置く
 function labelWidth(chain: Chain): number {
   const moveWidth = Math.max(...chain.moves.map((m) => m.label.length * MOVE_CHAR_WIDTH + 16));
-  const conditionWidth = chain.conditions.reduce((max, c) => Math.max(max, c.length * 11 + 34), 0);
+  const conditionWidth = chain.condition ? chain.condition.length * 11 + 34 : 0;
   return Math.max(moveWidth, conditionWidth) + 8;
 }
 
@@ -45,7 +45,7 @@ export function PlaybookGraph({ tree, currentSfen, className, onSelect }: Playbo
     return layoutGraph<CollapsedNode, (typeof chains)[number]>(collapsed.nodes, chains, collapsed.rootId);
   }, [tree]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const current = graphNodeIdOf(tree, currentSfen);
+  const current = tree.boards.get(currentSfen)?.nodeId;
 
   useEffect(() => {
     const box = containerRef.current;
@@ -68,7 +68,7 @@ export function PlaybookGraph({ tree, currentSfen, className, onSelect }: Playbo
           {layout.edges.map(({ edge, path, lane }, i) => (
             <path
               key={i}
-              // 名前を付けた形にたどり着かない手順は、省略記号のところで線を止める
+              // ノードにたどり着かない手順は、省略記号のところで線を止める
               d={edge.to < 0 ? `${path.split(' L ')[0]} L ${lane.x} ${(lane.top + lane.bottom) / 2}` : path}
               fill="none"
               strokeWidth={edge.isConditional ? 2 : 1.5}
@@ -86,7 +86,7 @@ export function PlaybookGraph({ tree, currentSfen, className, onSelect }: Playbo
           const hiddenCurrent = hidden.find((m) => m.sfen === currentSfen);
           const single = edge.moves.length === 1 && !open;
           const middle = (lane.top + lane.bottom) / 2;
-          // 名前の付いた行き先は札の方を強調するので、手順の中では強調しない
+          // ノードの行き先は札の方を強調するので、手順の中では強調しない
           const isCurrentMove = (m: ChainMove) => m.sfen === currentSfen && !(edge.to >= 0 && m === last);
           return (
             <div key={`labels-${i}`}>
@@ -94,15 +94,14 @@ export function PlaybookGraph({ tree, currentSfen, className, onSelect }: Playbo
                 className={cn('absolute flex -translate-x-1/2 flex-col items-center gap-0.5', single && '-translate-y-1/2')}
                 style={{ left: lane.x, top: single ? middle : lane.top }}
               >
-                {edge.conditions.map((c) => (
+                {edge.condition && (
                   <span
-                    key={c}
                     className="flex items-center gap-1 whitespace-nowrap rounded-full border border-orange-200 bg-orange-50 px-1.5 text-[11px] leading-4 text-orange-800"
                   >
                     <GitBranch className="h-3 w-3" aria-hidden="true" />
-                    {c}
+                    {edge.condition}
                   </span>
-                ))}
+                )}
                 <MoveChip move={first} isCurrent={isCurrentMove(first)} onSelect={onSelect} />
               </div>
               {hidden.length > 0 && (

@@ -37,14 +37,14 @@ public class GetPlaybookService
                 .Select(b => new PlaybookBoardDto { Id = b.Id, NodeId = b.NodeId, Sfen = b.Sfen })
                 .ToList(),
             Transitions = playbook.Transitions
-                .OrderBy(t => t.Id.Value)
-                .Select(t => new PlaybookBoardTransitionDto
+                .OrderBy(s => s.Id.Value)
+                .Select(s => new PlaybookBoardTransitionDto
                 {
-                    Id = t.Id,
-                    FromBoardId = t.FromBoardId,
-                    ToBoardId = t.ToBoardId,
-                    Usi = t.Usi,
-                    Condition = t.Condition,
+                    Id = s.Id,
+                    FromBoardId = s.FromBoardId,
+                    ToBoardId = s.ToBoardId,
+                    Usis = s.Usis,
+                    Condition = s.Condition,
                 })
                 .ToList(),
         };

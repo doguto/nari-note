@@ -28,11 +28,14 @@ public class SplitPlaybookBoardService
 
         var board = PlaybookAccess.FindBoard(playbook, request.BoardId);
         var node = board.Node;
-        if (node == null || node.Boards.Count <= 1) throw new InvalidOperationException("この局面だけのノードは分けられません");
+        if (node.Boards.Count <= 1) throw new InvalidOperationException("この局面だけのノードは分けられません");
 
-        var graph = new PlaybookGraph(playbook, this.playbookRepository);
-        graph.Unlink(board);
-        graph.ReleaseNodeIfEmpty(node);
+        var created = new PlaybookNode { Playbook = playbook };
+        node.Boards.Remove(board);
+        board.Node = created;
+        created.Boards.Add(board);
+        playbook.Nodes.Add(created);
+        this.playbookRepository.AddNode(created);
 
         playbook.UpdatedAt = this.timeProvider.UtcNow();
         await this.playbookRepository.SaveAsync();

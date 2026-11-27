@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { ArrowRight, GitBranch, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -12,7 +11,7 @@ export interface ResearchMove {
   usi: string;
   label: string;
   isDraft: boolean;
-  // ノードに属する局面から出る保存済みの手のときだけ、その遷移の条件を書ける
+  // 保存済みの手は、ノードから出る辺の 1 手目。条件はその辺に書く
   transitionId?: number;
   condition: string;
   conditionSuggestions: string[];
@@ -20,13 +19,15 @@ export interface ResearchMove {
 
 interface NextMovesPanelProps {
   moves: ResearchMove[];
+  // ノードでない局面では、保存済みの手を出さない
+  isNode: boolean;
   scores: Record<string, number>;
   selectedIndex: number;
   className?: string;
   onSelect: (index: number) => void;
   onGo: (usi: string) => void;
   onChangeCondition: (transitionId: number, condition: string) => void;
-  onDelete: (usi: string) => void;
+  onDeleteTransition: (transitionId: number) => void;
 }
 
 const fieldClass =
@@ -34,20 +35,23 @@ const fieldClass =
 
 export function NextMovesPanel({
   moves,
+  isNode,
   scores,
   selectedIndex,
   className,
   onSelect,
   onGo,
   onChangeCondition,
-  onDelete,
+  onDeleteTransition,
 }: NextMovesPanelProps) {
-  const [confirming, setConfirming] = useState<string | null>(null);
-
   return (
     <ResearchPanel title="ここからの手" icon={<ArrowRight className="h-4 w-4" aria-hidden="true" />} note={`${moves.length}手`} className={className}>
       {moves.length === 0 ? (
-        <p className="text-sm leading-relaxed text-brand-secondary-text">まだ手がありません。盤で指すか、AI候補手を押すと進めます。</p>
+        <p className="text-sm leading-relaxed text-brand-secondary-text">
+          {isNode
+            ? 'まだ手がありません。盤で指すか、AI候補手を押すと進めます。'
+            : 'ノードでない局面では、保存済みの手は出しません。→ キーで手順を進められます。'}
+        </p>
       ) : (
         <ul className="-mx-2 flex min-h-0 flex-1 flex-col overflow-y-auto px-2">
           {moves.map((m, i) => {
@@ -115,23 +119,14 @@ export function NextMovesPanel({
                         </div>
                       </>
                     )}
-                    <div className="flex justify-end">
-                      {confirming === m.usi ? (
-                        <div className="flex gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => setConfirming(null)}>
-                            やめる
-                          </Button>
-                          <Button size="sm" variant="destructive" onClick={() => onDelete(m.usi)}>
-                            先の手順ごと外す
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button size="sm" variant="ghost" className="text-red-700" onClick={() => setConfirming(m.usi)}>
+                    {transitionId !== undefined && (
+                      <div className="flex justify-end">
+                        <Button size="sm" variant="ghost" className="text-red-700" onClick={() => onDeleteTransition(transitionId)}>
                           <Trash2 aria-hidden="true" />
-                          この手を外す
+                          この辺を削除
                         </Button>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </li>

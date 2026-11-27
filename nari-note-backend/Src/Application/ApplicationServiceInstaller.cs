@@ -58,7 +58,9 @@ public static class ApplicationServiceInstaller
         services.AddScoped<InspectPlaybookBoardService>();
         services.AddScoped<AnalyzePlaybookBoardService>();
         services.AddScoped<SavePlaybookLinesService>();
-        services.AddScoped<RemovePlaybookMoveService>();
+        services.AddScoped<DeletePlaybookTransitionService>();
+        services.AddScoped<DeletePlaybookNodeService>();
+        services.AddScoped<UnlinkPlaybookNodeService>();
         services.AddScoped<UpdatePlaybookNodeService>();
         services.AddScoped<MergePlaybookNodesService>();
         services.AddScoped<SplitPlaybookBoardService>();

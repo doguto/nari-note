@@ -33,9 +33,10 @@ export interface ResearchView {
   isDraft: boolean;
 }
 
-// 表示中の局面が属する形。手順の途中の局面ではノードがまだ無い
+// 表示中の局面が属する形。辺の途中の局面ではノードが無い
 export interface ResearchShape {
   isNode: boolean;
+  isRoot: boolean;
   name: string;
   memo: string;
   boardCount: number;
@@ -70,7 +71,11 @@ interface PlaybookResearchTemplateProps {
   onForward: () => void;
   onMove: (usi: string) => void;
   onChangeCondition: (transitionId: number, condition: string) => void;
-  onDeleteMove: (usi: string) => void;
+  onDeleteTransition: (transitionId: number) => void;
+  onDeleteTransitionHere: () => void;
+  onMakeNode: () => void;
+  onUnlinkNode: () => void;
+  onDeleteNode: () => void;
   onRename: (name: string) => void;
   onSaveMemo: (memo: string) => void;
   onMerge: (boardId: string) => void;
@@ -114,7 +119,11 @@ export function PlaybookResearchTemplate(props: PlaybookResearchTemplateProps) {
     onForward,
     onMove,
     onChangeCondition,
-    onDeleteMove,
+    onDeleteTransition,
+    onDeleteTransitionHere,
+    onMakeNode,
+    onUnlinkNode,
+    onDeleteNode,
     onRename,
     onSaveMemo,
     onMerge,
@@ -135,9 +144,14 @@ export function PlaybookResearchTemplate(props: PlaybookResearchTemplateProps) {
       boardCount={shape.boardCount}
       nameSuggestions={shape.nameSuggestions}
       isNode={shape.isNode}
+      isRoot={shape.isRoot}
       isBusy={isBusy}
       onRename={onRename}
+      onMakeNode={onMakeNode}
       onSplit={() => shape.boardId && onSplit(shape.boardId)}
+      onUnlink={onUnlinkNode}
+      onDeleteNode={onDeleteNode}
+      onDeleteTransition={onDeleteTransitionHere}
     />
   );
   const boardCard = (
@@ -160,13 +174,14 @@ export function PlaybookResearchTemplate(props: PlaybookResearchTemplateProps) {
   const nextMoves = (
     <NextMovesPanel
       moves={view.moves}
+      isNode={shape.isNode}
       scores={scores}
       selectedIndex={selectedMoveIndex}
       className="min-h-0 flex-1"
       onSelect={onSelectMove}
       onGo={onMove}
       onChangeCondition={onChangeCondition}
-      onDelete={onDeleteMove}
+      onDeleteTransition={onDeleteTransition}
     />
   );
   const engine = (

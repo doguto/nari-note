@@ -1,5 +1,5 @@
 namespace NariNoteBackend.Application.Dto.Response;
 
-public class RemovePlaybookMoveResponse
+public class UnlinkPlaybookNodeResponse
 {
 }

@@ -17,7 +17,9 @@ import type {
   CreatePlaybookResponse,
   DeleteArticleRequest,
   DeleteCourseRequest,
+  DeletePlaybookNodeRequest,
   DeletePlaybookRequest,
+  DeletePlaybookTransitionRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   GetArticleCommentsRequest,
@@ -59,8 +61,6 @@ import type {
   InspectPlaybookBoardResponse,
   MergePlaybookNodesRequest,
   MergePlaybookNodesResponse,
-  RemovePlaybookMoveRequest,
-  RemovePlaybookMoveResponse,
   ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
@@ -79,6 +79,8 @@ import type {
   ToggleFollowResponse,
   ToggleLikeRequest,
   ToggleLikeResponse,
+  UnlinkPlaybookNodeRequest,
+  UnlinkPlaybookNodeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
   UpdateCourseRequest,
@@ -570,11 +572,11 @@ export function useSavePlaybookLines(options?: UseMutationOptions<SavePlaybookLi
   });
 }
 
-export function useRemovePlaybookMove(options?: UseMutationOptions<RemovePlaybookMoveResponse, Error, RemovePlaybookMoveRequest>) {
+export function useDeletePlaybookTransition(options?: UseMutationOptions<void, Error, DeletePlaybookTransitionRequest>) {
   const queryClient = useQueryClient();
-  return useMutation<RemovePlaybookMoveResponse, Error, RemovePlaybookMoveRequest>({
+  return useMutation<void, Error, DeletePlaybookTransitionRequest>({
     ...options,
-    mutationFn: (data) => playbooksApi.removePlaybookMove(data),
+    mutationFn: (data) => playbooksApi.deletePlaybookTransition(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
       options?.onSuccess?.(...args);
@@ -587,6 +589,30 @@ export function useUpdatePlaybookNode(options?: UseMutationOptions<UpdatePlayboo
   return useMutation<UpdatePlaybookNodeResponse, Error, UpdatePlaybookNodeRequest>({
     ...options,
     mutationFn: (data) => playbooksApi.updatePlaybookNode(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useDeletePlaybookNode(options?: UseMutationOptions<void, Error, DeletePlaybookNodeRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeletePlaybookNodeRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.deletePlaybookNode(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useUnlinkPlaybookNode(options?: UseMutationOptions<UnlinkPlaybookNodeResponse, Error, UnlinkPlaybookNodeRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UnlinkPlaybookNodeResponse, Error, UnlinkPlaybookNodeRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.unlinkPlaybookNode(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ['playbooks'] });
       options?.onSuccess?.(...args);

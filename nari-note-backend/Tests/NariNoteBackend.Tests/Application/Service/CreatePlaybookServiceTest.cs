@@ -34,7 +34,7 @@ public class CreatePlaybookServiceTest
             && b.RootSfen == ShogiBoard.Normalize(ShogiBoard.Hirate)
             && b.Boards.Count == 1
             && b.Boards[0].Sfen == b.RootSfen
-            && b.Nodes.Count == 0
+            && b.Nodes.Count == 1
             && b.Transitions.Count == 0
         ));
     }

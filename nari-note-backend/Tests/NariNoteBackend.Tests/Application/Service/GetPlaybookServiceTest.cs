@@ -12,26 +12,24 @@ public class GetPlaybookServiceTest
     readonly IPlaybookRepository repository = Substitute.For<IPlaybookRepository>();
 
     [Fact]
-    public async Task ノードと局面と遷移を返す()
+    public async Task ノードと盤面と手順を返す()
     {
         var owner = new UserBuilder().Build();
         var builder = new PlaybookBuilder(owner);
         builder.Line("7g7f", "3c3d", "2g2f");
         builder.Line("7g7f", "3c3d", "6g6f");
-        builder.Name(PlaybookBuilder.Play(builder.Build().RootSfen, "7g7f", "3c3d"), "角道を開け合った形");
         var playbook = builder.Build();
         this.repository.FindForceGraphByIdAsync(playbook.Id).Returns(playbook);
 
         var response = await new GetPlaybookService(this.repository).ExecuteAsync(owner.Id, new GetPlaybookRequest { Id = playbook.Id });
 
         Assert.Equal(playbook.RootSfen, response.RootSfen);
-        Assert.Equal(5, response.Boards.Count);
-        Assert.Equal(4, response.Transitions.Count);
-        var node = Assert.Single(response.Nodes);
-        Assert.Equal("角道を開け合った形", node.Name);
-        Assert.Single(response.Boards, b => b.NodeId == node.Id);
-        var first = Assert.Single(response.Transitions, t => t.FromBoardId == builder.Root.Id);
-        Assert.Equal("7g7f", first.Usi);
+        Assert.Equal(2, response.Boards.Count);
+        Assert.Equal(2, response.Nodes.Count);
+        Assert.Equal(3, response.Transitions.Count);
+        var first = response.Transitions.Single(s => s.FromBoardId == builder.Root.Id);
+        Assert.Equal(["7g7f", "3c3d"], first.Usis);
+        Assert.NotNull(first.ToBoardId);
     }
 
     [Fact]

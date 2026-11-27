@@ -43,14 +43,13 @@ public class InspectPlaybookBoardServiceTest
     }
 
     [Fact]
-    public async Task ノードに属さない局面は名前の候補だけを返す()
+    public async Task 手順の途中の局面は名前の候補だけを返す()
     {
         this.builder.Line("7g7f", "3c3d", "2g2f");
-        var sfen = PlaybookBuilder.Play(this.builder.Build().RootSfen, "7g7f");
 
-        var response = await this.Inspect(sfen);
+        var response = await this.Inspect(PlaybookBuilder.Play(this.builder.Build().RootSfen, "7g7f"));
 
-        Assert.Equal(this.builder.BoardAt(sfen)!.Id, response.BoardId);
+        Assert.Null(response.BoardId);
         Assert.Empty(response.Members);
         Assert.Empty(response.Similar);
     }
@@ -62,7 +61,7 @@ public class InspectPlaybookBoardServiceTest
     }
 
     [Fact]
-    public async Task まとめた局面の違いから遷移の条件の候補を出す()
+    public async Task まとめた盤面の違いから手順の条件の候補を出す()
     {
         this.builder.Line("7g7f", "3c3d", "2g2f", "4a3b");
         this.builder.Line("9g9f", "9c9d", "7g7f", "3c3d", "2g2f", "4a3b");

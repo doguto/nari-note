@@ -26,21 +26,18 @@ public class MergePlaybookNodesService
         var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
         PlaybookAccess.EnsureOwner(playbook, userId);
 
-        var board = PlaybookAccess.FindBoard(playbook, request.BoardId);
-        var other = PlaybookAccess.FindBoard(playbook, request.OtherBoardId);
-        if (board == other || (board.Node != null && board.Node == other.Node)) return new MergePlaybookNodesResponse();
-
-        var graph = new PlaybookGraph(playbook, this.playbookRepository);
-        var keep = graph.EnsureNode(board);
-        var drop = graph.EnsureNode(other);
+        var keep = PlaybookAccess.FindBoard(playbook, request.BoardId).Node;
+        var drop = PlaybookAccess.FindBoard(playbook, request.OtherBoardId).Node;
+        if (keep == drop) return new MergePlaybookNodesResponse();
 
         var memo = string.Join("\n", new[] { keep.Memo, drop.Memo }.Where(m => m.Length > 0));
         if (memo.Length > PlaybookNode.MemoMaxLength) throw new ArgumentException("まとめると研究メモが2000文字を超えます。先にメモを短くしてください");
 
-        foreach (var member in drop.Boards.ToList())
+        foreach (var board in drop.Boards.ToList())
         {
-            member.Node = keep;
-            keep.Boards.Add(member);
+            board.Node = keep;
+            board.NodeId = keep.Id;
+            keep.Boards.Add(board);
         }
         drop.Boards.Clear();
         keep.Memo = memo;

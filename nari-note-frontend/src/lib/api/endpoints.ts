@@ -16,7 +16,9 @@ import type {
   CreatePlaybookResponse,
   DeleteArticleRequest,
   DeleteCourseRequest,
+  DeletePlaybookNodeRequest,
   DeletePlaybookRequest,
+  DeletePlaybookTransitionRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   GetArticleCommentsRequest,
@@ -58,8 +60,6 @@ import type {
   InspectPlaybookBoardResponse,
   MergePlaybookNodesRequest,
   MergePlaybookNodesResponse,
-  RemovePlaybookMoveRequest,
-  RemovePlaybookMoveResponse,
   ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
@@ -78,6 +78,8 @@ import type {
   ToggleFollowResponse,
   ToggleLikeRequest,
   ToggleLikeResponse,
+  UnlinkPlaybookNodeRequest,
+  UnlinkPlaybookNodeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
   UpdateCourseRequest,
@@ -282,12 +284,18 @@ export const playbooksApi = {
     const response = await apiClient.post<SavePlaybookLinesResponse>(`/api/playbooks/${data.id}/lines`, data);
     return response;
   },
-  removePlaybookMove: async (data: RemovePlaybookMoveRequest): Promise<RemovePlaybookMoveResponse> => {
-    const response = await apiClient.post<RemovePlaybookMoveResponse>(`/api/playbooks/${data.id}/moves/remove`, data);
-    return response;
+  deletePlaybookTransition: async (data: DeletePlaybookTransitionRequest): Promise<void> => {
+    await apiClient.delete(`/api/playbooks/${data.id}/transitions/${data.transitionId}`);
   },
   updatePlaybookNode: async (data: UpdatePlaybookNodeRequest): Promise<UpdatePlaybookNodeResponse> => {
     const response = await apiClient.put<UpdatePlaybookNodeResponse>(`/api/playbooks/${data.id}/nodes`, data);
+    return response;
+  },
+  deletePlaybookNode: async (data: DeletePlaybookNodeRequest): Promise<void> => {
+    await apiClient.delete(`/api/playbooks/${data.id}/nodes/${data.nodeId}`);
+  },
+  unlinkPlaybookNode: async (data: UnlinkPlaybookNodeRequest): Promise<UnlinkPlaybookNodeResponse> => {
+    const response = await apiClient.post<UnlinkPlaybookNodeResponse>(`/api/playbooks/${data.id}/nodes/${data.nodeId}/unlink`);
     return response;
   },
   mergePlaybookNodes: async (data: MergePlaybookNodesRequest): Promise<MergePlaybookNodesResponse> => {

@@ -18,7 +18,9 @@ public class PlaybooksController : ApplicationController
     readonly GetPlaybookService getPlaybookService;
     readonly InspectPlaybookBoardService inspectPlaybookBoardService;
     readonly MergePlaybookNodesService mergePlaybookNodesService;
-    readonly RemovePlaybookMoveService removePlaybookMoveService;
+    readonly DeletePlaybookTransitionService deletePlaybookTransitionService;
+    readonly DeletePlaybookNodeService deletePlaybookNodeService;
+    readonly UnlinkPlaybookNodeService unlinkPlaybookNodeService;
     readonly SavePlaybookLinesService savePlaybookLinesService;
     readonly SplitPlaybookBoardService splitPlaybookBoardService;
     readonly UpdatePlaybookNodeService updatePlaybookNodeService;
@@ -32,7 +34,9 @@ public class PlaybooksController : ApplicationController
         GetPlaybookService getPlaybookService,
         InspectPlaybookBoardService inspectPlaybookBoardService,
         MergePlaybookNodesService mergePlaybookNodesService,
-        RemovePlaybookMoveService removePlaybookMoveService,
+        DeletePlaybookTransitionService deletePlaybookTransitionService,
+        DeletePlaybookNodeService deletePlaybookNodeService,
+        UnlinkPlaybookNodeService unlinkPlaybookNodeService,
         SavePlaybookLinesService savePlaybookLinesService,
         SplitPlaybookBoardService splitPlaybookBoardService,
         UpdatePlaybookNodeService updatePlaybookNodeService,
@@ -46,7 +50,9 @@ public class PlaybooksController : ApplicationController
         this.getPlaybookService = getPlaybookService;
         this.inspectPlaybookBoardService = inspectPlaybookBoardService;
         this.mergePlaybookNodesService = mergePlaybookNodesService;
-        this.removePlaybookMoveService = removePlaybookMoveService;
+        this.deletePlaybookTransitionService = deletePlaybookTransitionService;
+        this.deletePlaybookNodeService = deletePlaybookNodeService;
+        this.unlinkPlaybookNodeService = unlinkPlaybookNodeService;
         this.savePlaybookLinesService = savePlaybookLinesService;
         this.splitPlaybookBoardService = splitPlaybookBoardService;
         this.updatePlaybookNodeService = updatePlaybookNodeService;
@@ -117,14 +123,13 @@ public class PlaybooksController : ApplicationController
         return Ok(response);
     }
 
-    [HttpPost("{id}/moves/remove")]
+    [HttpDelete("{id}/transitions/{transitionId}")]
     [Auth(AuthLevel.Authenticated)]
-    [ValidateModelState]
-    public async Task<ActionResult<RemovePlaybookMoveResponse>> RemovePlaybookMove(PlaybookId id, [FromBody] RemovePlaybookMoveRequest request)
+    public async Task<ActionResult> DeletePlaybookTransition(PlaybookId id, PlaybookBoardTransitionId transitionId)
     {
-        request.Id = id;
-        var response = await this.removePlaybookMoveService.ExecuteAsync(UserId!.Value, request);
-        return Ok(response);
+        var request = new DeletePlaybookTransitionRequest { Id = id, TransitionId = transitionId };
+        await this.deletePlaybookTransitionService.ExecuteAsync(UserId!.Value, request);
+        return NoContent();
     }
 
     [HttpPut("{id}/nodes")]
@@ -134,6 +139,24 @@ public class PlaybooksController : ApplicationController
     {
         request.Id = id;
         var response = await this.updatePlaybookNodeService.ExecuteAsync(UserId!.Value, request);
+        return Ok(response);
+    }
+
+    [HttpDelete("{id}/nodes/{nodeId}")]
+    [Auth(AuthLevel.Authenticated)]
+    public async Task<ActionResult> DeletePlaybookNode(PlaybookId id, PlaybookNodeId nodeId)
+    {
+        var request = new DeletePlaybookNodeRequest { Id = id, NodeId = nodeId };
+        await this.deletePlaybookNodeService.ExecuteAsync(UserId!.Value, request);
+        return NoContent();
+    }
+
+    [HttpPost("{id}/nodes/{nodeId}/unlink")]
+    [Auth(AuthLevel.Authenticated)]
+    public async Task<ActionResult<UnlinkPlaybookNodeResponse>> UnlinkPlaybookNode(PlaybookId id, PlaybookNodeId nodeId)
+    {
+        var request = new UnlinkPlaybookNodeRequest { Id = id, NodeId = nodeId };
+        var response = await this.unlinkPlaybookNodeService.ExecuteAsync(UserId!.Value, request);
         return Ok(response);
     }
 

@@ -143,8 +143,18 @@ export interface DeleteCourseRequest {
   id?: string;
 }
 
+export interface DeletePlaybookNodeRequest {
+  id?: string;
+  nodeId?: number;
+}
+
 export interface DeletePlaybookRequest {
   id?: string;
+}
+
+export interface DeletePlaybookTransitionRequest {
+  id?: string;
+  transitionId?: number;
 }
 
 export interface EngineLineDto {
@@ -388,7 +398,7 @@ export interface InspectPlaybookBoardRequest {
 }
 
 export interface InspectPlaybookBoardResponse {
-  boardId: string;
+  boardId?: string;
   nameSuggestions: string[];
   members: PlaybookMemberDto[];
   similar: PlaybookSimilarBoardDto[];
@@ -417,15 +427,15 @@ export interface MergePlaybookNodesResponse {
 
 export interface PlaybookBoardDto {
   id: string;
-  nodeId?: number;
+  nodeId: number;
   sfen: string;
 }
 
 export interface PlaybookBoardTransitionDto {
   id: number;
   fromBoardId: string;
-  toBoardId: string;
-  usi: string;
+  toBoardId?: string;
+  usis: string[];
   condition: string;
 }
 
@@ -461,16 +471,6 @@ export interface PlaybookSummaryDto {
   id: string;
   name: string;
   updatedAt: string;
-}
-
-export interface RemovePlaybookMoveRequest {
-  id?: string;
-  sfen: string;
-  usi: string;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface RemovePlaybookMoveResponse {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -562,6 +562,15 @@ export interface ToggleLikeRequest {
 export interface ToggleLikeResponse {
   isLiked: boolean;
   currentLikeCount: number;
+}
+
+export interface UnlinkPlaybookNodeRequest {
+  id?: string;
+  nodeId?: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UnlinkPlaybookNodeResponse {
 }
 
 export interface UpdateArticleRequest {
