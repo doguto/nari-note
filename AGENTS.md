@@ -12,6 +12,7 @@ nari-note は将棋記事の投稿・共有プラットフォームの Web ア�
 | --- | --- |
 | `nari-note-backend/` | ASP.NET Core Web API（`Src/` 本体、`Tests/`、`Migrations/`、`Documents/`） |
 | `nari-note-frontend/` | Next.js アプリ（`src/` 本体、`docs/`） |
+| `nari-note-engine/` | マイ定跡の研究盤が使う将棋エンジン（Python）。局面を解析する。本番は Lambda、ローカルは HTTP サーバーで動かす |
 | `infrastruture/` | AWS インフラ（Terraform + Terragrunt）。ディレクトリ名の綴りはこのまま |
 | `spec/` | 画面・機能の仕様（`*.spec`） |
 | `scripts/` | API クライアント生成、デプロイ等のスクリプト |
@@ -38,6 +39,7 @@ nari-note は将棋記事の投稿・共有プラットフォームの Web ア�
 
 **インフラ**
 - AWS（Terraform + Terragrunt）。バックエンドと PostgreSQL は EC2 上、nginx で Blue/Green 切り替え
+- 将棋エンジンは Lambda（zip、Python ランタイム）
 - フロントエンドは Cloudflare Workers
 
 ## 全体構成
@@ -58,6 +60,7 @@ flowchart LR
             db[("PostgreSQL 17")]
         end
         cfront["CloudFront<br/>画像 CDN"]
+        engine["Lambda<br/>将棋エンジン"]
         s3img[("S3<br/>画像")]
     end
 
@@ -73,6 +76,7 @@ flowchart LR
     nginx --> api
     api -->|SQL| db
     api -->|アップロード| s3img
+    api -->|Invoke| engine
     user -->|画像| cfront
     cfront -->|OAC| s3img
     api -->|Outbox| resend
@@ -87,6 +91,7 @@ flowchart LR
 | 認証 | HttpOnly Cookie の JWT |
 | 画像 | API が S3 に保存し、ブラウザは CloudFront から取得する |
 | メール・通知 | API が Outbox に積み、バックグラウンドジョブが Resend / Discord に配送する |
+| 将棋エンジン | マイ定跡の局面の解析は、API が Lambda（`ShogiEngine:FunctionName`）を Invoke して行う。ローカルは `ShogiEngine:BaseUrl` の HTTP サーバー（`nari-note-engine/src/server.py`）を呼び、どちらも未設定の環境では無効 |
 
 EC2 の運用系（SSM Parameter Store、CloudWatch / SNS、デプロイ成果物の S3、DB 用 EBS）とデプロイフローは [infrastruture/docs/infra-design.md](infrastruture/docs/infra-design.md) を参照。
 
@@ -194,6 +199,7 @@ EC2 の運用系（SSM Parameter Store、CloudWatch / SNS、デプロイ成果�
 | `python scripts/api-generator.py` | バックエンドの Controller / DTO を解析し、`nari-note-frontend/src/lib/api/` の `types.ts` / `endpoints.ts` / `hooks.ts` / `server.ts` を上書き生成する。詳細: `.agents/skills/api-generator/SKILL.md` |
 | `python scripts/update-agent-docs.py --verbose` | `.github/agents/*.agent.md` のリンク切れ等を検証する（ファイルは書き換えない）。詳細: `.agents/skills/agent-doc-updater/SKILL.md` |
 | `scripts/deploy.sh` / `scripts/rollback.sh` | バックエンドの本番デプロイ / ロールバック（SSM Run Command）。詳細: `infrastruture/docs/infra-design.md` |
+| `scripts/deploy-engine.sh` | 将棋エンジンの zip を Docker でビルドし、Lambda のコードを差し替える。詳細: `nari-note-engine/README.md` |
 
 ## ブランチ・コミット・PR
 

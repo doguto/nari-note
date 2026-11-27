@@ -161,7 +161,7 @@ data "archive_file" "log_export" {
 }
 
 resource "aws_cloudwatch_log_group" "log_export" {
-  name              = "/aws/lambda/${local.log_export_name}"
+  name              = "/${var.app_name}/log-export"
   retention_in_days = var.log_retention_days
 
   tags = {

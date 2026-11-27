@@ -51,5 +51,19 @@ public static class ApplicationServiceInstaller
         services.AddScoped<ResetPasswordService>();
         services.AddScoped<UploadUserIconService>();
         services.AddScoped<UploadArticleImageService>();
+        services.AddScoped<GetMyPlaybooksService>();
+        services.AddScoped<CreatePlaybookService>();
+        services.AddScoped<DeletePlaybookService>();
+        services.AddScoped<GetPlaybookService>();
+        services.AddScoped<InspectPlaybookBoardService>();
+        services.AddScoped<AnalyzePlaybookBoardService>();
+        services.AddScoped<SavePlaybookLinesService>();
+        services.AddScoped<DeletePlaybookTransitionService>();
+        services.AddScoped<DeletePlaybookNodeService>();
+        services.AddScoped<UnlinkPlaybookNodeService>();
+        services.AddScoped<UpdatePlaybookNodeService>();
+        services.AddScoped<MergePlaybookNodesService>();
+        services.AddScoped<SplitPlaybookBoardService>();
+        services.AddScoped<UpdatePlaybookTransitionService>();
     }
 }

@@ -3,6 +3,8 @@
 
 import { apiClient } from './client';
 import type {
+  AnalyzePlaybookBoardRequest,
+  AnalyzePlaybookBoardResponse,
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
@@ -10,8 +12,13 @@ import type {
   CreateCommentResponse,
   CreateCourseRequest,
   CreateCourseResponse,
+  CreatePlaybookRequest,
+  CreatePlaybookResponse,
   DeleteArticleRequest,
   DeleteCourseRequest,
+  DeletePlaybookNodeRequest,
+  DeletePlaybookRequest,
+  DeletePlaybookTransitionRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   GetArticleCommentsRequest,
@@ -43,12 +50,21 @@ import type {
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
   GetMyCoursesResponse,
+  GetMyPlaybooksResponse,
+  GetPlaybookRequest,
+  GetPlaybookResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  InspectPlaybookBoardRequest,
+  InspectPlaybookBoardResponse,
+  MergePlaybookNodesRequest,
+  MergePlaybookNodesResponse,
   ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SavePlaybookLinesRequest,
+  SavePlaybookLinesResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SearchCoursesRequest,
@@ -56,16 +72,24 @@ import type {
   SignInRequest,
   SignUpRequest,
   SignUpResponse,
+  SplitPlaybookBoardRequest,
+  SplitPlaybookBoardResponse,
   ToggleFollowRequest,
   ToggleFollowResponse,
   ToggleLikeRequest,
   ToggleLikeResponse,
+  UnlinkPlaybookNodeRequest,
+  UnlinkPlaybookNodeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
   UpdateCourseRequest,
   UpdateCourseResponse,
   UpdatePasswordRequest,
   UpdatePasswordResponse,
+  UpdatePlaybookNodeRequest,
+  UpdatePlaybookNodeResponse,
+  UpdatePlaybookTransitionRequest,
+  UpdatePlaybookTransitionResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
   UploadArticleImageResponse,
@@ -227,6 +251,63 @@ export const coursesApi = {
 export const healthApi = {
   getHealth: async (): Promise<GetHealthResponse> => {
     const response = await apiClient.get<GetHealthResponse>('/api/health');
+    return response;
+  },
+};
+
+// Playbooks API
+export const playbooksApi = {
+  getMyPlaybooks: async (): Promise<GetMyPlaybooksResponse> => {
+    const response = await apiClient.get<GetMyPlaybooksResponse>('/api/playbooks/my');
+    return response;
+  },
+  createPlaybook: async (data: CreatePlaybookRequest): Promise<CreatePlaybookResponse> => {
+    const response = await apiClient.post<CreatePlaybookResponse>('/api/playbooks', data);
+    return response;
+  },
+  getPlaybook: async (data: GetPlaybookRequest): Promise<GetPlaybookResponse> => {
+    const response = await apiClient.get<GetPlaybookResponse>(`/api/playbooks/${data.id}`);
+    return response;
+  },
+  deletePlaybook: async (data: DeletePlaybookRequest): Promise<void> => {
+    await apiClient.delete(`/api/playbooks/${data.id}`);
+  },
+  inspectPlaybookBoard: async (data: InspectPlaybookBoardRequest): Promise<InspectPlaybookBoardResponse> => {
+    const response = await apiClient.get<InspectPlaybookBoardResponse>(`/api/playbooks/${data.id}/inspection`, { params: { sfen: data.sfen } });
+    return response;
+  },
+  analyzePlaybookBoard: async (data: AnalyzePlaybookBoardRequest): Promise<AnalyzePlaybookBoardResponse> => {
+    const response = await apiClient.post<AnalyzePlaybookBoardResponse>(`/api/playbooks/${data.id}/analysis`, data);
+    return response;
+  },
+  savePlaybookLines: async (data: SavePlaybookLinesRequest): Promise<SavePlaybookLinesResponse> => {
+    const response = await apiClient.post<SavePlaybookLinesResponse>(`/api/playbooks/${data.id}/lines`, data);
+    return response;
+  },
+  deletePlaybookTransition: async (data: DeletePlaybookTransitionRequest): Promise<void> => {
+    await apiClient.delete(`/api/playbooks/${data.id}/transitions/${data.transitionId}`);
+  },
+  updatePlaybookNode: async (data: UpdatePlaybookNodeRequest): Promise<UpdatePlaybookNodeResponse> => {
+    const response = await apiClient.put<UpdatePlaybookNodeResponse>(`/api/playbooks/${data.id}/nodes`, data);
+    return response;
+  },
+  deletePlaybookNode: async (data: DeletePlaybookNodeRequest): Promise<void> => {
+    await apiClient.delete(`/api/playbooks/${data.id}/nodes/${data.nodeId}`);
+  },
+  unlinkPlaybookNode: async (data: UnlinkPlaybookNodeRequest): Promise<UnlinkPlaybookNodeResponse> => {
+    const response = await apiClient.post<UnlinkPlaybookNodeResponse>(`/api/playbooks/${data.id}/nodes/${data.nodeId}/unlink`);
+    return response;
+  },
+  mergePlaybookNodes: async (data: MergePlaybookNodesRequest): Promise<MergePlaybookNodesResponse> => {
+    const response = await apiClient.post<MergePlaybookNodesResponse>(`/api/playbooks/${data.id}/nodes/merge`, data);
+    return response;
+  },
+  splitPlaybookBoard: async (data: SplitPlaybookBoardRequest): Promise<SplitPlaybookBoardResponse> => {
+    const response = await apiClient.post<SplitPlaybookBoardResponse>(`/api/playbooks/${data.id}/boards/${data.boardId}/split`);
+    return response;
+  },
+  updatePlaybookTransition: async (data: UpdatePlaybookTransitionRequest): Promise<UpdatePlaybookTransitionResponse> => {
+    const response = await apiClient.put<UpdatePlaybookTransitionResponse>(`/api/playbooks/${data.id}/transitions/${data.transitionId}`, data);
     return response;
   },
 };

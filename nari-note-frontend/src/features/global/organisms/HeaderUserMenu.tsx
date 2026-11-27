@@ -17,7 +17,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { UserAvatar } from '@/components/ui';
-import { User, FileText, BookOpen, LogOut, Settings } from 'lucide-react';
+import { User, FileText, BookOpen, LogOut, Settings, Network } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface HeaderUserMenuProps {
@@ -122,6 +122,16 @@ export function HeaderUserMenu({ userId, userName, userIconImageUrl, onLogout, i
             >
               <BookOpen className="w-4 h-4" />
               <span>マイ講座一覧</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href="/playbooks"
+              className="cursor-pointer text-white hover:text-brand-primary hover:bg-brand-text-hover transition-colors flex items-center gap-2 text-sm"
+              style={{ fontFamily: 'serif' }}
+            >
+              <Network className="w-4 h-4" />
+              <span>マイ定跡</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-brand-text-dark" />

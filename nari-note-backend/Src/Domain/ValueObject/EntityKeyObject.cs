@@ -40,3 +40,15 @@ public partial struct TagId;
 
 [ValueObject<Guid>(Conversions.EfCoreValueConverter)]
 public partial struct UserId;
+
+[ValueObject<Guid>(Conversions.EfCoreValueConverter)]
+public partial struct PlaybookId;
+
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct PlaybookNodeId;
+
+[ValueObject<Guid>(Conversions.EfCoreValueConverter)]
+public partial struct PlaybookBoardId;
+
+[ValueObject<int>(Conversions.EfCoreValueConverter)]
+public partial struct PlaybookBoardTransitionId;

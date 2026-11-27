@@ -6,50 +6,15 @@ namespace NariNoteBackend.Infrastructure.Binding;
 
 public class ValueObjectJsonConverterFactory : JsonConverterFactory
 {
+    // ID 型を追加したときの登録漏れを防ぐため、ValueObject の名前空間にある struct をすべて対象にする
     public override bool CanConvert(Type typeToConvert)
     {
-        return typeToConvert == typeof(ArticleId) ||
-               typeToConvert == typeof(ArticleTagId) ||
-               typeToConvert == typeof(CommentId) ||
-               typeToConvert == typeof(CourseId) ||
-               typeToConvert == typeof(CourseLikeId) ||
-               typeToConvert == typeof(EmailVerificationId) ||
-               typeToConvert == typeof(FollowId) ||
-               typeToConvert == typeof(KifuId) ||
-               typeToConvert == typeof(LikeId) ||
-               typeToConvert == typeof(NotificationId) ||
-               typeToConvert == typeof(TagId) ||
-               typeToConvert == typeof(UserId);
+        return typeToConvert.IsValueType && typeToConvert.Namespace == typeof(UserId).Namespace;
     }
 
     public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
-        if (typeToConvert == typeof(ArticleId))
-            return new ValueObjectJsonConverter<ArticleId>();
-        if (typeToConvert == typeof(ArticleTagId))
-            return new ValueObjectJsonConverter<ArticleTagId>();
-        if (typeToConvert == typeof(CommentId))
-            return new ValueObjectJsonConverter<CommentId>();
-        if (typeToConvert == typeof(CourseId))
-            return new ValueObjectJsonConverter<CourseId>();
-        if (typeToConvert == typeof(CourseLikeId))
-            return new ValueObjectJsonConverter<CourseLikeId>();
-        if (typeToConvert == typeof(EmailVerificationId))
-            return new ValueObjectJsonConverter<EmailVerificationId>();
-        if (typeToConvert == typeof(FollowId))
-            return new ValueObjectJsonConverter<FollowId>();
-        if (typeToConvert == typeof(KifuId))
-            return new ValueObjectJsonConverter<KifuId>();
-        if (typeToConvert == typeof(LikeId))
-            return new ValueObjectJsonConverter<LikeId>();
-        if (typeToConvert == typeof(NotificationId))
-            return new ValueObjectJsonConverter<NotificationId>();
-        if (typeToConvert == typeof(TagId))
-            return new ValueObjectJsonConverter<TagId>();
-        if (typeToConvert == typeof(UserId))
-            return new ValueObjectJsonConverter<UserId>();
-
-        return null;
+        return (JsonConverter?)Activator.CreateInstance(typeof(ValueObjectJsonConverter<>).MakeGenericType(typeToConvert));
     }
 }
 

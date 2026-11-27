@@ -11,3 +11,8 @@ output "public_ip" {
   description = "Elastic IP address (use this for Cloudflare DNS)"
   value       = aws_eip.app_server.public_ip
 }
+
+output "role_name" {
+  description = "IAM role name of the app server"
+  value       = aws_iam_role.app_server.name
+}

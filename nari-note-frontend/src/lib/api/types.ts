@@ -2,6 +2,17 @@
 // Do not edit manually
 
 
+export interface AnalyzePlaybookBoardRequest {
+  id?: string;
+  sfen: string;
+  engine: string;
+}
+
+export interface AnalyzePlaybookBoardResponse {
+  isAvailable: boolean;
+  lines: EngineLineDto[];
+}
+
 export interface ArticleDto {
   id: string;
   title: string;
@@ -115,12 +126,42 @@ export interface CreateCourseResponse {
   course: CourseDto;
 }
 
+export interface CreatePlaybookRequest {
+  name: string;
+  rootSfen?: string;
+}
+
+export interface CreatePlaybookResponse {
+  id: string;
+}
+
 export interface DeleteArticleRequest {
   id?: string;
 }
 
 export interface DeleteCourseRequest {
   id?: string;
+}
+
+export interface DeletePlaybookNodeRequest {
+  id?: string;
+  nodeId?: number;
+}
+
+export interface DeletePlaybookRequest {
+  id?: string;
+}
+
+export interface DeletePlaybookTransitionRequest {
+  id?: string;
+  transitionId?: number;
+}
+
+export interface EngineLineDto {
+  usi: string;
+  label: string;
+  score: number;
+  pv: string[];
 }
 
 export interface ErrorResponse {
@@ -303,6 +344,23 @@ export interface GetMyCoursesResponse {
   courses: CourseDto[];
 }
 
+export interface GetMyPlaybooksResponse {
+  playbooks: PlaybookSummaryDto[];
+}
+
+export interface GetPlaybookRequest {
+  id?: string;
+}
+
+export interface GetPlaybookResponse {
+  id: string;
+  name: string;
+  rootSfen: string;
+  nodes: PlaybookNodeDto[];
+  boards: PlaybookBoardDto[];
+  transitions: PlaybookBoardTransitionDto[];
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface GetPopularTagsRequest {
 }
@@ -334,6 +392,19 @@ export interface GetUserProfileResponse {
 export interface HealthCheckRequest {
 }
 
+export interface InspectPlaybookBoardRequest {
+  id?: string;
+  sfen: string;
+}
+
+export interface InspectPlaybookBoardResponse {
+  boardId: string;
+  nameSuggestions: string[];
+  members: PlaybookMemberDto[];
+  similar: PlaybookSimilarBoardDto[];
+  conditionSuggestions: PlaybookConditionSuggestionDto[];
+}
+
 export interface KifuDto {
   name: string;
   kifuText: string;
@@ -342,6 +413,64 @@ export interface KifuDto {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface LogoutRequest {
+}
+
+export interface MergePlaybookNodesRequest {
+  id?: string;
+  boardId: string;
+  otherBoardId: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface MergePlaybookNodesResponse {
+}
+
+export interface PlaybookBoardDto {
+  id: string;
+  nodeId?: number;
+  sfen?: string;
+}
+
+export interface PlaybookBoardTransitionDto {
+  id: number;
+  fromBoardId: string;
+  toBoardId: string;
+  usi: string;
+  condition: string;
+}
+
+export interface PlaybookConditionSuggestionDto {
+  transitionId: number;
+  suggestions: string[];
+}
+
+export interface PlaybookLineDto {
+  usis: string[];
+}
+
+export interface PlaybookMemberDto {
+  boardId: string;
+  isCurrent: boolean;
+  isRepresentative: boolean;
+  diff: string;
+}
+
+export interface PlaybookNodeDto {
+  id: number;
+  name: string;
+  memo: string;
+}
+
+export interface PlaybookSimilarBoardDto {
+  boardId: string;
+  nodeName: string;
+  diff: string;
+}
+
+export interface PlaybookSummaryDto {
+  id: string;
+  name: string;
+  updatedAt: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -355,6 +484,15 @@ export interface ResetPasswordRequest {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ResetPasswordResponse {
+}
+
+export interface SavePlaybookLinesRequest {
+  id?: string;
+  lines: PlaybookLineDto[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface SavePlaybookLinesResponse {
 }
 
 export interface SearchArticlesRequest {
@@ -394,6 +532,15 @@ export interface SignUpRequest {
 export interface SignUpResponse {
 }
 
+export interface SplitPlaybookBoardRequest {
+  id?: string;
+  boardId?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface SplitPlaybookBoardResponse {
+}
+
 export interface TagDto {
   name: string;
   articleCount: number;
@@ -415,6 +562,15 @@ export interface ToggleLikeRequest {
 export interface ToggleLikeResponse {
   isLiked: boolean;
   currentLikeCount: number;
+}
+
+export interface UnlinkPlaybookNodeRequest {
+  id?: string;
+  nodeId?: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UnlinkPlaybookNodeResponse {
 }
 
 export interface UpdateArticleRequest {
@@ -452,6 +608,27 @@ export interface UpdatePasswordRequest {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdatePasswordResponse {
+}
+
+export interface UpdatePlaybookNodeRequest {
+  id?: string;
+  sfen: string;
+  name?: string;
+  memo?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UpdatePlaybookNodeResponse {
+}
+
+export interface UpdatePlaybookTransitionRequest {
+  id?: string;
+  transitionId?: number;
+  condition: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UpdatePlaybookTransitionResponse {
 }
 
 export interface UpdateUserProfileRequest {

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +27,7 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public FakeEmailHelper EmailHelper { get; } = new();
     public FakeDiscordNotifier DiscordNotifier { get; } = new();
     public FakeImageStorageGateway ImageStorageGateway { get; } = new();
+    public FakeShogiEngineGateway ShogiEngineGateway { get; } = new();
 
     public async ValueTask InitializeAsync()
     {
@@ -65,6 +66,7 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         this.DiscordNotifier.Embeds.Clear();
         this.ImageStorageGateway.UploadedUserIds.Clear();
         this.ImageStorageGateway.UploadedArticleImageUrls.Clear();
+        this.ShogiEngineGateway.Reset();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -87,6 +89,8 @@ public class NariNoteApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             services.AddSingleton<IDiscordNotifier>(this.DiscordNotifier);
             services.RemoveAll<IImageStorageGateway>();
             services.AddSingleton<IImageStorageGateway>(this.ImageStorageGateway);
+            services.RemoveAll<IShogiEngineGateway>();
+            services.AddSingleton<IShogiEngineGateway>(this.ShogiEngineGateway);
 
             // Outbox はバックグラウンドで処理させず、必要なテストが OutboxProcessor を直接呼ぶ
             var outboxWorker = services.Single(d =>

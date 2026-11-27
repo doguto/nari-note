@@ -65,9 +65,14 @@ import type {
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
   GetMyCoursesResponse,
+  GetMyPlaybooksResponse,
+  GetPlaybookRequest,
+  GetPlaybookResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  InspectPlaybookBoardRequest,
+  InspectPlaybookBoardResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SearchCoursesRequest,
@@ -228,6 +233,31 @@ export async function getHealth(): Promise<GetHealthResponse> {
   const url = `${getBaseUrl()}/api/health`;
 
   return serverFetch<GetHealthResponse>(url);
+}
+
+// Playbooks Server Functions
+export async function getMyPlaybooks(): Promise<GetMyPlaybooksResponse> {
+  const url = `${getBaseUrl()}/api/playbooks/my`;
+
+  return serverFetch<GetMyPlaybooksResponse>(url);
+}
+
+export async function getPlaybook(params: GetPlaybookRequest): Promise<GetPlaybookResponse> {
+  const url = `${getBaseUrl()}/api/playbooks/${params.id}`;
+
+  return serverFetch<GetPlaybookResponse>(url);
+}
+
+export async function inspectPlaybookBoard(params: InspectPlaybookBoardRequest): Promise<InspectPlaybookBoardResponse> {
+  const url = new URL(`/api/playbooks/${params.id}/inspection`, getBaseUrl());
+  const query = { sfen: params.sfen };
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  });
+
+  return serverFetch<InspectPlaybookBoardResponse>(url.toString());
 }
 
 // Tags Server Functions

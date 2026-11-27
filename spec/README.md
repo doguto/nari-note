@@ -45,6 +45,7 @@ end
 | `article-edit.spec` | 記事の作成・編集、盤面・棋譜・画像の挿入、公開・予約投稿 |
 | `article-list.spec` | マイ記事一覧・下書き一覧、記事の削除 |
 | `course.spec` | 講座の作成・編集・公開・閲覧・削除 |
+| `playbook.spec` | マイ定跡（定跡の作成・削除、研究盤、ノードと似ている局面のまとめ、定跡グラフ、AI候補手） |
 | `search.spec` | 記事・講座の検索 |
 | `tag-timeline.spec` | タグページ |
 | `profile.spec` | プロフィールページ、フォロー |

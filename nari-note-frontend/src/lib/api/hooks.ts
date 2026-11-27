@@ -2,8 +2,10 @@
 // Do not edit manually
 
 import { useMutation, useQuery, useQueryClient, type UseMutationOptions, type UseQueryOptions } from '@tanstack/react-query';
-import { articlesApi, authApi, coursesApi, healthApi, tagsApi, usersApi } from './endpoints';
+import { articlesApi, authApi, coursesApi, healthApi, playbooksApi, tagsApi, usersApi } from './endpoints';
 import type {
+  AnalyzePlaybookBoardRequest,
+  AnalyzePlaybookBoardResponse,
   AuthResponse,
   CreateArticleRequest,
   CreateArticleResponse,
@@ -11,8 +13,13 @@ import type {
   CreateCommentResponse,
   CreateCourseRequest,
   CreateCourseResponse,
+  CreatePlaybookRequest,
+  CreatePlaybookResponse,
   DeleteArticleRequest,
   DeleteCourseRequest,
+  DeletePlaybookNodeRequest,
+  DeletePlaybookRequest,
+  DeletePlaybookTransitionRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   GetArticleCommentsRequest,
@@ -44,12 +51,21 @@ import type {
   GetLikedArticlesResponse,
   GetMyArticlesResponse,
   GetMyCoursesResponse,
+  GetMyPlaybooksResponse,
+  GetPlaybookRequest,
+  GetPlaybookResponse,
   GetPopularTagsResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
+  InspectPlaybookBoardRequest,
+  InspectPlaybookBoardResponse,
+  MergePlaybookNodesRequest,
+  MergePlaybookNodesResponse,
   ResendVerificationEmailResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SavePlaybookLinesRequest,
+  SavePlaybookLinesResponse,
   SearchArticlesRequest,
   SearchArticlesResponse,
   SearchCoursesRequest,
@@ -57,16 +73,24 @@ import type {
   SignInRequest,
   SignUpRequest,
   SignUpResponse,
+  SplitPlaybookBoardRequest,
+  SplitPlaybookBoardResponse,
   ToggleFollowRequest,
   ToggleFollowResponse,
   ToggleLikeRequest,
   ToggleLikeResponse,
+  UnlinkPlaybookNodeRequest,
+  UnlinkPlaybookNodeResponse,
   UpdateArticleRequest,
   UpdateArticleResponse,
   UpdateCourseRequest,
   UpdateCourseResponse,
   UpdatePasswordRequest,
   UpdatePasswordResponse,
+  UpdatePlaybookNodeRequest,
+  UpdatePlaybookNodeResponse,
+  UpdatePlaybookTransitionRequest,
+  UpdatePlaybookTransitionResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
   UploadArticleImageResponse,
@@ -102,6 +126,11 @@ export const queryKeys = {
   },
   health: {
     getHealth: ['health', 'getHealth'] as const,
+  },
+  playbooks: {
+    getMyPlaybooks: ['playbooks', 'getMyPlaybooks'] as const,
+    getPlaybook: ['playbooks', 'getPlaybook'] as const,
+    inspectPlaybookBoard: ['playbooks', 'inspectPlaybookBoard'] as const,
   },
   tags: {
     getPopularTags: ['tags', 'getPopularTags'] as const,
@@ -467,6 +496,163 @@ export function useGetHealth(options?: Omit<UseQueryOptions<GetHealthResponse>, 
     queryKey: queryKeys.health.getHealth,
     queryFn: () => healthApi.getHealth(),
     ...options,
+  });
+}
+
+// Playbooks Hooks
+export function useGetMyPlaybooks(options?: Omit<UseQueryOptions<GetMyPlaybooksResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetMyPlaybooksResponse>({
+    queryKey: queryKeys.playbooks.getMyPlaybooks,
+    queryFn: () => playbooksApi.getMyPlaybooks(),
+    ...options,
+  });
+}
+
+export function useCreatePlaybook(options?: UseMutationOptions<CreatePlaybookResponse, Error, CreatePlaybookRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<CreatePlaybookResponse, Error, CreatePlaybookRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.createPlaybook(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useGetPlaybook(params: GetPlaybookRequest, options?: Omit<UseQueryOptions<GetPlaybookResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<GetPlaybookResponse>({
+    queryKey: [...queryKeys.playbooks.getPlaybook, params],
+    queryFn: () => playbooksApi.getPlaybook(params),
+    ...options,
+  });
+}
+
+export function useDeletePlaybook(options?: UseMutationOptions<void, Error, DeletePlaybookRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeletePlaybookRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.deletePlaybook(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useInspectPlaybookBoard(params: InspectPlaybookBoardRequest, options?: Omit<UseQueryOptions<InspectPlaybookBoardResponse>, 'queryKey' | 'queryFn'>) {
+  return useQuery<InspectPlaybookBoardResponse>({
+    queryKey: [...queryKeys.playbooks.inspectPlaybookBoard, params],
+    queryFn: () => playbooksApi.inspectPlaybookBoard(params),
+    ...options,
+  });
+}
+
+export function useAnalyzePlaybookBoard(options?: UseMutationOptions<AnalyzePlaybookBoardResponse, Error, AnalyzePlaybookBoardRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<AnalyzePlaybookBoardResponse, Error, AnalyzePlaybookBoardRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.analyzePlaybookBoard(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useSavePlaybookLines(options?: UseMutationOptions<SavePlaybookLinesResponse, Error, SavePlaybookLinesRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<SavePlaybookLinesResponse, Error, SavePlaybookLinesRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.savePlaybookLines(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useDeletePlaybookTransition(options?: UseMutationOptions<void, Error, DeletePlaybookTransitionRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeletePlaybookTransitionRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.deletePlaybookTransition(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useUpdatePlaybookNode(options?: UseMutationOptions<UpdatePlaybookNodeResponse, Error, UpdatePlaybookNodeRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UpdatePlaybookNodeResponse, Error, UpdatePlaybookNodeRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.updatePlaybookNode(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useDeletePlaybookNode(options?: UseMutationOptions<void, Error, DeletePlaybookNodeRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, DeletePlaybookNodeRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.deletePlaybookNode(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useUnlinkPlaybookNode(options?: UseMutationOptions<UnlinkPlaybookNodeResponse, Error, UnlinkPlaybookNodeRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UnlinkPlaybookNodeResponse, Error, UnlinkPlaybookNodeRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.unlinkPlaybookNode(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useMergePlaybookNodes(options?: UseMutationOptions<MergePlaybookNodesResponse, Error, MergePlaybookNodesRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<MergePlaybookNodesResponse, Error, MergePlaybookNodesRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.mergePlaybookNodes(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useSplitPlaybookBoard(options?: UseMutationOptions<SplitPlaybookBoardResponse, Error, SplitPlaybookBoardRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<SplitPlaybookBoardResponse, Error, SplitPlaybookBoardRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.splitPlaybookBoard(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useUpdatePlaybookTransition(options?: UseMutationOptions<UpdatePlaybookTransitionResponse, Error, UpdatePlaybookTransitionRequest>) {
+  const queryClient = useQueryClient();
+  return useMutation<UpdatePlaybookTransitionResponse, Error, UpdatePlaybookTransitionRequest>({
+    ...options,
+    mutationFn: (data) => playbooksApi.updatePlaybookTransition(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ['playbooks'] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 

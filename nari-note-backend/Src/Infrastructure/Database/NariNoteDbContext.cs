@@ -28,6 +28,10 @@ public class NariNoteDbContext : DbContext
     public DbSet<EmailVerification> EmailVerifications { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
+    public DbSet<Playbook> Playbooks { get; set; }
+    public DbSet<PlaybookNode> PlaybookNodes { get; set; }
+    public DbSet<PlaybookBoard> PlaybookBoards { get; set; }
+    public DbSet<PlaybookBoardTransition> PlaybookBoardTransitions { get; set; }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
@@ -308,6 +312,94 @@ public class NariNoteDbContext : DbContext
              .UseIdentityByDefaultColumn();
 
             x.Property(k => k.ArticleId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<Playbook>(x =>
+        {
+            x.HasOne(b => b.User)
+             .WithMany()
+             .HasForeignKey(b => b.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(b => b.Id)
+             .HasValueGenerator<PlaybookIdValueGenerator>();
+
+            x.Property(b => b.Id)
+             .HasVogenConversion();
+
+            x.Property(b => b.UserId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<PlaybookNode>(x =>
+        {
+            x.HasOne(n => n.Playbook)
+             .WithMany(b => b.Nodes)
+             .HasForeignKey(n => n.PlaybookId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(n => n.Id)
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
+
+            x.Property(n => n.PlaybookId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<PlaybookBoard>(x =>
+        {
+            x.HasOne(b => b.Playbook)
+             .WithMany(p => p.Boards)
+             .HasForeignKey(b => b.PlaybookId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // 定跡の削除時は局面とノードが同じ文で消えるため、DB 側は文末に検査される NO ACTION にする
+            x.HasOne(b => b.Node)
+             .WithMany(n => n.Boards)
+             .HasForeignKey(b => b.NodeId)
+             .OnDelete(DeleteBehavior.ClientSetNull);
+
+            x.Property(b => b.Id)
+             .HasValueGenerator<PlaybookBoardIdValueGenerator>();
+
+            x.Property(b => b.Id)
+             .HasVogenConversion();
+
+            x.Property(b => b.PlaybookId)
+             .HasVogenConversion();
+        });
+
+        modelBuilder.Entity<PlaybookBoardTransition>(x =>
+        {
+            x.HasOne(t => t.Playbook)
+             .WithMany(p => p.Transitions)
+             .HasForeignKey(t => t.PlaybookId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasOne(t => t.FromBoard)
+             .WithMany()
+             .HasForeignKey(t => t.FromBoardId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.HasOne(t => t.ToBoard)
+             .WithMany()
+             .HasForeignKey(t => t.ToBoardId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            x.Property(t => t.Id)
+             .HasVogenConversion()
+             .ValueGeneratedOnAdd()
+             .UseIdentityByDefaultColumn();
+
+            x.Property(t => t.PlaybookId)
+             .HasVogenConversion();
+
+            x.Property(t => t.FromBoardId)
+             .HasVogenConversion();
+
+            x.Property(t => t.ToBoardId)
              .HasVogenConversion();
         });
     }

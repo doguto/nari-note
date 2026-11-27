@@ -459,6 +459,148 @@ namespace NariNoteBackend.Migrations
                     b.ToTable("PasswordResetTokens");
                 });
 
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Playbook", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RootSfen")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Playbooks");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookBoard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("NodeId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PlaybookId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Sfen")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NodeId");
+
+                    b.HasIndex("PlaybookId", "Sfen")
+                        .IsUnique();
+
+                    b.ToTable("PlaybookBoards");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookBoardTransition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Condition")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("FromBoardId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PlaybookId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ToBoardId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Usi")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlaybookId");
+
+                    b.HasIndex("ToBoardId");
+
+                    b.HasIndex("FromBoardId", "Usi")
+                        .IsUnique();
+
+                    b.ToTable("PlaybookBoardTransitions");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookNode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Memo")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("PlaybookId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlaybookId");
+
+                    b.ToTable("PlaybookNodes");
+                });
+
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Tag", b =>
                 {
                     b.Property<Guid>("Id")
@@ -715,6 +857,72 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Playbook", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookBoard", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.PlaybookNode", "Node")
+                        .WithMany("Boards")
+                        .HasForeignKey("NodeId");
+
+                    b.HasOne("NariNoteBackend.Domain.Entity.Playbook", "Playbook")
+                        .WithMany("Boards")
+                        .HasForeignKey("PlaybookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Node");
+
+                    b.Navigation("Playbook");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookBoardTransition", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.PlaybookBoard", "FromBoard")
+                        .WithMany()
+                        .HasForeignKey("FromBoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NariNoteBackend.Domain.Entity.Playbook", "Playbook")
+                        .WithMany("Transitions")
+                        .HasForeignKey("PlaybookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NariNoteBackend.Domain.Entity.PlaybookBoard", "ToBoard")
+                        .WithMany()
+                        .HasForeignKey("ToBoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FromBoard");
+
+                    b.Navigation("Playbook");
+
+                    b.Navigation("ToBoard");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookNode", b =>
+                {
+                    b.HasOne("NariNoteBackend.Domain.Entity.Playbook", "Playbook")
+                        .WithMany("Nodes")
+                        .HasForeignKey("PlaybookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Playbook");
+                });
+
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Article", b =>
                 {
                     b.Navigation("ArticleTags");
@@ -731,6 +939,20 @@ namespace NariNoteBackend.Migrations
                     b.Navigation("Articles");
 
                     b.Navigation("CourseLikes");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.Playbook", b =>
+                {
+                    b.Navigation("Boards");
+
+                    b.Navigation("Nodes");
+
+                    b.Navigation("Transitions");
+                });
+
+            modelBuilder.Entity("NariNoteBackend.Domain.Entity.PlaybookNode", b =>
+                {
+                    b.Navigation("Boards");
                 });
 
             modelBuilder.Entity("NariNoteBackend.Domain.Entity.Tag", b =>
