@@ -26,13 +26,7 @@ public class DeletePlaybookNodeService
 
         var node = PlaybookAccess.FindNode(playbook, request.NodeId);
         if (PlaybookAccess.ContainsRoot(playbook, node)) throw new InvalidOperationException("開始局面のノードは削除できません");
-
-        var tree = PlaybookTree.Load(playbook);
-        foreach (var incoming in playbook.Transitions.Where(t => t.ToBoard?.Node == node))
-        {
-            tree.RemoveMove(incoming.FromBoard.Sfen, incoming.Usis[0]);
-        }
-        PlaybookAccess.Rebuild(playbook, tree, this.playbookRepository);
+        new PlaybookGraph(playbook, this.playbookRepository).RemoveEdgesInto(node);
 
         playbook.UpdatedAt = this.timeProvider.UtcNow();
         await this.playbookRepository.SaveAsync();

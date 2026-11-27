@@ -27,15 +27,7 @@ public class SplitPlaybookBoardService
         PlaybookAccess.EnsureOwner(playbook, userId);
 
         var board = PlaybookAccess.FindBoard(playbook, request.BoardId);
-        var node = board.Node;
-        if (node.Boards.Count <= 1) throw new InvalidOperationException("この局面だけのノードは分けられません");
-
-        var created = new PlaybookNode { Playbook = playbook };
-        node.Boards.Remove(board);
-        board.Node = created;
-        created.Boards.Add(board);
-        playbook.Nodes.Add(created);
-        this.playbookRepository.AddNode(created);
+        new PlaybookGraph(playbook, this.playbookRepository).Split(board);
 
         playbook.UpdatedAt = this.timeProvider.UtcNow();
         await this.playbookRepository.SaveAsync();

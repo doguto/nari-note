@@ -4,12 +4,13 @@ using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
-// ノードの局面から次のノードの局面までの手順。グラフの辺にあたる
+// 局面から 1 手指した先の局面への遷移
 [Index(nameof(PlaybookId))]
-[Index(nameof(FromBoardId))]
+[Index(nameof(FromBoardId), nameof(Usi), IsUnique = true)]
 [Index(nameof(ToBoardId))]
 public class PlaybookBoardTransition : EntityBase
 {
+    public const int UsiMaxLength = 8;
     public const int ConditionMaxLength = 100;
 
     [Key]
@@ -21,18 +22,19 @@ public class PlaybookBoardTransition : EntityBase
     [Required]
     public PlaybookBoardId FromBoardId { get; set; }
 
-    // ノードに着かず途中で止まる手順は null
-    public PlaybookBoardId? ToBoardId { get; set; }
+    [Required]
+    public PlaybookBoardId ToBoardId { get; set; }
 
     [Required]
-    public List<string> Usis { get; set; } = new();
+    [MaxLength(UsiMaxLength)]
+    public required string Usi { get; set; }
 
-    // まとめた局面によって同じ手の行き先が分かれるときに、この辺がどの局面の話かを書く
+    // ノードから出る遷移にだけ書く。まとめた局面によって同じ手の行き先が分かれるときに、この遷移がどの局面の話かを書く
     [MaxLength(ConditionMaxLength)]
     public string Condition { get; set; } = "";
 
     // Navigation Properties
     public Playbook Playbook { get; set; } = null!;
     public PlaybookBoard FromBoard { get; set; } = null!;
-    public PlaybookBoard? ToBoard { get; set; }
+    public PlaybookBoard ToBoard { get; set; } = null!;
 }

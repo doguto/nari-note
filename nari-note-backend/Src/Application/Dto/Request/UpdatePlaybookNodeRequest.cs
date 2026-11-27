@@ -4,7 +4,7 @@ using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Application.Dto.Request;
 
-// 局面で指定する。ノードでない辺の途中の局面なら、そこをノードにする。名前もメモも省略すると、ノードにするだけになる
+// 局面で指定する。ノードでない局面なら、そこをノードにする。名前もメモも省略すると、ノードにするだけになる
 public class UpdatePlaybookNodeRequest
 {
     public PlaybookId Id { get; set; }

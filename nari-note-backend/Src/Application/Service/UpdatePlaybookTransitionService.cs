@@ -26,8 +26,8 @@ public class UpdatePlaybookTransitionService
         var playbook = await this.playbookRepository.FindForceGraphByIdAsync(request.Id);
         PlaybookAccess.EnsureOwner(playbook, userId);
 
-        var transition = playbook.Transitions.FirstOrDefault(t => t.Id == request.TransitionId)
-            ?? throw new KeyNotFoundException($"遷移{request.TransitionId}が存在しません");
+        var transition = PlaybookAccess.FindTransition(playbook, request.TransitionId);
+        if (transition.FromBoard.Node == null) throw new InvalidOperationException("条件はノードから出る遷移にだけ付けられます");
         transition.Condition = request.Condition.Trim();
 
         playbook.UpdatedAt = this.timeProvider.UtcNow();

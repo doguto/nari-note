@@ -26,9 +26,9 @@ erDiagram
     Playbooks ||--o{ PlaybookNodes : ""
     Playbooks ||--o{ PlaybookBoards : ""
     Playbooks ||--o{ PlaybookBoardTransitions : ""
-    PlaybookNodes ||--o{ PlaybookBoards : "まとめる"
+    PlaybookNodes |o--o{ PlaybookBoards : "まとめる"
     PlaybookBoards ||--o{ PlaybookBoardTransitions : "出発 (FromBoardId)"
-    PlaybookBoards |o--o{ PlaybookBoardTransitions : "行き先 (ToBoardId)"
+    PlaybookBoards ||--o{ PlaybookBoardTransitions : "行き先 (ToBoardId)"
 
     Users {
         uuid Id PK
@@ -141,15 +141,15 @@ erDiagram
     PlaybookBoards {
         uuid Id PK "登録順に大きくなる UUID v7"
         uuid PlaybookId FK
-        int NodeId FK
+        int NodeId FK "nullable。ノードでない局面は null"
         string Sfen "手数を 1 に正規化, (PlaybookId, Sfen) で一意"
     }
     PlaybookBoardTransitions {
         int Id PK
         uuid PlaybookId FK
         uuid FromBoardId FK
-        uuid ToBoardId FK "nullable。ノードに着かない手順"
-        text_array Usis "手順"
+        uuid ToBoardId FK
+        string Usi "指し手, max 8。(FromBoardId, Usi) で一意"
         string Condition "まとめた局面で行き先が分かれるときの条件, max 100"
     }
 ```
@@ -158,7 +158,7 @@ erDiagram
 
 - 全テーブルに `CreatedAt` / `UpdatedAt` がある（`EntityBase`。未設定なら保存時に `NariNoteDbContext` が設定する）
 - ID は Vogen の ValueObject（`UserId` 等）。Users / Articles / Courses / Tags / Playbooks / PlaybookBoards は UUID v7 をアプリ側で採番し、それ以外は int の IDENTITY 列。PlaybookBoards は同じミリ秒の中でも登録順に大きくなるよう採番する
-- 外部キーは `PlaybookBoards.NodeId`（`NO ACTION`）以外すべて `ON DELETE CASCADE`。ユーザー削除（退会・未認証ユーザー削除）で記事・講座・いいね・コメント・フォロー・通知・各種トークンがまとめて消え、講座を削除すると所属する記事も消える
+- 外部キーは `PlaybookBoards.NodeId`（`NO ACTION`。ノードを消すときはアプリ側で null にする）以外すべて `ON DELETE CASCADE`。ユーザー削除（退会・未認証ユーザー削除）で記事・講座・いいね・コメント・フォロー・通知・各種トークンがまとめて消え、講座を削除すると所属する記事も消える
 - 一意制約: `Users.Email`（`lower(Email)`）、`Users.Name`、`Tags.Name`、`EmailVerifications.Token`、`PasswordResetTokens.Token`、`(ArticleId, TagId)`、`(UserId, ArticleId)` の Likes、`(UserId, CourseId)` の CourseLikes、`(FollowerId, FollowingId)` の Follows
 - `OutboxMessages` は他テーブルと関連を持たない配送キュー（[architecture.md](./architecture.md#バックグラウンドジョブ)）
-- マイ定跡: ノード（`PlaybookNodes`）がグラフの点、遷移（`PlaybookBoardTransitions`）がノードの局面から次のノードの局面までの手順（`Usis`）で、グラフの辺にあたる。ノードの局面（`PlaybookBoards`）になるのは、開始局面・分岐点・手順前後の合流点と、ユーザーがノードにした局面だけ。辺の途中の局面は行を持たず、手順を指し直して求める。遷移は出発の局面と 1 手目で一意。似た局面をまとめると 1 つのノードに複数の局面が属し、名前と研究メモを共有する。ノードの代表は最小 ID（最初に登録した）の局面
+- マイ定跡: 指した局面はすべて局面（`PlaybookBoards`）の行になり、1 手ごとの前後の局面を遷移（`PlaybookBoardTransitions`）でつなぐ。手順前後で同じ局面に着けば同じ行に合流する。開始局面・分岐点・合流点と、ユーザーがノードにした局面だけがノード（`PlaybookNodes`）に属し、ノードでない局面は入る遷移も出る遷移も 1 本以下になる。ノードから次のノードまでの遷移の並びがグラフの辺で、条件はその 1 本目の遷移に書く。似た局面をまとめると 1 つのノードに複数の局面が属し、名前と研究メモを共有する。ノードの代表は最小 ID（最初に登録した）の局面

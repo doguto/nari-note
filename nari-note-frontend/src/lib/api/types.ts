@@ -398,7 +398,7 @@ export interface InspectPlaybookBoardRequest {
 }
 
 export interface InspectPlaybookBoardResponse {
-  boardId?: string;
+  boardId: string;
   nameSuggestions: string[];
   members: PlaybookMemberDto[];
   similar: PlaybookSimilarBoardDto[];
@@ -427,15 +427,15 @@ export interface MergePlaybookNodesResponse {
 
 export interface PlaybookBoardDto {
   id: string;
-  nodeId: number;
-  sfen: string;
+  nodeId?: number;
+  sfen?: string;
 }
 
 export interface PlaybookBoardTransitionDto {
   id: number;
   fromBoardId: string;
-  toBoardId?: string;
-  usis: string[];
+  toBoardId: string;
+  usi: string;
   condition: string;
 }
 

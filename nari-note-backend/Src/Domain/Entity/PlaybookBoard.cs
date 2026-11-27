@@ -4,7 +4,8 @@ using NariNoteBackend.Domain.ValueObject;
 
 namespace NariNoteBackend.Domain.Entity;
 
-// ノードの局面。開始局面・分岐点・合流点と、ユーザーがノードにした局面だけが行になり、その間の局面は遷移の手順から求める
+// 定跡に現れる局面。指した局面はすべて 1 行になり、手順前後で同じ局面に着けば同じ行になる。
+// ノードに属する局面（グラフの点）と、属さない局面（辺の途中）がある
 [Index(nameof(PlaybookId), nameof(Sfen), IsUnique = true)]
 [Index(nameof(NodeId))]
 public class PlaybookBoard : EntityBase
@@ -17,8 +18,8 @@ public class PlaybookBoard : EntityBase
     [Required]
     public PlaybookId PlaybookId { get; set; }
 
-    [Required]
-    public PlaybookNodeId NodeId { get; set; }
+    // 開始局面・分岐点・合流点と、ユーザーがノードにした局面だけがノードに属する
+    public PlaybookNodeId? NodeId { get; set; }
 
     // 手数を 1 に正規化した SFEN
     [Required]
@@ -27,5 +28,5 @@ public class PlaybookBoard : EntityBase
 
     // Navigation Properties
     public Playbook Playbook { get; set; } = null!;
-    public PlaybookNode Node { get; set; } = null!;
+    public PlaybookNode? Node { get; set; }
 }

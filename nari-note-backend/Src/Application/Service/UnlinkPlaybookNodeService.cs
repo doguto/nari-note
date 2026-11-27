@@ -24,7 +24,7 @@ public class UnlinkPlaybookNodeService
         PlaybookAccess.EnsureOwner(playbook, userId);
 
         var node = PlaybookAccess.FindNode(playbook, request.NodeId);
-        PlaybookAccess.Unlink(playbook, node, PlaybookTree.Load(playbook), this.playbookRepository);
+        new PlaybookGraph(playbook, this.playbookRepository).Unlink(node);
 
         playbook.UpdatedAt = this.timeProvider.UtcNow();
         await this.playbookRepository.SaveAsync();

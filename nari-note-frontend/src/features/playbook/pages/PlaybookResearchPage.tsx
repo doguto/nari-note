@@ -22,7 +22,7 @@ import { useAnalysisEngine } from '../hooks/useAnalysisEngine';
 import { useResearchDraft } from '../hooks/useResearchDraft';
 import type { ResearchMove } from '../organisms';
 import { type ResearchShape, type ResearchView, PlaybookResearchTemplate } from '../templates';
-import { buildPlaybookTree, contains, pathTo, transitionThrough } from '../utils/playbookTree';
+import { buildPlaybookTree, contains, edgeThrough, pathTo } from '../utils/playbookTree';
 import { destinationOf, legalMoves, moveLabel, play as playOn } from '../utils/shogiRules';
 
 interface PlaybookResearchPageProps {
@@ -39,7 +39,7 @@ function isTyping(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
 }
 
-// 定跡の全体を 1 回取得し、辺の手順を手元で指し直して局面を行き来する。開くと常に開始局面から始まる
+// 定跡の全体を 1 回取得し、手元で局面を行き来する。開くと常に開始局面から始まる
 export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [selected, setSelected] = useState<{ sfen: string; index: number } | null>(null);
@@ -106,6 +106,7 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
   }, [tree, sfen, draft]);
 
   const board = sfen ? tree?.boards.get(sfen) : undefined;
+  const nodeId = board?.nodeId;
 
   const view = useMemo((): ResearchView | null => {
     if (!tree || !sfen) return null;
@@ -113,16 +114,17 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
     const previousTo = last ? destinationOf(last.usi) : undefined;
     const suggestions = new Map((inspection.data?.conditionSuggestions ?? []).map((c) => [c.transitionId, c.suggestions]));
     // ノードでない局面では保存済みの手を出さない。辺を進むのは → キーで行う
-    const saved: ResearchMove[] = board
-      ? (tree.children.get(sfen) ?? []).map((m) => ({
-          usi: m.usi,
-          label: moveLabel(sfen, m.usi, previousTo),
-          isDraft: false,
-          transitionId: m.transition?.id,
-          condition: m.transition?.condition ?? '',
-          conditionSuggestions: (m.transition && suggestions.get(m.transition.id)) ?? [],
-        }))
-      : [];
+    const saved: ResearchMove[] =
+      nodeId !== undefined
+        ? (tree.children.get(sfen) ?? []).map((m) => ({
+            usi: m.usi,
+            label: moveLabel(sfen, m.usi, previousTo),
+            isDraft: false,
+            transitionId: m.transition.id,
+            condition: m.transition.condition,
+            conditionSuggestions: suggestions.get(m.transition.id) ?? [],
+          }))
+        : [];
     const savedUsis = new Set((tree.children.get(sfen) ?? []).map((m) => m.usi));
     const drafts: ResearchMove[] = draft
       .childrenOf(sfen)
@@ -137,12 +139,12 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
       moves: [...saved, ...drafts],
       isDraft: !contains(tree, sfen),
     };
-  }, [tree, sfen, board, path, draft, inspection.data]);
+  }, [tree, sfen, nodeId, path, draft, inspection.data]);
 
   const shape = useMemo((): ResearchShape => {
-    const node = board && tree ? tree.nodes.get(board.nodeId) : undefined;
+    const node = nodeId !== undefined ? tree?.nodes.get(nodeId) : undefined;
     const boardCount = node && tree ? [...tree.boards.values()].filter((b) => b.nodeId === node.id).length : 0;
-    const info = inspection.data && (inspection.data.boardId ?? undefined) === board?.id ? inspection.data : undefined;
+    const info = inspection.data?.boardId === board?.id ? inspection.data : undefined;
     return {
       isNode: !!node,
       isRoot: sfen === tree?.rootSfen,
@@ -154,7 +156,7 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
       similar: info?.similar ?? [],
       boardId: board?.id,
     };
-  }, [tree, sfen, board, inspection.data]);
+  }, [tree, sfen, board, nodeId, inspection.data]);
 
   const selectedIndex = selected && selected.sfen === sfen ? selected.index : -1;
 
@@ -174,7 +176,7 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
     const previous = path[path.length - 1];
     if (previous) navigate(previous.sfen);
   };
-  // 辺の途中では保存済みの手を一覧に出さないので、手順の次の手で進む
+  // ノードでない局面では保存済みの手を一覧に出さないので、次の遷移で進む
   const goForward = () => {
     if (!tree || !sfen) return;
     const move = view?.moves[selectedIndex] ?? tree.children.get(sfen)?.[0] ?? view?.moves[0];
@@ -262,17 +264,17 @@ export function PlaybookResearchPage({ playbookId }: PlaybookResearchPageProps) 
         onChangeCondition={(transitionId, condition) => updateTransition.mutate({ id: playbookId, transitionId, condition })}
         onDeleteTransition={confirmDeleteTransition}
         onDeleteTransitionHere={() => {
-          const transition = transitionThrough(tree, sfen);
+          const transition = edgeThrough(tree, sfen);
           if (transition) confirmDeleteTransition(transition.id);
         }}
         onMakeNode={() => updateNode.mutate({ id: playbookId, sfen })}
-        onUnlinkNode={() => board && unlink.mutate({ id: playbookId, nodeId: board.nodeId })}
+        onUnlinkNode={() => nodeId !== undefined && unlink.mutate({ id: playbookId, nodeId })}
         onDeleteNode={() =>
-          board &&
+          nodeId !== undefined &&
           setPendingDelete({
             title: 'このノードを削除しますか？',
             description: 'このノードと、その先にしか無いノード・手順を削除します。この操作は取り消せません。',
-            run: () => deleteNode.mutate({ id: playbookId, nodeId: board.nodeId }),
+            run: () => deleteNode.mutate({ id: playbookId, nodeId }),
           })
         }
         onRename={(name) => updateNode.mutate({ id: playbookId, sfen, name })}

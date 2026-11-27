@@ -1,16 +1,16 @@
-import type {
-  GetPlaybookResponse,
-  PlaybookBoardDto,
-  PlaybookNodeDto,
-  PlaybookBoardTransitionDto,
-} from '@/lib/api/types';
+import type { GetPlaybookResponse, PlaybookBoardTransitionDto, PlaybookNodeDto } from '@/lib/api/types';
 import { destinationOf, moveLabel, play } from './shogiRules';
+
+export interface TreeBoard {
+  id: string;
+  nodeId?: number;
+  sfen: string;
+}
 
 export interface TreeMove {
   usi: string;
   child: string;
-  // 辺の 1 手目のときだけ、その辺（条件を持つ）を指す
-  transition?: PlaybookBoardTransitionDto;
+  transition: PlaybookBoardTransitionDto;
 }
 
 export interface PathStep {
@@ -19,58 +19,63 @@ export interface PathStep {
   label: string;
 }
 
-// 定跡を 1 手ごとのグラフに展開したもの。辺の途中の局面は、遷移の手順を指し直して求める
+// 定跡の局面を SFEN で引き、遷移を局面ごとの次の手として並べたもの
 export interface PlaybookTree {
   rootSfen: string;
   children: Map<string, TreeMove[]>;
   parents: Map<string, { sfen: string; usi: string }>;
-  boards: Map<string, PlaybookBoardDto>;
-  boardsById: Map<string, PlaybookBoardDto>;
+  boards: Map<string, TreeBoard>;
+  boardsById: Map<string, TreeBoard>;
   nodes: Map<number, PlaybookNodeDto>;
   transitions: PlaybookBoardTransitionDto[];
 }
 
+// ノードでない局面は SFEN が返らないので、開始局面から遷移を指して求める
 export function buildPlaybookTree(data: GetPlaybookResponse): PlaybookTree {
-  const boardsById = new Map(data.boards.map((b) => [b.id, b]));
-  const children = new Map<string, TreeMove[]>();
-  for (const transition of data.transitions) {
-    let sfen = boardsById.get(transition.fromBoardId)?.sfen;
-    if (!sfen) continue;
-    transition.usis.forEach((usi, i) => {
-      const child = play(sfen!, usi);
-      const list = children.get(sfen!) ?? [];
-      list.push({ usi, child, transition: i === 0 ? transition : undefined });
-      children.set(sfen!, list);
-      sfen = child;
-    });
-  }
+  const outgoing = new Map<string, PlaybookBoardTransitionDto[]>();
+  for (const t of data.transitions) outgoing.set(t.fromBoardId, [...(outgoing.get(t.fromBoardId) ?? []), t]);
+  const sfenById = new Map(data.boards.flatMap((b) => (b.sfen ? [[b.id, b.sfen] as const] : [])));
 
+  const children = new Map<string, TreeMove[]>();
   const parents = new Map<string, { sfen: string; usi: string }>();
-  const queue = [data.rootSfen];
+  const root = data.boards.find((b) => b.sfen === data.rootSfen);
+  const queue = root ? [root.id] : [];
   const seen = new Set(queue);
   while (queue.length > 0) {
-    const sfen = queue.shift()!;
-    for (const m of children.get(sfen) ?? []) {
-      if (seen.has(m.child)) continue;
-      seen.add(m.child);
-      parents.set(m.child, { sfen, usi: m.usi });
-      queue.push(m.child);
+    const id = queue.shift()!;
+    const sfen = sfenById.get(id)!;
+    for (const t of outgoing.get(id) ?? []) {
+      const child = sfenById.get(t.toBoardId) ?? play(sfen, t.usi);
+      sfenById.set(t.toBoardId, child);
+      children.set(sfen, [...(children.get(sfen) ?? []), { usi: t.usi, child, transition: t }]);
+      if (seen.has(t.toBoardId)) continue;
+      seen.add(t.toBoardId);
+      parents.set(child, { sfen, usi: t.usi });
+      queue.push(t.toBoardId);
     }
   }
 
+  const boards = data.boards.flatMap((b) => {
+    const sfen = sfenById.get(b.id);
+    return sfen ? [{ id: b.id, nodeId: b.nodeId ?? undefined, sfen }] : [];
+  });
   return {
     rootSfen: data.rootSfen,
     children,
     parents,
-    boards: new Map(data.boards.map((b) => [b.sfen, b])),
-    boardsById,
+    boards: new Map(boards.map((b) => [b.sfen, b])),
+    boardsById: new Map(boards.map((b) => [b.id, b])),
     nodes: new Map(data.nodes.map((n) => [n.id, n])),
     transitions: data.transitions,
   };
 }
 
 export function contains(tree: PlaybookTree, sfen: string): boolean {
-  return sfen === tree.rootSfen || tree.parents.has(sfen);
+  return tree.boards.has(sfen);
+}
+
+export function nodeIdOf(tree: PlaybookTree, sfen: string): number | undefined {
+  return tree.boards.get(sfen)?.nodeId;
 }
 
 // 開始局面からの手順。「同」を付けるため、直前の手の行き先を引き継いで記譜する
@@ -91,19 +96,13 @@ export function pathTo(tree: PlaybookTree, sfen: string): PathStep[] {
   });
 }
 
-export function nodeOf(tree: PlaybookTree, sfen: string): PlaybookNodeDto | undefined {
-  const board = tree.boards.get(sfen);
-  return board ? tree.nodes.get(board.nodeId) : undefined;
-}
-
-// 辺の途中の局面が載っている辺。ノードの局面や、定跡に無い局面では undefined
-export function transitionThrough(tree: PlaybookTree, sfen: string): PlaybookBoardTransitionDto | undefined {
-  if (tree.boards.has(sfen)) return undefined;
+// ノードでない局面が載っている辺の、ノードから出る 1 本目の遷移
+export function edgeThrough(tree: PlaybookTree, sfen: string): PlaybookBoardTransitionDto | undefined {
   let cursor = sfen;
-  while (!tree.boards.has(cursor)) {
+  while (nodeIdOf(tree, cursor) === undefined) {
     const parent = tree.parents.get(cursor);
     if (!parent) return undefined;
-    if (tree.boards.has(parent.sfen)) {
+    if (nodeIdOf(tree, parent.sfen) !== undefined) {
       return tree.children.get(parent.sfen)?.find((m) => m.usi === parent.usi)?.transition;
     }
     cursor = parent.sfen;

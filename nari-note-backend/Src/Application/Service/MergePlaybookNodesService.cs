@@ -28,6 +28,7 @@ public class MergePlaybookNodesService
 
         var keep = PlaybookAccess.FindBoard(playbook, request.BoardId).Node;
         var drop = PlaybookAccess.FindBoard(playbook, request.OtherBoardId).Node;
+        if (keep == null || drop == null) throw new InvalidOperationException("まとめられるのはノードの局面どうしだけです");
         if (keep == drop) return new MergePlaybookNodesResponse();
 
         var memo = string.Join("\n", new[] { keep.Memo, drop.Memo }.Where(m => m.Length > 0));
@@ -36,7 +37,6 @@ public class MergePlaybookNodesService
         foreach (var board in drop.Boards.ToList())
         {
             board.Node = keep;
-            board.NodeId = keep.Id;
             keep.Boards.Add(board);
         }
         drop.Boards.Clear();

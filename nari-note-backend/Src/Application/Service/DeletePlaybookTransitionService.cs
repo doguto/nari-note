@@ -25,9 +25,8 @@ public class DeletePlaybookTransitionService
         PlaybookAccess.EnsureOwner(playbook, userId);
 
         var transition = PlaybookAccess.FindTransition(playbook, request.TransitionId);
-        var tree = PlaybookTree.Load(playbook);
-        tree.RemoveMove(transition.FromBoard.Sfen, transition.Usis[0]);
-        PlaybookAccess.Rebuild(playbook, tree, this.playbookRepository);
+        var graph = new PlaybookGraph(playbook, this.playbookRepository);
+        graph.RemoveEdge(graph.FirstOfEdge(transition));
 
         playbook.UpdatedAt = this.timeProvider.UtcNow();
         await this.playbookRepository.SaveAsync();
